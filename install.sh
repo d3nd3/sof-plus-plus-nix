@@ -1,2 +1,2 @@
 #!/bin/bash
-cp test.so ~/.loki/sof-runtime/
+cp out/test.so ~/.loki/sof-runtime/
