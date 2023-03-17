@@ -4,9 +4,8 @@ RUN apt-get -y update && apt-get -y install build-essential libx11-dev libxfixes
 
 WORKDIR /
 
-COPY compile.sh /script/
-
+COPY compile.sh /
 
 
 #CMD ["echo", "override me"]
-ENTRYPOINT "script/compile.sh"
+ENTRYPOINT "./compile.sh"
