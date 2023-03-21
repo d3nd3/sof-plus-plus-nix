@@ -7,7 +7,11 @@
 #include <sstream>
 
 #include "engine.h"
+
+
 #include "fn_sigs.h"
+
+
 
 // util.h
 extern void error(const char* message);
@@ -19,7 +23,6 @@ extern void * createDetour(void * orig, void * mine, int size);
 extern void memoryAdjust(void * addr, int size, unsigned char val);
 extern void NetadrToSockadr (netadr_t *a, struct sockaddr_in *s);
 extern void SockadrToNetadr (struct sockaddr_in *s, netadr_t *a);
-
 
 // serverlist.h
 extern void GetServerList(void);

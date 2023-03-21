@@ -102,6 +102,14 @@ void * createDetour(void * orig, void * mine, int size) {
     return thunk;
 }
 
+// qcommon from game source exports it.
+bool        NET_CompareAdr (netadr_t a, netadr_t b)
+{
+    if (a.ip[0] == b.ip[0] && a.ip[1] == b.ip[1] && a.ip[2] == b.ip[2] && a.ip[3] == b.ip[3] && a.port == b.port)
+        return true;
+    return false;
+}
+
 void NetadrToSockadr (netadr_t *a, struct sockaddr_in *s)
 {
     memset (s, 0, sizeof(*s));

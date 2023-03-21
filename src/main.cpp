@@ -75,6 +75,14 @@ void __attribute__ ((constructor)) begin() {
     // Assume it builds the string : SOF+%16s+%8s+%i/%i/%i+%s+%i+%i\n
     callE8Patch(0x80ABF6C, &my_SendToMasters);
 
+    // once you are on the server list
+    // you might want to edit the response from an info request
+    // at SVC_Info
+
+//---------------------- S_NOSOUND 1 CVAR NOT CRASH -------------------------
+    // stop calling Init.
+    // memoryAdjust(0x080C8A37,2,0x90);
+
 ////////////////////////////////////////////////////
     
     orig_Cmd_AddCommand = createDetour(0x08119514, &my_Cmd_AddCommand,5);
@@ -89,6 +97,7 @@ void __attribute__ ((constructor)) begin() {
 
     // Might be needed for adjusting the info return payload DM -> 0 CTF -> 4.
     orig_menu_AddServer = createDetour(0x080E08B0,&my_menu_AddServer,5);
+
 }
 
 

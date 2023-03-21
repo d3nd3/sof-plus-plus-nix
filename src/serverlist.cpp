@@ -39,7 +39,6 @@ netadr_t my_netadr = {
 void GetServerList(void)
 {
  
-  orig_Com_Printf("GetServerList!\n");
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
     orig_Com_Printf("Error: Failed to create socket.\n");
@@ -124,8 +123,6 @@ void GetServerList(void)
   if (send(sockfd, c, response.size(), 0) < 0) {
     error("Error: Failed to send response.\n");
   }
-
-  orig_Com_Printf("Size of buffer = %i\n",sizeof(buffer));
   std::memset(buffer, 0, sizeof(buffer));
   // ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 
@@ -144,9 +141,7 @@ void GetServerList(void)
   close(sockfd);
   // orig_Com_Printf("%.*s\n", bytes_returned, buffer);
   
-
   // there is a \final\ at the end. So ignore last 7 bytes
-  orig_Com_Printf("size : %i\n",bytes_returned);
 
   // hexdump(buffer,buffer+bytes_returned);
   // Ignore the first 7 bytes
@@ -173,29 +168,37 @@ void GetServerList(void)
     return 1;
   }
 
-  struct timeval timeout = {0, 500000}; // set timeout for 2 seconds
+  struct timeval timeout = {1, 200000}; // set timeout for 2 seconds
 
   // set receive UDP message timeout
   setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
 
-
-  // std::cout << addrs.size() << '\n';
-  // Print the netadr_t structures
-  for (int i = 0; i < addrs.size(); i++) {
-      std::cout << "Addr " << i << ": "
-                << (int)addrs[i].ip[0] << "."
-                << (int)addrs[i].ip[1] << "."
-                << (int)addrs[i].ip[2] << "."
-                << (int)addrs[i].ip[3] << ":"
-                << addrs[i].port << std::endl;
+  for (auto it = addrs.begin(); it != addrs.end();) {
+      std::cout << "Addr " << ": "
+                << (int)it->ip[0] << "."
+                << (int)it->ip[1] << "."
+                << (int)it->ip[2] << "."
+                << (int)it->ip[3] << ":"
+                << htons(it->port) << std::endl;
 
       struct sockaddr_in gs_server_info;
-      NetadrToSockadr(&addrs[i],&gs_server_info);
+      NetadrToSockadr(&(*it),&gs_server_info);
 
-      // if (connect(sockfd, (struct sockaddr*)&gs_server_info, sizeof(gs_server_info)) < 0) {
-      //   orig_Com_Printf("Failed to get server info\n");
-      //   continue;
-      // }
+      // send twice just in case?
+      if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+        std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+        error("Error: Failed to send response.\n");
+      }
+
+      if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+        std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+        error("Error: Failed to send response.\n");
+      }
+
+      if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+        std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+        error("Error: Failed to send response.\n");
+      }
 
       if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
         std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
@@ -204,49 +207,66 @@ void GetServerList(void)
 
       std::memset(buffer, 0, sizeof(buffer));
       bytes_returned = 0;
-      
       struct sockaddr_in client_addr;
       socklen_t client_addr_len = sizeof(client_addr);
-
       bool gonext = false;
       while ( true ) {
-        r = recvfrom(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0,(struct sockaddr*)&client_addr,&client_addr_len);
+        r = recvfrom(sockfd, buffer, 1400, 0,(struct sockaddr*)&client_addr,&client_addr_len);
         if ( r < 0 && errno == EAGAIN || errno == EWOULDBLOCK ) {
             gonext = true;
+            it = addrs.erase(it);
             break;
         }
-        // Not the correct sender.
+        // Not the correct sender. this is throwing packets away
         if (client_addr.sin_family == AF_INET &&
                client_addr.sin_port != gs_server_info.sin_port ||
-               client_addr.sin_addr.s_addr != gs_server_info.sin_addr.s_addr ) continue;
+               client_addr.sin_addr.s_addr != gs_server_info.sin_addr.s_addr ) {
+          continue;
+        }
       
         if ( r < 0) {
             std::cerr << std::strerror(errno) << std::endl;
             error("Error: Failed to receive message.\n");
         }
         bytes_returned += r;
+        // GOT DATA: go Process
         break;
       }
-      if ( gonext ) continue;
+      if ( gonext ) {
+        ++it;
+        continue;
+      }
       
-      std::string input((char*)buffer);
+      /*
+        Process the response (just trying to get their hostport?)
+      */
+      std::string input((char*)buffer,bytes_returned);
       std::istringstream ss(input);
       std::string token;
       int hostport = 0;
+      gonext=false;
       while (std::getline(ss, token, '\\')) {
           if (token == "hostport") {
               std::getline(ss, token, '\\');
               hostport = std::stoi(token);
+              it->port = htons(hostport);
+              gonext=true;
               break;
           }
       }
 
-      addrs[i].port = htons(hostport);
-      char * request = orig_va("info %i",33);
-      orig_Netchan_OutOfBandPrint(NS_CLIENT,addrs[i],request);
+      if ( gonext ) {
+        ++it;
+        continue;
+      }
       
+      it = addrs.erase(it);
   }
   close(sockfd);
+  for (auto it = addrs.begin(); it != addrs.end(); ++it) {
+    char * request = orig_va("info %i",33);
+    orig_Netchan_OutOfBandPrint(NS_CLIENT,*it,request);
+  }
 }
 
 /*
@@ -266,7 +286,6 @@ bool isNumberLessThan100(const std::string& input) {
 void my_menu_AddServer(netadr_t addr,char *data)
 {
   
-    orig_Com_Printf("AddServer triggered! %i %s\n",strlen(data),data);
     // *(char*)(data + strlen(data) + 1 - 8) = '\n';
     *(char*)(data + strlen(data) + 1 - 8) = 0x00;
     
@@ -288,12 +307,6 @@ void my_menu_AddServer(netadr_t addr,char *data)
     tokens.push_back(input.substr(start));
 
     if ( tokens.size() >= 3 ) {
-      // std::string * t = &tokens[2];
-      // orig_Com_Printf("Found : %s\n",t->c_str());
-      // *t = t->substr(0,t->size()-2);
-      // *t = *t + "16";
-      // orig_Com_Printf("Found : %s\n",t->c_str());
-
 
       std::string * t = &tokens[tokens.size() - 2];
       std::string * t2 = &tokens[tokens.size() - 3];
@@ -315,8 +328,6 @@ void my_menu_AddServer(netadr_t addr,char *data)
             output += "+";
         }
     }
-    orig_Com_Printf("YUP : %s\n%i\n",output.c_str(),output.length());
-
     orig_menu_AddServer(addr,output.c_str());
 }
 

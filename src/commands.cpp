@@ -18,7 +18,7 @@ void my_Com_Printf(char *msg, ...) {
         for ( char * p=msg+len_msg - 1;p>msg;p-- ) {
             *p = *(p-1);
         }
-        *msg=0x06;
+        *msg=0x03;
         *(msg+len_msg) = 0x00; // fits
     }
     // orig_Com_Printf(msg);
@@ -31,10 +31,10 @@ void my_Cmd_AddCommand(char * cmd, void * callback)
 {
     // printf("Command Created : %s\n",cmd);
 
-    if ( !strcmp(cmd,"fx_save") ) {
-        void *return_address = __builtin_return_address(0);
-        printf("Cmd_AddCommand Return address: %p\n", return_address);
-    }
+    // if ( !strcmp(cmd,"fx_save") ) {
+    //     void *return_address = __builtin_return_address(0);
+    //     printf("Cmd_AddCommand Return address: %p\n", return_address);
+    // }
     orig_Cmd_AddCommand(cmd,callback);
 }
 

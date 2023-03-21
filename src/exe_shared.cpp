@@ -7,4 +7,6 @@ void my_Qcommon_Init(int one , char ** two) {
 
     // my_Cmd_RemoveCommand("pingservers");
     // my_Cmd_AddCommand("pingservers",&my_CL_PingServers);
+
+    
 }

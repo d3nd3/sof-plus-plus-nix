@@ -15,6 +15,9 @@ extern void (*orig_CL_PingServers)(void);
 extern void my_menu_AddServer(netadr_t addr,char *data);
 extern void (*orig_menu_AddServer)(netadr_t addr,char *data);
 
+extern void my_SND_Load(void); //s_nosound doesn't work because null pointers hanging.
+extern void (*orig_SND_Load)(void); //use s_initsound 0?
+
 
 // --Shared--
 
@@ -33,6 +36,9 @@ extern void my_Cmd_RemoveCommand(char * cmd);
 
 extern void (*orig_Com_Printf) (char *msg, ...);
 extern void my_Com_Printf(char *msg,...);
+
+//Cvar_Get
+extern cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarcommand_t command = NULL);
 
 // Clipboard
 // {E8 DIRECT OVERRIDE}
