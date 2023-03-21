@@ -6,8 +6,12 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <netinet/tcp.h>
+
+#include <sys/time.h>
 
 #include "decodekey.h"
+
 
 
 netadr_t my_netadr = {
@@ -23,6 +27,14 @@ netadr_t my_netadr = {
     // windows: SOF+%16s+%8s+%i/%i/%i+%s+%s+%i\n
 
     char t[1024] = "SOF+hostname1+dm/abc+0/0/8+some1+0+0\n";
+
+    Called by pingservers. By serverbox Menu.
+
+    // SOF+hostname+mapname+num_players/NON_PLAYER_COUNT/max_players+$GAME_CVAR+$str(deathmatch)+sv_violence
+    // linux: SOF+%16s+%8s+%i/%i/%i+%s+%i+%i\n
+    // windows: SOF+%16s+%8s+%i/%i/%i+%s+%s+%i\n
+
+    Linux seems to treat the $GAME_CVAR as "game-type". Crashes on empty string.
 */
 void GetServerList(void)
 {
@@ -33,6 +45,15 @@ void GetServerList(void)
     orig_Com_Printf("Error: Failed to create socket.\n");
     return 1;
   }
+
+  // int timeout = 2000; // user timeout in milliseconds [ms]
+  // setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (char*) &timeout, sizeof(timeout));
+
+  // Set the maximum segment size for outgoing TCP packets
+  // int maxseg = 1400;
+  // if (setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, sizeof(maxseg)) < 0) {
+  //     error("Error: Failed to set maximum segment size.\n");
+  // }
 
   struct addrinfo hints;
   struct addrinfo *res;
@@ -61,13 +82,14 @@ void GetServerList(void)
     error("Error: Failed to send message.\n");
   }
 
-  char buffer[1400];
+  unsigned char buffer[1400];
   std::memset(buffer, 0, sizeof(buffer));
-  if (recv(sockfd, buffer, sizeof(buffer), 0) < 0) {
+  int bytes_returned = recv(sockfd, buffer, sizeof(buffer), 0);
+  if (bytes_returned < 0) {
     error("Error: Failed to receive message.\n");
   }
 
-  std::string received_message(buffer);
+  std::string received_message((char*)buffer,bytes_returned);
 
   // std::cout << "MSG1: " << received_message << '\n';
 
@@ -90,44 +112,73 @@ void GetServerList(void)
 
   // std::cout << "HASHED_KEY: " << hashed_key << '\n';
 
-  std::string response = std::string("\\gamename\\sofretail\\gamever\\1.6\\location\\0\\validate\\") + hashed_key + "\\final\\\\queryid\\1.1\\";
-  if (send(sockfd, response.c_str(), response.length(), 0) < 0) {
+  std::string response = "\\gamename\\sofretail\\gamever\\1.6\\location\\0\\validate\\" + std::string("ABCDEFGH") + "\\final\\\\queryid\\1.1\\";
+  char * c = response.c_str();
+  // ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+  if (send(sockfd, c, response.size(), 0) < 0) {
     error("Error: Failed to send response.\n");
   }
 
-  response = std::string("\\list\\cmp\\gamename\\sofretail\\final\\");
-  if (send(sockfd, response.c_str(), response.length(), 0) < 0) {
+  response = "\\list\\cmp\\gamename\\sofretail\\final\\";
+  c = response.c_str();
+  if (send(sockfd, c, response.size(), 0) < 0) {
     error("Error: Failed to send response.\n");
   }
 
+  orig_Com_Printf("Size of buffer = %i\n",sizeof(buffer));
   std::memset(buffer, 0, sizeof(buffer));
-  int bytes_returned = recv(sockfd, buffer, sizeof(buffer), 0);
-  if ( bytes_returned < 0) {
-    error("Error: Failed to receive message.\n");
-  }
+  // ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 
-  // orig_Com_Printf("%.*s\n", bytes_returned, buffer);
+  int r = 0;
+  bytes_returned = 0;
+  while ( true ) {
+    r = recv(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0);
+    if ( r < 0) {
+      error("Error: Failed to receive message.\n");
+    } else {
+      if ( r == 0 )
+        break;
+    }
+    bytes_returned += r;
+  }
   close(sockfd);
+  // orig_Com_Printf("%.*s\n", bytes_returned, buffer);
+  
 
   // there is a \final\ at the end. So ignore last 7 bytes
   orig_Com_Printf("size : %i\n",bytes_returned);
+
+  // hexdump(buffer,buffer+bytes_returned);
   // Ignore the first 7 bytes
   unsigned char* data = buffer;
   if (bytes_returned <= 7 || (bytes_returned-7) % 6 != 0 ) {
       error("Failure getting Server List , bytes returned not correct\n");
   }
-
   // Parse the buffer and create netadr_t structures
   std::vector<netadr_t> addrs;
   for (int i = 0; i < bytes_returned - 7; i += 6) {
       netadr_t addr;
+      addr.type = NA_IP;
       addr.ip[0] = data[i];
       addr.ip[1] = data[i + 1];
       addr.ip[2] = data[i + 2];
       addr.ip[3] = data[i + 3];
-      addr.port = (data[i + 4] << 8) | data[i + 5];
+      addr.port = (data[i + 5] << 8) | data[i + 4];
       addrs.push_back(addr);
   }
+  // --------------UDP MODE----------------
+  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockfd < 0) {
+    orig_Com_Printf("Error: Failed to create socket.\n");
+    return 1;
+  }
+
+  struct timeval timeout = {0, 500000}; // set timeout for 2 seconds
+
+  // set receive UDP message timeout
+  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
+
+
   // std::cout << addrs.size() << '\n';
   // Print the netadr_t structures
   for (int i = 0; i < addrs.size(); i++) {
@@ -138,50 +189,64 @@ void GetServerList(void)
                 << (int)addrs[i].ip[3] << ":"
                 << addrs[i].port << std::endl;
 
+      struct sockaddr_in gs_server_info;
+      NetadrToSockadr(&addrs[i],&gs_server_info);
 
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-      orig_Com_Printf("Error: Failed to create socket.\n");
-      return 1;
-    }
+      // if (connect(sockfd, (struct sockaddr*)&gs_server_info, sizeof(gs_server_info)) < 0) {
+      //   orig_Com_Printf("Failed to get server info\n");
+      //   continue;
+      // }
 
-    struct addrinfo hints;
-    struct addrinfo *res;
-    std::memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-    int status = getaddrinfo("sof1master.megalag.org", nullptr, &hints, &res);
-    if (status != 0) {
-      error("Error: Failed to resolve hostname.\n");
-      return 1;
-    }
+      if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+        std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+        error("Error: Failed to send response.\n");
+      }
 
-    struct sockaddr_in server_addr;
-    std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
-    server_addr.sin_port = htons(28900);
+      std::memset(buffer, 0, sizeof(buffer));
+      bytes_returned = 0;
+      
+      struct sockaddr_in client_addr;
+      socklen_t client_addr_len = sizeof(client_addr);
 
-    freeaddrinfo(res);
+      bool gonext = false;
+      while ( true ) {
+        r = recvfrom(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0,(struct sockaddr*)&client_addr,&client_addr_len);
+        if ( r < 0 && errno == EAGAIN || errno == EWOULDBLOCK ) {
+            gonext = true;
+            break;
+        }
+        // Not the correct sender.
+        if (client_addr.sin_family == AF_INET &&
+               client_addr.sin_port != gs_server_info.sin_port ||
+               client_addr.sin_addr.s_addr != gs_server_info.sin_addr.s_addr ) continue;
+      
+        if ( r < 0) {
+            std::cerr << std::strerror(errno) << std::endl;
+            error("Error: Failed to receive message.\n");
+        }
+        bytes_returned += r;
+        break;
+      }
+      if ( gonext ) continue;
+      
+      std::string input((char*)buffer);
+      std::istringstream ss(input);
+      std::string token;
+      int hostport = 0;
+      while (std::getline(ss, token, '\\')) {
+          if (token == "hostport") {
+              std::getline(ss, token, '\\');
+              hostport = std::stoi(token);
+              break;
+          }
+      }
 
-    if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-      error("Error: Failed to connect to server.\n");
-    }
-
-    const char* message = "IDQD";
-    if (send(sockfd, message, std::strlen(message), 0) < 0) {
-      error("Error: Failed to send message.\n");
-    }
-
-    char buffer[1400];
-    std::memset(buffer, 0, sizeof(buffer));
-    if (recv(sockfd, buffer, sizeof(buffer), 0) < 0) {
-      error("Error: Failed to receive message.\n");
-    }
-
-
-    // menu_AddServer
+      addrs[i].port = htons(hostport);
+      char * request = orig_va("info %i",33);
+      orig_Netchan_OutOfBandPrint(NS_CLIENT,addrs[i],request);
+      
   }
-
+  close(sockfd);
 }
 
 /*
@@ -190,45 +255,69 @@ void GetServerList(void)
 
  Seg fault on menu free?
 */
-
-void my_AddServer(void * menu_system, netadr_t adr, char * serverdata)
+bool isNumberLessThan100(const std::string& input) {
+    try {
+        int num = std::stoi(input);
+        return num < 100;
+    } catch (const std::invalid_argument& e) {
+        return false;
+    }
+}
+void my_menu_AddServer(netadr_t addr,char *data)
 {
+  
+    orig_Com_Printf("AddServer triggered! %i %s\n",strlen(data),data);
+    // *(char*)(data + strlen(data) + 1 - 8) = '\n';
+    *(char*)(data + strlen(data) + 1 - 8) = 0x00;
     
-    // orig_Com_Printf((static_cast<std::string*>(static_cast<void*>(serverdata)))->c_str());
+    // orig_Com_Printf("BOO: %s\n",data);
+    /*
+      If the server which is giving us this data is a WINDOWS server.
+      Translate the DM string into an integer. Does it matter? Maybe doens't matter.
+    */
+    std::string input(data);
+    
+    std::vector<std::string> tokens;
+    size_t start = 0;
+    size_t end = input.find("+");
+    while (end != std::string::npos) {
+        tokens.push_back(input.substr(start, end - start));
+        start = end + 1;
+        end = input.find("+", start);
+    }
+    tokens.push_back(input.substr(start));
+
+    if ( tokens.size() >= 3 ) {
+      // std::string * t = &tokens[2];
+      // orig_Com_Printf("Found : %s\n",t->c_str());
+      // *t = t->substr(0,t->size()-2);
+      // *t = *t + "16";
+      // orig_Com_Printf("Found : %s\n",t->c_str());
 
 
-    orig_Com_Printf("%s\n",serverdata);
-    orig_Com_Printf("hexdump before\n");
-    hexdump(menu_system, menu_system+0x80);
-    //mapping of a string to a palette
-    //map<
-        //basic_string<char,string_char_traits<char>,__default_alloc_template<true,0>>,
-        //paletteRGBA_c,less<basic_string<char,string_char_traits<char>,__default_alloc_template<true,0>>
-        //>,__default_alloc_template<true,0>
-        //>
-    //>
-    // NVM THAT IS RECT.
-    // 0x44 = DTINT? 0x080E99FF .. specifically dtint?
-    orig_Com_Printf("+0x44 == %s\n",*(char*)(menu_system+0x44));
-    // 0x48 = ALIGNMENT? RIGHT/CENTER/LEFT 0x080E9A0D
-    orig_Com_Printf("+0x48 == %s\n",*(char*)(menu_system+0x48));
+      std::string * t = &tokens[tokens.size() - 2];
+      std::string * t2 = &tokens[tokens.size() - 3];
+      *t2 = *t;
+      if ( *t == std::string("DM") ) *t = "1";
+      else if ( *t == std::string("Assassin") ) *t = "2";
+      else if ( *t == std::string("Arsenal") ) *t = "3";
+      else if ( *t == std::string("CTF") ) *t = "4";
+      else if ( *t == std::string("Realistic") ) *t = "5";
+      else if ( *t == std::string("Control") ) *t = "6";
+      else if ( *t == std::string("CTB") ) *t = "7";
+      else *t = "8";
+    }
 
+    std::string output;
+    for (size_t i = 0; i < tokens.size(); i++) {
+        output += tokens[i];
+        if (i != tokens.size() - 1) {
+            output += "+";
+        }
+    }
+    orig_Com_Printf("YUP : %s\n%i\n",output.c_str(),output.length());
 
-    // segfault in menu_system destructor if this is 0
-    // i think its a pointer?
-    // set players?
-    // std::list<string>
-
-    // std::string * huh = new std::string("0");
-   
-    // *(int*)(menu_system+0x44) = huh;
-
-    // *(int*)(menu_system+0x48) = huh;
-
-    orig_AddServer(menu_system,adr,serverdata);
-
-    orig_Com_Printf("hexdump after\n");
-    hexdump(menu_system, menu_system+0x80);
+    orig_menu_AddServer(addr,output.c_str());
 }
 
 
@@ -242,3 +331,4 @@ void my_SendToMasters(void * arg1,void * arg2)
     // Netchan_OutOfBandPrint (NS_SERVER, master_adr[i], "heartbeat\n%s", string);
     
 }
+

@@ -12,10 +12,8 @@ extern char * (*orig_SV_StatusString)(void);
 extern void my_CL_PingServers(void);
 extern void (*orig_CL_PingServers)(void);
 
-extern void my_AddServer(void * menu_system, netadr_t adr, char * serverdata);
-extern void (*orig_AddServer)(void * menu_system, netadr_t adr,char * serverdata);
-
-extern void (*menu_AddServer)(netadr_t addr,char *data);
+extern void my_menu_AddServer(netadr_t addr,char *data);
+extern void (*orig_menu_AddServer)(netadr_t addr,char *data);
 
 
 // --Shared--
@@ -42,7 +40,9 @@ extern char *my_Sys_GetClipboardData(void);
 
 // ServerSendToStatus
 
+extern char	* (*orig_va)(char *format, ...);
 
+extern void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...);
 
 
 /*

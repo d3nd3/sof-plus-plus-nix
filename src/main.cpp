@@ -65,6 +65,11 @@ void __attribute__ ((constructor)) begin() {
     // Menu:ServerList wants
     // Also its the output of the  `pingservers` command.
 
+
+    // Don't check no_won cvar.0xEB = 2 BYTE JMP!
+    memoryAdjust(0x080C5D09,1,0xEB);
+    memoryAdjust(0x080C5D2C,1,0xEB);
+
 //---------------SERVER TALK TO MASTER---------------
     // Enable Server To Send Master Heartbeats @ Master_Heartbeat_F calls "SV_StatusString".
     // Assume it builds the string : SOF+%16s+%8s+%i/%i/%i+%s+%i+%i\n
@@ -82,8 +87,8 @@ void __attribute__ ((constructor)) begin() {
     // Apply executable command creation here ( server & client )
     orig_Qcommon_Init = createDetour(0x0811E6E8,&my_Qcommon_Init,5);
 
-    // Disable later.
-    orig_AddServer = createDetour(0x080E4F50,&my_AddServer,9);
+    // Might be needed for adjusting the info return payload DM -> 0 CTF -> 4.
+    orig_menu_AddServer = createDetour(0x080E08B0,&my_menu_AddServer,5);
 }
 
 

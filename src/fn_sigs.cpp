@@ -8,9 +8,7 @@ char * (*orig_SV_StatusString)(void) = 0x080A97A4;
 
 void (*orig_CL_PingServers)(void) = 0x080C5DE8;
 
-void (*orig_AddServer)(void * menu_system, netadr_t adr,char * serverdata) = NULL;
-
-void (*menu_AddServer)(netadr_t addr,char *data) = 0x080E08B0;
+void (*orig_menu_AddServer)(netadr_t addr,char *data) = 0x080E08B0;
 
 // ---SERVER-----
 
@@ -26,7 +24,8 @@ void (*orig_Cmd_RemoveCommand)(char * cmd) = NULL;
 
 void (*orig_Com_Printf) (char *msg, ...) = NULL;
 
-
+char	* (*orig_va)(char *format, ...) = 0x081ED5DC;
+void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...) = 0x0812AEC4;;
 
 /*
 ---------------------Ref Library---------------------

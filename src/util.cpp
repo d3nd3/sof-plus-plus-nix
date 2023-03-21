@@ -3,7 +3,12 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
 void error(const char* message) {
+    perror(message);
     std::cerr << "Error: " << message << std::endl;
     std::exit(EXIT_FAILURE);
 }
@@ -95,4 +100,33 @@ void * createDetour(void * orig, void * mine, int size) {
     memoryUnprotect(orig);
     // dealloc this on uninit.
     return thunk;
+}
+
+void NetadrToSockadr (netadr_t *a, struct sockaddr_in *s)
+{
+    memset (s, 0, sizeof(*s));
+
+    if (a->type == NA_BROADCAST)
+    {
+        s->sin_family = AF_INET;
+
+        // s->sin_port = htons(a->port);
+        s->sin_port = a->port;
+        *(int *)&s->sin_addr = -1;
+    }
+    else if (a->type == NA_IP)
+    {
+        s->sin_family = AF_INET;
+
+        *(int *)&s->sin_addr = *(int *)&a->ip;
+        // s->sin_port = htons(a->port);
+        s->sin_port = a->port;
+    }
+}
+
+void SockadrToNetadr (struct sockaddr_in *s, netadr_t *a)
+{
+    *(int *)&a->ip = *(int *)&s->sin_addr;
+    a->port = ntohs(s->sin_port);
+    a->type = NA_IP;
 }
