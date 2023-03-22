@@ -1,9 +1,35 @@
+#include <unistd.h>
+#include <limits.h>
+#include <dlfcn.h>
+
 #include "common.h"
 
+
 #define NOP 0x90
+
+void setupMemory(void);
+
+int chdir(const char *path)
+{
+    static bool initalized = false;
+    static int (*orig_chdir)(const char * p);
+    if ( !initalized ) {
+        orig_chdir = dlsym(RTLD_NEXT,"chdir");
+        initalized = true;
+        setupMemory();
+    }
+
+    return orig_chdir(path);   
+}
+
 void __attribute__ ((constructor)) begin() {
     printf("Constructor\n");
 
+ }
+
+
+ void setupMemory() {
+    printf("fix memory\n");
 //---------------CLIPBOARD---------------
     callE8Patch(0x08113315,&my_Sys_GetClipboardData);
 
