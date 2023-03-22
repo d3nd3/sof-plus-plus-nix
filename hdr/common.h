@@ -6,6 +6,8 @@
 #include <vector>
 #include <sstream>
 
+#include <cerrno>
+
 #include "engine.h"
 
 

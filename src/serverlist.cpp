@@ -60,7 +60,7 @@ void GetServerList(void)
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_protocol = IPPROTO_TCP;
-  int status = getaddrinfo("sof1master.megalag.org", nullptr, &hints, &res);
+  int status = getaddrinfo("sof1master.megalag.org", NULL, &hints, &res);
   if (status != 0) {
     error("Error: Failed to resolve hostname.\n");
     return 1;
@@ -173,7 +173,7 @@ void GetServerList(void)
   // set receive UDP message timeout
   setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
 
-  for (auto it = addrs.begin(); it != addrs.end();) {
+  for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end();) {
       std::cout << "Addr " << ": "
                 << (int)it->ip[0] << "."
                 << (int)it->ip[1] << "."
@@ -248,7 +248,9 @@ void GetServerList(void)
       while (std::getline(ss, token, '\\')) {
           if (token == "hostport") {
               std::getline(ss, token, '\\');
-              hostport = std::stoi(token);
+              //hostport = std::stoi(token);
+              std::stringstream ss(token);
+              ss >> hostport;
               it->port = htons(hostport);
               gonext=true;
               break;
@@ -263,7 +265,7 @@ void GetServerList(void)
       it = addrs.erase(it);
   }
   close(sockfd);
-  for (auto it = addrs.begin(); it != addrs.end(); ++it) {
+  for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end(); ++it) {
     char * request = orig_va("info %i",33);
     orig_Netchan_OutOfBandPrint(NS_CLIENT,*it,request);
   }
@@ -275,14 +277,6 @@ void GetServerList(void)
 
  Seg fault on menu free?
 */
-bool isNumberLessThan100(const std::string& input) {
-    try {
-        int num = std::stoi(input);
-        return num < 100;
-    } catch (const std::invalid_argument& e) {
-        return false;
-    }
-}
 void my_menu_AddServer(netadr_t addr,char *data)
 {
   
