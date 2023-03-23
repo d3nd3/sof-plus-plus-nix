@@ -18,17 +18,19 @@ OBJS= \
 ../obj/game.o \
 ../obj/main.o \
 ../obj/serverlist.o \
-../obj/util.o
+../obj/util.o \
+../obj/httpdl.o
 
 CFLAGS=-m32 -fpic -fpermissive -w -D _GNU_SOURCE -D_inline=inline -I ../hdr
-LDFLAGS= -m32 -shared -lX11 -o ../out/test.so
+LDFLAGS= -m32 -shared -o ../out/test.so
+LINKUS= -lcurl -lX11
 
 # run recipe if binary does not exist
 $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 	cp $^ $@
 
 ../out/$(BINARY): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o ../out/test.so
+	$(CC) $(LDFLAGS) $(OBJS) -o ../out/test.so $(LINKUS)
 
 ../obj/clipboard.o : ../src/clipboard.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -43,6 +45,8 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 ../obj/fn_sigs.o : ../src/fn_sigs.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/game.o : ../src/game.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/httpdl.o : ../src/httpdl.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/main.o : ../src/main.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@

@@ -9,6 +9,9 @@ extern char * (*orig_SV_StatusString)(void);
 
 
 // --Client--
+extern void (*orig_CL_Frame) (int msec);
+extern void my_CL_Frame(int msec);
+
 extern void my_CL_PingServers(void);
 extern void (*orig_CL_PingServers)(void);
 
@@ -17,6 +20,20 @@ extern void (*orig_menu_AddServer)(netadr_t addr,char *data);
 
 extern void my_SND_Load(void); //s_nosound doesn't work because null pointers hanging.
 extern void (*orig_SND_Load)(void); //use s_initsound 0?
+
+extern qboolean my_CL_CheckOrDownloadFile(char * filepath);
+extern qboolean (*orig_CL_CheckOrDownloadFile)(char * filepath);
+
+extern void (*orig_CL_RequestNextDownload) (void);
+
+extern void my_CL_Precache_f(void);
+extern void (*orig_CL_Precache_f)(void);
+
+extern void my_CL_RegisterEffects(void);
+extern void (*orig_CL_RegisterEffects)(void);
+
+extern void my_CL_Disconnect(short unknown);
+extern void (*orig_CL_Disconnect)(short unknown);
 
 
 // --Shared--
@@ -28,6 +45,9 @@ extern char    *(*orig_Cmd_Args) (void);
 extern void (*orig_Qcommon_Init)(int one, char** two);
 extern void my_Qcommon_Init(int one , char ** two);
 
+extern void (*orig_Qcommon_Shutdown)(void);
+extern void my_Qcommon_Shutdown(void);
+
 extern void (*orig_Cmd_AddCommand)(char * cmd, void * callback);
 extern void my_Cmd_AddCommand(char * cmd, void * callback);
 
@@ -36,6 +56,9 @@ extern void my_Cmd_RemoveCommand(char * cmd);
 
 extern void (*orig_Com_Printf) (char *msg, ...);
 extern void my_Com_Printf(char *msg,...);
+
+extern int (*orig_FS_LoadFile)(char * name,void ** something, bool button);
+extern char * (*orig_FS_Userdir)(void);
 
 //Cvar_Get
 extern cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarcommand_t command = NULL);
