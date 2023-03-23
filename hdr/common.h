@@ -1,36 +1,80 @@
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 #include <cstdlib>
 
 #include <string>
 #include <vector>
 #include <sstream>
+#include <fstream>
+#include <list>
+#include <algorithm>
 
 #include <cerrno>
 
 #include <thread>
 
+#include <unistd.h>
+#include <limits.h>
+#include <dlfcn.h>
+
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include <libgen.h>
+
 #include <curl/curl.h>
 
 #include "engine.h"
-
-
 #include "fn_sigs.h"
 
 
-// httpdl.cpp
-extern size_t httpdl_writecb(char *ptr, size_t size, size_t nmemb, void *userdata);
-extern void httpdl_thread_get(const char* url);
-extern CURLcode res;
-extern long http_status;
 
-// exe_client.cpp
-extern std::thread httpdl;
 
-// exe_shared.cpp
+
+// --------------------httpdl.cpp-----------------------
+enum enum_dl_status {
+	DS_UNCERTAIN,
+	DS_FAILURE,
+	DS_SUCCESS
+};
+
+
+extern std::list<std::string> httpdl_cache_list;
 extern CURL * curl_handle;
+extern enum enum_dl_status download_status;
+extern size_t httpdl_writecb(char *ptr, size_t size, size_t nmemb, void *userdata);
+extern void httpdl_thread_get(std::string * rel_map_path);
+extern int getHttpStatus(void);
+void beginHttpDL(char * relative_file_path_name);
 
-// util.cpp
+extern bool unZipFile(char * in_zip, char * out_root );
+
+
+extern bool removeItemHttpCache(const std::string& zipfile);
+extern void appendItemHttpCache(const std::string& zipfile);
+
+extern bool searchHttpCache(const std::string& target);
+
+extern void saveHttpCache(void);
+extern void loadHttpCache(void);
+
+
+// --------------------exe_client.cpp-----------------------
+
+// --------------------exe_shared.cpp-----------------------
+
+
+// --------------------util.cpp-----------------------
+extern void SOFPPNIX_PRINT(char * msg, ... );
 extern void error(const char* message);
 extern void hexdump(void *addr_start, void *addr_end);
 extern void memoryUnprotect(void * addr);
@@ -43,12 +87,13 @@ extern void SockadrToNetadr (struct sockaddr_in *s, netadr_t *a);
 extern void create_dir_if_not_exists(const char* dir_path);
 extern void create_file_dir_if_not_exists(const char* file_path);
 
-// serverlist.cpp
+
+// --------------------serverlist.cpp-----------------------
 extern void GetServerList(void);
 extern void my_SendToMasters(void * arg1,void * arg2);
 
-
-// commands.cpp
+// --------------------commands.cpp-----------------------
 void CreateCommands(void);
 extern void cmd_nix_client_state(void);
 extern void cmd_nix_httpdl_test(void);
+extern void cmd_nix_client_map(void);

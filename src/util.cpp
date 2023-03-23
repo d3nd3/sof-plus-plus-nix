@@ -1,15 +1,20 @@
 #include "common.h"
 
-#include <unistd.h>
-#include <sys/mman.h>
 
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+void SOFPPNIX_PRINT(char * msg, ... ) {
+	char text[1023];
+	va_list args;
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <libgen.h>
+	va_start(args, msg);
+	vsnprintf(text, sizeof(text), msg, args);
+	va_end(args);
+
+	char color[1024];
+	
+	snprintf(color,1024,"%c%s%s",0x07,"sof++nix_Debug: ",text);
+
+	orig_Com_Printf(color);
+}
 
 void error(const char* message) {
 	perror(message);
@@ -143,18 +148,44 @@ void SockadrToNetadr (struct sockaddr_in *s, netadr_t *a)
 	a->type = NA_IP;
 }
 
+// Recursively create directories
+void create_dirs_recursively(const char* path) {
+	char* path_copy = strdup(path);
+	char* current_dir = strtok(path_copy, "/");
+	char current_path[1024];
+	
+	if ( path[0] == '/' ) {
+		current_path[0] = '/';
+		current_path[1] = '\0';
+	} else
+	{
+		current_path[0] = '\0';
+	}
+	while (current_dir != nullptr) {
+		strcat(current_path, current_dir);
+		strcat(current_path, "/");
+		create_dir_if_not_exists(current_path);
+		current_dir = strtok(nullptr, "/");
+	}
+	free(path_copy);
+}
+
 // Create a directory if it does not exist
 void create_dir_if_not_exists(const char* dir_path) {
-    struct stat st = {0};
-    if (stat(dir_path, &st) == -1) {
-        // Directory does not exist, create it
-        mkdir(dir_path, 0755);
-    }
+	struct stat st = {0};
+	if (stat(dir_path, &st) == -1) {
+		// Directory does not exist, create it
+		mkdir(dir_path, 0755);
+	}
 }
 
 // Create a directory for a file if it does not exist
 void create_file_dir_if_not_exists(const char* file_path) {
-    char* dir_path = dirname(strdup(file_path));
-    create_dir_if_not_exists(dir_path);
-    free(dir_path);
+	char* dir_path = strdup(file_path);
+	char* last_slash = strrchr(dir_path, '/');
+	if (last_slash != nullptr) {
+		*last_slash = '\0';
+		create_dirs_recursively(dir_path);
+	}
+	free(dir_path);
 }

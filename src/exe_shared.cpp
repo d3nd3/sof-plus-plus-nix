@@ -3,11 +3,12 @@
 CURL * curl_handle = NULL;
 
 void my_Qcommon_Init(int one , char ** two) {
-	orig_Com_Printf("sof++nix_DEBUG: Qcommon_Init\n");
+	SOFPPNIX_PRINT("Qcommon_Init\n");
 
+	loadHttpCache();
 	curl_global_init(CURL_GLOBAL_NOTHING);
 
-	orig_Com_Printf("++nix_DEBUG: Curl Version : %s\n",curl_version());
+	SOFPPNIX_PRINT("Curl Version : %s\n",curl_version());
 	orig_Qcommon_Init(one,two);
 
 
@@ -24,7 +25,7 @@ void my_Qcommon_Init(int one , char ** two) {
 
 void my_Qcommon_Shutdown(void)
 {
-	orig_Com_Printf("sof++nix_DEBUG: Qcommon_Shutdown\n");
+	SOFPPNIX_PRINT("Qcommon_Shutdown\n");
 
 	curl_global_cleanup();
 

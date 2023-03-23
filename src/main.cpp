@@ -1,7 +1,3 @@
-#include <unistd.h>
-#include <limits.h>
-#include <dlfcn.h>
-
 #include "common.h"
 
 
@@ -124,7 +120,7 @@ void __attribute__ ((constructor)) begin() {
 
 
 	//--------------------Client-------------------------
-	orig_CL_CheckOrDownloadFile = createDetour(0x080CBA2C ,&my_CL_CheckOrDownloadFile,6);
+	// orig_CL_CheckOrDownloadFile = createDetour(0x080CBA2C ,&my_CL_CheckOrDownloadFile,6);
 	orig_CL_Precache_f = createDetour(0x080CDD48 , &my_CL_Precache_f,5);
 
 	// entered server event ( bottom of CL_RequestNextDownload ) `curl_easy_cleanup()` in both.

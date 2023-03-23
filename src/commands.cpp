@@ -5,6 +5,7 @@ void CreateCommands(void)
 {
 	my_Cmd_AddCommand("++nix_httpdl_test",&cmd_nix_httpdl_test);
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
+	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
 }
 
 
@@ -46,8 +47,9 @@ void my_Com_Printf(char *msg, ...) {
 		vsnprintf(text, sizeof(text), msg, args);
 		va_end(args);
 
-		char color[1024] = {0x03,0x00};
-		strcat(color,text);
+		char color[1024];
+		
+		snprintf(color,1024,"%c%s",0x03,text);
 
 		orig_Com_Printf(color);
 		
@@ -85,19 +87,20 @@ void cmd_nix_client_state(void)
 {
 	int** connected_state = 0x0829D494;
 
-	orig_Com_Printf("Connected state is %i\n",**connected_state);
+	SOFPPNIX_PRINT("Connected state is %i\n",**connected_state);
+}
+
+void cmd_nix_client_map(void)
+{
+	unsigned int add= 0x0829D480 + 0x1F44;
+	char ** mapname = add;
+
+	SOFPPNIX_PRINT("Mapname is %s\n",*mapname);
 }
 
 
 void cmd_nix_httpdl_test(void)
 {
-	orig_Com_Printf("Testing httpdl %s\n",orig_Cmd_Argv(1));
-
-	// fake a download
-	httpdl = std::thread(httpdl_thread_get,orig_Cmd_Argv(1));
-	if ( httpdl.joinable() ) {
-		orig_Com_Printf("httpdl is joinable... joining\n");
-		httpdl.join();
-		orig_Com_Printf("Response code was : %li : %i : %s\n",http_status,res,curl_easy_strerror(res));
-	}
+	SOFPPNIX_PRINT("Testing httpdl %s\n",orig_Cmd_Argv(1));
+	beginHttpDL(orig_Cmd_Argv(1));
 }

@@ -28,34 +28,75 @@ void my_CL_Frame(int msec)
 	// 10 fps slow ... :) ca_connecting
 
 	// Assume finished
-	if ( httpdl.joinable() ) {
-		orig_Com_Printf("httpdl is joinable... joining\n");
-		httpdl.join();
-		orig_Com_Printf("Response code was : %li : %i : %s\n",http_status,res,curl_easy_strerror(res));
-
-		// a http download is completed.
-		// Lets call RequestNextDownload
-		// orig_CL_RequestNextDownload();
-
+	int http_status = getHttpStatus();
+	switch ( http_status) {
+	case DS_FAILURE:
+		SOFPPNIX_PRINT(":'( Download failed!\n");
+		break;
+	case DS_SUCCESS:
+		SOFPPNIX_PRINT(":'( Download succeeeded!\n");
+		break;
 	}
+
+	/*
+		HTTP DL COMPLETE.
+	*/
+	if ( http_status != DS_UNCERTAIN ) {
+		// Just continue as normal to the server, regardless of the outcome of the http dl.
+		orig_CL_Precache_f();
+	}
+
+	
+	// if ( !download_status ) {
+		// TODO : decrement the index counter so that it tries again with normal download?
+		// temporary solution:
+		// only download mapname before iterate configstrings
+	// }
+	// a http download is completed.
+	// Lets call RequestNextDownload
+	// orig_CL_RequestNextDownload();
 }
 
 
 /*
 	The configstrings,ghoulstrings and baseline has been received.
 	Now the server wants you to check if they exist locally on disk.
+
+	This function calls CL_RequestNextDownload() then returns.
 */
 void my_CL_Precache_f(void)
 {
-	orig_Com_Printf("sof++nix_DEBUG: CL_Precache_F curl_easy_init()\n");
-	// curl_handle = curl_easy_init();
-	orig_CL_Precache_f();
+	SOFPPNIX_PRINT("CL_Precache_F curl_easy_init()\n");
+	
+	// configstrings CS_NAME = *(unsigned int*)(0x0829D480)+0x1EFC+0x48
+
+	// CM_LoadMap mapname = 0x829DB40
+
+	// configstrings ALTERNATE = *(unsigned int*)(0x0829D480) + 0x2844
+
+	char * mapname = *(unsigned int*)(0x0829D480) + 0x2844;
+	
+	std::string filePath(mapname);
+	std::string newExtension = ".zip";
+	size_t lastDotIndex = filePath.find_last_of(".");
+	if (lastDotIndex != std::string::npos) {
+		filePath.replace(lastDotIndex, newExtension.length(), newExtension);
+	}
+
+	beginHttpDL(filePath.c_str());
+	// Start the download. Run Precache after :)
+
+	// mapname is set inside CL_Precache @CL_LoadMap
+	// Actually its not set until the very last call of CL_RequestNextDownload()
+	// Which is far into future :P
+
+	
 }
 
 void my_CL_RegisterEffects(void)
 {
 
-	orig_Com_Printf("sof++nix_DEBUG: CL_RegisterEffects curl_easy_cleanup()\n");
+	SOFPPNIX_PRINT("CL_RegisterEffects curl_easy_cleanup()\n");
 
 	// if ( curl_handle != NULL ) curl_easy_cleanup(curl_handle);
 	orig_CL_RegisterEffects();
@@ -63,7 +104,7 @@ void my_CL_RegisterEffects(void)
 
 void my_CL_Disconnect(short unknown)
 {
-	orig_Com_Printf("sof++nix_DEBUG: CL_Disconnect curl_easy_cleanup()\n");
+	SOFPPNIX_PRINT("CL_Disconnect curl_easy_cleanup()\n");
 
 	// if ( curl_handle != NULL ) curl_easy_cleanup(curl_handle);
 	orig_CL_Disconnect(unknown);
@@ -86,16 +127,17 @@ void my_CL_Disconnect(short unknown)
 	Don't mess with the cl_download cvars if you are using http.
 */
 
-std::thread httpdl;
+#if 0
+
 qboolean my_CL_CheckOrDownloadFile(char * filepath)
 {
 
-	orig_Com_Printf("sof++nix_DEBUG CL_CheckOrDownloadFile: %s\n",filepath);
+	SOFPPNIX_PRINT("CL_CheckOrDownloadFile: %s\n",filepath);
 	// return orig_CL_CheckOrDownloadFile(filepath);
 
 	if (strstr (filepath, ".."))
 	{
-		Com_Printf ("Refusing to download a path with ..\n");
+		SOFPPNIX_PRINT ("Refusing to download a path with ..\n");
 		return true;
 	}
 
@@ -104,7 +146,17 @@ qboolean my_CL_CheckOrDownloadFile(char * filepath)
 		return true;
 	}
 
-	// std::thread
+	// Initiate download of mapfile.zip
+	// Even if they already have it?
+	// Difficult problem. Need a file list?
+	// Under which condition do I initiate download of the mapname .zip ?
+	// Bulk download vs individual file download.
+
+	// Perhaps a httpdl_history_cache.txt
+	// Contains a list of zips downloaded.
+
+	// If the zip_path exists in that file, it doesn't download.
+	
 	httpdl = std::thread(httpdl_thread_get,filepath);
 
 	/*
@@ -112,28 +164,5 @@ qboolean my_CL_CheckOrDownloadFile(char * filepath)
 	*/
 	return false;
 
-#if 0
-	fp = fopen (name, "r+b");
-	if (fp) { // it exists
-		int len;
-		fseek(fp, 0, SEEK_END);
-		len = ftell(fp);
-
-		cls.download = fp;
-
-		// give the server an offset to start the download
-		Com_Printf ("Resuming %s\n", cls.downloadname);
-		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-		MSG_WriteString (&cls.netchan.message,
-			va("download %s %i", cls.downloadname, len));
-	} else {
-		Com_Printf ("Downloading %s\n", cls.downloadname);
-		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
-		MSG_WriteString (&cls.netchan.message,
-			va("download %s", cls.downloadname));
-	}
-
-#endif
-
 }
-
+#endif

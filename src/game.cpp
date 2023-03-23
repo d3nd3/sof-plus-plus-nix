@@ -39,7 +39,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 
 void my_ShutdownGame(void)
 {
-	orig_Com_Printf("Shutting down game!!!\n");
+	SOFPPNIX_PRINT("Shutting down game!!!\n");
 	orig_ShutdownGame();
 
 

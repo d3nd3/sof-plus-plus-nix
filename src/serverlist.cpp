@@ -1,15 +1,5 @@
 #include "common.h"
 
-#include <list>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <netinet/tcp.h>
-
-#include <sys/time.h>
-
 #include "decodekey.h"
 
 
@@ -41,7 +31,7 @@ void GetServerList(void)
  
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
-	orig_Com_Printf("Error: Failed to create socket.\n");
+	SOFPPNIX_PRINT("Error: Failed to create socket.\n");
 	return 1;
   }
 
@@ -139,7 +129,7 @@ void GetServerList(void)
 	bytes_returned += r;
   }
   close(sockfd);
-  // orig_Com_Printf("%.*s\n", bytes_returned, buffer);
+  // SOFPPNIX_PRINT("%.*s\n", bytes_returned, buffer);
   
   // there is a \final\ at the end. So ignore last 7 bytes
 
@@ -164,7 +154,7 @@ void GetServerList(void)
   // --------------UDP MODE----------------
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (sockfd < 0) {
-	orig_Com_Printf("Error: Failed to create socket.\n");
+	SOFPPNIX_PRINT("Error: Failed to create socket.\n");
 	return 1;
   }
 
@@ -283,7 +273,7 @@ void my_menu_AddServer(netadr_t addr,char *data)
 	// *(char*)(data + strlen(data) + 1 - 8) = '\n';
 	*(char*)(data + strlen(data) + 1 - 8) = 0x00;
 	
-	// orig_Com_Printf("BOO: %s\n",data);
+	// SOFPPNIX_PRINT("BOO: %s\n",data);
 	/*
 	  If the server which is giving us this data is a WINDOWS server.
 	  Translate the DM string into an integer. Does it matter? Maybe doens't matter.
@@ -328,7 +318,7 @@ void my_menu_AddServer(netadr_t addr,char *data)
 
 void my_SendToMasters(void * arg1,void * arg2)
 {
-	orig_Com_Printf("Attemping to send to masters!\n");
+	SOFPPNIX_PRINT("Attemping to send to masters!\n");
 
 	char * string = orig_SV_StatusString();
 

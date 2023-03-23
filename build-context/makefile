@@ -23,7 +23,7 @@ OBJS= \
 
 CFLAGS=-m32 -fpic -fpermissive -w -D _GNU_SOURCE -D_inline=inline -I ../hdr
 LDFLAGS= -m32 -shared -o ../out/test.so
-LINKUS= -lcurl -lX11
+LINKUS= -lcurl -lX11 -lminizip
 
 # run recipe if binary does not exist
 $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
