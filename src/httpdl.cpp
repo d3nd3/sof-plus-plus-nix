@@ -31,20 +31,21 @@ CURL* curl = NULL;
 		http_in_progress = false;
 	}
 */
-void beginHttpDL(char * relative_file_path_name)
+bool beginHttpDL(std::string * relative_file_path_name)
 {
-	SOFPPNIX_PRINT("Requested start DL for map : %s\n",relative_file_path_name);
+	SOFPPNIX_PRINT("Requested start DL for map : %s\n",relative_file_path_name->c_str());
 	if ( download_status != DS_UNCERTAIN ) {
 		SOFPPNIX_PRINT("Http Download already in progress!!\n");
-		return;
+		return false;
 	}
-	if ( searchHttpCache( std::string(relative_file_path_name) ) ) {
+	if ( searchHttpCache( std::string(relative_file_path_name->c_str()) ) ) {
 		SOFPPNIX_PRINT("Refusing to download a map zip that is in your cache\n");
-		return;
+		return false;
 	}
 	download_status = DS_UNCERTAIN;
-	std::thread httpdl(httpdl_thread_get,new std::string(relative_file_path_name));
+	std::thread httpdl(httpdl_thread_get,new std::string(*relative_file_path_name));
 	httpdl.detach();
+	return true;
 }
 
 /*
@@ -144,7 +145,7 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	char * userdir = orig_FS_Userdir();
 	char write_zip_here[256];
-	snprintf(write_zip_here,256,"%s/%s",userdir,map_path);
+	snprintf(write_zip_here,256,"%s p/%s",userdir,map_path);
 	SOFPPNIX_PRINT("Local URL is : %s\n",write_zip_here);
 	
 

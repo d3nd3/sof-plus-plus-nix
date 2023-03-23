@@ -40,13 +40,17 @@ void my_CL_Frame(int msec)
 
 	/*
 		HTTP DL COMPLETE.
+		When the user doesn't need to download because its in their cache.
+		Or another http download is in progress ( shouldn't be :/ )
+		http_status is DS_UNCERTAIN in these cases but we still want to connect to server.
+		NVM, precache will be called from the precache hook instad for those sitautions
 	*/
 	if ( http_status != DS_UNCERTAIN ) {
 		// Just continue as normal to the server, regardless of the outcome of the http dl.
 		orig_CL_Precache_f();
 	}
 
-	
+
 	// if ( !download_status ) {
 		// TODO : decrement the index counter so that it tries again with normal download?
 		// temporary solution:
@@ -83,8 +87,13 @@ void my_CL_Precache_f(void)
 		filePath.replace(lastDotIndex, newExtension.length(), newExtension);
 	}
 
-	beginHttpDL(filePath.c_str());
-	// Start the download. Run Precache after :)
+	if ( filePath.compare(0,5,"maps/") == 0 )
+		filePath.erase(0,5);
+	
+	// Thread might not be created, check return value of this function to see if it created thread
+	// Start the download. Rely upon CL_Frame code to run the preacache.
+	if ( ! beginHttpDL(&filePath) )
+		orig_CL_Precache_f();
 
 	// mapname is set inside CL_Precache @CL_LoadMap
 	// Actually its not set until the very last call of CL_RequestNextDownload()

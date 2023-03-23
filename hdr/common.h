@@ -54,7 +54,7 @@ extern enum enum_dl_status download_status;
 extern size_t httpdl_writecb(char *ptr, size_t size, size_t nmemb, void *userdata);
 extern void httpdl_thread_get(std::string * rel_map_path);
 extern int getHttpStatus(void);
-void beginHttpDL(char * relative_file_path_name);
+extern bool beginHttpDL(std::string * relative_file_path_name);
 
 extern bool unZipFile(char * in_zip, char * out_root );
 
