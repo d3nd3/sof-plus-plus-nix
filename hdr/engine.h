@@ -81,6 +81,7 @@ enum ScriptConditionT
 #define GCLIENT_RESP_SPECTATOR 0x320
 #define GCLIENT_RESP_SCORE 0x308
 #define GCLINT_RESP_ENTERFRAME 0x304
+#define GCLIENT_RESP_CTFTEAM 0x380
 #define GCLIENT_PING 0xC8
 #define GCLIENT_SHOWSCORES 0x470
 #define GCLIENT_MOVESCALE 0x348 //other movescale is 26 offset , doesnt set
