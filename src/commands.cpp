@@ -40,18 +40,18 @@ void my_Com_Printf(char *msg, ...) {
 
 	__builtin_apply((void (*)())orig_Com_Printf, args, 512);
 	#else
-		char text[1023];
+		char text[1024];
 		va_list args;
 
 		va_start(args, msg);
 		vsnprintf(text, sizeof(text), msg, args);
 		va_end(args);
 
-		char color[1024];
+		// char color[1024];
 		
-		snprintf(color,1024,"%c%s",0x03,text);
+		// snprintf(color,1024,"%c%s",0x03,text);
 
-		orig_Com_Printf(color);
+		orig_Com_Printf(text);
 		
 	#endif
 }

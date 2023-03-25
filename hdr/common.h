@@ -47,6 +47,11 @@ enum enum_dl_status {
 	DS_SUCCESS
 };
 
+struct FileData {
+	int crc;
+	std::string filename;
+};
+
 
 extern std::list<std::string> httpdl_cache_list;
 extern CURL * curl_handle;
@@ -55,6 +60,13 @@ extern size_t httpdl_writecb(char *ptr, size_t size, size_t nmemb, void *userdat
 extern void httpdl_thread_get(std::string * rel_map_path);
 extern int getHttpStatus(void);
 extern bool beginHttpDL(std::string * relative_file_path_name);
+
+extern size_t header_cb_get_content_length(char *buffer, size_t size, size_t nitems, void *userdata);
+extern size_t partial_blob_100_cb(void *ptr, size_t size, size_t nmemb, void *userdata);
+extern bool partialHttpBlobs(char * url);
+
+extern bool getCentralDirectoryOffset(const char* buffer_haystack, int haystack_size,char ** found_offset);
+extern void extractCentralDirectory(const char* centralDirectory, std::vector<FileData>* files);
 
 extern bool unZipFile(char * in_zip, char * out_root );
 
