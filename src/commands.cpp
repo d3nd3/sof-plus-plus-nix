@@ -102,5 +102,5 @@ void cmd_nix_client_map(void)
 void cmd_nix_httpdl_test(void)
 {
 	SOFPPNIX_PRINT("Testing httpdl %s\n",orig_Cmd_Argv(1));
-	beginHttpDL(orig_Cmd_Argv(1));
+	beginHttpDL(&std::string(orig_Cmd_Argv(1)));
 }

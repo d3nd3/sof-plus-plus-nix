@@ -145,7 +145,11 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	char * userdir = orig_FS_Userdir();
 	char write_zip_here[256];
-	snprintf(write_zip_here,256,"%s p/%s",userdir,map_path);
+	/*
+		some maps are called maps/dm/
+		others just dm/
+	*/
+	snprintf(write_zip_here,256,"%s/maps/%s",userdir,map_path);
 	SOFPPNIX_PRINT("Local URL is : %s\n",write_zip_here);
 	
 
@@ -262,8 +266,10 @@ bool unZipFile(char * in_zip, char * out_root )
 		SOFPPNIX_PRINT("Processing file : %s : size : %lu\n",filename,file_info.uncompressed_size);
 		
 		//----------------------OPEN READ FILE----------------------
-		if (unzOpenCurrentFile(unz_file) != UNZ_OK) {
-			SOFPPNIX_PRINT("Error opening %s, corrupt zip %s?\n",filename,in_zip);
+		int ret = unzOpenCurrentFile(unz_file);
+		if ( ret != UNZ_OK) {
+
+			SOFPPNIX_PRINT("Error %i opening \"%s\" , corrupt zip %s?\n",ret,filename,in_zip);
 			closeAndDeleteZipFile(unz_file,in_zip);
 			return false;
 		}

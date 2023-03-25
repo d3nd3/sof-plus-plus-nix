@@ -21,9 +21,9 @@ OBJS= \
 ../obj/util.o \
 ../obj/httpdl.o
 
-CFLAGS=-m32 -fpic -fpermissive -w -D _GNU_SOURCE -D_inline=inline -I ../hdr
-LDFLAGS= -m32 -shared -o ../out/test.so
-LINKUS= -lcurl -lX11 -lminizip
+CFLAGS=-m32 -fpic -fpermissive -w -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
+LDFLAGS= -m32 -shared -o ../out/test.so -L /minizip/build
+LINKUS= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic
 
 # run recipe if binary does not exist
 $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)

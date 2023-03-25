@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -tcompiler build-context
+docker build --progress=plain -tcompiler build-context
