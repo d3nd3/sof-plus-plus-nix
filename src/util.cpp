@@ -11,7 +11,7 @@ void SOFPPNIX_PRINT(char * msg, ... ) {
 
 	char color[1024];
 	
-	snprintf(color,1024,"%c%s%s",0x03,"sof++nix_Debug: ",text);
+	snprintf(color,1024,"%c%s%s",0x02,"sof++nix_Debug: ",text);
 
 	orig_Com_Printf(color);
 }

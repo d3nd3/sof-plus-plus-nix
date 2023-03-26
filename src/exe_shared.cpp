@@ -5,7 +5,7 @@ CURL * curl_handle = NULL;
 void my_Qcommon_Init(int one , char ** two) {
 	SOFPPNIX_PRINT("Qcommon_Init\n");
 
-	loadHttpCache();
+	// loadHttpCache();
 	curl_global_init(CURL_GLOBAL_NOTHING);
 
 	SOFPPNIX_PRINT("Curl Version : %s\n",curl_version());

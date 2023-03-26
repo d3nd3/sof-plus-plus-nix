@@ -46,7 +46,8 @@ void my_CL_Frame(int msec)
 		NVM, precache will be called from the precache hook instad for those sitautions
 	*/
 	if ( http_status != DS_UNCERTAIN ) {
-		// Just continue as normal to the server, regardless of the outcome of the http dl.
+		// IF SUCCESS - CONTINUE - ( more files )
+		// IF FAILURE - CONTINUE - ( old fashioned download )
 		orig_CL_Precache_f();
 	}
 
@@ -92,8 +93,10 @@ void my_CL_Precache_f(void)
 	
 	// Thread might not be created, check return value of this function to see if it created thread
 	// Start the download. Rely upon CL_Frame code to run the preacache.
-	if ( ! beginHttpDL(&filePath) )
+	if ( ! beginHttpDL(&filePath) ) {
+		// ALREADY IN CACHE?
 		orig_CL_Precache_f();
+	}
 
 	// mapname is set inside CL_Precache @CL_LoadMap
 	// Actually its not set until the very last call of CL_RequestNextDownload()

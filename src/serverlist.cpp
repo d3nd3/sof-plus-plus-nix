@@ -28,12 +28,12 @@ netadr_t my_netadr = {
 */
 void GetServerList(void)
 {
- 
-  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-	SOFPPNIX_PRINT("Error: Failed to create socket.\n");
-	return 1;
-  }
+	
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd < 0) {
+		SOFPPNIX_PRINT("Error: Failed to create socket.\n");
+		return 1;
+	}
 
   // int timeout = 2000; // user timeout in milliseconds [ms]
   // setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (char*) &timeout, sizeof(timeout));
@@ -44,119 +44,119 @@ void GetServerList(void)
   //     error("Error: Failed to set maximum segment size.\n");
   // }
 
-  struct addrinfo hints;
-  struct addrinfo *res;
-  std::memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_protocol = IPPROTO_TCP;
-  int status = getaddrinfo("sof1master.megalag.org", NULL, &hints, &res);
-  if (status != 0) {
-	error("Error: Failed to resolve hostname.\n");
-	return 1;
-  }
+	struct addrinfo hints;
+	struct addrinfo *res;
+	std::memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	int status = getaddrinfo("sof1master.megalag.org", NULL, &hints, &res);
+	if (status != 0) {
+		error("Error: Failed to resolve hostname.\n");
+		return 1;
+	}
 
-  struct sockaddr_in server_addr;
-  std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
-  server_addr.sin_port = htons(28900);
+	struct sockaddr_in server_addr;
+	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
+	server_addr.sin_port = htons(28900);
 
-  freeaddrinfo(res);
+	freeaddrinfo(res);
 
-  if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-	error("Error: Failed to connect to server.\n");
-  }
+	if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+		error("Error: Failed to connect to server.\n");
+	}
 
-  const char* message = "IDQD";
-  if (send(sockfd, message, std::strlen(message), 0) < 0) {
-	error("Error: Failed to send message.\n");
-  }
+	const char* message = "IDQD";
+	if (send(sockfd, message, std::strlen(message), 0) < 0) {
+		error("Error: Failed to send message.\n");
+	}
 
-  unsigned char buffer[1400];
-  std::memset(buffer, 0, sizeof(buffer));
-  int bytes_returned = recv(sockfd, buffer, sizeof(buffer), 0);
-  if (bytes_returned < 0) {
-	error("Error: Failed to receive message.\n");
-  }
+	unsigned char buffer[1400];
+	std::memset(buffer, 0, sizeof(buffer));
+	int bytes_returned = recv(sockfd, buffer, sizeof(buffer), 0);
+	if (bytes_returned < 0) {
+		error("Error: Failed to receive message.\n");
+	}
 
-  std::string received_message((char*)buffer,bytes_returned);
+	std::string received_message((char*)buffer,bytes_returned);
 
   // std::cout << "MSG1: " << received_message << '\n';
 
   // Split the message string by the backslash character '\'
-  std::vector<std::string> parts;
-  std::istringstream iss(received_message);
-  std::string part;
-  while (std::getline(iss, part, '\\')) {
-	parts.push_back(part);
-  }
+	std::vector<std::string> parts;
+	std::istringstream iss(received_message);
+	std::string part;
+	while (std::getline(iss, part, '\\')) {
+		parts.push_back(part);
+	}
 
   // std::cout << "SIZE: " << parts.size();
 
-  std::string realkey = parts[parts.size() - 1];
+	std::string realkey = parts[parts.size() - 1];
 
   // Hash the key using the provided hash function
   // char * ckey = gsseckey(NULL,key.c_str(),"iVn3a3",2);
-  std::vector<uint8_t> key = ValidateKey(std::string("iVn3a3"),realkey);
-  std::string hashed_key( key.begin(), key.end() );
+	std::vector<uint8_t> key = ValidateKey(std::string("iVn3a3"),realkey);
+	std::string hashed_key( key.begin(), key.end() );
 
   // std::cout << "HASHED_KEY: " << hashed_key << '\n';
 
-  std::string response = "\\gamename\\sofretail\\gamever\\1.6\\location\\0\\validate\\" + std::string("ABCDEFGH") + "\\final\\\\queryid\\1.1\\";
-  char * c = response.c_str();
+	std::string response = "\\gamename\\sofretail\\gamever\\1.6\\location\\0\\validate\\" + std::string("ABCDEFGH") + "\\final\\\\queryid\\1.1\\";
+	char * c = response.c_str();
   // ssize_t send(int sockfd, const void *buf, size_t len, int flags);
-  if (send(sockfd, c, response.size(), 0) < 0) {
-	error("Error: Failed to send response.\n");
-  }
+	if (send(sockfd, c, response.size(), 0) < 0) {
+		error("Error: Failed to send response.\n");
+	}
 
-  response = "\\list\\cmp\\gamename\\sofretail\\final\\";
-  c = response.c_str();
-  if (send(sockfd, c, response.size(), 0) < 0) {
-	error("Error: Failed to send response.\n");
-  }
-  std::memset(buffer, 0, sizeof(buffer));
+	response = "\\list\\cmp\\gamename\\sofretail\\final\\";
+	c = response.c_str();
+	if (send(sockfd, c, response.size(), 0) < 0) {
+		error("Error: Failed to send response.\n");
+	}
+	std::memset(buffer, 0, sizeof(buffer));
   // ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 
-  int r = 0;
-  bytes_returned = 0;
-  while ( true ) {
-	r = recv(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0);
-	if ( r < 0) {
-	  error("Error: Failed to receive message.\n");
-	} else {
-	  if ( r == 0 )
-		break;
+	int r = 0;
+	bytes_returned = 0;
+	while ( true ) {
+		r = recv(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0);
+		if ( r < 0) {
+			error("Error: Failed to receive message.\n");
+		} else {
+			if ( r == 0 )
+				break;
+		}
+		bytes_returned += r;
 	}
-	bytes_returned += r;
-  }
-  close(sockfd);
+	close(sockfd);
   // SOFPPNIX_PRINT("%.*s\n", bytes_returned, buffer);
-  
+	
   // there is a \final\ at the end. So ignore last 7 bytes
 
   // hexdump(buffer,buffer+bytes_returned);
   // Ignore the first 7 bytes
-  unsigned char* data = buffer;
-  if (bytes_returned <= 7 || (bytes_returned-7) % 6 != 0 ) {
-	  error("Failure getting Server List , bytes returned not correct\n");
-  }
+	unsigned char* data = buffer;
+	if (bytes_returned <= 7 || (bytes_returned-7) % 6 != 0 ) {
+		error("Failure getting Server List , bytes returned not correct\n");
+	}
   // Parse the buffer and create netadr_t structures
-  std::vector<netadr_t> addrs;
-  for (int i = 0; i < bytes_returned - 7; i += 6) {
-	  netadr_t addr;
-	  addr.type = NA_IP;
-	  addr.ip[0] = data[i];
-	  addr.ip[1] = data[i + 1];
-	  addr.ip[2] = data[i + 2];
-	  addr.ip[3] = data[i + 3];
-	  addr.port = (data[i + 5] << 8) | data[i + 4];
-	  addrs.push_back(addr);
-  }
+	std::vector<netadr_t> addrs;
+	for (int i = 0; i < bytes_returned - 7; i += 6) {
+		netadr_t addr;
+		addr.type = NA_IP;
+		addr.ip[0] = data[i];
+		addr.ip[1] = data[i + 1];
+		addr.ip[2] = data[i + 2];
+		addr.ip[3] = data[i + 3];
+		addr.port = (data[i + 5] << 8) | data[i + 4];
+		addrs.push_back(addr);
+	}
   // --------------UDP MODE----------------
-  sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sockfd < 0) {
-	SOFPPNIX_PRINT("Error: Failed to create socket.\n");
-	return 1;
-  }
+	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sockfd < 0) {
+		SOFPPNIX_PRINT("Error: Failed to create socket.\n");
+		return 1;
+	}
 
   struct timeval timeout = {1, 200000}; // set timeout for 2 seconds
 
@@ -164,101 +164,111 @@ void GetServerList(void)
   setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
 
   for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end();) {
-	  std::cout << "Addr " << ": "
-				<< (int)it->ip[0] << "."
-				<< (int)it->ip[1] << "."
-				<< (int)it->ip[2] << "."
-				<< (int)it->ip[3] << ":"
-				<< htons(it->port) << std::endl;
+  	std::cout << "Addr " << ": "
+  	<< (int)it->ip[0] << "."
+  	<< (int)it->ip[1] << "."
+  	<< (int)it->ip[2] << "."
+  	<< (int)it->ip[3] << ":"
+  	<< htons(it->port) << std::endl;
 
-	  struct sockaddr_in gs_server_info;
-	  NetadrToSockadr(&(*it),&gs_server_info);
+  	struct sockaddr_in gs_server_info;
+  	NetadrToSockadr(&(*it),&gs_server_info);
 
 	  // send twice just in case?
-	  if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-		error("Error: Failed to send response.\n");
-	  }
+  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+  		error("Error: Failed to send response.\n");
+  	}
 
-	  if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-		error("Error: Failed to send response.\n");
-	  }
+  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+  		error("Error: Failed to send response.\n");
+  	}
 
-	  if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-		error("Error: Failed to send response.\n");
-	  }
+  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+  		error("Error: Failed to send response.\n");
+  	}
 
-	  if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-		error("Error: Failed to send response.\n");
-	  }
+  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+  		error("Error: Failed to send response.\n");
+  	}
 
-	  std::memset(buffer, 0, sizeof(buffer));
-	  bytes_returned = 0;
-	  struct sockaddr_in client_addr;
-	  socklen_t client_addr_len = sizeof(client_addr);
-	  bool gonext = false;
-	  while ( true ) {
-		r = recvfrom(sockfd, buffer, 1400, 0,(struct sockaddr*)&client_addr,&client_addr_len);
-		if ( r < 0 && errno == EAGAIN || errno == EWOULDBLOCK ) {
-			gonext = true;
-			it = addrs.erase(it);
-			break;
-		}
+  	std::memset(buffer, 0, sizeof(buffer));
+  	bytes_returned = 0;
+  	struct sockaddr_in client_addr;
+  	socklen_t client_addr_len = sizeof(client_addr);
+  	bool gonext = false;
+  	while ( true ) {
+  		r = recvfrom(sockfd, buffer, 1400, 0,(struct sockaddr*)&client_addr,&client_addr_len);
+  		if ( r < 0 && errno == EAGAIN || errno == EWOULDBLOCK ) {
+  			gonext = true;
+
+  			/*
+				2 SERVERS THE SAME IP HOST PORT SEG FAULT ME
+
+  			*/
+  			SOFPPNIX_PRINT("TIMEOUT YADDA YADDA YADDA\n");
+  			it = addrs.erase(it);
+  			// IF YOU CALL ERASE YOU ARE NOT MEANT TO INCREMENT ITERATOR.
+  			break;
+  		}
 		// Not the correct sender. this is throwing packets away
-		if (client_addr.sin_family == AF_INET &&
-			   client_addr.sin_port != gs_server_info.sin_port ||
-			   client_addr.sin_addr.s_addr != gs_server_info.sin_addr.s_addr ) {
-		  continue;
-		}
-	  
-		if ( r < 0) {
-			std::cerr << std::strerror(errno) << std::endl;
-			error("Error: Failed to receive message.\n");
-		}
-		bytes_returned += r;
+  		if (client_addr.sin_family == AF_INET &&
+  			client_addr.sin_port != gs_server_info.sin_port ||
+  			client_addr.sin_addr.s_addr != gs_server_info.sin_addr.s_addr ) {
+  			continue;
+  	}
+
+  	if ( r < 0) {
+  		std::cerr << std::strerror(errno) << std::endl;
+  		error("Error: Failed to receive message.\n");
+  	}
+  	bytes_returned += r;
 		// GOT DATA: go Process
-		break;
-	  }
-	  if ( gonext ) {
-		++it;
-		continue;
-	  }
-	  
+  	break;
+  }
+  if ( gonext ) {
+  	// ++it;
+  	continue;
+  }
+  
 	  /*
 		Process the response (just trying to get their hostport?)
 	  */
-	  std::string input((char*)buffer,bytes_returned);
-	  std::istringstream ss(input);
-	  std::string token;
-	  int hostport = 0;
-	  gonext=false;
-	  while (std::getline(ss, token, '\\')) {
-		  if (token == "hostport") {
-			  std::getline(ss, token, '\\');
+  std::string input((char*)buffer,bytes_returned);
+  std::istringstream ss(input);
+  std::string token;
+  int hostport = 0;
+  gonext=false;
+  while (std::getline(ss, token, '\\')) {
+  	if (token == "hostport") {
+  		std::getline(ss, token, '\\');
 			  //hostport = std::stoi(token);
-			  std::stringstream ss(token);
-			  ss >> hostport;
-			  it->port = htons(hostport);
-			  gonext=true;
-			  break;
-		  }
-	  }
-
-	  if ( gonext ) {
-		++it;
-		continue;
-	  }
-	  
-	  it = addrs.erase(it);
+  		std::stringstream ss(token);
+  		ss >> hostport;
+  		it->port = htons(hostport);
+  		gonext=true;
+  		break;
+  	}
   }
-  close(sockfd);
-  for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end(); ++it) {
+
+  if ( gonext ) {
+  	++it;
+  	SOFPPNIX_PRINT("GO NEXT YADDA GO NEXT YADDA\n");
+  	continue;
+  }
+
+  SOFPPNIX_PRINT("ERASE BOTTOM ERASE BOTTOM\n");
+  it = addrs.erase(it);
+}
+close(sockfd);
+for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end(); ++it) {
+	SOFPPNIX_PRINT("INFO MODE UDP HOSTPORTS\n");
 	char * request = orig_va("info %i",33);
 	orig_Netchan_OutOfBandPrint(NS_CLIENT,*it,request);
-  }
+}
 }
 
 /*
@@ -269,7 +279,7 @@ void GetServerList(void)
 */
 void my_menu_AddServer(netadr_t addr,char *data)
 {
-  
+
 	// *(char*)(data + strlen(data) + 1 - 8) = '\n';
 	*(char*)(data + strlen(data) + 1 - 8) = 0x00;
 	
@@ -292,17 +302,17 @@ void my_menu_AddServer(netadr_t addr,char *data)
 
 	if ( tokens.size() >= 3 ) {
 
-	  std::string * t = &tokens[tokens.size() - 2];
-	  std::string * t2 = &tokens[tokens.size() - 3];
-	  *t2 = *t;
-	  if ( *t == std::string("DM") ) *t = "1";
-	  else if ( *t == std::string("Assassin") ) *t = "2";
-	  else if ( *t == std::string("Arsenal") ) *t = "3";
-	  else if ( *t == std::string("CTF") ) *t = "4";
-	  else if ( *t == std::string("Realistic") ) *t = "5";
-	  else if ( *t == std::string("Control") ) *t = "6";
-	  else if ( *t == std::string("CTB") ) *t = "7";
-	  else *t = "8";
+		std::string * t = &tokens[tokens.size() - 2];
+		std::string * t2 = &tokens[tokens.size() - 3];
+		*t2 = *t;
+		if ( *t == std::string("DM") ) *t = "1";
+		else if ( *t == std::string("Assassin") ) *t = "2";
+		else if ( *t == std::string("Arsenal") ) *t = "3";
+		else if ( *t == std::string("CTF") ) *t = "4";
+		else if ( *t == std::string("Realistic") ) *t = "5";
+		else if ( *t == std::string("Control") ) *t = "6";
+		else if ( *t == std::string("CTB") ) *t = "7";
+		else *t = "8";
 	}
 
 	std::string output;

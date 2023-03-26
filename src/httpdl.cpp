@@ -12,6 +12,9 @@ bool http_in_progress = false;
 // Track which zip files have been downloaded & extracted.
 std::list<std::string> httpdl_cache_list;
 
+std::vector<FileData> zip_content;
+int partial_blob_100_cb_written = 0;
+
 // global for fclose
 FILE * local_new_file = NULL;
 
@@ -38,10 +41,10 @@ bool beginHttpDL(std::string * relative_file_path_name)
 		SOFPPNIX_PRINT("Http Download already in progress!!\n");
 		return false;
 	}
-	if ( searchHttpCache( std::string(relative_file_path_name->c_str()) ) ) {
-		SOFPPNIX_PRINT("Refusing to download a map zip that is in your cache\n");
-		return false;
-	}
+	// if ( searchHttpCache( std::string(relative_file_path_name->c_str()) ) ) {
+	// 	SOFPPNIX_PRINT("Refusing to download a map zip that is in your cache\n");
+	// 	return false;
+	// }
 	download_status = DS_UNCERTAIN;
 	std::thread httpdl(httpdl_thread_get,new std::string(*relative_file_path_name));
 	httpdl.detach();
@@ -50,6 +53,8 @@ bool beginHttpDL(std::string * relative_file_path_name)
 
 /*
 	resets download_status to DS_UNCERTAIN
+
+	SO FAR A VERY POINTLESS VARIABLE - because we always continue anyway.
 */
 int getHttpStatus(void)
 {
@@ -75,15 +80,18 @@ If your callback function returns CURL_WRITEFUNC_PAUSE it will cause this
  transfer to become paused. See curl_easy_pause for further details.
 */
 
+
 size_t httpdl_writecb(void *ptr, size_t size, size_t nmemb, void *userdata) {
 	char * url = (char*)userdata;
 	
 
 	// SOFPPNIX_PRINT("httpdl_writecb : %08X %i %i %08X\n", ptr,size,nmemb,userdata);
 
-	long http_status = 0;
-	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
-	// SOFPPNIX_PRINT("RESPONSE_CODE: %li\n",http_status);
+	static long http_status;
+	http_status = 0;
+	if ( !http_status )
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
+	// SOFPPNIX_PRINT("Http status code httpdl_writecb : %li\n",http_status);
 	if (http_status == 200) {
 		if ( local_new_file == NULL ) {
 			create_file_dir_if_not_exists(url);
@@ -117,6 +125,8 @@ size_t httpdl_writecb(void *ptr, size_t size, size_t nmemb, void *userdata) {
 }
 
 
+#include <zlib.h>
+
 /*
 	url as given by configstrings.
 
@@ -131,15 +141,13 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	char * userdir = orig_FS_Userdir();
 	char write_zip_here[256];
-<<<<<<< Updated upstream
+
 	/*
 		some maps are called maps/dm/
 		others just dm/
 	*/
 	snprintf(write_zip_here,256,"%s/maps/%s",userdir,map_path);
-=======
-	snprintf(write_zip_here,256,"%s/%s",userdir,map_path);
->>>>>>> Stashed changes
+
 	SOFPPNIX_PRINT("Local URL is : %s\n",write_zip_here);
 	
 	char remote_zip_weburl[256];
@@ -148,20 +156,71 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	/*
 		-------------------------PARTIAL DOWNLOAD-----------------------------------
-	*/
-	// CALL CRC CHECKS HERE
-	// GET CONTENT LENGTH
-	// GET 100 BYTE BLOBS FROM END
-	// IF ANY OF CRC DO NOT MATCH JUST DOWNLOAD ENTIRE ZIP.
+		IF UNABLE TO GET THE CRC FILE-LIST FROM ZIP, GIVE UP NOW.
+		
+		ONLY BOTHER TO REDOWNLOAD THE BIG ZIP FILE IF:
+			ANY FILE DOES NOT EXIST LOCALLY OR
+			ANY FILE's CRC DOES NOT MATCH.
 
+		EITHER WAY: PROPEL FORWARD!
+	*/
 
 	if ( !partialHttpBlobs(&remote_zip_weburl[0]) ) {
+		// NOT ABLE TO GET THE FILE CONTENT LENGTH AND LISTS.
+
 		delete rel_map_path;
 		download_status = DS_FAILURE;
 		return;
 	}
+
+	// Use zip_content ( it was cleared and set inside ExtractCentralDirectory function )
+
+	bool do_download = false;
+	for (const auto& file_data : zip_content) {
+		std::cout << "File Name: " << file_data.filename << std::endl;
+		std::cout << "File CRC-32: " << std::hex << file_data.crc << std::endl;
+
+		std::string full_file_pathname = std::string(orig_FS_Userdir()) + std::string("/") +  file_data.filename;
+		// Check if file exists on disk
+		std::ifstream file(full_file_pathname);
+		if (!file.good()) {
+			std::cerr << "File does not exist: " << full_file_pathname << std::endl;
+			// We know we want to download now.
+			do_download = true;
+			break;
+		}
+
+		// Compute CRC of file on disk
+		std::ifstream disk_file(full_file_pathname, std::ios::binary);
+		unsigned int disk_crc = 0;
+		char buffer[1024];
+		while (disk_file.read(buffer, sizeof(buffer))) {
+			disk_crc = crc32(disk_crc, buffer, sizeof(buffer));
+		}
+		disk_crc = crc32(disk_crc, buffer, disk_file.gcount());
+
+		// Check if CRC values match
+		if (disk_crc != file_data.crc) {
+			std::cerr << "File has different CRC value: " << full_file_pathname << std::endl;
+			// We know we want to download now.
+			do_download = true;
+			break;
+		}
+	}
+
+	if ( !do_download ) 
+	{
+		SOFPPNIX_PRINT("Not downloading because file not found or crc different\n");
+		delete rel_map_path;
+		download_status = DS_FAILURE;
+		return;
+	}
+	SOFPPNIX_PRINT("PREPARING DOWNLOAD!\n");
+
 	/*
 		---------------------------FULL DOWNLOAD--------------------------------------
+		WE HAVE COMPARED CRC TO EACH LOCAL DIRECTORY
+		THEY ARE DIFFERENT OR NON-EXISTING, SO GO AHEAD
 	*/
 
 	curl = curl_easy_init();
@@ -209,8 +268,8 @@ void httpdl_thread_get(std::string * rel_map_path) {
 		} else
 		{
 			// keep track of the extracted zip files in a permanant file
-			appendItemHttpCache(map_path);
-			saveHttpCache();
+			// appendItemHttpCache(map_path);
+			// saveHttpCache();
 			download_status = DS_SUCCESS;
 		}
 	} else {
@@ -226,122 +285,183 @@ void httpdl_thread_get(std::string * rel_map_path) {
 // return length.
 size_t header_cb_get_content_length(char *buffer, size_t size, size_t nitems, void *userdata)
 {
+	int ret = -1;
+
+	static long http_status;
+	http_status = 0;
+	if ( !http_status )
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
+
+	if ( http_status != 200 ) return ret;
+
 	size_t numbytes = size * nitems;
 	char *header = (char *)malloc(numbytes + 1);
 	memcpy(header, buffer, numbytes);
 	header[numbytes] = '\0';
 
-	SOFPPNIX_PRINT("%s\n",header);
-
-	// Parse the Content-Length header
+	// hexdump(header,header+numbytes);
+	
 	const char *prefix = "Content-Length: ";
 	char *content_length = strcasestr(header, prefix);
 	int length = 0;
 	if (content_length)
 	{
-		SOFPPNIX_PRINT("FOUND CONTENT LENGTH\n");
+		// hexdump(header,header+numbytes);
+		// SOFPPNIX_PRINT("FOUND CONTENT LENGTH\n");
 		content_length += strlen(prefix);
-		SOFPPNIX_PRINT("%s\n",content_length);
 		length = atoi(content_length);
 		*((int *)userdata) = length;
-	} else {
-		SOFPPNIX_PRINT("FOUND CONTENT LENGTH\n");
 	}
+	ret = numbytes;
 
 	free(header);
-	SOFPPNIX_PRINT("LENGTH WAS %i\n",length);
-	return -1;
+	// SOFPPNIX_PRINT("LENGTH WAS %i\n",length);
+	return ret;
 }
 
 
 // pass buffer to it
+
 size_t partial_blob_100_cb(void *ptr, size_t size, size_t nmemb, void *userdata) {
-	char * url = (char*)userdata;
 
-	unsigned char * out_buffer = userdata;
+	unsigned char ** out_buffer = userdata;
 
-	long http_status = 0;
-	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
+	static long http_status;
+	http_status = 0;
+	if ( !http_status )
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
 
-	if (http_status == 200) {
-		
-		size_t total_size = size * nmemb;
-		SOFPPNIX_PRINT("Total Size of Partial Download = %i\n",total_size);
-		if (total_size != 100 ) return -1;
+	SOFPPNIX_PRINT("Status code for partial_blob_100 %i\n",http_status);
+	// partial content success == 206
+	if ( http_status != 206 && http_status != 200) {
+		SOFPPNIX_PRINT("RETURNING -1 Because Bad status code\n");
+		return -1;
+	} 
 
-		size_t written = 0;
-		char *buf = (char *)ptr;
 
-		memcpy(out_buffer , buf, 100);
+	size_t total_size = size * nmemb;
+	SOFPPNIX_PRINT("!!!!Total Size of Partial Download!!!!! = %i , partialptr: %08X\n",total_size,ptr);
 
-		return 100;
-	}
+	// its growing. i assume new space is at end
+	// we are supposed to free.
+
+	char * new_mem = malloc(partial_blob_100_cb_written + total_size);
 	
-	// Stop downloading
-	return -1;
+	// free previous mem
+	if ( *out_buffer != NULL ) {
+		// insert previous mem right-hand size into new mem.
+		memcpy(new_mem + total_size, *out_buffer,partial_blob_100_cb_written);
+			
+		free( *out_buffer );
+	}
+
+	*out_buffer = new_mem;
+
+	// save data
+	memcpy(*out_buffer, ptr , total_size);
+	
+	// update size
+	partial_blob_100_cb_written += total_size;
+
+	return total_size;
 }
 /*
 	Download end of file in chunks until signature is found indicating Central Directory Offset
 	100 byte chunks?
 */
-bool partialHttpBlobs(char * remote_url)
-{
-	bool error = false;
+// struct partial_http_s {
+// 	unsigned char * buffer_out;
+// 	int chunk_size;
+// }
 
+int partial_Header_ContentLength(char * remote_url)
+{
+	int file_size = 0;
 	/*
 		Get the Content Length One time only.
 	*/
 	curl = curl_easy_init();
 	if (!curl) {
 		std::cerr << "Error initializing libcurl" << std::endl;
-		return;
+		return 0;
 	}
 
 	// ---------------HEADER----------------
 	// Get the Content Length. Required to Request "Range"Download".
-	int file_size = 0;
+	
 	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb_get_content_length);
 	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &file_size);
 
 	// Enable header data
-	curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+	// curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+
+	// Disable body data
+	curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
 
 	// --------------URL-----------------
 	curl_easy_setopt(curl, CURLOPT_URL, remote_url);
 	CURLcode res = curl_easy_perform(curl);
-	if (res != CURLE_OK) {
-		SOFPPNIX_PRINT("Error downloading %s : %s\n", remote_url ,curl_easy_strerror(res));
-		error = true;
-	}
-	// URL using bad/illegal format or missing URL
-	// 
+
 	curl_easy_cleanup(curl);
 
-	if ( file_size <= 0 || error ) {
+	return file_size;
+}
+
+
+/*
+	1) GET CONTENT LENGTH
+	2) DOWNLOAD CHUNKS FROM END
+	3) STORE CRC
+	4) COMPARE CRC LOCALLY
+*/
+
+
+bool partialHttpBlobs(char * remote_url)
+{
+	bool error = false;
+
+	/*
+		GET CONTENT LENGTH
+	*/
+	int file_size = partial_Header_ContentLength(remote_url);
+	if ( file_size <= 0 ) {
 		SOFPPNIX_PRINT("The content length had no value\n");
 		return false;
 	}
 	SOFPPNIX_PRINT("File Size of %s == %i\n",remote_url,file_size);
 
-	int current_blob_size = 100;
-	unsigned char * blob = malloc(current_blob_size);
-	if ( blob == NULL ) return false;
-	for ( int upper = file_size; upper>=100; upper=upper-100 ) {
-		/*
-			extract last 100*n bytes from remote zip.
-			append them to a buffer array. ( they're order is incorrect )
-		*/
-		int lower = upper - 100;
+	/*
+		Let http data cb call malloc
+	*/
+	int CHUNK_SIZE = 100;
+	int current_blob_size = CHUNK_SIZE;
+	// this pointer is sent to the callback func, they will malloc it and control its size.
+	// size will be set in global var. partial_blob_100_cb_written
+	unsigned char * blob = NULL;
+	int upper = file_size;
+	bool FORCED_RANGE = false;
+	int CD_SIZE = 0;
+	do {
+		// reset written count for memcpy tracking.
+		partial_blob_100_cb_written = 0;
+
+		curl = curl_easy_init();
+		if (!curl) {
+			std::cerr << "Error initializing libcurl" << std::endl;
+			return;
+		}
+		int lower;
+		if ( !FORCED_RANGE )
+			lower = upper - CHUNK_SIZE;
+		
 		char range[64];
 		snprintf(range,64,"%i-%i",lower,upper);
+		if ( !FORCED_RANGE )
+			upper = lower - 1;
+
 		curl_easy_setopt(curl, CURLOPT_RANGE, range);
-
-		// fetch 100 bytes of data from end of file
-		// performs memcpy(blob,data,100)
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, partial_blob_100_cb);
-		unsigned char * recent_blob = blob + (current_blob_size - 100);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, recent_blob );
-
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &blob );
 
 		// --------------URL-----------------
 		curl_easy_setopt(curl, CURLOPT_URL, remote_url);
@@ -361,39 +481,43 @@ bool partialHttpBlobs(char * remote_url)
 			return false;
 		}
 
-		char * cd_offset;
-		if ( getCentralDirectoryOffset(recent_blob,100,&cd_offset) ) {
-			SOFPPNIX_PRINT("GOOD, found Central Directory!\n");
+		if ( FORCED_RANGE ) {
+			extractCentralDirectory(blob,CD_SIZE,&zip_content);
 
-			// Acquire local CRC.
-			// Need file - list.
-
-			std::vector<FileData> zip_content;
-			extractCentralDirectory(cd_offset,&zip_content);
-
-
-			for (const auto& file_data : zip_content) {
-				std::cout << "File Name: " << file_data.filename << std::endl;
-				std::cout << "File CRC-32: " << std::hex << file_data.crc << std::endl;
-			}
-
-
-			// good?
 			free(blob);
 			return true;
 		}
 
-		/*
-			CONTINUING
-		*/
-		// go around again.
-		current_blob_size += 100;
-		unsigned char * larger_blob = malloc(current_blob_size);
-		// move the current data to the right allowing 100 bytes free left
-		memcpy(larger_blob + (current_blob_size-100),blob, current_blob_size-100);
-		free(blob);
-		blob = larger_blob;
-	}
+
+		int CENTRAL_DIRECTORY_OFFSET;
+		// ensure full size search even though searched that area in case of overlap,cut off from 100 chunking
+		
+
+		int ABSOLUTE_DIR_OFFSET;
+		if ( CD_SIZE = getCentralDirectoryOffset(blob,partial_blob_100_cb_written,CENTRAL_DIRECTORY_OFFSET,ABSOLUTE_DIR_OFFSET) ) {
+			if ( CENTRAL_DIRECTORY_OFFSET > 0 ) {
+				SOFPPNIX_PRINT("POSITIVE OFFSET, found Central Directory! %08X\n",CENTRAL_DIRECTORY_OFFSET);
+
+				extractCentralDirectory(blob + CENTRAL_DIRECTORY_OFFSET,CD_SIZE,&zip_content);
+
+				free(blob);
+				return true;
+			} else {
+				SOFPPNIX_PRINT("NEGATIVE OFFSET %i %i\n",ABSOLUTE_DIR_OFFSET,ABSOLUTE_DIR_OFFSET + CD_SIZE);
+				// ITS NOT HERE, GO REQUEST IT WITH EXACT RANGE!
+				FORCED_RANGE = true;
+				lower = ABSOLUTE_DIR_OFFSET;
+				upper = ABSOLUTE_DIR_OFFSET + CD_SIZE;
+
+				continue;
+			}
+		}
+
+		// lower - upper , within FILE_LEN bounds. [0 - FILELEN]
+		// FITS? UPPER SHOULDN't DECREASE, it just follows LOWER
+		if ( upper<CHUNK_SIZE )
+			break;
+	} while ( true );
 
 	// After iterating
 	SOFPPNIX_PRINT("Cannot find the Central Directory in any HTTP blob\n");
@@ -529,69 +653,100 @@ bool unZipFile(char * in_zip, char * out_root )
 }
 
 
-bool getCentralDirectoryOffset(const char* buffer_haystack, int haystack_size,char * found_offset)
+int getCentralDirectoryOffset(const char* HTTP_BLOB, int BLOB_SIZE,int &found_offset, int &abs_dir_offset)
 {
-	// Set the buffer size for reading data from the buffer array
-	const int BUFFER_SIZE = 4096;
-	char buffer[BUFFER_SIZE];
+	SOFPPNIX_PRINT("SEARCHING FOR CENTAL DIRECTORY OFFSET\n");
+	for ( int i = BLOB_SIZE-4; i >=0; i-- ) {
+		// End of Central Directory SIGNATURE
+		// SUrely can just subtract size to get the start?
+		if (memcmp(HTTP_BLOB + i, "\x50\x4b\x05\x06", 4) == 0) {
+			
+			/*
+				Just because we have found the end signature, doesnt mean
+				we have collected enough data.
+				MATH!
 
-	// Find the end of the buffer array by seeking to the end and reading the central directory offset
-	int offset = 0;
-	while (offset < haystack_size) {
-		// Read a buffer of data from the end of the buffer array
-		int size_to_read = std::min(haystack_size - offset, BUFFER_SIZE);
-		memcpy(buffer, buffer_haystack + haystack_size - offset - size_to_read, size_to_read);
-		int read_count = size_to_read;
+			*/
 
-		// Search backwards
-		// Search the buffer for the central directory signature
-		for (int i = read_count - 4; i >= 0; i--) {
-			if (memcmp(buffer + i, "\x50\x4b\x05\x06", 4) == 0) {
-				*found_offset = haystack_size - offset - size_to_read + i;
-				return true;
-			} // if found magic signature
-		} // buffer loop
+			abs_dir_offset = *((int*)(HTTP_BLOB + i + 16));
+			SOFPPNIX_PRINT("Central Directory Offset: %i\n", abs_dir_offset);
 
-		// Move the buffer position back by the amount read to read the next buffer
-		offset += read_count;
-	}
-	return false;
-}
+			int central_directory_size = *((int*)(HTTP_BLOB + i + 12));
+			SOFPPNIX_PRINT("Central Directory Size = %i\n",central_directory_size);
 
-void extractCentralDirectory(const char* centralDirectory, std::vector<FileData>* files){
-	const int BUFFER_SIZE = 4096;
-	char buffer[BUFFER_SIZE];
-
-	// Found the central directory signature
-	int central_directory_size = *((int*)(centralDirectory + 12));
-	int central_directory_offset = *((int*)(centralDirectory + 16));
-	std::cout << "Central Directory Offset: " << central_directory_offset << std::endl;
-
-	// Iterate through each file in the central directory and output its CRC value and file name
-	for (int j = 0; j < central_directory_size;) {
-		memcpy(centralDirectory, centralDirectory + central_directory_offset + j, std::min(BUFFER_SIZE, central_directory_size - j));
-		int read_count = std::min(BUFFER_SIZE, central_directory_size - j);
-		int k = 0;
-		while (k < read_count) {
-			if (memcmp(buffer + k, "\x50\x4b\x01\x02", 4) == 0) {
-				int crc32 = *((int*)(buffer + k + 16));
-				int file_name_length = *((short*)(buffer + k + 28));
-				int extra_field_length = *((short*)(buffer + k + 30));
-				int comment_length = *((short*)(buffer + k + 32));
-				int file_offset = *((int*)(buffer + k + 42));
-				std::string file_name(buffer + k + 46, file_name_length);
-				std::cout << "File Name: " << file_name << std::endl;
-				std::cout << "File CRC-32: " << std::hex << crc32 << std::endl;
-				files->push_back({ crc32, file_name });
-				k += file_name_length + extra_field_length + comment_length + 46;
-				j += file_name_length + extra_field_length + comment_length + 46;
-			}
-			else {
-				k++;
-				j++;
-			}
+			found_offset = i - central_directory_size;
+			// i can be negative.
+			return central_directory_size;
 		}
+	}
+	return 0;
+}
+// Define a struct for the central directory file header
+#pragma pack(push, 1) // Ensure no padding is added
+struct CDFileHeader {
+  uint32_t signature; // 0x02014b50
+  uint16_t versionMadeBy;
+  uint16_t versionNeeded;
+  uint16_t flags;
+  uint16_t compressionMethod;
+  uint16_t lastModTime;
+  uint16_t lastModDate;
+  uint32_t crc32;
+  uint32_t compressedSize;
+  uint32_t uncompressedSize;
+  uint16_t fileNameLength;
+  uint16_t extraFieldLength;
+  uint16_t commentLength;
+  uint16_t diskNumberStart;
+  uint16_t internalAttributes;
+  uint32_t externalAttributes;
+  uint32_t relativeOffset; // Offset of local file header
+};
+ #pragma pack(pop) // Restore default alignment
+
+
+void extractCentralDirectory(const char* centralDirectory,int cd_size, std::vector<FileData>* files)
+{
+	files->clear();
+	#if 0
+	// Iterate through each file in the central directory and output its CRC value and file name
+	int k = 0;
+	while ( k < cd_size ) {
+		SOFPPNIX_PRINT("ADDRESS == %08X\n",centralDirectory + k);
+		if (memcmp(centralDirectory + k, "\x50\x4b\x01\x02", 4) == 0) {
+			SOFPPNIX_PRINT("Found a magic signature for FILE !\n");
+			int crc32 = *((int*)(centralDirectory + k + 16));
+			int file_name_length = *((short*)(centralDirectory + k + 28));
+			int extra_field_length = *((short*)(centralDirectory + k + 30));
+			int comment_length = *((short*)(centralDirectory + k + 32));
+			int file_offset = *((int*)(centralDirectory + k + 42));
+			std::string file_name(centralDirectory + k + 46, file_name_length);
+			std::cout << "File Name: " << file_name << std::endl;
+			std::cout << "File CRC-32: " << std::hex << crc32 << std::endl;
+			files->push_back({ crc32, file_name });
+			SOFPPNIX_PRINT("FIlenameLength = %i :: extra_Field_len = %i :: comment_len = %i\n",file_name_length,extra_field_length,comment_length);
+			k += file_name_length + extra_field_length + comment_length + 46;
+			// ye its because i have never encountered a for loop that also increases its index HAHA.
+		} else
+		k++;
 	} //central directory loop
+	#endif
+
+	int k = 0;
+	while ( k < cd_size ) {
+		// Cast the pointer to the struct type
+		CDFileHeader* header = (CDFileHeader*)(centralDirectory + k);
+		// Check the signature
+		if (header->signature == 0x02014b50) {
+			// Get the file name from the header
+			std::string file_name((char*)(header + 1), (size_t)header->fileNameLength);
+			files->push_back({ header->crc32, file_name });
+			// Advance the pointer by the size of the header and the variable fields
+			k += sizeof(CDFileHeader) + header->fileNameLength + header->extraFieldLength + header->commentLength;
+		} else {
+			k++;
+		}
+	}
 }
 
 

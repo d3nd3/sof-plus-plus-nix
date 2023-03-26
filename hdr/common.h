@@ -52,7 +52,7 @@ struct FileData {
 	std::string filename;
 };
 
-
+extern std::vector<FileData> zip_content;
 extern std::list<std::string> httpdl_cache_list;
 extern CURL * curl_handle;
 extern enum enum_dl_status download_status;
@@ -65,8 +65,8 @@ extern size_t header_cb_get_content_length(char *buffer, size_t size, size_t nit
 extern size_t partial_blob_100_cb(void *ptr, size_t size, size_t nmemb, void *userdata);
 extern bool partialHttpBlobs(char * url);
 
-extern bool getCentralDirectoryOffset(const char* buffer_haystack, int haystack_size,char ** found_offset);
-extern void extractCentralDirectory(const char* centralDirectory, std::vector<FileData>* files);
+extern int getCentralDirectoryOffset(const char* HTTP_BLOB, int BLOB_SIZE,int &found_offset, int &abs_dir_offset);
+extern void extractCentralDirectory(const char* centralDirectory,int cd_size, std::vector<FileData>* files);
 
 extern bool unZipFile(char * in_zip, char * out_root );
 
