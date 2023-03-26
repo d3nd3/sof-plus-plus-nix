@@ -4,7 +4,10 @@
 
 #define MAP_POOL "https://raw.githubusercontent.com/plowsof/sof1maps/main"
 
-
+/*
+	This is called after http is completed.
+*/
+void (*HTTP_CONTINUE_CB)(void) = NULL;
 
 enum enum_dl_status download_status;
 
@@ -34,19 +37,28 @@ CURL* curl = NULL;
 		http_in_progress = false;
 	}
 */
-bool beginHttpDL(std::string * relative_file_path_name)
+bool beginHttpDL(std::string * mapname, void * callback)
 {
-	SOFPPNIX_PRINT("Requested start DL for map : %s\n",relative_file_path_name->c_str());
-	if ( download_status != DS_UNCERTAIN ) {
-		SOFPPNIX_PRINT("Http Download already in progress!!\n");
+	
+	if ( HTTP_CONTINUE_CB ) {
+		SOFPPNIX_DEBUG("Http Download already in progress!!\n");
 		return false;
 	}
+	/*
+		This mapname is fixed before its sent to this function
+		It has to be in the form "dm/mapname.zip"
+	*/
+
+	SOFPPNIX_DEBUG("Requested start DL for map : %s\n",mapname->c_str());
+
+	HTTP_CONTINUE_CB = callback;
+
 	// if ( searchHttpCache( std::string(relative_file_path_name->c_str()) ) ) {
-	// 	SOFPPNIX_PRINT("Refusing to download a map zip that is in your cache\n");
+	// 	SOFPPNIX_DEBUG("Refusing to download a map zip that is in your cache\n");
 	// 	return false;
 	// }
 	download_status = DS_UNCERTAIN;
-	std::thread httpdl(httpdl_thread_get,new std::string(*relative_file_path_name));
+	std::thread httpdl(httpdl_thread_get,new std::string(*mapname));
 	httpdl.detach();
 	return true;
 }
@@ -56,14 +68,20 @@ bool beginHttpDL(std::string * relative_file_path_name)
 
 	SO FAR A VERY POINTLESS VARIABLE - because we always continue anyway.
 */
-int getHttpStatus(void)
+void isHTTPdone(void)
 {
-	enum enum_dl_status ret = DS_UNCERTAIN;
-	if ( download_status != DS_UNCERTAIN ) {
-		ret = download_status;
-		download_status = DS_UNCERTAIN;
+	// SOFPPNIX_DEBUG("HUH? : %08X\n",HTTP_CONTINUE_CB);
+	if ( HTTP_CONTINUE_CB ) {
+		if ( download_status != DS_UNCERTAIN ) {
+			SOFPPNIX_DEBUG("HTTP IS DONE AND RESOLVE !!\n");
+			download_status = DS_UNCERTAIN;
+
+			// some resolve
+			HTTP_CONTINUE_CB();
+
+			HTTP_CONTINUE_CB = NULL;
+		}
 	}
-	return ret;
 }
 
 
@@ -85,24 +103,24 @@ size_t httpdl_writecb(void *ptr, size_t size, size_t nmemb, void *userdata) {
 	char * url = (char*)userdata;
 	
 
-	// SOFPPNIX_PRINT("httpdl_writecb : %08X %i %i %08X\n", ptr,size,nmemb,userdata);
+	// SOFPPNIX_DEBUG("httpdl_writecb : %08X %i %i %08X\n", ptr,size,nmemb,userdata);
 
 	static long http_status;
 	http_status = 0;
 	if ( !http_status )
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
-	// SOFPPNIX_PRINT("Http status code httpdl_writecb : %li\n",http_status);
+	// SOFPPNIX_DEBUG("Http status code httpdl_writecb : %li\n",http_status);
 	if (http_status == 200) {
 		if ( local_new_file == NULL ) {
 			create_file_dir_if_not_exists(url);
 			local_new_file = fopen(url, "wb");
 			if ( local_new_file == NULL ) {
-				SOFPPNIX_PRINT("httpdl_error: could not create the file locally.\n");
+				SOFPPNIX_DEBUG("httpdl_error: could not create the file locally.\n");
 				return -1;
 			}
 		}
 		// open already
-		// SOFPPNIX_PRINT("Writing because response code = %li\n",http_status);
+		// SOFPPNIX_DEBUG("Writing because response code = %li\n",http_status);
 		size_t written = fwrite(ptr, size, nmemb, local_new_file);
 		#if 0
 		// COMPLETION CHECK
@@ -114,7 +132,7 @@ size_t httpdl_writecb(void *ptr, size_t size, size_t nmemb, void *userdata) {
 
 		if (filesize == pos) {
 			// The entire file has been downloaded, so we can close the file
-			SOFPPNIX_PRINT("httpdl_writecb: COMPLETION DETECTED!\n");
+			SOFPPNIX_DEBUG("httpdl_writecb: COMPLETION DETECTED!\n");
 		}
 		#endif
 		return written;
@@ -137,7 +155,7 @@ void httpdl_thread_get(std::string * rel_map_path) {
 	// other stages write to memory.
 
 	char * map_path = rel_map_path->c_str();
-	SOFPPNIX_PRINT("URL is : %s\n",map_path);
+	SOFPPNIX_DEBUG("URL is : %s\n",map_path);
 
 	char * userdir = orig_FS_Userdir();
 	char write_zip_here[256];
@@ -148,11 +166,11 @@ void httpdl_thread_get(std::string * rel_map_path) {
 	*/
 	snprintf(write_zip_here,256,"%s/maps/%s",userdir,map_path);
 
-	SOFPPNIX_PRINT("Local URL is : %s\n",write_zip_here);
+	SOFPPNIX_DEBUG("Local URL is : %s\n",write_zip_here);
 	
 	char remote_zip_weburl[256];
 	snprintf(remote_zip_weburl,256,"%s/%s",MAP_POOL,map_path);
-	SOFPPNIX_PRINT("Remote URL is : %s\n",remote_zip_weburl);
+	SOFPPNIX_DEBUG("Remote URL is : %s\n",remote_zip_weburl);
 
 	/*
 		-------------------------PARTIAL DOWNLOAD-----------------------------------
@@ -210,12 +228,12 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	if ( !do_download ) 
 	{
-		SOFPPNIX_PRINT("Not downloading because file not found or crc different\n");
+		SOFPPNIX_DEBUG("Not downloading because file not found or crc different\n");
 		delete rel_map_path;
 		download_status = DS_FAILURE;
 		return;
 	}
-	SOFPPNIX_PRINT("PREPARING DOWNLOAD!\n");
+	SOFPPNIX_DEBUG("PREPARING DOWNLOAD!\n");
 
 	/*
 		---------------------------FULL DOWNLOAD--------------------------------------
@@ -241,7 +259,7 @@ void httpdl_thread_get(std::string * rel_map_path) {
 	// BLOCKS!
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK) {
-		SOFPPNIX_PRINT("Error downloading %s : %s\n", map_path ,curl_easy_strerror(res));
+		SOFPPNIX_DEBUG("Error downloading %s : %s\n", map_path ,curl_easy_strerror(res));
 		error = true;
 	}
 
@@ -259,11 +277,11 @@ void httpdl_thread_get(std::string * rel_map_path) {
 	*/
 	
 	if ( !error ) {
-		SOFPPNIX_PRINT("Preparing to unzip %s\n",write_zip_here);
+		SOFPPNIX_DEBUG("Preparing to unzip %s\n",write_zip_here);
 		// all happy?
 		if ( !unZipFile( write_zip_here, userdir) )
 		{
-			SOFPPNIX_PRINT("Unzip failure!\n");
+			SOFPPNIX_DEBUG("Unzip failure!\n");
 			download_status = DS_FAILURE;
 		} else
 		{
@@ -307,7 +325,7 @@ size_t header_cb_get_content_length(char *buffer, size_t size, size_t nitems, vo
 	if (content_length)
 	{
 		// hexdump(header,header+numbytes);
-		// SOFPPNIX_PRINT("FOUND CONTENT LENGTH\n");
+		// SOFPPNIX_DEBUG("FOUND CONTENT LENGTH\n");
 		content_length += strlen(prefix);
 		length = atoi(content_length);
 		*((int *)userdata) = length;
@@ -315,7 +333,7 @@ size_t header_cb_get_content_length(char *buffer, size_t size, size_t nitems, vo
 	ret = numbytes;
 
 	free(header);
-	// SOFPPNIX_PRINT("LENGTH WAS %i\n",length);
+	// SOFPPNIX_DEBUG("LENGTH WAS %i\n",length);
 	return ret;
 }
 
@@ -331,16 +349,16 @@ size_t partial_blob_100_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
 	if ( !http_status )
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
 
-	SOFPPNIX_PRINT("Status code for partial_blob_100 %i\n",http_status);
+	// SOFPPNIX_DEBUG("Status code for partial_blob_100 %i\n",http_status);
 	// partial content success == 206
 	if ( http_status != 206 && http_status != 200) {
-		SOFPPNIX_PRINT("RETURNING -1 Because Bad status code\n");
+		SOFPPNIX_DEBUG("RETURNING -1 Because Bad status code\n");
 		return -1;
 	} 
 
 
 	size_t total_size = size * nmemb;
-	SOFPPNIX_PRINT("!!!!Total Size of Partial Download!!!!! = %i , partialptr: %08X\n",total_size,ptr);
+	// SOFPPNIX_DEBUG("!!!!Total Size of Partial Download!!!!! = %i , partialptr: %08X\n",total_size,ptr);
 
 	// its growing. i assume new space is at end
 	// we are supposed to free.
@@ -425,10 +443,10 @@ bool partialHttpBlobs(char * remote_url)
 	*/
 	int file_size = partial_Header_ContentLength(remote_url);
 	if ( file_size <= 0 ) {
-		SOFPPNIX_PRINT("The content length had no value\n");
+		SOFPPNIX_DEBUG("The content length had no value\n");
 		return false;
 	}
-	SOFPPNIX_PRINT("File Size of %s == %i\n",remote_url,file_size);
+	SOFPPNIX_DEBUG("File Size of %s == %i\n",remote_url,file_size);
 
 	/*
 		Let http data cb call malloc
@@ -467,7 +485,7 @@ bool partialHttpBlobs(char * remote_url)
 		curl_easy_setopt(curl, CURLOPT_URL, remote_url);
 		CURLcode res = curl_easy_perform(curl);
 		if (res != CURLE_OK) {
-			SOFPPNIX_PRINT("Error downloading %s : %s\n", remote_url ,curl_easy_strerror(res));
+			SOFPPNIX_DEBUG("Error downloading %s : %s\n", remote_url ,curl_easy_strerror(res));
 			error = true;
 		}
 		curl_easy_cleanup(curl);
@@ -476,7 +494,7 @@ bool partialHttpBlobs(char * remote_url)
 			EXITTING
 		*/
 		if ( error ) {
-			SOFPPNIX_PRINT("HTTP Error whilst finding the Central Directory in any HTTP blob\n");
+			SOFPPNIX_DEBUG("HTTP Error whilst finding the Central Directory in any HTTP blob\n");
 			free(blob);
 			return false;
 		}
@@ -496,14 +514,14 @@ bool partialHttpBlobs(char * remote_url)
 		int ABSOLUTE_DIR_OFFSET;
 		if ( CD_SIZE = getCentralDirectoryOffset(blob,partial_blob_100_cb_written,CENTRAL_DIRECTORY_OFFSET,ABSOLUTE_DIR_OFFSET) ) {
 			if ( CENTRAL_DIRECTORY_OFFSET > 0 ) {
-				SOFPPNIX_PRINT("POSITIVE OFFSET, found Central Directory! %08X\n",CENTRAL_DIRECTORY_OFFSET);
+				SOFPPNIX_DEBUG("POSITIVE OFFSET, found Central Directory! %08X\n",CENTRAL_DIRECTORY_OFFSET);
 
 				extractCentralDirectory(blob + CENTRAL_DIRECTORY_OFFSET,CD_SIZE,&zip_content);
 
 				free(blob);
 				return true;
 			} else {
-				SOFPPNIX_PRINT("NEGATIVE OFFSET %i %i\n",ABSOLUTE_DIR_OFFSET,ABSOLUTE_DIR_OFFSET + CD_SIZE);
+				SOFPPNIX_DEBUG("NEGATIVE OFFSET %i %i\n",ABSOLUTE_DIR_OFFSET,ABSOLUTE_DIR_OFFSET + CD_SIZE);
 				// ITS NOT HERE, GO REQUEST IT WITH EXACT RANGE!
 				FORCED_RANGE = true;
 				lower = ABSOLUTE_DIR_OFFSET;
@@ -520,7 +538,7 @@ bool partialHttpBlobs(char * remote_url)
 	} while ( true );
 
 	// After iterating
-	SOFPPNIX_PRINT("Cannot find the Central Directory in any HTTP blob\n");
+	SOFPPNIX_DEBUG("Cannot find the Central Directory in any HTTP blob\n");
 	return false;
 }
 
@@ -552,7 +570,7 @@ bool unZipFile(char * in_zip, char * out_root )
 
 	// Set the current file of the zip archive to the first file
 	if (unzGoToFirstFile(unz_file) != UNZ_OK) {
-		SOFPPNIX_PRINT("Error corrupt zip %s?\n",in_zip);
+		SOFPPNIX_DEBUG("Error corrupt zip %s?\n",in_zip);
 		closeAndDeleteZipFile(unz_file,in_zip);
 		return false;
 	}
@@ -565,18 +583,18 @@ bool unZipFile(char * in_zip, char * out_root )
 
 		// Get the filename of the current file in the zip archive
 		if (unzGetCurrentFileInfo(unz_file, &file_info, filename, MAX_PATH, NULL, 0, NULL, 0) != UNZ_OK) {
-			SOFPPNIX_PRINT("Error corrupt zip %s?\n",in_zip);
+			SOFPPNIX_DEBUG("Error corrupt zip %s?\n",in_zip);
 			closeAndDeleteZipFile(unz_file,in_zip);
 			return false;
 		}
 		
-		SOFPPNIX_PRINT("Processing file : %s : size : %lu\n",filename,file_info.uncompressed_size);
+		SOFPPNIX_DEBUG("Processing file : %s : size : %lu\n",filename,file_info.uncompressed_size);
 		
 		//----------------------OPEN READ FILE----------------------
 		int ret = unzOpenCurrentFile(unz_file);
 		if ( ret != UNZ_OK) {
 
-			SOFPPNIX_PRINT("Error %i opening \"%s\" , corrupt zip %s?\n",ret,filename,in_zip);
+			SOFPPNIX_DEBUG("Error %i opening \"%s\" , corrupt zip %s?\n",ret,filename,in_zip);
 			closeAndDeleteZipFile(unz_file,in_zip);
 			return false;
 		}
@@ -594,7 +612,7 @@ bool unZipFile(char * in_zip, char * out_root )
 
 			closeAndDeleteZipFile(unz_file,in_zip);
 			// CANNOT READ A FILE ERROR!
-			SOFPPNIX_PRINT("Cannot write to : %s : when extracting : %s\n",output_file_path.c_str(),in_zip);
+			SOFPPNIX_DEBUG("Cannot write to : %s : when extracting : %s\n",output_file_path.c_str(),in_zip);
 			return false;
 		}
 		
@@ -615,7 +633,7 @@ bool unZipFile(char * in_zip, char * out_root )
 				closeAndDeleteZipFile(unz_file,in_zip);
 
 				// CANNOT READ A FILE ERROR!
-				SOFPPNIX_PRINT("This zip is corrupt? cannot read correctly : %s\n",in_zip);
+				SOFPPNIX_DEBUG("This zip is corrupt? cannot read correctly : %s\n",in_zip);
 				return false;
 			}
 			// Write the bytes
@@ -635,8 +653,8 @@ bool unZipFile(char * in_zip, char * out_root )
 		// maybe this is just to find the end of the zip ? :D not error.
 		if ( unzGoToNextFile(unz_file) != UNZ_OK ) {
 			
-			// SOFPPNIX_PRINT("WARNING: Partial extraction of : %s\n",in_zip);
-			// SOFPPNIX_PRINT("This zip might have polluted your directories\n");
+			// SOFPPNIX_DEBUG("WARNING: Partial extraction of : %s\n",in_zip);
+			// SOFPPNIX_DEBUG("This zip might have polluted your directories\n");
 
 			// success? :P
 			break;
@@ -648,14 +666,14 @@ bool unZipFile(char * in_zip, char * out_root )
 
 	closeAndDeleteZipFile(unz_file,in_zip);
 
-	SOFPPNIX_PRINT("Successfully extracted and deleted : %s\n",in_zip);
+	SOFPPNIX_DEBUG("Successfully extracted and deleted : %s\n",in_zip);
 	return true;
 }
 
 
 int getCentralDirectoryOffset(const char* HTTP_BLOB, int BLOB_SIZE,int &found_offset, int &abs_dir_offset)
 {
-	SOFPPNIX_PRINT("SEARCHING FOR CENTAL DIRECTORY OFFSET\n");
+	SOFPPNIX_DEBUG("SEARCHING FOR CENTAL DIRECTORY OFFSET\n");
 	for ( int i = BLOB_SIZE-4; i >=0; i-- ) {
 		// End of Central Directory SIGNATURE
 		// SUrely can just subtract size to get the start?
@@ -669,10 +687,10 @@ int getCentralDirectoryOffset(const char* HTTP_BLOB, int BLOB_SIZE,int &found_of
 			*/
 
 			abs_dir_offset = *((int*)(HTTP_BLOB + i + 16));
-			SOFPPNIX_PRINT("Central Directory Offset: %i\n", abs_dir_offset);
+			SOFPPNIX_DEBUG("Central Directory Offset: %i\n", abs_dir_offset);
 
 			int central_directory_size = *((int*)(HTTP_BLOB + i + 12));
-			SOFPPNIX_PRINT("Central Directory Size = %i\n",central_directory_size);
+			SOFPPNIX_DEBUG("Central Directory Size = %i\n",central_directory_size);
 
 			found_offset = i - central_directory_size;
 			// i can be negative.
@@ -712,9 +730,9 @@ void extractCentralDirectory(const char* centralDirectory,int cd_size, std::vect
 	// Iterate through each file in the central directory and output its CRC value and file name
 	int k = 0;
 	while ( k < cd_size ) {
-		SOFPPNIX_PRINT("ADDRESS == %08X\n",centralDirectory + k);
+		SOFPPNIX_DEBUG("ADDRESS == %08X\n",centralDirectory + k);
 		if (memcmp(centralDirectory + k, "\x50\x4b\x01\x02", 4) == 0) {
-			SOFPPNIX_PRINT("Found a magic signature for FILE !\n");
+			SOFPPNIX_DEBUG("Found a magic signature for FILE !\n");
 			int crc32 = *((int*)(centralDirectory + k + 16));
 			int file_name_length = *((short*)(centralDirectory + k + 28));
 			int extra_field_length = *((short*)(centralDirectory + k + 30));
@@ -724,7 +742,7 @@ void extractCentralDirectory(const char* centralDirectory,int cd_size, std::vect
 			std::cout << "File Name: " << file_name << std::endl;
 			std::cout << "File CRC-32: " << std::hex << crc32 << std::endl;
 			files->push_back({ crc32, file_name });
-			SOFPPNIX_PRINT("FIlenameLength = %i :: extra_Field_len = %i :: comment_len = %i\n",file_name_length,extra_field_length,comment_length);
+			SOFPPNIX_DEBUG("FIlenameLength = %i :: extra_Field_len = %i :: comment_len = %i\n",file_name_length,extra_field_length,comment_length);
 			k += file_name_length + extra_field_length + comment_length + 46;
 			// ye its because i have never encountered a for loop that also increases its index HAHA.
 		} else
@@ -760,7 +778,7 @@ void extractCentralDirectory(const char* centralDirectory,int cd_size, std::vect
 	Call this after download complete success.
 */
 void appendItemHttpCache(const std::string& zipfile) {
-	SOFPPNIX_PRINT("Appending %s\n",zipfile.c_str());
+	SOFPPNIX_DEBUG("Appending %s\n",zipfile.c_str());
 	// Convert the new line to lower case for case-insensitive comparison 
 	std::string lower_zipfile = zipfile;
 	std::transform(lower_zipfile.begin(), lower_zipfile.end(), lower_zipfile.begin(), ::tolower);
@@ -770,7 +788,7 @@ void appendItemHttpCache(const std::string& zipfile) {
 	httpdl_cache_list.insert(pos, zipfile);
 
 	for (const auto& azip : httpdl_cache_list) {
-		SOFPPNIX_PRINT("%s\n", azip.c_str());
+		SOFPPNIX_DEBUG("%s\n", azip.c_str());
 	}
 }
 
@@ -820,7 +838,7 @@ bool searchHttpCache(const std::string& target) {
 */
 void saveHttpCache(void)
 {
-	SOFPPNIX_PRINT("Saving "HTTPDL_CACHE_NAME"\n");
+	SOFPPNIX_DEBUG("Saving "HTTPDL_CACHE_NAME"\n");
 	std::ofstream diskcache(HTTPDL_CACHE_NAME, std::ios::out);
 
 	if (diskcache.is_open()) {
@@ -831,7 +849,7 @@ void saveHttpCache(void)
 	}
 	else {
 		// Print an error message if the file cannot be opened
-		SOFPPNIX_PRINT("Unable to saveHttpCache "HTTPDL_CACHE_NAME"\n");
+		SOFPPNIX_DEBUG("Unable to saveHttpCache "HTTPDL_CACHE_NAME"\n");
 	}
 }
 
@@ -852,6 +870,6 @@ void loadHttpCache(void) {
 		}
 		diskcache.close();
 	} else {
-		SOFPPNIX_PRINT("No "HTTPDL_CACHE_NAME" found, maps will be re-downloaded\n");
+		SOFPPNIX_DEBUG("No "HTTPDL_CACHE_NAME" found, maps will be re-downloaded\n");
 	}
 }

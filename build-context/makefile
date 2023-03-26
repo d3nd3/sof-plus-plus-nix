@@ -1,6 +1,7 @@
 
 # -D _GNU_SOURCE for RTLD_NEXT
 # -D WSL ( Clipboard WSL )
+# -D DEBUG ( DEBUG PRINT CALLS )
 
 CC=g++
 
@@ -21,7 +22,7 @@ OBJS= \
 ../obj/util.o \
 ../obj/httpdl.o
 
-CFLAGS=-m32 -fpic -fpermissive -w -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
+CFLAGS=-m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
 LDFLAGS= -m32 -shared -o ../out/test.so -L /minizip/build
 LINKUS= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic
 

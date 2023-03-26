@@ -1,8 +1,8 @@
 #include "common.h"
 
-
-void SOFPPNIX_PRINT(char * msg, ... ) {
-	char text[1023];
+void SOFPPNIX_DEBUG(char * msg, ... ) {
+	#ifdef DEBUG
+	char text[1024];
 	va_list args;
 
 	va_start(args, msg);
@@ -11,7 +11,23 @@ void SOFPPNIX_PRINT(char * msg, ... ) {
 
 	char color[1024];
 	
-	snprintf(color,1024,"%c%s%s",0x02,"sof++nix_Debug: ",text);
+	snprintf(color,1024,"%c%s%c%s",P_PURPLE,"[sof++nix_Debug] : ",P_YELLOW,text);
+
+	orig_Com_Printf(color);
+	#endif
+}
+
+void SOFPPNIX_PRINT(char * msg, ... ) {
+	char text[1024];
+	va_list args;
+
+	va_start(args, msg);
+	vsnprintf(text, sizeof(text), msg, args);
+	va_end(args);
+
+	char color[1024];
+	
+	snprintf(color,1024,"%c%s%c%s",P_PINK,"[sof++nix] : ",P_TEXT,text);
 
 	orig_Com_Printf(color);
 }
@@ -82,6 +98,7 @@ void callE8Patch(void * addr,void * to) {
 }
 
 void * createDetour(void * orig, void * mine, int size) {
+	// printf("processing detour : %08X\n",orig);
 	memoryUnprotect(orig);
 
 	/*
@@ -106,7 +123,7 @@ void * createDetour(void * orig, void * mine, int size) {
 	memcpy(orig,&small_jmp,1);
 	memcpy(orig+1,&rel_jmp,4);
 
-	memoryUnprotect(orig);
+	memoryProtect(orig);
 	// dealloc this on uninit.
 	return thunk;
 }

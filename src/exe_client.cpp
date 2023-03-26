@@ -22,44 +22,12 @@ typedef struct cvar_s
 
 void my_CL_Frame(int msec)
 {
+	isHTTPdone();
 
+	// if (dedicated->value) return;
 	orig_CL_Frame(msec);
 
 	// 10 fps slow ... :) ca_connecting
-
-	// Assume finished
-	int http_status = getHttpStatus();
-	switch ( http_status) {
-	case DS_FAILURE:
-		SOFPPNIX_PRINT(":'( Download failed!\n");
-		break;
-	case DS_SUCCESS:
-		SOFPPNIX_PRINT(":'( Download succeeeded!\n");
-		break;
-	}
-
-	/*
-		HTTP DL COMPLETE.
-		When the user doesn't need to download because its in their cache.
-		Or another http download is in progress ( shouldn't be :/ )
-		http_status is DS_UNCERTAIN in these cases but we still want to connect to server.
-		NVM, precache will be called from the precache hook instad for those sitautions
-	*/
-	if ( http_status != DS_UNCERTAIN ) {
-		// IF SUCCESS - CONTINUE - ( more files )
-		// IF FAILURE - CONTINUE - ( old fashioned download )
-		orig_CL_Precache_f();
-	}
-
-
-	// if ( !download_status ) {
-		// TODO : decrement the index counter so that it tries again with normal download?
-		// temporary solution:
-		// only download mapname before iterate configstrings
-	// }
-	// a http download is completed.
-	// Lets call RequestNextDownload
-	// orig_CL_RequestNextDownload();
 }
 
 
@@ -71,7 +39,7 @@ void my_CL_Frame(int msec)
 */
 void my_CL_Precache_f(void)
 {
-	SOFPPNIX_PRINT("CL_Precache_F curl_easy_init()\n");
+	// SOFPPNIX_PRINT("CL_Precache_F curl_easy_init()\n");
 	
 	// configstrings CS_NAME = *(unsigned int*)(0x0829D480)+0x1EFC+0x48
 
@@ -80,20 +48,22 @@ void my_CL_Precache_f(void)
 	// configstrings ALTERNATE = *(unsigned int*)(0x0829D480) + 0x2844
 
 	char * mapname = *(unsigned int*)(0x0829D480) + 0x2844;
-	
-	std::string filePath(mapname);
-	std::string newExtension = ".zip";
-	size_t lastDotIndex = filePath.find_last_of(".");
-	if (lastDotIndex != std::string::npos) {
-		filePath.replace(lastDotIndex, newExtension.length(), newExtension);
-	}
+	SOFPPNIX_DEBUG("MAPNAME: %s\n",mapname);
+	// this contains ".bsp"
 
-	if ( filePath.compare(0,5,"maps/") == 0 )
-		filePath.erase(0,5);
+	std::string sMapname(mapname);
+	if ( sMapname.compare(0,5,"maps/") == 0 )
+		sMapname.erase(0,5);
+
+	std::string newExtension = ".zip";
+	size_t lastDotIndex = sMapname.find_last_of(".");
+	if (lastDotIndex != std::string::npos) {
+		sMapname.replace(lastDotIndex, newExtension.length(), newExtension);
+	}
 	
 	// Thread might not be created, check return value of this function to see if it created thread
 	// Start the download. Rely upon CL_Frame code to run the preacache.
-	if ( ! beginHttpDL(&filePath) ) {
+	if ( ! beginHttpDL(&sMapname,orig_CL_Precache_f) ) {
 		// ALREADY IN CACHE?
 		orig_CL_Precache_f();
 	}
@@ -108,7 +78,7 @@ void my_CL_Precache_f(void)
 void my_CL_RegisterEffects(void)
 {
 
-	SOFPPNIX_PRINT("CL_RegisterEffects curl_easy_cleanup()\n");
+	// SOFPPNIX_PRINT("CL_RegisterEffects curl_easy_cleanup()\n");
 
 	// if ( curl_handle != NULL ) curl_easy_cleanup(curl_handle);
 	orig_CL_RegisterEffects();
@@ -116,7 +86,7 @@ void my_CL_RegisterEffects(void)
 
 void my_CL_Disconnect(short unknown)
 {
-	SOFPPNIX_PRINT("CL_Disconnect curl_easy_cleanup()\n");
+	// SOFPPNIX_PRINT("CL_Disconnect curl_easy_cleanup()\n");
 
 	// if ( curl_handle != NULL ) curl_easy_cleanup(curl_handle);
 	orig_CL_Disconnect(unknown);

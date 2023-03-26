@@ -52,14 +52,16 @@ struct FileData {
 	std::string filename;
 };
 
+extern void (*HTTP_CONTINUE_CB)(void);
+
 extern std::vector<FileData> zip_content;
 extern std::list<std::string> httpdl_cache_list;
 extern CURL * curl_handle;
 extern enum enum_dl_status download_status;
 extern size_t httpdl_writecb(char *ptr, size_t size, size_t nmemb, void *userdata);
 extern void httpdl_thread_get(std::string * rel_map_path);
-extern int getHttpStatus(void);
-extern bool beginHttpDL(std::string * relative_file_path_name);
+extern void isHTTPdone(void);
+extern bool beginHttpDL(std::string * relative_file_path_name, void * callback);
 
 extern size_t header_cb_get_content_length(char *buffer, size_t size, size_t nitems, void *userdata);
 extern size_t partial_blob_100_cb(void *ptr, size_t size, size_t nmemb, void *userdata);
@@ -86,6 +88,7 @@ extern void loadHttpCache(void);
 
 
 // --------------------util.cpp-----------------------
+extern void SOFPPNIX_DEBUG(char * msg, ... );
 extern void SOFPPNIX_PRINT(char * msg, ... );
 extern void error(const char* message);
 extern void hexdump(void *addr_start, void *addr_end);

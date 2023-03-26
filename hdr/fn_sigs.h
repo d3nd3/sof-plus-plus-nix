@@ -7,6 +7,8 @@
 // {E8 DIRECT OVERRIDE}
 extern char * (*orig_SV_StatusString)(void);
 
+extern void (*orig_SV_Map_f)(void);
+extern void my_SV_Map_f(void);
 
 // --Client--
 extern void (*orig_CL_Frame) (int msec);
@@ -37,7 +39,7 @@ extern void (*orig_CL_Disconnect)(short unknown);
 
 
 // --Shared--
-
+extern void (*orig_Cmd_ExecuteString)(const char * string);
 extern int     (*orig_Cmd_Argc) (void);
 extern char    *(*orig_Cmd_Argv) (int i);
 extern char    *(*orig_Cmd_Args) (void);

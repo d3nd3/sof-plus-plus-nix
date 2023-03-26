@@ -46,41 +46,41 @@ public:
 	}
 };
 
-#define P_DONT_USE0	"\000"		/* DONT USE !! */
+#define P_DONT_USE0	'\000'		/* DONT USE !! */
 
-#define P_WHITE		"\001"
-#define P_RED  		"\002"
-#define P_GREEN		"\003"
-#define P_YELLOW	"\004"
-#define P_BLUE		"\005"
-#define P_PURPLE	"\006"
-#define P_CYAN		"\007"
+#define P_WHITE		'\001'
+#define P_RED  		'\002'
+#define P_GREEN		'\003'
+#define P_YELLOW	'\004'
+#define P_BLUE		'\005'
+#define P_PURPLE	'\006'
+#define P_CYAN		'\007'
 
-#define P_BLACK		"\010"
-#define P_HWHITE  	"\011"
-#define P_DONT_USE1	"\012"		/* DONT USE !! */
-#define P_HRED    	"\013"
-#define P_HGREEN  	"\014"
-#define P_DONT_USE2	"\015"		/* DONT USE !! */
-#define P_HYELLOW	"\016"
-#define P_HBLUE		"\017"
+#define P_BLACK		'\010'
+#define P_HWHITE  	'\011'
+#define P_DONT_USE1	'\012'		/* DONT USE !! */
+#define P_HRED    	'\013'
+#define P_HGREEN  	'\014'
+#define P_DONT_USE2	'\015'		/* DONT USE !! */
+#define P_HYELLOW	'\016'
+#define P_HBLUE		'\017'
 
-#define P_CAMOBROWN	"\020"
-#define P_CAMOGREEN	"\021"
-#define P_SEAGREEN 	"\022"
-#define P_SEABLUE  	"\023"
-#define P_METAL    	"\024"
-#define P_DBLUE    	"\025"
-#define P_DPURPLE  	"\026"
-#define P_DGREY    	"\027"
+#define P_CAMOBROWN	'\020'
+#define P_CAMOGREEN	'\021'
+#define P_SEAGREEN 	'\022'
+#define P_SEABLUE  	'\023'
+#define P_METAL    	'\024'
+#define P_DBLUE    	'\025'
+#define P_DPURPLE  	'\026'
+#define P_DGREY    	'\027'
            
-#define P_PINK	  	"\030"
-#define P_BLOODRED 	"\031"
-#define P_RUSSET   	"\032"
-#define P_BROWN    	"\033"
-#define P_TEXT     	"\034"
-#define P_BAIGE    	"\035"
-#define P_LBROWN   	"\036"
-#define P_ORANGE   	"\037"
+#define P_PINK	  	'\030'
+#define P_BLOODRED 	'\031'
+#define P_RUSSET   	'\032'
+#define P_BROWN    	'\033'
+#define P_TEXT     	'\034'
+#define P_BAIGE    	'\035'
+#define P_LBROWN   	'\036'
+#define P_ORANGE   	'\037'
 
 // end

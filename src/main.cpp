@@ -25,6 +25,31 @@ void __attribute__ ((constructor)) begin() {
 
  void setupMemory() {
 	printf("sof++nix_DEBUG: First Init patches + detours\n");
+
+
+//-----------------ALWAYS 1.07f SERVER TOO--------------------
+	// SVC_DirectConnect - server has received `connect` packet from client
+	// Do not be Strict about argV return length
+	memoryAdjust(0x80AA3DE,1,0x21);
+	
+	// SVC_Info_f - server sends `info` packet to client
+	// Do not be Strict about argV return length
+	memoryAdjust(0x80A99D7,1,0x21);
+
+	// SV_New_f Protocol changed from `32` to `33`
+	memoryAdjust(0x80B031A,1,0x21);
+
+	// correct argv pointer - SVC_DirectConnect adjusts the 6th parameter to be the same as the 5th
+	memoryAdjust(0x80AA49D,1,0x05);
+	// correct argv pointer - SVC_DirectConnect adjusts the 5th parameter to be the same as the 4th
+	memoryAdjust(0x80AA46C,1,0x04);
+
+	// ignore connmode check - SVC_DirectConnect , some authorization check
+	memoryAdjust(0x80AA6B7,1,0x75);
+
+	// ignore arg4
+	memoryAdjust(0x80AA6A9,6,NOP);
+
 //---------------CLIPBOARD---------------
 	callE8Patch(0x08113315,&my_Sys_GetClipboardData);
 
@@ -91,6 +116,15 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x080C5D09,1,0xEB);
 	memoryAdjust(0x080C5D2C,1,0xEB);
 
+
+	// CL_ParseInfoRequest SILENCE COM_PRINTF
+	memoryAdjust(0x080C5DB6,5,NOP);
+	// Silence CL_Connectionless packets
+	memoryAdjust(0x080C60E7,5,NOP);
+
+	// Silence status response (print?)
+	memoryAdjust(0x080C623A,5,NOP);
+
 //---------------SERVER TALK TO MASTER---------------
 	// Enable Server To Send Master Heartbeats @ Master_Heartbeat_F calls "SV_StatusString".
 	// Assume it builds the string : SOF+%16s+%8s+%i/%i/%i+%s+%i+%i\n
@@ -107,30 +141,36 @@ void __attribute__ ((constructor)) begin() {
 ////////////////////////////////////////////////////
 	
 	// ------------------Shared-----------------
-	orig_Cmd_AddCommand = createDetour(0x08119514, &my_Cmd_AddCommand,5);
-	orig_Cmd_RemoveCommand = createDetour(0x081195BC , &my_Cmd_RemoveCommand, 5);
-	orig_Com_Printf = createDetour(0x0811C8F4, &my_Com_Printf,9);
+	// printf("first deotur\n");
+	orig_Cmd_AddCommand = createDetour(orig_Cmd_AddCommand, &my_Cmd_AddCommand,5);
+	// printf("second deotur\n");
+	orig_Cmd_RemoveCommand = createDetour( orig_Cmd_RemoveCommand, &my_Cmd_RemoveCommand, 5);
+	// orig_Com_Printf = createDetour(0x0811C8F4, &my_Com_Printf,9);
 
 	// Apply game detours here
-	orig_Sys_GetGameAPI = createDetour(0x08209C50,&my_Sys_GetGameAPI,9);
+	orig_Sys_GetGameAPI = createDetour(orig_Sys_GetGameAPI,&my_Sys_GetGameAPI,9);
 
 	// Apply executable command creation here ( server & client )
-	orig_Qcommon_Init = createDetour(0x0811E6E8,&my_Qcommon_Init,5);
-	orig_Qcommon_Shutdown = createDetour(0x081211E0 , &my_Qcommon_Shutdown, 5);
+	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
+	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
 
 
 	//--------------------Client-------------------------
 	// orig_CL_CheckOrDownloadFile = createDetour(0x080CBA2C ,&my_CL_CheckOrDownloadFile,6);
-	orig_CL_Precache_f = createDetour(0x080CDD48 , &my_CL_Precache_f,5);
+	orig_CL_Precache_f = createDetour(orig_CL_Precache_f , &my_CL_Precache_f,5);
 
 	// entered server event ( bottom of CL_RequestNextDownload ) `curl_easy_cleanup()` in both.
-	orig_CL_RegisterEffects = createDetour(0x0814461C , &my_CL_RegisterEffects, 5);
-	orig_CL_Disconnect = createDetour(0x080C5670 , &my_CL_Disconnect,5);
+	orig_CL_RegisterEffects = createDetour( orig_CL_RegisterEffects, &my_CL_RegisterEffects, 5);
+	orig_CL_Disconnect = createDetour( orig_CL_Disconnect, &my_CL_Disconnect,5);
 
 	// Might be needed for adjusting the info return payload DM -> 0 CTF -> 4.
-	orig_menu_AddServer = createDetour(0x080E08B0,&my_menu_AddServer,5);
+	orig_menu_AddServer = createDetour(orig_menu_AddServer,&my_menu_AddServer,5);
 
-	orig_CL_Frame = createDetour( 0x080C84F8, &my_CL_Frame,5);
+	orig_CL_Frame = createDetour(orig_CL_Frame , &my_CL_Frame,5);
+
+
+	// -----------------------Server----------------------------
+	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
 }
 
 

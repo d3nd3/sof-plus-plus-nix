@@ -164,12 +164,12 @@ void GetServerList(void)
   setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
 
   for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end();) {
-  	std::cout << "Addr " << ": "
-  	<< (int)it->ip[0] << "."
-  	<< (int)it->ip[1] << "."
-  	<< (int)it->ip[2] << "."
-  	<< (int)it->ip[3] << ":"
-  	<< htons(it->port) << std::endl;
+  	// std::cout << "Addr " << ": "
+  	// << (int)it->ip[0] << "."
+  	// << (int)it->ip[1] << "."
+  	// << (int)it->ip[2] << "."
+  	// << (int)it->ip[3] << ":"
+  	// << htons(it->port) << std::endl;
 
   	struct sockaddr_in gs_server_info;
   	NetadrToSockadr(&(*it),&gs_server_info);
@@ -209,7 +209,7 @@ void GetServerList(void)
 				2 SERVERS THE SAME IP HOST PORT SEG FAULT ME
 
   			*/
-  			SOFPPNIX_PRINT("TIMEOUT YADDA YADDA YADDA\n");
+  			// SOFPPNIX_PRINT("TIMEOUT YADDA YADDA YADDA\n");
   			it = addrs.erase(it);
   			// IF YOU CALL ERASE YOU ARE NOT MEANT TO INCREMENT ITERATOR.
   			break;
@@ -256,16 +256,16 @@ void GetServerList(void)
 
   if ( gonext ) {
   	++it;
-  	SOFPPNIX_PRINT("GO NEXT YADDA GO NEXT YADDA\n");
+  	// SOFPPNIX_PRINT("GO NEXT YADDA GO NEXT YADDA\n");
   	continue;
   }
 
-  SOFPPNIX_PRINT("ERASE BOTTOM ERASE BOTTOM\n");
+  // SOFPPNIX_PRINT("ERASE BOTTOM ERASE BOTTOM\n");
   it = addrs.erase(it);
 }
 close(sockfd);
 for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end(); ++it) {
-	SOFPPNIX_PRINT("INFO MODE UDP HOSTPORTS\n");
+	// SOFPPNIX_PRINT("INFO MODE UDP HOSTPORTS\n");
 	char * request = orig_va("info %i",33);
 	orig_Netchan_OutOfBandPrint(NS_CLIENT,*it,request);
 }
@@ -328,7 +328,7 @@ void my_menu_AddServer(netadr_t addr,char *data)
 
 void my_SendToMasters(void * arg1,void * arg2)
 {
-	SOFPPNIX_PRINT("Attemping to send to masters!\n");
+	// SOFPPNIX_PRINT("Attemping to send to masters!\n");
 
 	char * string = orig_SV_StatusString();
 
