@@ -62,9 +62,11 @@ extern void my_Com_Printf(char *msg,...);
 extern int (*orig_FS_LoadFile)(char * name,void ** something, bool button);
 extern char * (*orig_FS_Userdir)(void);
 
-extern unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int bytes, int length);
-extern unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int bytes, int length);
+extern unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int len, int out_seq_id);
+extern unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int len, int out_seq_id);
 
+extern void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd);
+extern void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd);
 
 
 //Cvar_Get

@@ -7,6 +7,135 @@ void CreateCommands(void)
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
 	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
 
+
+	// command to output checksum
+	my_Cmd_AddCommand("++nix_checksum",&cmd_nix_checksum);
+}
+
+std::vector<std::string> split(const std::string& str, const std::string& delimiter) {
+	std::vector<std::string> substrings;
+	size_t start = 0;
+	size_t end = 0;
+	while ((end = str.find(delimiter, start)) != std::string::npos) {
+		substrings.push_back(str.substr(start, end - start));
+		start = end + delimiter.length();
+	}
+	substrings.push_back(str.substr(start));
+	return substrings;
+}
+
+int hexStringToByteArray(const std::string& hexString, unsigned char* buffer, size_t bufferSize) {
+	std::vector<std::string> hexBytes = split(hexString, " ");
+	if (hexBytes.size() > bufferSize) {
+		throw std::invalid_argument("Input string length exceeds buffer size");
+	}
+	for (size_t i = 0; i < hexBytes.size(); i++) {
+		buffer[i] = static_cast<unsigned char>(std::stoi(hexBytes[i], nullptr, 16));
+	}
+	return hexBytes.size();
+}
+
+typedef struct usercmd_S
+{
+	byte	msec; // 10
+	byte	buttons; // [+1]
+	byte	lightlevel;		// light level the player is standing on
+	char	lean;			// -1 or 1 [+3]
+	short	angles[3]; // [+4/6/8]
+	short	forwardmove; // 0A
+	short	sidemove; // 0C
+	short	upmove; // 0E
+	
+	float	fireEvent;
+	float	altfireEvent;
+} usercmd_n;
+
+void cmd_nix_checksum(void)
+{
+	sizebuf_t sb;
+	usercmd_n * u_test = malloc(sizeof(usercmd_n));
+	usercmd_n * u_empty = malloc(sizeof(usercmd_n));
+
+	memset(u_empty,0,sizeof(usercmd_n));
+	memset(u_test,0,sizeof(usercmd_n));
+	memset(&sb,0,sizeof(sb));
+
+	u_test->angles[0] = 1020;
+	u_test->angles[1] = 1020;
+	u_test->angles[2] = 1020;
+	u_test->forwardmove = 2048;
+	u_test->sidemove = 2048;
+	u_test->upmove = 2048;
+	u_test->msec = 20;
+	u_test->buttons = 0xFF;
+	u_test->lean = 1;
+	u_test->lightlevel = 0;
+	u_test->fireEvent = 1;
+	u_test->altfireEvent = 1;
+
+	sb.data = (byte*)malloc(64);
+	sb.maxsize = 64;
+
+	// orig_MSG_WriteDeltaUsercmd(&sb,u_empty,u_test);
+	void * out_packet = malloc(1024);
+	void (*op_construct)(void * self, int size) = 0x081A8F00;
+	op_construct(out_packet,0x64);
+
+	orig_PAK_WriteDeltaUsercmd(out_packet,(usercmd_t*)u_empty,(usercmd_t*)u_test);
+
+
+	vector<signed char> * v = (vector<signed char>*)(out_packet+8);
+	
+
+	// Iterates the vector v and print all of its elements
+	for (int i = 0; i < v->size(); i++) {
+		// SOFPPNIX_DEBUG("Vector %i : %02X\n",i,*(v->data()+i));
+		printf("%02X",*(v->data()+i));
+	}
+	printf("\n%i\nBITMODE!\n",v->size());
+
+	for ( int i = 0 ; i < v->size() * 8; i++ ) {
+		int bit_to_byte = i / 8;
+		int bit_to_bit = i % 8;
+		if ( (*(v->data()+bit_to_byte) & (1 << bit_to_bit)) != 0 )
+			printf("1");
+		else
+			printf("0");
+	}
+	printf("\n");
+
+	// for (const auto& element : *v) {
+	// 	// do something with the element
+	// 	// for example, print it to the console
+	// 	// std::cout << element << " ";
+	// 	printf("%02X",element);
+	// }
+	// printf("\n%i\n",v->size());
+/*
+	// print every sb->data at sequence of hex bytes
+	for (int i = 0; i < sb.cursize; i++) {
+		// SOFPPNIX_PRINT("%02X ",sb.data[i]);
+		printf("%02X ",sb.data[i]);
+	}
+	printf("Length = %i\n", sb.cursize);
+
+*/
+
+	// int seq = atoi(orig_Cmd_Argv(1));
+	// char * buffer = orig_Cmd_Argv(2);
+	// int len = strlen(buffer);
+
+	int seq = 103;
+	unsigned char buffer[1024];
+	int len = hexStringToByteArray(string("13 00 00 00 01 20 00 05 00 fa 17 c0 42 11 00 00 f0 47 00 08 40 01 80 fe 05 b0 50 04 00 00 fc 11 00 02 50 00 a0 7f 01 2c 14 01 00 00 7f"),buffer,1024);
+	// debug print seq is : input_data is :
+	// SOFPPNIX_DEBUG("seq is : %i input_data is : %s\n",seq,input_data);
+
+	// int out_seq = *(unsigned int*)((*(unsigned int*)0x0829D494) + 0x4F4);
+	SOFPPNIX_DEBUG("Checksum : %02X\n",orig_COM_BlockSequenceCheckByte(buffer,len, seq));
+
+	free(sb.data);
+	free(out_packet);
 }
 
 

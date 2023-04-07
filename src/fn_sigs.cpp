@@ -48,7 +48,10 @@ cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarc
 char	* (*orig_va)(char *format, ...) = 0x081ED5DC;
 void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...) = 0x0812AEC4;
 
-unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int bytes, int length) = 0x08120F7C;
+unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int len,int out_seq_id ) = 0x08120F7C;
+
+void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd) = 0x0811CD90;
+void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd) = 0x080BA99C;
 
 /*
 ---------------------Ref Library---------------------

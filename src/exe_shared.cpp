@@ -35,12 +35,12 @@ void my_Qcommon_Shutdown(void)
 	orig_Qcommon_Shutdown();
 }
 
-unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int bytes, int length)
+unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int len, int out_seq_id )
 {
 
-	unsigned char checksum =  orig_COM_BlockSequenceCheckByte(src,bytes,length);
+	unsigned char checksum =  orig_COM_BlockSequenceCheckByte(src,len,out_seq_id);
 
-	SOFPPNIX_PRINT("COM_BlockSequenceCheckByte : %02X\n",checksum);
-	
+	int out_seq = *(unsigned int*)((*(unsigned int*)0x0829D494) + 0x4F4);
+	SOFPPNIX_PRINT("COM_BlockSequenceCheckByte : %02X %i %i\n",checksum,out_seq_id, out_seq);
 	return checksum;
 }

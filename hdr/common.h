@@ -112,3 +112,4 @@ void CreateCommands(void);
 extern void cmd_nix_client_state(void);
 extern void cmd_nix_httpdl_test(void);
 extern void cmd_nix_client_map(void);
+extern void cmd_nix_checksum(void);
