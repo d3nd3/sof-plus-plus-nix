@@ -155,6 +155,9 @@ void __attribute__ ((constructor)) begin() {
 	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
 
 
+	orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
+
+
 	//--------------------Client-------------------------
 	// orig_CL_CheckOrDownloadFile = createDetour(0x080CBA2C ,&my_CL_CheckOrDownloadFile,6);
 	orig_CL_Precache_f = createDetour(orig_CL_Precache_f , &my_CL_Precache_f,5);
@@ -171,6 +174,10 @@ void __attribute__ ((constructor)) begin() {
 
 	// -----------------------Server----------------------------
 	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
+
+
+
+
 }
 
 

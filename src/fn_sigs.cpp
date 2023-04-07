@@ -46,7 +46,9 @@ void (*orig_Com_Printf) (char *msg, ...) = 0x0811C8F4;
 cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarcommand_t command = NULL) = 0x08121568;
 
 char	* (*orig_va)(char *format, ...) = 0x081ED5DC;
-void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...) = 0x0812AEC4;;
+void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...) = 0x0812AEC4;
+
+unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int bytes, int length) = 0x08120F7C;
 
 /*
 ---------------------Ref Library---------------------

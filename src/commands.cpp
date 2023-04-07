@@ -6,6 +6,7 @@ void CreateCommands(void)
 	my_Cmd_AddCommand("++nix_httpdl_test",&cmd_nix_httpdl_test);
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
 	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
+
 }
 
 

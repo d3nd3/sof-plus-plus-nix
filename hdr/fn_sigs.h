@@ -62,6 +62,11 @@ extern void my_Com_Printf(char *msg,...);
 extern int (*orig_FS_LoadFile)(char * name,void ** something, bool button);
 extern char * (*orig_FS_Userdir)(void);
 
+extern unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int bytes, int length);
+extern unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int bytes, int length);
+
+
+
 //Cvar_Get
 extern cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarcommand_t command = NULL);
 

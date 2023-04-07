@@ -25,7 +25,6 @@ void my_Qcommon_Init(int one , char ** two) {
 	CreateCommands();
 }
 
-
 void my_Qcommon_Shutdown(void)
 {
 	SOFPPNIX_PRINT("Shutting down.\n");
@@ -34,4 +33,14 @@ void my_Qcommon_Shutdown(void)
 	curl_global_cleanup();
 
 	orig_Qcommon_Shutdown();
+}
+
+unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int bytes, int length)
+{
+
+	unsigned char checksum =  orig_COM_BlockSequenceCheckByte(src,bytes,length);
+
+	SOFPPNIX_PRINT("COM_BlockSequenceCheckByte : %02X\n",checksum);
+	
+	return checksum;
 }
