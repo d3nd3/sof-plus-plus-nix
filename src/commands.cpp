@@ -40,7 +40,7 @@ typedef struct usercmd_S
 	byte	msec; // 10
 	byte	buttons; // [+1]
 	byte	lightlevel;		// light level the player is standing on
-	char	lean;			// -1 or 1 [+3]
+	byte	lean;			// -1 or 1 [+3]
 	short	angles[3]; // [+4/6/8]
 	short	forwardmove; // 0A
 	short	sidemove; // 0C
@@ -66,12 +66,12 @@ void cmd_nix_checksum(void)
 	u_test->forwardmove = 2048;
 	u_test->sidemove = 2048;
 	u_test->upmove = 2048;
-	u_test->msec = 20;
+	u_test->msec = 100;
 	u_test->buttons = 0xFF;
-	u_test->lean = 1;
-	u_test->lightlevel = 0;
-	u_test->fireEvent = 1;
-	u_test->altfireEvent = 1;
+	u_test->lean = 0;
+	u_test->lightlevel = 0xFF;
+	u_test->fireEvent = 0;
+	u_test->altfireEvent = 0;
 
 	sb.data = (byte*)malloc(64);
 	sb.maxsize = 64;
