@@ -26,23 +26,44 @@ netadr_t my_netadr = {
 
 	Linux seems to treat the $GAME_CVAR as "game-type". Crashes on empty string.
 */
+
+
+int gs_select_sock = 0;
+
+// a gs_item struct that contains a netadr_t and a boolean hinting if status received
+typedef struct gs_item_s {
+	netadr_t addr;
+
+std::chrono::steady_clock::time_point queryTime;
+} gs_item_t;
+
+
+// a std vector of gs_items
+std::vector<gs_item_t> gs_items;
+
+
 void GetServerList(void)
 {
-	
+	/*
+-------------------------------------------------------------------
+		STAGE 1 : IP LIST
+		\\list\cmp\gamename\sofretail\final\
+-------------------------------------------------------------------
+	*/
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) {
 		SOFPPNIX_PRINT("Error: Failed to create socket.\n");
 		return 1;
 	}
 
-  // int timeout = 2000; // user timeout in milliseconds [ms]
-  // setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (char*) &timeout, sizeof(timeout));
+	// int timeout = 2000; // user timeout in milliseconds [ms]
+	// setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (char*) &timeout, sizeof(timeout));
 
-  // Set the maximum segment size for outgoing TCP packets
-  // int maxseg = 1400;
-  // if (setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, sizeof(maxseg)) < 0) {
-  //     error("Error: Failed to set maximum segment size.\n");
-  // }
+	// Set the maximum segment size for outgoing TCP packets
+	// int maxseg = 1400;
+	// if (setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, sizeof(maxseg)) < 0) {
+	//     error("Error: Failed to set maximum segment size.\n");
+	// }
 
 	struct addrinfo hints;
 	struct addrinfo *res;
@@ -55,16 +76,14 @@ void GetServerList(void)
 		error("Error: Failed to resolve hostname.\n");
 		return 1;
 	}
-
 	struct sockaddr_in server_addr;
 	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
 	server_addr.sin_port = htons(28900);
-
 	freeaddrinfo(res);
-
 	if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
 		error("Error: Failed to connect to server.\n");
 	}
+
 
 	const char* message = "IDQD";
 	if (send(sockfd, message, std::strlen(message), 0) < 0) {
@@ -80,9 +99,7 @@ void GetServerList(void)
 
 	std::string received_message((char*)buffer,bytes_returned);
 
-  // std::cout << "MSG1: " << received_message << '\n';
-
-  // Split the message string by the backslash character '\'
+	// Split the message string by the backslash character '\'
 	std::vector<std::string> parts;
 	std::istringstream iss(received_message);
 	std::string part;
@@ -90,20 +107,17 @@ void GetServerList(void)
 		parts.push_back(part);
 	}
 
-  // std::cout << "SIZE: " << parts.size();
-
 	std::string realkey = parts[parts.size() - 1];
 
-  // Hash the key using the provided hash function
-  // char * ckey = gsseckey(NULL,key.c_str(),"iVn3a3",2);
+	// This is disabled I think. But do it anyway.
+	// Hash the key using the provided hash function
+	// char * ckey = gsseckey(NULL,key.c_str(),"iVn3a3",2);
 	std::vector<uint8_t> key = ValidateKey(std::string("iVn3a3"),realkey);
 	std::string hashed_key( key.begin(), key.end() );
 
-  // std::cout << "HASHED_KEY: " << hashed_key << '\n';
-
 	std::string response = "\\gamename\\sofretail\\gamever\\1.6\\location\\0\\validate\\" + std::string("ABCDEFGH") + "\\final\\\\queryid\\1.1\\";
 	char * c = response.c_str();
-  // ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+	// ssize_t send(int sockfd, const void *buf, size_t len, int flags);
 	if (send(sockfd, c, response.size(), 0) < 0) {
 		error("Error: Failed to send response.\n");
 	}
@@ -114,11 +128,11 @@ void GetServerList(void)
 		error("Error: Failed to send response.\n");
 	}
 	std::memset(buffer, 0, sizeof(buffer));
-  // ssize_t recv(int sockfd, void *buf, size_t len, int flags);
-
+	
 	int r = 0;
 	bytes_returned = 0;
 	while ( true ) {
+		// ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 		r = recv(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0);
 		if ( r < 0) {
 			error("Error: Failed to receive message.\n");
@@ -129,19 +143,21 @@ void GetServerList(void)
 		bytes_returned += r;
 	}
 	close(sockfd);
-  // SOFPPNIX_PRINT("%.*s\n", bytes_returned, buffer);
-	
-  // there is a \final\ at the end. So ignore last 7 bytes
+	// there is a \final\ at the end. So ignore last 7 bytes
+	// hexdump(buffer,buffer+bytes_returned);
 
-  // hexdump(buffer,buffer+bytes_returned);
-  // Ignore the first 7 bytes
+	// Ignore the first 7 bytes
 	unsigned char* data = buffer;
 	if (bytes_returned <= 7 || (bytes_returned-7) % 6 != 0 ) {
 		error("Failure getting Server List , bytes returned not correct\n");
 	}
-  // Parse the buffer and create netadr_t structures
-	std::vector<netadr_t> addrs;
+	auto now = std::chrono::steady_clock::now();
+	// Parse the buffer and create gamespy structs that contain netadr_t
+	// They are global and will be dealt with each frame
 	for (int i = 0; i < bytes_returned - 7; i += 6) {
+
+		gs_item_t unacked_server;
+
 		netadr_t addr;
 		addr.type = NA_IP;
 		addr.ip[0] = data[i];
@@ -149,126 +165,54 @@ void GetServerList(void)
 		addr.ip[2] = data[i + 2];
 		addr.ip[3] = data[i + 3];
 		addr.port = (data[i + 5] << 8) | data[i + 4];
-		addrs.push_back(addr);
+
+		unacked_server.addr = addr;
+
+		unacked_server.queryTime = now;
+
+		// store the netadr_t in the gs_items vector
+		gs_items.push_back(unacked_server);
 	}
-  // --------------UDP MODE----------------
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sockfd < 0) {
+
+	if ( gs_select_sock >= 0 ) {
+		close(gs_select_sock);
+	}
+
+	gs_select_sock = socket(AF_INET, SOCK_DGRAM, 0);
+	if (gs_select_sock < 0) {
 		SOFPPNIX_PRINT("Error: Failed to create socket.\n");
 		return 1;
 	}
 
-  struct timeval timeout = {1, 200000}; // set timeout for 2 seconds
+	int flags = fcntl(gs_select_sock, F_GETFL, 0);
+	fcntl(gs_select_sock, F_SETFL, flags | O_NONBLOCK);
 
-  // set receive UDP message timeout
-  setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
 
-  for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end();) {
-  	// std::cout << "Addr " << ": "
-  	// << (int)it->ip[0] << "."
-  	// << (int)it->ip[1] << "."
-  	// << (int)it->ip[2] << "."
-  	// << (int)it->ip[3] << ":"
-  	// << htons(it->port) << std::endl;
+	// for ( auto item : gs_items ) {
+	// 	std::cout << "item !" << std::endl;
+	// }
 
-  	struct sockaddr_in gs_server_info;
-  	NetadrToSockadr(&(*it),&gs_server_info);
+	// Initiate the responses, (send out all queries)
+	for (std::vector<gs_item_t>::iterator it = gs_items.begin(); it != gs_items.end();) {
+		struct sockaddr_in gs_server_info;
+		netadr_t * na = &(it->addr);
 
-	  // send twice just in case?
-  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-  		error("Error: Failed to send response.\n");
-  	}
+		NetadrToSockadr(na,&gs_server_info);
 
-  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-  		error("Error: Failed to send response.\n");
-  	}
-
-  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-  		error("Error: Failed to send response.\n");
-  	}
-
-  	if (sendto(sockfd, "\\info\\", 6, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-  		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-  		error("Error: Failed to send response.\n");
-  	}
-
-  	std::memset(buffer, 0, sizeof(buffer));
-  	bytes_returned = 0;
-  	struct sockaddr_in client_addr;
-  	socklen_t client_addr_len = sizeof(client_addr);
-  	bool gonext = false;
-  	while ( true ) {
-  		r = recvfrom(sockfd, buffer, 1400, 0,(struct sockaddr*)&client_addr,&client_addr_len);
-  		if ( r < 0 && errno == EAGAIN || errno == EWOULDBLOCK ) {
-  			gonext = true;
-
-  			/*
-				2 SERVERS THE SAME IP HOST PORT SEG FAULT ME
-
-  			*/
-  			// SOFPPNIX_PRINT("TIMEOUT YADDA YADDA YADDA\n");
-  			it = addrs.erase(it);
-  			// IF YOU CALL ERASE YOU ARE NOT MEANT TO INCREMENT ITERATOR.
-  			break;
-  		}
-		// Not the correct sender. this is throwing packets away
-  		if (client_addr.sin_family == AF_INET &&
-  			client_addr.sin_port != gs_server_info.sin_port ||
-  			client_addr.sin_addr.s_addr != gs_server_info.sin_addr.s_addr ) {
-  			continue;
-  	}
-
-  	if ( r < 0) {
-  		std::cerr << std::strerror(errno) << std::endl;
-  		error("Error: Failed to receive message.\n");
-  	}
-  	bytes_returned += r;
-		// GOT DATA: go Process
-  	break;
-  }
-  if ( gonext ) {
-  	// ++it;
-  	continue;
-  }
-  
-	  /*
-		Process the response (just trying to get their hostport?)
-	  */
-  std::string input((char*)buffer,bytes_returned);
-  std::istringstream ss(input);
-  std::string token;
-  int hostport = 0;
-  gonext=false;
-  while (std::getline(ss, token, '\\')) {
-  	if (token == "hostport") {
-  		std::getline(ss, token, '\\');
-			  //hostport = std::stoi(token);
-  		std::stringstream ss(token);
-  		ss >> hostport;
-  		it->port = htons(hostport);
-  		gonext=true;
-  		break;
-  	}
-  }
-
-  if ( gonext ) {
-  	++it;
-  	// SOFPPNIX_PRINT("GO NEXT YADDA GO NEXT YADDA\n");
-  	continue;
-  }
-
-  // SOFPPNIX_PRINT("ERASE BOTTOM ERASE BOTTOM\n");
-  it = addrs.erase(it);
-}
-close(sockfd);
-for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end(); ++it) {
-	// SOFPPNIX_PRINT("INFO MODE UDP HOSTPORTS\n");
-	char * request = orig_va("info %i",33);
-	orig_Netchan_OutOfBandPrint(NS_CLIENT,*it,request);
-}
+		// ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+		if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+			std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+			error("Error: Failed to send response.\n");
+		}
+		if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+			std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+			error("Error: Failed to send response.\n");
+		}
+		it++;
+	}
+	SOFPPNIX_DEBUG("Sent out all queries\n");
+	// Will call select before recv on gamespy port udp
+	nonBlockingServerResponses();
 }
 
 /*
@@ -276,9 +220,13 @@ for (std::vector<netadr_t>::iterator it = addrs.begin(); it != addrs.end(); ++it
  Created in M_PushMenu.
 
  Seg fault on menu free?
+ SOF+hostname+mapname+num_players/NON_PLAYER_COUNT/max_players+$GAME_CVAR+$str(deathmatch)+sv_violence
+	REQURIED TO TRANSFORM THE GAMEMODE TYPE
 */
 void my_menu_AddServer(netadr_t addr,char *data)
 {
+	// SOFPPNIX_DEBUG("my_menu_AddServer\n");
+	// I think this is removing +localhost
 
 	// *(char*)(data + strlen(data) + 1 - 8) = '\n';
 	*(char*)(data + strlen(data) + 1 - 8) = 0x00;
@@ -302,6 +250,8 @@ void my_menu_AddServer(netadr_t addr,char *data)
 
 	if ( tokens.size() >= 3 ) {
 
+		// Shift dm up into the $GAME token
+		// Set dm to a number.
 		std::string * t = &tokens[tokens.size() - 2];
 		std::string * t2 = &tokens[tokens.size() - 3];
 		*t2 = *t;
@@ -337,3 +287,260 @@ void my_SendToMasters(void * arg1,void * arg2)
 	
 }
 
+
+/*
+[sof++nix] : BOO: Free Server Mode - CTF (unclaimed)+dm/sibctf1+0/0/32++CTF+63+local+
+[sof++nix] : BOO:    (#1)SERVER+dm/irqctf1+0/0/32++CTF+63+local+
+[sof++nix] : BOO:           Lag DM+dm/jpndm2+0/0/32++DM+63+local+
+[sof++nix] : BOO: EURO Bastards+dm/jpnctf1+8/0/16++CTF+63+local+
+[sof++nix] : BOO: Free Server Mode - DM (unclaimed)+dm/irqdesertdm+0/0/32++DM+63+local+
+[sof++nix] : BOO: [$$] , !CTF! & [�#] SerVer+dm/gerctf1+0/0/32++CTF+63+local+
+[sof++nix] : BOO: Arsenal-Megalag[UT-Sounds]+dm/jpnctb1+0/0/32++Arsenal+63+local+
+[sof++nix] : BOO:          UT 1995+dm/deuce_arena+0/0/32++DM+63+local+
+[sof++nix] : BOO:        Mad Onion+dm/madrange+0/0/32++DM+63+local+
+[sof++nix] : BOO: [KK] - Clan Server+dm/irqdm1+0/0/32++DM+32+local+
+[sof++nix] : BOO: SOF.exe - Online Multiplayer CTF+dm/lostway+0/0/32++CTF+32+local+
+[sof++nix] : BOO: [KK] - [DM] Server+dm/chaos_castle+0/0/32++DM+32+local+
+[sof++nix] : BOO: [KK] - [F.S.M] Server - Join as Spectator!+dm/[r&b]time2die+0/0/32++DM+32+local+
+[sof++nix] : BOO: ChAoS Unlimited Fire DM Fiber+dm/chaos_arena_5+0/0/16++DM+32+local+
+[sof++nix] : BOO:    MHP-Clan.de+dm/sibctb2+0/0/16++DM+32+local+
+[sof++nix] : BOO: ChAoS Unlimited Fire SP Fiber+   irq3a+0/0/16++DM+32+local+
+[sof++nix] : BOO: Bastard's Corner+dm/sudctf1+0/0/16++CTF+63+local+
+[sof++nix] : BOO: Bastard's Corner DM+dm/jpnctb1+0/0/16++DM+63+local+
+[sof++nix] : BOO: Assassin Bastards+dm/suddm1+0/0/16++Assassin+63+local+
+[sof++nix] : BOO: Bastards on the Bunker+dm/dreamstate2+0/0/16++Team CTB+63+local+
+[sof++nix] : BOO: After The Burial(lobby)+dm/mhp_uba+0/0/12++DM+63+local+
+[sof++nix] : BOO: Cooperative Mission+dm/coop_streets2_rdam+0/0/12++COOP+63+local+
+[sof++nix] : BOO: Cooperative Mission (Single Player)+    tsr1+0/0/12++COOP+63+local+
+[sof++nix] : BOO: * * * S H M O O  ' S   G A M E * * * +dm/irqctb2+0/0/12++DM+32+local+
+[sof++nix] : BOO: CGZA - SoF Deathmatch+dm/irqctb1+0/0/16++DM+32+local+
+[sof++nix] : BOO: Temple Of Assassin BR - ***https://discord.gg/Ys4Fmj6dEB+dm/conbeach+0/0/16++DM+32+local+
+
+*/
+
+/*
+	SERVERLIST ACQUIRED FROM TCP CONNECTION TO MASTER SERVER
+	THEN A UDP CONNECTION IS MADE TO EACH SERVER IN THAT LIST, ON THEIR GAMESPY PORT
+	THE PAYLOAD IS \STATUS\
+
+	THEN THE RESPONSE IS PARSED AND ADDED TO THE SERVER LIST
+
+	HOWEVER THE COMMAND SERVERSTATUS IS ADDING THEM ALSO.
+	IT SENDS status\n to the standard hostport on udp.
+	It uses the `print` pathway back to client, which calls M_AddServer eventually.
+	This pathway is better because includes ping. I think it should be used?
+
+
+	Will call select before recv on gamespy port udp
+	Lightweight once a frame
+	Uses socket : gs_select_sock that already sent queries out, waiting on response
+*/
+void nonBlockingServerResponses(void)
+{
+	unsigned char buffer[1400];
+	struct sockaddr_in in_addr;
+	socklen_t addrlen = sizeof(in_addr);
+	fd_set readfds;
+	struct timeval timeout;
+
+	if ( gs_items.size() == 0 ) {
+		// no items to process
+		return;
+	}
+
+
+	// Set up the file descriptor set and timeout values for select
+	FD_ZERO(&readfds);
+	FD_SET(gs_select_sock, &readfds);
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	// Call select to wait for data to become available on the socket
+	select(gs_select_sock + 1, &readfds, NULL, NULL, &timeout);
+
+	// SOFPPNIX_DEBUG("Data available\n");
+
+	// Check if data is available to read
+	while (FD_ISSET(gs_select_sock, &readfds)) {
+		// SOFPPNIX_DEBUG("About to recfrom\n");
+		// Data is available, so receive it and process it
+		int recv_len = recvfrom(gs_select_sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&in_addr, &addrlen);
+
+		if (recv_len > 0) {
+			// Compare the source address with gs_items vector .addr netadr_t
+			for (int i = 0; i < gs_items.size();) {
+				struct sockaddr_in gs_item_info;
+				netadr_t * na = &gs_items[i].addr;
+				NetadrToSockadr(na,&gs_item_info);
+				// SOFPPNIX_DEBUG("Checking for match\n");
+				if ( in_addr.sin_port == gs_item_info.sin_port && in_addr.sin_addr.s_addr == gs_item_info.sin_addr.s_addr ) {
+					// we have a match
+					// Process the message if it has '\final\' in it
+					if (strstr((char*)buffer, "\\final\\")) {
+
+						// Process the message here
+						// ...
+						// SOFPPNIX_DEBUG("Processed a server! %.*s\n", recv_len, buffer);
+						// hexdump(buffer,buffer+recv_len);
+
+
+						/* \gamename\sofretail\
+							gamever\1.07f\
+							location\1\
+							hostname\CGZA - SoF Deathmatch\
+							hostport\17242\
+							mapname\dm/suddm1\
+							gametype\DM\
+							numplayers\0\
+							maxplayers\16\
+							gamemode\openplaying\
+							violence\32\
+							timelimit\15\
+							fraglimit\0\
+							dmflags\4356\
+							movescale\100%\
+							cheats\disabled\
+							ctf_loops\10\
+							suicide_penalty\2
+							\final\\queryid\1734.1
+						*/
+						std::string in_status((char*)buffer,recv_len);
+						// Find the position of the \final\ substring
+						std::string::size_type final_pos = in_status.find("\\final\\");
+
+						// Extract the part of the string before the \final\ substring
+						std::string before_final = in_status.substr(0, final_pos);
+
+						std::unordered_map<std::string, std::string> dictionary;
+
+						std::string::size_type pos = 0;
+						if (before_final[pos] == '\\') {
+							pos++;
+						}
+						// Iterate over the input string until the end or \final\ is reached
+						while (pos < before_final.length()) {
+							// Find the position of the next delimiter '\'
+							std::string::size_type next_pos = before_final.find('\\', pos);
+
+							if (next_pos == std::string::npos || next_pos == before_final.length() - 1) {
+								// The input string does not contain a proper key-value pair format
+								break;
+							}
+
+							// Extract the key from the input string
+							std::string key = before_final.substr(pos, next_pos - pos);
+
+							// Move pos to the next delimiter '\'
+							pos = next_pos + 1;
+
+							// Find the position of the next delimiter '\'
+							next_pos = before_final.find('\\', pos);
+
+							if (next_pos == std::string::npos) {
+								// The input string does not contain a proper key-value pair format
+								break;
+							}
+
+							// Extract the value from the input string
+							std::string value = before_final.substr(pos, next_pos - pos);
+
+							// Move pos to the next delimiter '\'
+							pos = next_pos + 1;
+
+							if (!key.empty() && !value.empty()) {
+								// Add the key-value pair to the dictionary
+								dictionary[key] = value;
+							}
+						}
+
+						// Print the contents of the dictionary
+						// for (const auto& kv : dictionary) {
+						// 	std::cout << kv.first << " = " << kv.second << std::endl;
+						// }
+
+						// SOF+hostname+mapname+num_players/NON_PLAYER_COUNT/max_players+$GAME_CVAR+$str(deathmatch)+sv_violence
+						// SOF+CGZA - SoF Deathmatch+dm/suddm1+0/10/16++
+						// In linux, the game $GAME cvar is used as GAMETYPE
+						int dm = 0;
+						if ( dictionary["gametype"].compare("DM") == 0 ) dm = 1;
+						else if ( dictionary["gametype"].compare("Assassin") == 0 ) dm = 2;
+						else if ( dictionary["gametype"].compare("Arsenal") == 0 ) dm = 3;
+						else if ( dictionary["gametype"].compare("CTF") == 0 ) dm = 4;
+						else if ( dictionary["gametype"].compare("Realistic") == 0 ) dm = 5;
+						else if ( dictionary["gametype"].compare("Control") == 0 ) dm = 6;
+						else if ( dictionary["gametype"].compare("CTB") == 0 ) dm = 7;
+
+
+						char formedData[256];
+						// char * formedData = malloc(256);
+						// memset(formedData,0,256);
+						// sizeof(formedData)
+						// 16s 8s?
+						snprintf(formedData, 256, "%s+%s+%s/0/%s+%s+%i+%s",
+								dictionary["hostname"].c_str(),
+								dictionary["mapname"].c_str(),
+								dictionary["numplayers"].c_str(),
+								dictionary["maxplayers"].c_str(),
+								dictionary["gametype"].c_str(),
+								dm,
+								dictionary["violence"].c_str());
+
+						// SOFPPNIX_DEBUG("formedData: %s\n",formedData);
+
+						gs_items[i].addr.port = std::stoi(dictionary["hostport"]);
+						// orig_menu_AddServer(gs_items[i].addr,formedData);
+						snprintf(formedData,256,"serverstatus %i.%i.%i.%i:%i\n",
+							gs_items[i].addr.ip[0],
+							gs_items[i].addr.ip[1],
+							gs_items[i].addr.ip[2],
+							gs_items[i].addr.ip[3],
+							gs_items[i].addr.port);
+						// std::cout << formedData << std::endl;
+						orig_Cmd_ExecuteString(formedData);
+
+						// erase element from gs_items
+						gs_items.erase(gs_items.begin() + i);
+
+						// The message can only match one server:port :)
+						// breaks out of for loop
+					}
+					break;
+				}
+				i++;
+			}
+		}
+		
+		// Call select again to wait for more data to become available on the socket
+		FD_ZERO(&readfds);
+		FD_SET(gs_select_sock, &readfds);
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 0;
+		select(gs_select_sock + 1, &readfds, NULL, NULL, &timeout);
+	}
+
+
+	auto now = std::chrono::steady_clock::now();
+	for ( auto& item : gs_items ) {
+		auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - item.queryTime).count();
+		if ( elapsed_ms > 500 ) {
+			// std:cout << "resending!!" << std::endl;
+			// Query the server
+			struct sockaddr_in gs_server_info;
+			netadr_t * na = &(item.addr);
+			NetadrToSockadr(na,&gs_server_info);
+			// ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+			if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+				std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+				error("Error: Failed to send response.\n");
+			}
+			if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
+				std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
+				error("Error: Failed to send response.\n");
+			}
+
+			item.queryTime = now;
+		}
+	}
+
+	// SOFPPNIX_DEBUG("Outside\n");
+}

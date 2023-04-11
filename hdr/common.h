@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
+#include <chrono>
 
 #include <string>
 #include <vector>
@@ -9,6 +10,7 @@
 #include <fstream>
 #include <list>
 #include <algorithm>
+#include <unordered_map>
 
 #include <cerrno>
 
@@ -17,6 +19,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <dlfcn.h>
+#include <fcntl.h>
 
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -106,6 +109,7 @@ extern void create_file_dir_if_not_exists(const char* file_path);
 // --------------------serverlist.cpp-----------------------
 extern void GetServerList(void);
 extern void my_SendToMasters(void * arg1,void * arg2);
+extern void nonBlockingServerResponses(void);
 
 // --------------------commands.cpp-----------------------
 void CreateCommands(void);

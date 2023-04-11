@@ -138,6 +138,12 @@ void __attribute__ ((constructor)) begin() {
 	// stop calling Init.
 	// memoryAdjust(0x080C8A37,2,0x90);
 
+
+
+
+// -----------------------NON-BLOCKING-SERVER-LIST-------------------------
+	callE8Patch(0x0811F183, &nonBlockingServerResponses);
+
 ////////////////////////////////////////////////////
 	
 	// ------------------Shared-----------------

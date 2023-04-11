@@ -31,6 +31,8 @@ void (*orig_SV_Map_f)(void) = 0x080AE3E8;
 int (*orig_FS_LoadFile)(char * name,void ** something, bool button) = 0x08124724;
 char * (*orig_FS_Userdir)(void) = 0x08126BE0;
 
+
+
 void (*orig_Cmd_ExecuteString)(const char * string) = 0x08118388;
 int     (*orig_Cmd_Argc) (void) = 0x081194FC;
 char    *(*orig_Cmd_Argv) (int i) = 0x081194C8;
