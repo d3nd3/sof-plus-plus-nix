@@ -28,10 +28,11 @@ void (*orig_CL_Disconnect)(short unknown) = 0x080C5670;
 void (*orig_SV_Map_f)(void) = 0x080AE3E8;
 
 // ----SHARED-----
+void (*orig_Sys_Quit) (void) = 0x0820AF40;
+void (*orig_Sys_Error) (char *error, ...) = 0x082099A4;
+
 int (*orig_FS_LoadFile)(char * name,void ** something, bool button) = 0x08124724;
 char * (*orig_FS_Userdir)(void) = 0x08126BE0;
-
-
 
 void (*orig_Cmd_ExecuteString)(const char * string) = 0x08118388;
 int     (*orig_Cmd_Argc) (void) = 0x081194FC;

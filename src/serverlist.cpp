@@ -66,7 +66,7 @@ void GetServerList(void)
 	// Set the maximum segment size for outgoing TCP packets
 	// int maxseg = 1400;
 	// if (setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, sizeof(maxseg)) < 0) {
-	//     error("Error: Failed to set maximum segment size.\n");
+	//     error_exit("Failed to set maximum segment size.\n");
 	// }
 
 	struct addrinfo hints;
@@ -77,28 +77,27 @@ void GetServerList(void)
 	hints.ai_protocol = IPPROTO_TCP;
 	int status = getaddrinfo("sof1master.megalag.org", NULL, &hints, &res);
 	if (status != 0) {
-		error("Error: Failed to resolve hostname.\n");
-		return 1;
+		error_exit("Failed to resolve hostname.\n");
 	}
 	struct sockaddr_in server_addr;
 	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
 	server_addr.sin_port = htons(28900);
 	freeaddrinfo(res);
 	if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-		error("Error: Failed to connect to server.\n");
+		error_exit("Failed to connect to server.\n");
 	}
 
 
 	const char* message = "IDQD";
 	if (send(sockfd, message, std::strlen(message), 0) < 0) {
-		error("Error: Failed to send message.\n");
+		error_exit("Failed to send message.\n");
 	}
 
 	unsigned char buffer[1400];
 	std::memset(buffer, 0, sizeof(buffer));
 	int bytes_returned = recv(sockfd, buffer, sizeof(buffer), 0);
 	if (bytes_returned < 0) {
-		error("Error: Failed to receive message.\n");
+		error_exit("Failed to receive message.\n");
 	}
 
 	std::string received_message((char*)buffer,bytes_returned);
@@ -123,13 +122,13 @@ void GetServerList(void)
 	char * c = response.c_str();
 	// ssize_t send(int sockfd, const void *buf, size_t len, int flags);
 	if (send(sockfd, c, response.size(), 0) < 0) {
-		error("Error: Failed to send response.\n");
+		error_exit("Failed to send response.\n");
 	}
 
 	response = "\\list\\cmp\\gamename\\sofretail\\final\\";
 	c = response.c_str();
 	if (send(sockfd, c, response.size(), 0) < 0) {
-		error("Error: Failed to send response.\n");
+		error_exit("Failed to send response.\n");
 	}
 	std::memset(buffer, 0, sizeof(buffer));
 	
@@ -139,7 +138,7 @@ void GetServerList(void)
 		// ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 		r = recv(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0);
 		if ( r < 0) {
-			error("Error: Failed to receive message.\n");
+			error_exit("Failed to receive message.\n");
 		} else {
 			if ( r == 0 )
 				break;
@@ -153,7 +152,7 @@ void GetServerList(void)
 	// Ignore the first 7 bytes
 	unsigned char* data = buffer;
 	if (bytes_returned <= 7 || (bytes_returned-7) % 6 != 0 ) {
-		error("Failure getting Server List , bytes returned not correct\n");
+		error_exit("Failure getting Server List , bytes returned not correct\n");
 	}
 	auto now = std::chrono::steady_clock::now();
 	// Parse the buffer and create gamespy structs that contain netadr_t
@@ -197,17 +196,14 @@ void GetServerList(void)
 
 		// ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
 		if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-			std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-			error("Error: Failed to send response.\n");
+			error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
 		}
 		if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-			std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-			error("Error: Failed to send response.\n");
+			error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
 		}
 		it++;
 	}
-	// SOFPPNIX_DEBUG("Sent out all queries\n");
-	// Will call select before recv on gamespy port udp
+	// Handle all responses on the gamespy port.
 	nonBlockingServerResponses();
 }
 
@@ -377,6 +373,11 @@ void nonBlockingServerResponses(void)
 					// TODO: send back a response
 					// == BASIC + INFO + RULES + PLAYERS
 				}
+			} else if ( !strncmp((char*)buffer, "\\info\\", 6) ) {
+				if ( sv_public->value  ) {
+					SOFPPNIX_DEBUG("Got a \\info\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
+					// prepare data to send back as response
+				}
 			} else {
 				// OBJECTIVE: get the hostport of the server(currently only have the gs port)
 				// : Then query them on hostport with 'status'
@@ -505,11 +506,11 @@ void nonBlockingServerResponses(void)
 			// ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
 			if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
 				std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-				error("Error: Failed to send response.\n");
+				error_exit("Failed to send response.\n");
 			}
 			if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
 				std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-				error("Error: Failed to send response.\n");
+				error_exit("Failed to send response.\n");
 			}
 
 			item->lastSentTime = now;
@@ -520,7 +521,11 @@ void nonBlockingServerResponses(void)
 	// SOFPPNIX_DEBUG("Outside\n");
 }
 
-
+/*
+This is called inside SV_Frame. So only server calls it. Periodic heartbeat
+I don't think its used in windows(sofplus).
+But hook is in place, to silence the WON heartbeat code.(crashes). could nop.
+*/
 void GamespyHeartbeat(void)
 {
 
@@ -529,7 +534,8 @@ void GamespyHeartbeat(void)
 }
 
 /*
-	This is called inside SV_Frame. So only server calls it.
+	Called by Game SpawnEntities, when level changes, hostport and gamespyport and sent to the master
+	Operates on gamespyport UDP
 */
 void GamespyHeartbeatCtrlNotify(void)
 {
@@ -563,13 +569,12 @@ void GamespyHeartbeatCtrlNotify(void)
 	struct sockaddr_in gs_server_info;
 	NetadrToSockadr(&sof1master_ip,&gs_server_info);
 
-	// sendto gs_server_info on gs_select_sock
+	// sendto gs_server_info on gs_select_sock, Ensure send using gamespy socket
 	if (sendto(gs_select_sock, formedData, strlen(formedData), 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-		std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-		error("Error: Failed to send response.\n");
+		error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
 	}
 
-	// now the hostport variant
+	// now the hostport variant Ensure send using hostport socket
 	snprintf(formedData, 256, "\\hostport\\%s\\gamespyport\\%s\\", hostport->string,gamespyport->string);
 	// netsrc_t sock, int length, void *data, netadr_t to
 	orig_NET_SendPacket(NS_SERVER, strlen(formedData), formedData, sof1master_ip);

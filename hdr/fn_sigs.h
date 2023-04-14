@@ -39,6 +39,8 @@ extern void (*orig_CL_Disconnect)(short unknown);
 
 
 // --Shared--
+extern void (*orig_Sys_Quit) (void); 
+extern void (*orig_Sys_Error) (char *error, ...);
 extern void (*orig_Cmd_ExecuteString)(const char * string);
 extern int     (*orig_Cmd_Argc) (void);
 extern char    *(*orig_Cmd_Argv) (int i);

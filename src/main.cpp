@@ -18,8 +18,14 @@ int chdir(const char *path)
 	return orig_chdir(path);   
 }
 
+void segfault_handler(int signal) {
+
+}
 void __attribute__ ((constructor)) begin() {
 	// printf("sof++nix_DEBUG: LD_PRELOAD Constructor\n");
+
+	// Prevent SDL from having ugly message? (seg deploy parachute)
+	signal(SIGSEGV, segfault_handler);
 }
 
 

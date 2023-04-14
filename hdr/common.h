@@ -15,6 +15,7 @@
 #include <cerrno>
 
 #include <thread>
+#include <signal.h>
 
 #include <unistd.h>
 #include <limits.h>
@@ -31,6 +32,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 
 #include <libgen.h>
 
@@ -93,7 +95,7 @@ extern void loadHttpCache(void);
 // --------------------util.cpp-----------------------
 extern void SOFPPNIX_DEBUG(char * msg, ... );
 extern void SOFPPNIX_PRINT(char * msg, ... );
-extern void error(const char* message);
+extern void error_exit(char* message,...);
 extern void hexdump(void *addr_start, void *addr_end);
 extern void memoryUnprotect(void * addr);
 extern void memoryProtect(void * addr);

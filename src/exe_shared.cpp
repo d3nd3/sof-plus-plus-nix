@@ -27,7 +27,7 @@ void my_Qcommon_Init(int one , char ** two) {
 		// Gamespy Port Init
 		gs_select_sock = socket(AF_INET, SOCK_DGRAM, 0);
 		if (gs_select_sock < 0) {
-			error("Error: Failed to create gamespy socket.\n");
+			error_exit("Failed to create gamespy socket.\n");
 		}
 		// Non-blocking
 		int flags = fcntl(gs_select_sock, F_GETFL, 0);
@@ -40,7 +40,7 @@ void my_Qcommon_Init(int one , char ** two) {
 		addr.sin_addr.s_addr = INADDR_ANY;
 
 		if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-			error("Unable to bind to gamespy port");
+			error_exit("Unable to bind to gamespy port");
 		}
 	}
 
@@ -48,9 +48,9 @@ void my_Qcommon_Init(int one , char ** two) {
 
 	// memset 0 the master
 	memset(&sof1master_ip, 0, sizeof(sof1master_ip));
-	orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
-	// orig_NET_StringToAdr("192.168.0.54", &sof1master_ip);
-	// orig_NET_StringToAdr("172.22.130.228", &sof1master_ip);
+	// orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
+	// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
+	orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
 
 }
 

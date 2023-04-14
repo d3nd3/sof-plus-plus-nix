@@ -31,11 +31,66 @@ void SOFPPNIX_PRINT(char * msg, ... ) {
 
 	orig_Com_Printf(color);
 }
+void shutdown_program(void);
+void error_exit(char* format,...) {
+	va_list args;
+	va_start(args, format);
+	char message[512];
+	int len = vsnprintf(message, sizeof(message), format, args);
+	va_end(args);
 
-void error(const char* message) {
-	perror(message);
+	if (len < 0 || len >= sizeof(message)) {
+		// handle error
+		std::cerr << "Error: message input invalid" << std::endl;
+	}
 	std::cerr << "Error: " << message << std::endl;
+
+	shutdown_program();
+	orig_Sys_Error("");
 	std::exit(EXIT_FAILURE);
+}
+
+void shutdown_program(void)
+{
+	std::cout << "Shutting down..." << std::endl;
+
+
+	// get the process ID
+	pid_t pid = getpid();
+
+	// get a list of all the threads in the process
+	std::vector<pid_t> tids;
+	FILE* fp = fopen("/proc/self/task", "r");
+	if (fp != nullptr)
+	{
+		char buf[256];
+		while (fgets(buf, sizeof(buf), fp))
+		{
+			pid_t tid = atoi(buf);
+			if (tid != syscall(SYS_gettid))
+			{
+				tids.push_back(tid);
+			}
+		}
+		fclose(fp);
+	}
+
+	// send a signal to each thread to terminate
+	for (auto tid : tids)
+	{
+		pthread_kill(tid, SIGINT);
+	}
+
+	// wait for each thread to terminate
+	for (auto tid : tids)
+	{
+		pthread_join(tid, NULL);
+	}
+
+	// perform any necessary cleanup
+	// ...
+
+	// std::exit(EXIT_SUCCESS);
 }
 
 void hexdump(void *addr_start, void *addr_end) {
@@ -72,7 +127,7 @@ void memoryUnprotect(void * addr)
 
 	void * aligned_addr = (void *)((unsigned long)addr & ~(page_size - 1));
 	if (mprotect(aligned_addr, page_size, PROT_READ | PROT_WRITE) == -1) {
-		error("mprotect");
+		error_exit("mprotect");
 	}
 }
 
@@ -81,7 +136,7 @@ void memoryProtect(void * addr)
 	size_t page_size = getpagesize();
 	void * aligned_addr = (void *)((unsigned long)addr & ~(page_size - 1));
 	if (mprotect(aligned_addr, page_size, PROT_READ ) == -1) {
-		error("mprotect");
+		error_exit("mprotect");
 	}
 }
 
