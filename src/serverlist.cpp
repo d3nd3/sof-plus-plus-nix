@@ -569,11 +569,13 @@ void GamespyHeartbeatCtrlNotify(void)
 	struct sockaddr_in gs_server_info;
 	NetadrToSockadr(&sof1master_ip,&gs_server_info);
 
+	std::cout << "gamespy " << gs_select_sock << " ?" << std::endl;
 	// sendto gs_server_info on gs_select_sock, Ensure send using gamespy socket
 	if (sendto(gs_select_sock, formedData, strlen(formedData), 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
 		error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
 	}
 
+	std::cout << "hostport" << std::endl;
 	// now the hostport variant Ensure send using hostport socket
 	snprintf(formedData, 256, "\\hostport\\%s\\gamespyport\\%s\\", hostport->string,gamespyport->string);
 	// netsrc_t sock, int length, void *data, netadr_t to
