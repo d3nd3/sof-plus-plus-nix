@@ -68,6 +68,10 @@ extern unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int len
 extern void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd);
 extern void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd);
 
+extern void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netadr_t to);
+
+extern qboolean	(*orig_NET_StringToAdr) (char *s, netadr_t *a);
+
 
 //Cvar_Get
 extern cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarcommand_t command = NULL);
@@ -87,7 +91,7 @@ extern void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *
 ---------------------Ref Library---------------------
 */
 extern void * (*orig_GetRefAPI ) (void* rimp );
-void * GetRefAPI(void* rimp);
+extern void * GetRefAPI(void* rimp);
 
 
 /*
@@ -95,10 +99,13 @@ void * GetRefAPI(void* rimp);
 */
 
 extern void * (*orig_GetGameAPI) (void * import);
-void *GetGameAPI (void *import);
+extern void *GetGameAPI (void *import);
 
 extern void * (*orig_Sys_GetGameAPI)(void * params);
-game_export_t * my_Sys_GetGameAPI (void *params);
+extern game_export_t * my_Sys_GetGameAPI (void *params);
 
 extern void (*orig_ShutdownGame)(void);
-void my_ShutdownGame(void);
+extern void my_ShutdownGame(void);
+
+extern void (*orig_SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
+extern void my_SpawnEntities (char *mapname, char *entstring, char *spawnpoint);

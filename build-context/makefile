@@ -12,6 +12,7 @@ BINARY=test.so
 OBJS= \
 ../obj/clipboard.o \
 ../obj/commands.o \
+../obj/cvars.o \
 ../obj/exe_shared.o \
 ../obj/exe_server.o \
 ../obj/exe_client.o \
@@ -36,6 +37,8 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 ../obj/clipboard.o : ../src/clipboard.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/commands.o : ../src/commands.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/cvars.o : ../src/cvars.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/exe_shared.o : ../src/exe_shared.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@

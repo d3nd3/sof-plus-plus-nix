@@ -49,6 +49,10 @@ cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarc
 
 char	* (*orig_va)(char *format, ...) = 0x081ED5DC;
 void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...) = 0x0812AEC4;
+void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netadr_t to) = 0x0820C940;
+
+qboolean (*orig_NET_StringToAdr) (char *s, netadr_t *a) = 0x0820D710;
+
 
 unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int len,int out_seq_id ) = 0x08120F7C;
 
@@ -68,3 +72,4 @@ void * (*orig_GetRefAPI ) (void* rimp ) = NULL;
 void * (*orig_GetGameAPI) (void * import) = NULL;
 void * (*orig_Sys_GetGameAPI)(void * params) = 0x08209C50;
 void (*orig_ShutdownGame)(void) = NULL;
+void (*orig_SpawnEntities) (char *mapname, char *entstring, char *spawnpoint) = NULL;

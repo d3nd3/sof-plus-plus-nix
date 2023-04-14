@@ -19,15 +19,31 @@ int chdir(const char *path)
 }
 
 void __attribute__ ((constructor)) begin() {
-	printf("sof++nix_DEBUG: LD_PRELOAD Constructor\n");
+	// printf("sof++nix_DEBUG: LD_PRELOAD Constructor\n");
 }
 
 
  void setupMemory() {
-	printf("sof++nix_DEBUG: First Init patches + detours\n");
+	// printf("sof++nix_DEBUG: First Init patches + detours\n");
 
 
-//-----------------ALWAYS 1.07f SERVER TOO--------------------
+//-----------------ALWAYS 1.07f CLIENT----------------- NO need to use patch
+	// # CL_HandleChallenge - change protocol from 32 to protocol 33
+	memoryAdjust(0x80C4E4B,1,0x21);
+	// CL_ParseServerData - change protocol from 32 to protocol 33
+	memoryAdjust(0x80C9AB0,1,0x21);
+	// ---------------------MORE 33--------------------
+	memoryAdjust(0x080C94B7,1,0x21);
+	memoryAdjust(0x80C4FD4,1,0x21);
+	// CL_ConnectionlessPacket - disable cert authentication - don't act upon 3rd Argument.
+	memoryAdjust(0x80C62CC,7,0x90);
+	memoryAdjust(0x80C62D3,1,0xBF);
+	memoryAdjust(0x80C62D4,1,0x05);
+	memoryAdjust(0x80C62D5,3,0x00);
+	// CL_ConnectionlessPacket - challenger handler old style - don't act upon 2nd Argument.
+	memoryAdjust(0x80C62F4,12,0x90);
+
+//-----------------ALWAYS 1.07f SERVER TOO ( this is equivalent to patchit_server.sh )--------------------
 	// SVC_DirectConnect - server has received `connect` packet from client
 	// Do not be Strict about argV return length
 	memoryAdjust(0x80AA3DE,1,0x21);
@@ -125,14 +141,6 @@ void __attribute__ ((constructor)) begin() {
 	// Silence status response (print?)
 	memoryAdjust(0x080C623A,5,NOP);
 
-//---------------SERVER TALK TO MASTER---------------
-	// Enable Server To Send Master Heartbeats @ Master_Heartbeat_F calls "SV_StatusString".
-	// Assume it builds the string : SOF+%16s+%8s+%i/%i/%i+%s+%i+%i\n
-	callE8Patch(0x80ABF6C, &my_SendToMasters);
-
-	// once you are on the server list
-	// you might want to edit the response from an info request
-	// at SVC_Info
 
 //---------------------- S_NOSOUND 1 CVAR NOT CRASH -------------------------
 	// stop calling Init.
@@ -144,6 +152,9 @@ void __attribute__ ((constructor)) begin() {
 // -----------------------NON-BLOCKING-SERVER-LIST-------------------------
 	callE8Patch(0x0811F183, &nonBlockingServerResponses);
 
+
+// -------------------------GAMESPY HEARTBEAT-------------------------
+	callE8Patch(0x080ABF6C,&GamespyHeartbeat);
 ////////////////////////////////////////////////////
 	
 	// ------------------Shared-----------------

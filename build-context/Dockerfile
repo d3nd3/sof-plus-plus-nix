@@ -21,6 +21,8 @@ RUN cp /minizip/build/libminizip.a /lib/
 
 WORKDIR /
 
+
+
 COPY makefile /
 
 

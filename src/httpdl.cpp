@@ -37,11 +37,15 @@ CURL* curl = NULL;
 		http_in_progress = false;
 	}
 */
+
+/*
+map_saving is true here
+*/
 bool beginHttpDL(std::string * mapname, void * callback)
 {
 	
 	if ( HTTP_CONTINUE_CB ) {
-		SOFPPNIX_DEBUG("Http Download already in progress!!\n");
+		// SOFPPNIX_DEBUG("Http Download already in progress!!\n");
 		return false;
 	}
 	/*
@@ -49,7 +53,7 @@ bool beginHttpDL(std::string * mapname, void * callback)
 		It has to be in the form "dm/mapname.zip"
 	*/
 
-	SOFPPNIX_DEBUG("Requested start DL for map : %s\n",mapname->c_str());
+	// SOFPPNIX_DEBUG("Requested start DL for map : %s\n",mapname->c_str());
 
 	HTTP_CONTINUE_CB = callback;
 
@@ -73,7 +77,8 @@ void isHTTPdone(void)
 	// SOFPPNIX_DEBUG("HUH? : %08X\n",HTTP_CONTINUE_CB);
 	if ( HTTP_CONTINUE_CB ) {
 		if ( download_status != DS_UNCERTAIN ) {
-			SOFPPNIX_DEBUG("HTTP IS DONE AND RESOLVE !!\n");
+			// Called on failure or success.
+			// SOFPPNIX_DEBUG("HTTP IS DONE AND RESOLVE !!\n");
 			download_status = DS_UNCERTAIN;
 
 			// some resolve
@@ -155,7 +160,7 @@ void httpdl_thread_get(std::string * rel_map_path) {
 	// other stages write to memory.
 
 	char * map_path = rel_map_path->c_str();
-	SOFPPNIX_DEBUG("URL is : %s\n",map_path);
+	// SOFPPNIX_DEBUG("URL is : %s\n",map_path);
 
 	char * userdir = orig_FS_Userdir();
 	char write_zip_here[256];
@@ -166,11 +171,11 @@ void httpdl_thread_get(std::string * rel_map_path) {
 	*/
 	snprintf(write_zip_here,256,"%s/maps/%s",userdir,map_path);
 
-	SOFPPNIX_DEBUG("Local URL is : %s\n",write_zip_here);
+	// SOFPPNIX_DEBUG("Local URL is : %s\n",write_zip_here);
 	
 	char remote_zip_weburl[256];
 	snprintf(remote_zip_weburl,256,"%s/%s",MAP_POOL,map_path);
-	SOFPPNIX_DEBUG("Remote URL is : %s\n",remote_zip_weburl);
+	// SOFPPNIX_DEBUG("Remote URL is : %s\n",remote_zip_weburl);
 
 	/*
 		-------------------------PARTIAL DOWNLOAD-----------------------------------
@@ -228,12 +233,12 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	if ( !do_download ) 
 	{
-		SOFPPNIX_DEBUG("Not downloading because file not found or crc different\n");
+		SOFPPNIX_DEBUG("Not downloading because file not found or crc matches on disk\n");
 		delete rel_map_path;
 		download_status = DS_FAILURE;
 		return;
 	}
-	SOFPPNIX_DEBUG("PREPARING DOWNLOAD!\n");
+	// SOFPPNIX_DEBUG("PREPARING DOWNLOAD!\n");
 
 	/*
 		---------------------------FULL DOWNLOAD--------------------------------------
@@ -514,14 +519,14 @@ bool partialHttpBlobs(char * remote_url)
 		int ABSOLUTE_DIR_OFFSET;
 		if ( CD_SIZE = getCentralDirectoryOffset(blob,partial_blob_100_cb_written,CENTRAL_DIRECTORY_OFFSET,ABSOLUTE_DIR_OFFSET) ) {
 			if ( CENTRAL_DIRECTORY_OFFSET > 0 ) {
-				SOFPPNIX_DEBUG("POSITIVE OFFSET, found Central Directory! %08X\n",CENTRAL_DIRECTORY_OFFSET);
+				// SOFPPNIX_DEBUG("POSITIVE OFFSET, found Central Directory! %08X\n",CENTRAL_DIRECTORY_OFFSET);
 
 				extractCentralDirectory(blob + CENTRAL_DIRECTORY_OFFSET,CD_SIZE,&zip_content);
 
 				free(blob);
 				return true;
 			} else {
-				SOFPPNIX_DEBUG("NEGATIVE OFFSET %i %i\n",ABSOLUTE_DIR_OFFSET,ABSOLUTE_DIR_OFFSET + CD_SIZE);
+				// SOFPPNIX_DEBUG("NEGATIVE OFFSET %i %i\n",ABSOLUTE_DIR_OFFSET,ABSOLUTE_DIR_OFFSET + CD_SIZE);
 				// ITS NOT HERE, GO REQUEST IT WITH EXACT RANGE!
 				FORCED_RANGE = true;
 				lower = ABSOLUTE_DIR_OFFSET;
@@ -538,7 +543,7 @@ bool partialHttpBlobs(char * remote_url)
 	} while ( true );
 
 	// After iterating
-	SOFPPNIX_DEBUG("Cannot find the Central Directory in any HTTP blob\n");
+	// SOFPPNIX_DEBUG("Cannot find the Central Directory in any HTTP blob\n");
 	return false;
 }
 
@@ -588,7 +593,7 @@ bool unZipFile(char * in_zip, char * out_root )
 			return false;
 		}
 		
-		SOFPPNIX_DEBUG("Processing file : %s : size : %lu\n",filename,file_info.uncompressed_size);
+		// SOFPPNIX_DEBUG("Processing file : %s : size : %lu\n",filename,file_info.uncompressed_size);
 		
 		//----------------------OPEN READ FILE----------------------
 		int ret = unzOpenCurrentFile(unz_file);
@@ -673,7 +678,7 @@ bool unZipFile(char * in_zip, char * out_root )
 
 int getCentralDirectoryOffset(const char* HTTP_BLOB, int BLOB_SIZE,int &found_offset, int &abs_dir_offset)
 {
-	SOFPPNIX_DEBUG("SEARCHING FOR CENTAL DIRECTORY OFFSET\n");
+	// SOFPPNIX_DEBUG("SEARCHING FOR CENTAL DIRECTORY OFFSET\n");
 	for ( int i = BLOB_SIZE-4; i >=0; i-- ) {
 		// End of Central Directory SIGNATURE
 		// SUrely can just subtract size to get the start?
@@ -687,10 +692,10 @@ int getCentralDirectoryOffset(const char* HTTP_BLOB, int BLOB_SIZE,int &found_of
 			*/
 
 			abs_dir_offset = *((int*)(HTTP_BLOB + i + 16));
-			SOFPPNIX_DEBUG("Central Directory Offset: %i\n", abs_dir_offset);
+			// SOFPPNIX_DEBUG("Central Directory Offset: %i\n", abs_dir_offset);
 
 			int central_directory_size = *((int*)(HTTP_BLOB + i + 12));
-			SOFPPNIX_DEBUG("Central Directory Size = %i\n",central_directory_size);
+			// SOFPPNIX_DEBUG("Central Directory Size = %i\n",central_directory_size);
 
 			found_offset = i - central_directory_size;
 			// i can be negative.

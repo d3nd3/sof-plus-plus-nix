@@ -107,13 +107,25 @@ extern void create_file_dir_if_not_exists(const char* file_path);
 
 
 // --------------------serverlist.cpp-----------------------
+extern int gs_select_sock;
+extern netadr_t sof1master_ip;
 extern void GetServerList(void);
-extern void my_SendToMasters(void * arg1,void * arg2);
 extern void nonBlockingServerResponses(void);
+extern void GamespyHeartbeatCtrlNotify(void);
+extern void GamespyHeartbeat(void);
+
 
 // --------------------commands.cpp-----------------------
 void CreateCommands(void);
 extern void cmd_nix_client_state(void);
-extern void cmd_nix_httpdl_test(void);
+extern void cmd_nix_test(void);
 extern void cmd_nix_client_map(void);
 extern void cmd_nix_checksum(void);
+
+// ---------------------cvars.cpp-----------------------
+extern void CreateCvars(void);
+extern cvar_t * maxclients;
+extern cvar_t * sv_public;
+extern cvar_t * gamespyport;
+extern cvar_t * hostport;
+

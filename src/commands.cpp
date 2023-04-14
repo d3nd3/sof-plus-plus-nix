@@ -3,7 +3,7 @@
 
 void CreateCommands(void)
 {
-	my_Cmd_AddCommand("++nix_httpdl_test",&cmd_nix_httpdl_test);
+	my_Cmd_AddCommand("++nix_test",&cmd_nix_test);
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
 	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
 
@@ -232,8 +232,27 @@ void cmd_nix_client_map(void)
 void fake_cb(void) {
 SOFPPNIX_DEBUG("Fake cb\n");
 }
-void cmd_nix_httpdl_test(void)
+void cmd_nix_test(void)
 {
-	SOFPPNIX_DEBUG("Testing httpdl %s\n",orig_Cmd_Argv(1));
-	beginHttpDL(&std::string(orig_Cmd_Argv(1)),&fake_cb);
+	// SOFPPNIX_DEBUG("Testing httpdl %s\n",orig_Cmd_Argv(1));
+	// beginHttpDL(&std::string(orig_Cmd_Argv(1)),&fake_cb);
+
+	SOFPPNIX_DEBUG("TEst\n");
+	
+	bool isClientHere = false;
+	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	for ( int i = 0 ; i < maxclients->value;i++ ) {
+		void * client_t = svs_clients + i * 0xd2ac;
+		int state = *(int*)(client_t);
+		if (state != cs_spawned )
+			continue;
+		isClientHere = true;
+		break;
+	}
+
+	if (isClientHere) {
+		SOFPPNIX_DEBUG("Client is here\n");
+	} else {
+		SOFPPNIX_DEBUG("Client is not here\n");
+	}
 }

@@ -1,13 +1,12 @@
 #include "common.h"
 
 char saved_map_arg1[MAX_STRING_CHARS];
-bool map_saved = false;
+bool map_saving = false;
 void map_continue(void)
 {
 	// DOWNLOAD DONE.
-	SOFPPNIX_DEBUG("MAP CONTINUE!!!!!!!!!!!!!!!!!!!\n");
 	char cmd[MAX_STRING_CHARS];
-	snprintf(cmd,MAX_STRING_CHARS,"map %s %s\n",saved_map_arg1,"fgdd46hg");
+	snprintf(cmd,MAX_STRING_CHARS,"map \"%s\" \"%s\"\n",saved_map_arg1,"fgdd46hg");
 	orig_Cmd_ExecuteString(cmd);
 }
 /*
@@ -17,14 +16,14 @@ cmd_argv(1) = mapname
 int * cmd_argc = 0x083F9200;
 void my_SV_Map_f(void)
 {
-	if ( map_saved ) {
+	if ( map_saving ) {
 		// How do know if this was called by callback or by a user.
 		if ( orig_Cmd_Argc >= 3 ) {
 			if ( !strcmp(orig_Cmd_Argv(2), "fgdd46hg") ) {
 				// DOWNLOAD ALREADY DONE.
 
 				*cmd_argc = 2;
-				map_saved = false;
+				map_saving = false;
 				orig_SV_Map_f();
 				return;
 			}
@@ -33,7 +32,6 @@ void my_SV_Map_f(void)
 		SOFPPNIX_PRINT("Map download in progress, please wait\n");
 		return;
 	}
-	SOFPPNIX_DEBUG("my_SV_Map_f %s\n",orig_Cmd_Argv(1));
 	/*
 		Tweak argument to contain .zip for this request.
 	*/
@@ -42,8 +40,8 @@ void my_SV_Map_f(void)
 		SOFPPNIX_PRINT("Not the right time to load a map\n");
 		return;
 	}
-
+	// empty mapname bug ruins cmd_argc count. Used double quotes in ExecuteString
 	strcpy(saved_map_arg1,orig_Cmd_Argv(1));
 	// http map start here
-	map_saved = true;
+	map_saving = true;
 }
