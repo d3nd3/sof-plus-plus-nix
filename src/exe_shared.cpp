@@ -22,17 +22,18 @@ void my_Qcommon_Init(int one , char ** two) {
 	CreateCommands();
 	CreateCvars();
 
-	printf("public is : %f\n",sv_public->value);
+	// Gamespy Port Init
+	gs_select_sock = socket(AF_INET, SOCK_DGRAM, 0);
+	if (gs_select_sock < 0) {
+		error_exit("Failed to create gamespy socket.\n");
+	}
+	// Non-blocking
+	int flags = fcntl(gs_select_sock, F_GETFL, 0);
+	fcntl(gs_select_sock, F_SETFL, flags | O_NONBLOCK);
+
 	if ( sv_public->value ) {
 		SOFPPNIX_PRINT("Server is public.\n");
-		// Gamespy Port Init
-		gs_select_sock = socket(AF_INET, SOCK_DGRAM, 0);
-		if (gs_select_sock < 0) {
-			error_exit("Failed to create gamespy socket.\n");
-		}
-		// Non-blocking
-		int flags = fcntl(gs_select_sock, F_GETFL, 0);
-		fcntl(gs_select_sock, F_SETFL, flags | O_NONBLOCK);
+		
 		// Bind to port
 		struct sockaddr_in addr;
 		memset(&addr, 0, sizeof(addr));
@@ -43,17 +44,21 @@ void my_Qcommon_Init(int one , char ** two) {
 		if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 			error_exit("Unable to bind to gamespy port");
 		}
+
+		// gamespyport hostport map change -> 27900
+		// master checks using src port 28904 '\\info\\' ~every 5 minutes
+		// master checks using src port 28902 '\\status\\' ~every 30 seconds
+		// client query server list -> 28900
+
+		// memset 0 the master
+		memset(&sof1master_ip, 0, sizeof(sof1master_ip));
+		std::cout << "sof1master" << std::endl;
+		orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
+
+		// orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);
+		// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
+		// orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
 	}
-
-	// master checks using src port 28904
-
-	// memset 0 the master
-	memset(&sof1master_ip, 0, sizeof(sof1master_ip));
-	std::cout << "sof1master" << std::endl;
-	// orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
-	orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);
-	// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
-	// orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
 
 }
 

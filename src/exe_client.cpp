@@ -148,3 +148,52 @@ qboolean my_CL_CheckOrDownloadFile(char * filepath)
 
 }
 #endif
+
+void dump_usercmd(const usercmd_t& cmd)
+{
+	std::cout << "usercmd_t {" << std::endl;
+	std::cout << "  msec: " << static_cast<int>(cmd.msec) << std::endl;
+	std::cout << "  buttons: " << static_cast<int>(cmd.buttons) << std::endl;
+	std::cout << "  lightlevel: " << static_cast<int>(cmd.lightlevel) << std::endl;
+	std::cout << "  lean: " << static_cast<int>(cmd.lean) << std::endl;
+	std::cout << "  angles: {" << static_cast<int>(cmd.angles[0]) << ", "
+			  << static_cast<int>(cmd.angles[1]) << ", "
+			  << static_cast<int>(cmd.angles[2]) << "}" << std::endl;
+	std::cout << "  forwardmove: " << static_cast<int>(cmd.forwardmove) << std::endl;
+	std::cout << "  sidemove: " << static_cast<int>(cmd.sidemove) << std::endl;
+	std::cout << "  upmove: " << static_cast<int>(cmd.upmove) << std::endl;
+	std::cout << "  fireEvent: "  << cmd.fireEvent << std::endl;
+	std::cout << "  altfireEvent: " << cmd.altfireEvent << std::endl;
+	std::cout << "}" << std::endl;
+}
+void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_t *cmd)
+{
+	// SOFPPNIX_DEBUG("PAK_WriteDeltaUsercmd\n");
+
+	orig_PAK_WriteDeltaUsercmd(out_packet,from,cmd);
+
+	SOFPPNIX_DEBUG("--------FROM-----------\n");
+	dump_usercmd(*from);
+	SOFPPNIX_DEBUG("--------TO-----------\n");
+	dump_usercmd(*cmd);
+
+	vector<signed char> * v = (vector<signed char>*)(out_packet+8);
+	
+
+	// Iterates the vector v and print all of its elements
+	for (int i = 0; i < v->size(); i++) {
+		// SOFPPNIX_DEBUG("Vector %i : %02X\n",i,*(v->data()+i));
+		printf("%02X",*(v->data()+i));
+	}
+	printf("\n%i\nBITMODE!\n",v->size());
+
+	for ( int i = 0 ; i < v->size() * 8; i++ ) {
+		int bit_to_byte = i / 8;
+		int bit_to_bit = i % 8;
+		if ( (*(v->data()+bit_to_byte) & (1 << bit_to_bit)) != 0 )
+			printf("1");
+		else
+			printf("0");
+	}
+	printf("\n");
+}

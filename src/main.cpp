@@ -181,7 +181,7 @@ void __attribute__ ((constructor)) begin() {
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
 
 
-	//--------------------Client-------------------------
+//-------------------------------------------Client-------------------------------------
 	// orig_CL_CheckOrDownloadFile = createDetour(0x080CBA2C ,&my_CL_CheckOrDownloadFile,6);
 	orig_CL_Precache_f = createDetour(orig_CL_Precache_f , &my_CL_Precache_f,5);
 
@@ -194,12 +194,15 @@ void __attribute__ ((constructor)) begin() {
 
 	orig_CL_Frame = createDetour(orig_CL_Frame , &my_CL_Frame,5);
 
+	// orig_PAK_WriteDeltaUsercmd = createDetour(orig_PAK_WriteDeltaUsercmd , &my_PAK_WriteDeltaUsercmd,5);
 
-	// -----------------------Server----------------------------
+
+
+//-----------------------------------------Server------------------------------------------
 	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
 
-
-
+	// poorman msec adjustment
+	orig_SV_ClientThink = createDetour(orig_SV_ClientThink , &my_SV_ClientThink, 5);
 
 }
 

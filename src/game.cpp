@@ -108,4 +108,15 @@ void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
 	orig_SpawnEntities(mapname,entstring,spawnpoint);
 
 	GamespyHeartbeatCtrlNotify();
+
+	// initialise poorman framecounter
+	for (int i = 0; i < client_framecounters.size(); ++i) {
+		client_framecounters[i] = 0;
+		client_last_non_skipped_cmd[i] = {0};
+		client_last_last_non_skipped_cmd = {0};
+		client_last_skipped_cmd[i] = {0};
+		client_last_cmd[i] = {0};
+		client_last_last_cmd = {0};
+		client_toggle_state = {0};
+	}
 }

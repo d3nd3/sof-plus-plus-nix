@@ -83,6 +83,7 @@ void GetServerList(void)
 	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
 	server_addr.sin_port = htons(28900);
 	freeaddrinfo(res);
+
 	if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
 		error_exit("Failed to connect to server.\n");
 	}
@@ -299,7 +300,7 @@ void my_menu_AddServer(netadr_t addr,char *data)
 */
 
 /*
- 	\gamename\sofretail\
+	\gamename\sofretail\
 	gamever\1.07f\
 	location\1\
 	hostname\CGZA - SoF Deathmatch\
@@ -367,18 +368,164 @@ void nonBlockingServerResponses(void)
 		if (recv_len > 0) {
 
 			// OBJECTIVE: pass any '\\status\\' queries if we are server /w public 1
-			if ( !strncmp((char*)buffer, "\\status\\", 8) ) {
-				if ( sv_public->value  ) {
-					SOFPPNIX_DEBUG("Got a \\status\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
-					// TODO: send back a response
-					// == BASIC + INFO + RULES + PLAYERS
+			if ( sv_public->value && !strncmp((char*)buffer, "\\status\\", 8) ) {
+				// received every 30 seconds... (if info completed)
+				SOFPPNIX_DEBUG("Got a \\status\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
+				// TODO: send back a response
+				// == BASIC + INFO + RULES + PLAYERS
+
+				const char* gamename = "sofretail";
+				const char* gamever = "1.07f";
+				int location = 1;
+				const char* in_hostname = hostname->string;
+				int in_hostport = c_string_to_int(hostport->string);
+				const char* in_mapname = mapname->string;
+				const char* gametype = "Unknown";
+				switch ( std::lround(deathmatch->value) ) {
+					case 1: gametype = "DM"; break;
+					case 2: gametype = "Assassin"; break;
+					case 3: gametype = "Arsenal"; break;
+					case 4: gametype = "CTF"; break;
+					case 5: gametype = "Realistic"; break;
+					case 6: gametype = "Control"; break;
+					case 7: gametype = "CTB"; break;
 				}
-			} else if ( !strncmp((char*)buffer, "\\info\\", 6) ) {
-				if ( sv_public->value  ) {
-					SOFPPNIX_DEBUG("Got a \\info\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
-					// prepare data to send back as response
+				int numplayers = countPlayersInGame();
+				int maxplayers = c_string_to_int(maxclients->string);
+				const char* gamemode = "openplaying";
+				int violence = c_string_to_int(sv_violence->string);
+				int in_timelimit = c_string_to_int(timelimit->string);
+				int in_fraglimit = c_string_to_int(fraglimit->string);
+				int in_dmflags = c_string_to_int(dmflags->string);
+				const char* movescale = g_movescale->value == 1.0f ? "100%" : (std::to_string((int)(g_movescale->value * 100)) + "%").c_str();
+
+				const char* in_cheats = cheats->value == 1.0f ? "enabled" : "disabled";
+				int in_ctf_loops = std::lround(ctf_loops->value);
+				int suicide_penalty = std::lround(sv_suicidepenalty->value);
+				const char* queryid = "3.1";
+
+				std::string player_data;
+				for (int i = 0; i < numplayers; i++) {
+					// NAME
+					std::string player_num = "player_" + std::to_string(i);
+					std::string name = "John Mullinsqqu";
+
+					// FRAGS
+					std::string frags_num = "frags_" + std::to_string(i);
+					// TODO : GET FRAGS PER PLAYER
+					int frags_val = 0;
+
+					// PING
+					std::string ping_num = "ping_" + std::to_string(i);
+					// TODO : GET PING PER PLAYER
+					int ping_val = 38;
+
+					// SKIN
+					std::string skin_num = "skin_" + std::to_string(i);
+					// TODO : GET SKIN
+					std::string skin_val = "dekker";
+
+					// TEAMNAME
+					std::string team_num = "team_" + std::to_string(i);
+					// TODO : GET TEAMNAME
+					std::string team_val = "The Order";
+
+					// Append player data to string
+					player_data += player_num + "\\" + name + "\\" + frags_num + "\\" + std::to_string(frags_val) + "\\" + ping_num + "\\" + std::to_string(ping_val) + "\\" + skin_num + "\\" + skin_val + "\\" + team_num + "\\" + team_val;
+
+					// Add delimiter if there are more players
+					if (i < numplayers - 1) {
+						player_data += "|";
+					}
+				}
+
+				std::cout << "Player data: " << player_data << std::endl;
+				
+				// Generate the response string using snprintf
+				char response[1024];
+				snprintf(response, sizeof(response), "\\gamename\\%s\\"
+												"gamever\\%s\\"
+												"location\\%d\\"
+												"hostname\\%s\\"
+												"hostport\\%d\\"
+												"mapname\\%s\\"
+												"gametype\\%s\\"
+												"numplayers\\%d\\"
+												"maxplayers\\%d\\"
+												"gamemode\\%s\\"
+												"violence\\%d\\"
+												"timelimit\\%d\\"
+												"fraglimit\\%d\\"
+												"dmflags\\%d\\"
+												"movescale\\%s\\"
+												"cheats\\%s\\"
+												"ctf_loops\\%d\\"
+												"suicide_penalty\\%d\\"
+												"%s\\"
+												"final\\\\queryid\\%s",
+					gamename, gamever, location, in_hostname, in_hostport, in_mapname, gametype,
+					numplayers, maxplayers, gamemode, violence, in_timelimit, in_fraglimit,
+					in_dmflags, movescale, in_cheats, in_ctf_loops, suicide_penalty,player_data.c_str(), queryid);
+
+				// player_0\John Mullinsqqu\frags_0\0\ping_0\38\skin_0\dekker\team_0\The Order
+				std::cout << response << std::endl;
+
+				if ( sendto(gs_select_sock, response, strlen(response), 0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
+					error_exit("sendto() failed responding to \\info\\ query try public 0 if continued error");
+				}
+				
+			} else if ( sv_public->value && !strncmp((char*)buffer, "\\info\\", 6) ) {
+				// received every 5 minutes... (if on the radar)
+				SOFPPNIX_DEBUG("Got a \\info\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
+				// prepare data to send back as response
+
+				// \hostname\Example\hostport\8080\mapname\dm/suddm2\gametype\DM\numplayers\0\maxplayers\16\gamemode\openplaying\violence\0\final\\queryid\6.1
+
+				const char* in_hostname = hostname->string;
+				std::cout << "hostport is : " << hostport->string << std::endl;
+				int in_hostport = c_string_to_int(hostport->string);
+				const char* in_mapname = mapname->string;
+				const char* gametype = "Unknown";
+				switch ( std::lround(deathmatch->value) ) {
+					case 1: gametype = "DM"; break;
+					case 2: gametype = "Assassin"; break;
+					case 3: gametype = "Arsenal"; break;
+					case 4: gametype = "CTF"; break;
+					case 5: gametype = "Realistic"; break;
+					case 6: gametype = "Control"; break;
+					case 7: gametype = "CTB"; break;
+				}
+				int numplayers = countPlayersInGame();
+				std::cout << "maxclients is : " << maxclients->string << std::endl;
+				int maxplayers = c_string_to_int(maxclients->string);
+				const char* gamemode = "openplaying";
+				std::cout << "sv_violence is : " << sv_violence->string << std::endl;
+				int violence = c_string_to_int(sv_violence->string);
+
+				const char* queryid = "3.1";
+				// Generate the response string using snprintf
+				char response[1024];
+				snprintf(response, sizeof(response), "\\hostname\\%s\\"
+												"hostport\\%d\\"
+												"mapname\\%s\\"
+												"gametype\\%s\\"
+												"numplayers\\%d\\"
+												"maxplayers\\%d\\"
+												"gamemode\\%s\\"
+												"violence\\%d\\"
+												"final\\\\queryid\\%s",
+					in_hostname, in_hostport, in_mapname, gametype,
+					numplayers, maxplayers, gamemode, violence, queryid);
+
+				std::cout << response << std::endl;
+
+				// Send the response back to the in_addr that sent the query
+				if ( sendto(gs_select_sock, response, strlen(response), 0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
+					error_exit("sendto() failed responding to \\info\\ query try public 0 if continued error");
 				}
 			} else {
+				// Its not a \\status\\ or \\info\\ query
+				// Its another server's response to our outgoing \\status\\ request.
 				// OBJECTIVE: get the hostport of the server(currently only have the gs port)
 				// : Then query them on hostport with 'status'
 				// Did the message come from one of the servers that we sent a \\status\\ query to earlier?
@@ -528,7 +675,8 @@ But hook is in place, to silence the WON heartbeat code.(crashes). could nop.
 */
 void GamespyHeartbeat(void)
 {
-
+	return;
+	if ( !sv_public->value ) return;
 	// \\heartbeat\\%d\\gamename\\%s
 	std::cout << "Not yet implemented heartbeat" << std::endl;
 }
@@ -539,26 +687,8 @@ void GamespyHeartbeat(void)
 */
 void GamespyHeartbeatCtrlNotify(void)
 {
-	/*
-		if ( sv_public->value == 1.0f ) {
-			bool isClientHere = false;
-			void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
-			for ( int i = 0 ; i < maxclients->value;i++ ) {
-				void * client_t = svs_clients + i * 0xd2ac;
-				int state = *(int*)(client_t);
-				if (state != cs_spawned )
-					continue;
-				isClientHere = true;
-				break;
-			}
+	if ( !sv_public->value ) return;
 
-			if (isClientHere) {
-				SOFPPNIX_DEBUG("Client is here\n");
-
-
-			}
-		}
-	*/
 	SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
 	
 	//fill in the gamespyport and hostport

@@ -27,6 +27,8 @@ void (*orig_CL_Disconnect)(short unknown) = 0x080C5670;
 
 void (*orig_SV_Map_f)(void) = 0x080AE3E8;
 
+void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd) = 0x080B1470;
+
 // ----SHARED-----
 void (*orig_Sys_Quit) (void) = 0x0820AF40;
 void (*orig_Sys_Error) (char *error, ...) = 0x082099A4;

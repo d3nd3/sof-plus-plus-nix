@@ -43,9 +43,10 @@
 
 
 
-
-
-// --------------------httpdl.cpp-----------------------
+/*---------------------------------------------------------------------
+-----------------------------httpdl.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
 enum enum_dl_status {
 	DS_UNCERTAIN,
 	DS_FAILURE,
@@ -87,47 +88,100 @@ extern void saveHttpCache(void);
 extern void loadHttpCache(void);
 
 
-// --------------------exe_client.cpp-----------------------
+/*---------------------------------------------------------------------
+-----------------------------exe_client.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+/*---------------------------------------------------------------------
+-----------------------------exe_server.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+extern std::array<int, 32> client_framecounters;
+extern std::array<usercmd_t, 32> client_last_non_skipped_cmd;
+extern std::array<usercmd_t, 32> client_last_last_non_skipped_cmd;
+extern std::array<usercmd_t, 32> client_last_skipped_cmd;
+extern std::array<usercmd_t, 32> client_last_cmd;
+extern std::array<usercmd_t, 32> client_last_last_cmd;
+extern std::array<int, 32> client_toggle_state;
 
-// --------------------exe_shared.cpp-----------------------
-
-
-// --------------------util.cpp-----------------------
+/*---------------------------------------------------------------------
+-----------------------------exe_shared.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+/*---------------------------------------------------------------------
+------------------------------util.cpp---------------------------------
+---------------------------------------------------------------------
+*/
+// print
 extern void SOFPPNIX_DEBUG(char * msg, ... );
 extern void SOFPPNIX_PRINT(char * msg, ... );
-extern void error_exit(char* message,...);
-extern void hexdump(void *addr_start, void *addr_end);
+
+// memory funcs
 extern void memoryUnprotect(void * addr);
 extern void memoryProtect(void * addr);
 extern void callE8Patch(void * addr,void * to);
 extern void * createDetour(void * orig, void * mine, int size);
 extern void memoryAdjust(void * addr, int size, unsigned char val);
+
+// net
 extern void NetadrToSockadr (netadr_t *a, struct sockaddr_in *s);
 extern void SockadrToNetadr (struct sockaddr_in *s, netadr_t *a);
+
+// utils
+extern void error_exit(char* message,...);
+extern void hexdump(void *addr_start, void *addr_end);
+extern int c_string_to_int(char * in_str);
 extern void create_dir_if_not_exists(const char* dir_path);
 extern void create_file_dir_if_not_exists(const char* file_path);
+extern int countPlayersInGame(void);
+extern bool isServerEmpty(void);
+extern int getPlayerSlot(void * in_client);
 
 
-// --------------------serverlist.cpp-----------------------
+/*---------------------------------------------------------------------
+-----------------------------serverlist.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
 extern int gs_select_sock;
 extern netadr_t sof1master_ip;
+// client gs
 extern void GetServerList(void);
+
+// gs
 extern void nonBlockingServerResponses(void);
 extern void GamespyHeartbeatCtrlNotify(void);
 extern void GamespyHeartbeat(void);
 
 
-// --------------------commands.cpp-----------------------
+/*---------------------------------------------------------------------
+-----------------------------commands.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
 void CreateCommands(void);
 extern void cmd_nix_client_state(void);
 extern void cmd_nix_test(void);
 extern void cmd_nix_client_map(void);
 extern void cmd_nix_checksum(void);
 
-// ---------------------cvars.cpp-----------------------
+/*---------------------------------------------------------------------
+-----------------------------cvars.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
 extern void CreateCvars(void);
 extern cvar_t * maxclients;
 extern cvar_t * sv_public;
 extern cvar_t * gamespyport;
 extern cvar_t * hostport;
+extern cvar_t * hostname;
+extern cvar_t * deathmatch;
+extern cvar_t * mapname;
+extern cvar_t * sv_violence;
+extern cvar_t * timelimit;
+extern cvar_t * fraglimit;
+extern cvar_t * dmflags;
+extern cvar_t * g_movescale;
+extern cvar_t * cheats;
+extern cvar_t * ctf_loops;
+extern cvar_t * sv_suicidepenalty;
 
+extern cvar_t * _nix_poorman;

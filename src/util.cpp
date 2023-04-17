@@ -93,6 +93,8 @@ void shutdown_program(void)
 	// std::exit(EXIT_SUCCESS);
 }
 
+
+
 void hexdump(void *addr_start, void *addr_end) {
 	unsigned char *p = (unsigned char *)addr_start;
 	unsigned char *q = (unsigned char *)addr_end;
@@ -260,4 +262,67 @@ void create_file_dir_if_not_exists(const char* file_path) {
 		create_dirs_recursively(dir_path);
 	}
 	free(dir_path);
+}
+
+
+int c_string_to_int(char * in_str) {
+	std::string str(in_str);
+	size_t pos;
+	int num;
+
+	try {
+		num = std::stoi(str, &pos);
+	}
+	catch(const std::invalid_argument& e) {
+		error_exit("c_string_to_int Invalid argument");
+	}
+	catch(const std::out_of_range& e) {
+		error_exit("c_string_to_int Out of range");
+	}
+	if (pos != str.length()) {
+		error_exit("c_string_to_int Trailing characters");
+	}
+	return num;
+}
+
+int countPlayersInGame(void)
+{
+	int player_count = 0;
+	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	for ( int i = 0 ; i < maxclients->value;i++ ) {
+		void * client_t = svs_clients + i * 0xd2ac;
+		int state = *(int*)(client_t);
+		if (state != cs_spawned )
+			continue;
+		player_count +=1;
+	}
+
+	return player_count;
+}
+
+int getPlayerSlot(void * in_client)
+{
+	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+
+	int addr_diff = (int)in_client - (int)svs_clients;
+	if ( addr_diff < 0 || addr_diff % 0xd2ac != 0)
+		return -1;
+	int slot = addr_diff / 0xd2ac;
+	if ( slot < 0 || slot >= maxclients->value)
+		return -1;
+	return slot;
+}
+
+bool isServerEmpty(void)
+{
+	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	for ( int i = 0 ; i < maxclients->value;i++ ) {
+		void * client_t = svs_clients + i * 0xd2ac;
+		int state = *(int*)(client_t);
+		if (state != cs_spawned )
+			continue;
+		return false;
+	
+	}
+	return true;
 }

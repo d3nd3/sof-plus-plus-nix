@@ -10,6 +10,9 @@ extern char * (*orig_SV_StatusString)(void);
 extern void (*orig_SV_Map_f)(void);
 extern void my_SV_Map_f(void);
 
+extern void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd);
+extern void my_SV_ClientThink(void *cl, usercmd_t *cmd);
+
 // --Client--
 extern void (*orig_CL_Frame) (int msec);
 extern void my_CL_Frame(int msec);
@@ -69,6 +72,8 @@ extern unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int len
 
 extern void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd);
 extern void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd);
+extern void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_t *cmd);
+
 
 extern void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netadr_t to);
 
