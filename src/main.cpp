@@ -161,6 +161,8 @@ void __attribute__ ((constructor)) begin() {
 
 // -------------------------GAMESPY HEARTBEAT-------------------------
 	callE8Patch(0x080ABF6C,&GamespyHeartbeat);
+
+
 ////////////////////////////////////////////////////
 	
 	// ------------------Shared-----------------
@@ -203,6 +205,7 @@ void __attribute__ ((constructor)) begin() {
 
 	// poorman msec adjustment
 	orig_SV_ClientThink = createDetour(orig_SV_ClientThink , &my_SV_ClientThink, 5);
+
 
 }
 

@@ -129,7 +129,7 @@ void memoryUnprotect(void * addr)
 
 	void * aligned_addr = (void *)((unsigned long)addr & ~(page_size - 1));
 	if (mprotect(aligned_addr, page_size, PROT_READ | PROT_WRITE) == -1) {
-		error_exit("mprotect");
+		error_exit("m-unprotect");
 	}
 }
 
@@ -138,7 +138,7 @@ void memoryProtect(void * addr)
 	size_t page_size = getpagesize();
 	void * aligned_addr = (void *)((unsigned long)addr & ~(page_size - 1));
 	if (mprotect(aligned_addr, page_size, PROT_READ ) == -1) {
-		error_exit("mprotect");
+		error_exit("m-protect");
 	}
 }
 

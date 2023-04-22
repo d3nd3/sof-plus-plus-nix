@@ -21,40 +21,40 @@ also passes in pointers for ref_gl library. ri
 			SV_InitGameProgs [ctrl hooks this one and modifies the exported functions]
 				Sys_GetGameAPI [so if we used sofplus, if he doesnt call orig, our func is not executed]
 
-    // the init function will only be called when a game starts,
-    // not each time a level is loaded.  Persistant data for clients
-    // and the server can be allocated in init
-    int APIVERSION;
-    void        (*Init) (void);
-    void        (*Shutdown) (void);
-    // each new level entered will cause a call to SpawnEntities
-    void        (*SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
-    // Read/Write Game is for storing persistant cross level information
-    // about the world state and the clients.
-    // WriteGame is called every time a level is exited.
-    // ReadGame is called on a loadgame.
-    void        (*WriteGame) (bool autosave);
-    bool        (*ReadGame) (bool autosave);
-    // ReadLevel is called after the default map information has been
-    // loaded with SpawnEntities
-    void        (*WriteLevel) (void);
-    void        (*ReadLevel) (void);
-    void    (*ClientPreConnect) (void*);
-    qboolean    (*ClientConnect) (edict_t *ent, char *userinfo);
+	// the init function will only be called when a game starts,
+	// not each time a level is loaded.  Persistant data for clients
+	// and the server can be allocated in init
+	int APIVERSION;
+	void        (*Init) (void);
+	void        (*Shutdown) (void);
+	// each new level entered will cause a call to SpawnEntities
+	void        (*SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
+	// Read/Write Game is for storing persistant cross level information
+	// about the world state and the clients.
+	// WriteGame is called every time a level is exited.
+	// ReadGame is called on a loadgame.
+	void        (*WriteGame) (bool autosave);
+	bool        (*ReadGame) (bool autosave);
+	// ReadLevel is called after the default map information has been
+	// loaded with SpawnEntities
+	void        (*WriteLevel) (void);
+	void        (*ReadLevel) (void);
+	void    (*ClientPreConnect) (void*);
+	qboolean    (*ClientConnect) (edict_t *ent, char *userinfo);
 	void        (*ClientBegin) (edict_t *ent);
 	void        (*ClientUserinfoChanged) (edict_t *ent, char *userinfo, bool not_first_time);
-    void        (*ClientDisconnect) (edict_t *ent);
-    void        (*ClientCommand) (edict_t *ent);
-    void        (*ClientThink) (edict_t *ent, usercmd_t *cmd);
-    void        (*ResetCTFTeam) (edict_t *ent);
-    int         (*GameAllowASave) (void);
-    void        (*SavesLeft) (void);
-    void        (*GetGameStats) (void);
-    void        (*UpdateInven) (void);
-    const char  *(*GetDMGameName) (void);
-    byte        (*GetCinematicFreeze) (void);
-    void        (*SetCinematicFreeze) (byte cf);
-    float       (*RunFrame) (int serverframe);
+	void        (*ClientDisconnect) (edict_t *ent);
+	void        (*ClientCommand) (edict_t *ent);
+	void        (*ClientThink) (edict_t *ent, usercmd_t *cmd);
+	void        (*ResetCTFTeam) (edict_t *ent);
+	int         (*GameAllowASave) (void);
+	void        (*SavesLeft) (void);
+	void        (*GetGameStats) (void);
+	void        (*UpdateInven) (void);
+	const char  *(*GetDMGameName) (void);
+	byte        (*GetCinematicFreeze) (void);
+	void        (*SetCinematicFreeze) (byte cf);
+	float       (*RunFrame) (int serverframe);
 */
 bool first_load = true;
 game_export_t * my_Sys_GetGameAPI (void *params) {
@@ -69,10 +69,29 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 		ret is a list of function address which are exported to the main executable.
 	*/
 
+	/*
+		acquire base address.
+	*/
+	Dl_info info;
+	void *handle = dlopen(NULL, RTLD_LAZY);
+	if (handle == NULL) {
+		error_exit("Failed to load current library\n");
+	}
+	int rc = dladdr((void*)game_exports->Shutdown, &info);
+	if (rc == 0) {
+		error_exit("Failed to get current library information\n");
+	}
+	void *base_addr = info.dli_fbase;
+	dlclose(handle);
+
 	// I am not editing the return, I am detouring original, but still.
 	// Ctrl method of inline patching defeats detours. Take caution.
 	orig_ShutdownGame = createDetour(game_exports->Shutdown, my_ShutdownGame,5);
 	orig_SpawnEntities = createDetour(game_exports->SpawnEntities, my_SpawnEntities,5);
+
+	// ---------------------------WP EDIT---------------------------------
+	memoryAdjust(base_addr + 0x14964E,5,0x90);
+	memoryAdjust(base_addr + 0x1496D0,5,0x90);
 
 
 	// sv_map -> sv_spawnserver ( AFTER SV_InitGame ) -> spawnentities -> fx_init -> addCommand("fx_save");
