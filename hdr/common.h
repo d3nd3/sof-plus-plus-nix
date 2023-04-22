@@ -67,7 +67,7 @@ extern enum enum_dl_status download_status;
 extern size_t httpdl_writecb(char *ptr, size_t size, size_t nmemb, void *userdata);
 extern void httpdl_thread_get(std::string * rel_map_path);
 extern void isHTTPdone(void);
-extern bool beginHttpDL(std::string * relative_file_path_name, void * callback);
+extern bool beginHttpDL(std::string * mapname, void * callback,bool use_join=false);
 
 extern size_t header_cb_get_content_length(char *buffer, size_t size, size_t nitems, void *userdata);
 extern size_t partial_blob_100_cb(void *ptr, size_t size, size_t nmemb, void *userdata);

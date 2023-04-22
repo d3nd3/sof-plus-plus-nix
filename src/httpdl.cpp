@@ -41,7 +41,7 @@ CURL* curl = NULL;
 /*
 map_saving is true here
 */
-bool beginHttpDL(std::string * mapname, void * callback)
+bool beginHttpDL(std::string * mapname, void * callback,bool use_join=false)
 {
 	
 	if ( HTTP_CONTINUE_CB ) {
@@ -63,7 +63,11 @@ bool beginHttpDL(std::string * mapname, void * callback)
 	// }
 	download_status = DS_UNCERTAIN;
 	std::thread httpdl(httpdl_thread_get,new std::string(*mapname));
-	httpdl.detach();
+	// if this returns too early, it doesnt work.
+	if ( use_join ) {
+		httpdl.join();	
+	} else
+		httpdl.detach();
 	return true;
 }
 
@@ -76,11 +80,13 @@ void isHTTPdone(void)
 {
 	// SOFPPNIX_DEBUG("HUH? : %08X\n",HTTP_CONTINUE_CB);
 	if ( HTTP_CONTINUE_CB ) {
+		
 		if ( download_status != DS_UNCERTAIN ) {
+			
 			// Called on failure or success.
-			// SOFPPNIX_DEBUG("HTTP IS DONE AND RESOLVE !!\n");
+			
 			download_status = DS_UNCERTAIN;
-
+			
 			// some resolve
 			HTTP_CONTINUE_CB();
 
@@ -236,6 +242,8 @@ void httpdl_thread_get(std::string * rel_map_path) {
 		SOFPPNIX_DEBUG("Not downloading because file not found or crc matches on disk\n");
 		delete rel_map_path;
 		download_status = DS_FAILURE;
+
+		SOFPPNIX_DEBUG("Thread ending!\n");
 		return;
 	}
 	// SOFPPNIX_DEBUG("PREPARING DOWNLOAD!\n");
@@ -471,7 +479,7 @@ bool partialHttpBlobs(char * remote_url)
 		curl = curl_easy_init();
 		if (!curl) {
 			std::cerr << "Error initializing libcurl" << std::endl;
-			return;
+			return false;
 		}
 		int lower;
 		if ( !FORCED_RANGE )

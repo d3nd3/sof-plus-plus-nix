@@ -163,6 +163,11 @@ void __attribute__ ((constructor)) begin() {
 	callE8Patch(0x080ABF6C,&GamespyHeartbeat);
 
 
+//-----------------------------POOORMAN msec CPU REDUCTION--------------------------------------
+	// orig_SV_ClientThink = createDetour(orig_SV_ClientThink , &my_SV_ClientThink, 5);
+	callE8Patch(0x080B1922,&my_SV_ClientThink);
+
+
 ////////////////////////////////////////////////////
 	
 	// ------------------Shared-----------------
@@ -202,9 +207,6 @@ void __attribute__ ((constructor)) begin() {
 
 //-----------------------------------------Server------------------------------------------
 	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
-
-	// poorman msec adjustment
-	orig_SV_ClientThink = createDetour(orig_SV_ClientThink , &my_SV_ClientThink, 5);
 
 
 }
