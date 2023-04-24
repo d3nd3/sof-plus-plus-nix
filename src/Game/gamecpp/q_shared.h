@@ -521,15 +521,15 @@ typedef struct
 typedef struct usercmd_s
 {
 	byte	msec;
-	byte	buttons;
-	byte	lightlevel;		// light level the player is standing on
-	char	lean;			// -1 or 1
-	short	angles[3];
-	short	forwardmove;
-	short	sidemove;
-	short	upmove;
-	float	fireEvent;
-	float	altfireEvent;
+	byte	buttons; // :: 1
+	byte	lightlevel;		// light level the player is standing on :: 2
+	char	lean;			// -1 or 1 :: 3
+	short	angles[3]; // :: 45 67 89
+	short	forwardmove; // ab
+	short	sidemove; // cd
+	short	upmove; // ef
+	float	fireEvent; // 10
+	float	altfireEvent; // 14
 } usercmd_t;
 
 

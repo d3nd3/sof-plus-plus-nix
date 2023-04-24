@@ -23,6 +23,9 @@ void (*orig_CL_RequestNextDownload) (void) = 0x080CCC74;
 void (*orig_CL_RegisterEffects)(void) = 0x0814461C;
 void (*orig_CL_Disconnect)(short unknown) = 0x080C5670;
 
+void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd) = 0x0811CD90;
+void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd) = 0x080BA99C;
+
 // ---SERVER-----
 
 void (*orig_SV_Map_f)(void) = 0x080AE3E8;
@@ -56,11 +59,9 @@ void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netadr_t to)
 
 qboolean (*orig_NET_StringToAdr) (char *s, netadr_t *a) = 0x0820D710;
 
-
 unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int len,int out_seq_id ) = 0x08120F7C;
 
-void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd) = 0x0811CD90;
-void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd) = 0x080BA99C;
+void (*orig_PAK_ReadDeltaUsercmd) (void *in_packet, usercmd_t *from, usercmd_t *move) = 0x080BA5BC;
 
 /*
 ---------------------Ref Library---------------------

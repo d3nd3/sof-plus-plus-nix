@@ -40,6 +40,10 @@ extern void (*orig_CL_RegisterEffects)(void);
 extern void my_CL_Disconnect(short unknown);
 extern void (*orig_CL_Disconnect)(short unknown);
 
+extern void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd);
+extern void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd);
+extern void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_t *cmd);
+
 
 // --Shared--
 extern void (*orig_Sys_Quit) (void); 
@@ -70,10 +74,9 @@ extern char * (*orig_FS_Userdir)(void);
 extern unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int len, int out_seq_id);
 extern unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int len, int out_seq_id);
 
-extern void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd);
-extern void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd);
-extern void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_t *cmd);
 
+extern void (*orig_PAK_ReadDeltaUsercmd)(void *in_packet, usercmd_t *from, usercmd_t *move);
+extern void my_PAK_ReadDeltaUsercmd (void *in_packet, usercmd_t *from, usercmd_t *move);
 
 extern void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netadr_t to);
 

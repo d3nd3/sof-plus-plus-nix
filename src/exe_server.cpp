@@ -147,3 +147,18 @@ void my_SV_ClientThink(void *cl, usercmd_t *cmd)
 }
 
 #endif
+
+/*
+	from used as base for move contents.
+	memcpy(move,from)
+
+*/
+void my_PAK_ReadDeltaUsercmd (void *in_packet, usercmd_t *from, usercmd_t *move)
+{
+	orig_PAK_ReadDeltaUsercmd(in_packet,from,move);
+
+	// SOFPPNIX_DEBUG("FROM : \n");
+	// dump_usercmd(*from);
+	// SOFPPNIX_DEBUG("TO : \n");
+	// dump_usercmd(*move);
+}

@@ -168,6 +168,10 @@ void __attribute__ ((constructor)) begin() {
 	callE8Patch(0x080B1922,&my_SV_ClientThink);
 
 
+	// useless test inside sv_executeclientmessage
+	// memoryAdjust(0x080B1780,1,0xEB);
+
+
 ////////////////////////////////////////////////////
 	
 	// ------------------Shared-----------------
@@ -186,6 +190,8 @@ void __attribute__ ((constructor)) begin() {
 
 
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
+	// callE8Patch(0x080B1809,&my_test);
+
 
 
 //-------------------------------------------Client-------------------------------------
@@ -207,7 +213,7 @@ void __attribute__ ((constructor)) begin() {
 
 //-----------------------------------------Server------------------------------------------
 	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
-
+	orig_PAK_ReadDeltaUsercmd = createDetour(orig_PAK_ReadDeltaUsercmd , &my_PAK_ReadDeltaUsercmd,5);
 
 }
 

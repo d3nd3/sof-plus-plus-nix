@@ -2,7 +2,7 @@ FROM i386/ubuntu:20.04
 
 ARG TZ=Europe/London
 ENV TZ $TZ
-RUN apt-get -y update && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata git build-essential cmake libx11-dev libxfixes-dev libcurl4-openssl-dev pkg-config zlib1g-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get -y update && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata git build-essential cmake libx11-dev libxfixes-dev libcurl4-openssl-dev pkg-config zlib1g-dev libssl-dev && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /
 

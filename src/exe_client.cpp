@@ -149,23 +149,7 @@ qboolean my_CL_CheckOrDownloadFile(char * filepath)
 }
 #endif
 
-void dump_usercmd(const usercmd_t& cmd)
-{
-	std::cout << "usercmd_t {" << std::endl;
-	std::cout << "  msec: " << static_cast<int>(cmd.msec) << std::endl;
-	std::cout << "  buttons: " << static_cast<int>(cmd.buttons) << std::endl;
-	std::cout << "  lightlevel: " << static_cast<int>(cmd.lightlevel) << std::endl;
-	std::cout << "  lean: " << static_cast<int>(cmd.lean) << std::endl;
-	std::cout << "  angles: {" << static_cast<int>(cmd.angles[0]) << ", "
-			  << static_cast<int>(cmd.angles[1]) << ", "
-			  << static_cast<int>(cmd.angles[2]) << "}" << std::endl;
-	std::cout << "  forwardmove: " << static_cast<int>(cmd.forwardmove) << std::endl;
-	std::cout << "  sidemove: " << static_cast<int>(cmd.sidemove) << std::endl;
-	std::cout << "  upmove: " << static_cast<int>(cmd.upmove) << std::endl;
-	std::cout << "  fireEvent: "  << cmd.fireEvent << std::endl;
-	std::cout << "  altfireEvent: " << cmd.altfireEvent << std::endl;
-	std::cout << "}" << std::endl;
-}
+
 void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_t *cmd)
 {
 	// SOFPPNIX_DEBUG("PAK_WriteDeltaUsercmd\n");

@@ -38,9 +38,18 @@
 
 #include <curl/curl.h>
 
+#include <openssl/evp.h>
+#include <openssl/md4.h>
+
 #include "engine.h"
 #include "fn_sigs.h"
 
+
+/*---------------------------------------------------------------------
+-----------------------------game.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+extern unsigned char chktbl2[3000];
 
 
 /*---------------------------------------------------------------------
@@ -108,6 +117,8 @@ extern std::array<int, 32> client_toggle_state;
 -----------------------------exe_shared.cpp----------------------------
  ---------------------------------------------------------------------
 */
+
+extern void my_test(void);
 /*---------------------------------------------------------------------
 ------------------------------util.cpp---------------------------------
 ---------------------------------------------------------------------
@@ -136,6 +147,7 @@ extern void create_file_dir_if_not_exists(const char* file_path);
 extern int countPlayersInGame(void);
 extern bool isServerEmpty(void);
 extern int getPlayerSlot(void * in_client);
+extern void dump_usercmd(usercmd_t& cmd);
 
 
 /*---------------------------------------------------------------------
