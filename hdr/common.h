@@ -197,6 +197,7 @@ extern cvar_t * cheats;
 extern cvar_t * ctf_loops;
 extern cvar_t * sv_suicidepenalty;
 
+extern cvar_t * _nix_deathmatch;
 
 /*---------------------------------------------------------------------
 -----------------------------detect.cpp----------------------------

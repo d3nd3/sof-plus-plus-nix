@@ -4,35 +4,37 @@ extern gamerules_c * currentGameMode;
 always_gamerules_c dm_always;
 
 /*
-
+------------------------------------------------------------------
 currentGameMode is within our memory
 
 orig is within sof.exe memory
+------------------------------------------------------------------
+all code leads back to the BASE gamerules_c.
+Only if function is not implemented.
 
-*/
-
-
-/*
+dm_always-> ( extra code to always run )
+	currentGameMode-> ( your gamerules_c class )
+		inheritedGameMode-> ( another gamerules_c class )
+			BASE gamerules_c ( if not implemented ).
+------------------------------------------------------------------
+orig is strictly handled by BASE gamerules_c.
+If you implement a function, it is your job to call orig.
+------------------------------------------------------------------
+setOrigPointer is only ever called by currentGameMode.
+So its only valid to call getOrigPointer on currentGameMode.
+------------------------------------------------------------------
+Let currentGameMode file also only ever call getOrigPointer because if its defined a function, its disabling its base class's version, which would access the orig pointer.
+------------------------------------------------------------------
+If you currentGameMode->getOrigPointer()->yourFunc() here ( in dm_always.cpp ), it can be called twice, because the functions here always call the currentGameMode. TLDR: Dont want 2 function calls to same function.
+------------------------------------------------------------------
 -> orig PROPERTY IS NOT SET HERE !! DO NOT USE IT !!!
+------------------------------------------------------------------
+This file's only job is to call currentGameMode->yourFunc()
+Its a PASS-THROUGH.
 currentGameMode->yourFunc() MUST be called here..
-
-calling 
-gamerules_c * fallback = currentGameMode->getOrigPointer();
-fallback->yourFunc() is NOT allowed here..
-
-because : issue : 2 places where fallback might be called.
-	within always(here),
-	within currentGameMode
-
-SO: 
-	If you want GameModeSpecific AND original behavior, you must make sure to call the orig
-	function within your gameModeSpecific class.
-
-
+------------------------------------------------------------------
 If you want fallback/default, just don't implement the function in the game mode class
 and it will automatically be enabled because of inheritance virtual.
-
-Its important to note that 'orig' property is only set on the gamemode object
 
 */
 

@@ -13,6 +13,9 @@ extern void my_SV_Map_f(void);
 extern void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd);
 extern void my_SV_ClientThink(void *cl, usercmd_t *cmd);
 
+
+extern void ( *orig_PF_Configstring)(int index, char * string);
+
 // --Client--
 extern void (*orig_CL_Frame) (int msec);
 extern void my_CL_Frame(int msec);
@@ -127,12 +130,12 @@ extern void my_ClientBegin(edict_t * ent);
 extern void (*orig_PutClientInServer) (edict_t *ent);
 extern void my_PutClientInServer (edict_t *ent);
 
-
 extern edict_t * (*orig_G_Spawn) (void);
 
 extern void (*orig_ClientDisconnect) (edict_t *ent);
 extern void my_ClientDisconnect(void);
 
 
-extern void (*orig_setDMMode)(void * self,int newtype);
+// __attribute__((thiscall))
+extern void ( *orig_setDMMode)(void * self,int newtype);
 extern void my_setDMMode(void * self,int newtype);

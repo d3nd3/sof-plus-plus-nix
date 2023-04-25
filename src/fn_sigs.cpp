@@ -32,6 +32,9 @@ void (*orig_SV_Map_f)(void) = 0x080AE3E8;
 
 void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd) = 0x080B1470;
 
+void ( *orig_PF_Configstring)(int index, char * string) = 0x080a7710;
+
+
 // ----SHARED-----
 void (*orig_Sys_Quit) (void) = 0x0820AF40;
 void (*orig_Sys_Error) (char *error, ...) = 0x082099A4;
@@ -83,4 +86,5 @@ void (*orig_ClientDisconnect) (edict_t *ent) = NULL;
 void (*orig_PutClientInServer) (edict_t *ent) = NULL;
 
 edict_t * (*orig_G_Spawn) (void) = NULL;
+// attribute__((thiscall))
 void (* orig_setDMMode)(void * self,int newtype) = NULL;

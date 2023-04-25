@@ -1,8 +1,13 @@
 /*
-
+	------------------------------------------------------------------
 	gamemode_c is an interface classs that forwards to the mode specific routine.
 	rules is set to the current game mode.
 	eg. rules->SomeFunc.
+
+	Whatever rules is set to, it gets called by gamemode_c inside SoF.
+
+	So we change the rules pointer to control which code is being ran.
+	------------------------------------------------------------------
 
 	gamerules_c is the BASE CLASS for all game modes.
 
@@ -17,25 +22,14 @@
 
 		rules->registerPlayerIcons();
 	}
-
-
-
-	gamemode_c = SoF class that forwards to the mode specific routine.
-	Remember everything is gamerules_c class.
-	I orginally had it setup that:
-		I store orig pointer to original gamerules_c class as a fallback behavior.(Default)
-		And then override the rules pointer to point to my class.
-		This did not allow me to have an 'always' routine for all game modes.
-
-		If you want to have default/fallback behavior, you just don't Implement the function.
-		Then OOP inheritance virtual function thing will handle it.  The parent/base class
-		is setup to call the orig pointer.
-
-		You can always call the orig pointer in your rules class though, when you want to extend
-		functionality to default/fallback.
-
-		To make it that all game modes have default behavior code to code vital things etc.  I will make another
-		gamerules_c class instance which will wrap around everything else.
+	Look in dm_always.cpp for more understanding.
+	------------------------------------------------------------------
+	The functions defined in this file are the base class implementation.
+	Meaning any functions that are not defined in your Derived class,
+	will eventually make their way here. Where the in-memory version of the function will be called.
+	------------------------------------------------------------------
+	This file should mostly be left alone, because the code is not guaranteed to run , if the DerivedClass implements the function eg. This file just allows fallback.
+	------------------------------------------------------------------
 */
 
 #include "common.h"
@@ -71,14 +65,20 @@ gamerules_c * orig_modes[] = {
 
 
 gamerules_c * intercept = NULL;
-gamerules_c realrules;
+gamerules_c base_gamerules_c;
+
+gamerules_c * sof_mem_modes = NULL;
 
 void applyDeathmatchHooks(unsigned int base_addr)
 {
-	orig_setDMMode = createDetour((int)base_addr + 0x0015EFF0,my_setDMMode,5);
+	orig_setDMMode = createDetour(base_addr + 0x0015EFF0,my_setDMMode,5);
 
-	// Set our gamerules_c to use the code at. Which is the base gamerules_c.
-	*(unsigned int*)(&realrules) = base_addr + 0x00296320;
+	// This is the gamerules_c base class. (Used vtable reference to point.)
+	*(unsigned int*)((void*)(&base_gamerules_c) + 4) = base_addr + 0x00296320;
+	// It is set as the orig in some cases. eg. ( sofree game modes ).
+
+	// sof_mem_modes = base_addr + 0x002bd2e8;
+	sof_mem_modes = base_addr + 0x0028d040;
 
 }
 
@@ -110,13 +110,14 @@ private:
 	it will call the rules pointer use as class.
 	this is set by us.
 */
-void my_setDMMode(void * self,int dmmode)
+// __attribute__((thiscall))
+void  my_setDMMode(void * self,int dmmode)
 {
-	SOFPPNIX_DEBUG("my_setDMMode %8X\n",self);
-	orig_setDMMode(self,dmmode);
-	#if 0
-	int sofree_dmmode = (int)(_sf_sv_sofree_deathmatch->value);
-
+	// SOFPPNIX_DEBUG("my_setDMMode %08X\n",self);
+	// orig_setDMMode(self,dmmode);
+	
+	int sofree_dmmode = (int)(_nix_deathmatch->value);
+	SOFPPNIX_DEBUG("One\n");
 	if ( sofree_dmmode > 0 ) {
 		//sofree custom gamemode
 		int temp_fix = 1;
@@ -129,11 +130,15 @@ void my_setDMMode(void * self,int dmmode)
 		stset(self,4,7 + sofree_dmmode);// gametype
 
 		// use gamerules_c BASE as original.
-		currentGameMode->setOrigPointer((void*)(&realrules));
+		currentGameMode->setOrigPointer((void*)(&base_gamerules_c));
 		
 	} else {
+		SOFPPNIX_DEBUG("Two %i\n",dmmode);
 		//save rules pointer
-		intercept = stget(0x50144C58 + (4* dmmode),0);
+
+		intercept = stget((void*)sof_mem_modes+(4*dmmode),0);
+
+		SOFPPNIX_DEBUG("Intercept : %08X\n",intercept);
 
 		//if dm free for all hm.
 		if ( dmmode == 1 || dmmode == 5 || dmmode == 4){
@@ -151,23 +156,24 @@ void my_setDMMode(void * self,int dmmode)
 		}
 		else {
 			// rules = gamerules[newtype];
+			// no hooks applied.
 			stset(self,8,intercept);
 		}
 		
 		stset(self,4,dmmode);
 	}
-	// orig_Com_Printf("pre applyHooks\n");
+	orig_Com_Printf("pre applyHooks\n");
 	dm_always.applyHooks();
-
+	SOFPPNIX_DEBUG("The end2\n");
 	// orig_Com_Printf("arePLayerNamesOn PRE\n");
-	det_PF_Configstring(CS_SHOWNAMES,dm_always.arePlayerNamesOn()?"1":"0");
-	det_PF_Configstring(CS_SHOWTEAMS,dm_always.arePlayerTeamsOn()?"1":"0");
-
+	// orig_PF_Configstring(CS_SHOWNAMES,dm_always.arePlayerNamesOn()?"1":"0");
+	// orig_PF_Configstring(CS_SHOWTEAMS,dm_always.arePlayerTeamsOn()?"1":"0");
+	SOFPPNIX_DEBUG("The end1\n");
 	dm_always.registerPlayerIcons();
 	//18
 	//rules->checkItemSpawn(NULL,NULL);
 
-	#endif
+	SOFPPNIX_DEBUG("The end\n");
 }
 
 
@@ -289,6 +295,7 @@ int 	gamerules_c::somethingWeDontUnderstand(void) {
 }
 //8c
 int		gamerules_c::arePlayerNamesOn(void){
+	SOFPPNIX_DEBUG("Fallback Base GamesRules_C arePlayerNamesOn %08X\n",orig);
 	return orig->arePlayerNamesOn();
 }
 //90
@@ -305,6 +312,7 @@ void	gamerules_c::initPlayerDMInfo(edict_t *ent){
 }
 //9c
 void	gamerules_c::registerPlayerIcons(void){
+	SOFPPNIX_DEBUG("Fallback Base GamesRules_C registerPlayerIcons %08X\n",orig);
 	orig->registerPlayerIcons();
 }
 //a0

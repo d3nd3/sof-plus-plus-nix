@@ -163,13 +163,17 @@ void __attribute__ ((constructor)) begin() {
 	callE8Patch(0x080ABF6C,&GamespyHeartbeat);
 
 
-//-----------------------------POOORMAN msec CPU REDUCTION--------------------------------------
+//-----------------------------SV_CLIENTTHINK now call--------------------------------------
 	// orig_SV_ClientThink = createDetour(orig_SV_ClientThink , &my_SV_ClientThink, 5);
 	callE8Patch(0x080B1922,&my_SV_ClientThink);
 
 
 	// useless test inside sv_executeclientmessage
 	// memoryAdjust(0x080B1780,1,0xEB);
+
+
+//-------------------------------CONSOLE INPUT DEBUG-----------------
+	// memoryAdjust(0x08209ae0,2,NOP);
 
 
 ////////////////////////////////////////////////////
@@ -180,9 +184,6 @@ void __attribute__ ((constructor)) begin() {
 	// printf("second deotur\n");
 	orig_Cmd_RemoveCommand = createDetour( orig_Cmd_RemoveCommand, &my_Cmd_RemoveCommand, 5);
 	// orig_Com_Printf = createDetour(0x0811C8F4, &my_Com_Printf,9);
-
-	// Apply game detours here
-	orig_Sys_GetGameAPI = createDetour(orig_Sys_GetGameAPI,&my_Sys_GetGameAPI,9);
 
 	// Apply executable command creation here ( server & client )
 	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
@@ -215,8 +216,11 @@ void __attribute__ ((constructor)) begin() {
 	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
 	orig_PAK_ReadDeltaUsercmd = createDetour(orig_PAK_ReadDeltaUsercmd , &my_PAK_ReadDeltaUsercmd,5);
 
+	// orig_PF_Configstring = createDetour( orig_PF_Configstring, &my_PF_Configstring, 5);
+
+	// Apply game detours here
+	orig_Sys_GetGameAPI = createDetour(orig_Sys_GetGameAPI,&my_Sys_GetGameAPI,9);
+
 }
-
-
 
 // __builtin_return_address(0)
