@@ -215,6 +215,6 @@ extern void spawnDistraction(edict_t * ent,int slot);
 -----------------------------deathmatch.cpp----------------------------
  ---------------------------------------------------------------------
 */
-#define stget(e,x) *(unsigned int*)(e+x)
-#define stset(e,x,v) *(unsigned int*)(e+x) = v
+#define stget(e,x) *(unsigned int*)((void*)e+x)
+#define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
 #include "deathmatch.h"

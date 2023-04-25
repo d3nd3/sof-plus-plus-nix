@@ -88,12 +88,10 @@ void	always_gamerules_c::levelInit(void){
 	orig_Cbuf_AddText("sf_sv_draw_clear\n");
 
 	// orig_Com_Printf("Before level init\n");
+	#endif
 	// dm specific levelinit fallback func
 	currentGameMode->levelInit();
-
 	// orig_Com_Printf("Level Init Complete\n");
-#endif
-
 }
 char	*always_gamerules_c::getGameName(void){
 	return currentGameMode->getGameName();
@@ -110,6 +108,11 @@ void	always_gamerules_c::checkEvents(void){
 void	always_gamerules_c::respawnUntouchedItem(edict_t *ent) {
 	currentGameMode->respawnUntouchedItem(ent);
 }
+/*
+ Look in CWeaponInfo.cpp for the PickupList, it defines:
+ spawnName,type,spawnParm,respawnTime,defaultCount,defaultMaxCount,index,worldname,pickupstringindex,ammopickupstringindex,itemfullstringindex,flags. For each item.
+ eg. armour spawnName is "item_equip_armor" and has respawn time of 30 seconds.
+*/
 void	always_gamerules_c::setRespawn(edict_t *ent, float delay){
 	currentGameMode->setRespawn(ent,delay);
 
@@ -192,8 +195,8 @@ int		always_gamerules_c::dmRule_BULLET_WPNS_ONLY(void){
 	return currentGameMode->dmRule_BULLET_WPNS_ONLY();
 }
 //88
-int 	always_gamerules_c::somethingWeDontUnderstand(void) {
-	return currentGameMode->somethingWeDontUnderstand();
+int 	always_gamerules_c::dmRule_TEAM_REDBLUE(void) {
+	return currentGameMode->dmRule_TEAM_REDBLUE();
 }
 //8c
 int		always_gamerules_c::arePlayerNamesOn(void){
@@ -347,8 +350,8 @@ void	always_gamerules_c::clientStealthAndFatigueMeter(edict_t *ent){
 	currentGameMode->clientStealthAndFatigueMeter(ent);
 }
 //e0
-void always_gamerules_c::extraFuncOne(void * one, void * two) {
-	currentGameMode->extraFuncOne(one,two);
+void always_gamerules_c::clientTouchConquerTrigger(void * one, void * two) {
+	currentGameMode->clientTouchConquerTrigger(one,two);
 }
 //e4
 bool	always_gamerules_c::IsUnprotectedGoreZone(gz_code zone){
@@ -368,33 +371,33 @@ bool	always_gamerules_c::IsShootableWeapon(char *weaponname){
 	return currentGameMode->IsShootableWeapon(weaponname);
 }
 //f4
-void always_gamerules_c::extraFuncTwo(void * one){
+void always_gamerules_c::unsetControlFlag(void * one){
 	// orig_Com_Printf("extraFuncTwo\n");
-	currentGameMode->extraFuncTwo(one);
+	currentGameMode->unsetControlFlag(one);
 }
 //f8
-void always_gamerules_c::extraFuncThree(void * one) {
+void always_gamerules_c::setControlFlag(void * one) {
 	// orig_Com_Printf("extraFuncThree\n");
-	currentGameMode->extraFuncThree(one);
+	currentGameMode->setControlFlag(one);
 }
 //fc
-int always_gamerules_c::extraFuncFour(void) {
+int always_gamerules_c::tooManyFlags(void) {
 	// orig_Com_Printf("extraFour\n");
-	return currentGameMode->extraFuncFour();
+	return currentGameMode->tooManyFlags();
 }
 //100
-void always_gamerules_c::extraFuncFive(void * one) {
+void always_gamerules_c::addControlFlag(void * one) {
 	// orig_Com_Printf("extraFuncFive\n");
-	currentGameMode->extraFuncFive(one);
+	currentGameMode->addControlFlag(one);
 }
 //104
-void always_gamerules_c::onSpawnTriggerConquer(edict_t * ent){
-	currentGameMode->onSpawnTriggerConquer(ent);
+void always_gamerules_c::registerConquerTrigger(edict_t * ent){
+	currentGameMode->registerConquerTrigger(ent);
 }
 //108
-int always_gamerules_c::extraFuncSeven(void * one) {
+int always_gamerules_c::isPointInConquerTrigger(void * one) {
 	// orig_Com_Printf("extraFuncSeven\n");
-	return currentGameMode->extraFuncSeven(one);
+	return currentGameMode->isPointInConquerTrigger(one);
 }
 
 
@@ -413,7 +416,9 @@ void always_gamerules_c::removeHooks(void) {
 
 
 void always_gamerules_c::applyHooks(void) {
-	// orig_Com_Printf("HELLO APPLY HOOKS ALWAYS?\n");
+	
+	SOFPPNIX_DEBUG("applyHooks\n");
+
 	#if 0
 	orig_Cmd_Score_f = (Cmd_Score_f_type)DetourCreate((LPVOID)0x500F6710,(LPVOID)&my_Cmd_Score_f,DETOUR_TYPE_JMP,6);
 

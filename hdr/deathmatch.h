@@ -111,23 +111,23 @@ public:
 	virtual int		dmRule_BULLET_WPNS_ONLY(void); //84
 	
 	//84
-	virtual int somethingWeDontUnderstand(void);
+	virtual int dmRule_TEAM_REDBLUE(void); // 88
 
 	//88
-	virtual int		arePlayerNamesOn(void); // 88
+	virtual int		arePlayerNamesOn(void); // 8C
 
 	//8c
-	virtual int		arePlayerTeamsOn(void); // 8C  
+	virtual int		arePlayerTeamsOn(void); // 90  
 
 	//90
-	virtual int		allowAutoWeaponSwitch(void);// 90 //xx
+	virtual int		allowAutoWeaponSwitch(void);// 94 //xx
 
 
 	////THE WRAPPER DOESNT CONTAIN THESE 2
 	//94
-	virtual	void	initPlayerDMInfo(edict_t *ent);// 94
+	virtual	void	initPlayerDMInfo(edict_t *ent);// 98
 	//98
-	virtual void	registerPlayerIcons(void); //98 // xx
+	virtual void registerPlayerIcons(void); //9C // xx
 
 	//9c
 	virtual	float	clientCalculateWaver(edict_t *ent, int atkID);
@@ -178,7 +178,7 @@ public:
 	virtual void	clientStealthAndFatigueMeter(edict_t *ent);
 	
 	//e0
-	virtual void extraFuncOne(void * one, void * two);
+	virtual void clientTouchConquerTrigger(void * one, void * two);
 	
 	//e4
 	virtual bool	IsUnprotectedGoreZone(gz_code zone);
@@ -194,17 +194,17 @@ public:
 	virtual bool	IsShootableWeapon(char *weaponname);
 	
 	//f4
-	virtual void extraFuncTwo(void * one);
+	virtual void unsetControlFlag(void * one);
 	//f8
-	virtual void extraFuncThree(void * one);
+	virtual void setControlFlag(void * one);
 	//fc
-	virtual int extraFuncFour(void);
+	virtual int tooManyFlags(void);
 	//100
-	virtual void extraFuncFive(void* one);
+	virtual void addControlFlag(void* one);
 	//104
-	virtual void onSpawnTriggerConquer(edict_t * ent);
+	virtual void  registerConquerTrigger(edict_t * ent);
 	//108
-	virtual int extraFuncSeven(void* one);
+	virtual int isPointInConquerTrigger(void* one);
 
 
 
@@ -297,7 +297,7 @@ class always_gamerules_c:public gamerules_c
 		 int		dmRule_BULLET_WPNS_ONLY(void); //84
 		
 		//84
-		 int somethingWeDontUnderstand(void);
+		 int 		dmRule_TEAM_REDBLUE(void);
 
 		//88
 		 int		arePlayerNamesOn(void); // 88
@@ -313,7 +313,7 @@ class always_gamerules_c:public gamerules_c
 		//94
 			void	initPlayerDMInfo(edict_t *ent);// 94
 		//98
-		 void	registerPlayerIcons(void); //98
+		 void registerPlayerIcons(void); //98
 
 		//9c
 			float	clientCalculateWaver(edict_t *ent, int atkID);
@@ -364,7 +364,7 @@ class always_gamerules_c:public gamerules_c
 		 void	clientStealthAndFatigueMeter(edict_t *ent);
 		
 		//e0
-		 void extraFuncOne(void * one, void * two);
+		 void clientTouchConquerTrigger(void * one, void * two);
 		
 		//e4
 		 bool	IsUnprotectedGoreZone(gz_code zone);
@@ -380,17 +380,17 @@ class always_gamerules_c:public gamerules_c
 		 bool	IsShootableWeapon(char *weaponname);
 		
 		//f4
-		 void extraFuncTwo(void * one);
+		 void unsetControlFlag(void * one);
 		//f8
-		 void extraFuncThree(void * one);
+		 void setControlFlag(void * one);
 		//fc
-		 int extraFuncFour(void);
+		 int tooManyFlags(void);
 		//100
-		 void extraFuncFive(void* one);
+		 void addControlFlag(void* one);
 		//104
-		 void onSpawnTriggerConquer(edict_t * ent);
+		 void registerConquerTrigger(edict_t * ent);
 		//108
-		 int extraFuncSeven(void* one);
+		 int isPointInConquerTrigger(void* one);
 
 
 
@@ -455,7 +455,7 @@ public:
 class dm_ctf_c:public gamerules_c
 {
 public:
-	void levelInit(void);
+	// void levelInit(void);
 	void applyHooks(void);
 	void removeHooks(void);
 };
