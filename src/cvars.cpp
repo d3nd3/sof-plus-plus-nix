@@ -15,7 +15,7 @@ cvar_t * g_movescale = NULL;
 cvar_t * cheats = NULL;
 cvar_t * ctf_loops = NULL;
 cvar_t * sv_suicidepenalty = NULL;
-cvar_t * _nix_poorman = NULL;
+
 
 /*
 	If the cvar already exists, the value will not be set.
@@ -49,8 +49,5 @@ void CreateCvars(void)
 	deathmatch = orig_Cvar_Get(			"deathmatch", 			"0", 	CVAR_ARCHIVE, 									NULL);
 	mapname = orig_Cvar_Get(			"mapname",				"",		CVAR_NOSET,										NULL);
 
-
-	// New
-	_nix_poorman = orig_Cvar_Get(		"_++nix_poorman",		"0",	NULL,	NULL);
 
 }

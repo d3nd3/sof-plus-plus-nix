@@ -105,13 +105,8 @@ extern void loadHttpCache(void);
 -----------------------------exe_server.cpp----------------------------
  ---------------------------------------------------------------------
 */
-extern std::array<int, 32> client_framecounters;
-extern std::array<usercmd_t, 32> client_last_non_skipped_cmd;
-extern std::array<usercmd_t, 32> client_last_last_non_skipped_cmd;
-extern std::array<usercmd_t, 32> client_last_skipped_cmd;
-extern std::array<usercmd_t, 32> client_last_cmd;
-extern std::array<usercmd_t, 32> client_last_last_cmd;
-extern std::array<int, 32> client_toggle_state;
+
+
 
 /*---------------------------------------------------------------------
 -----------------------------exe_shared.cpp----------------------------
@@ -148,6 +143,12 @@ extern int countPlayersInGame(void);
 extern bool isServerEmpty(void);
 extern int getPlayerSlot(void * in_client);
 extern void dump_usercmd(usercmd_t& cmd);
+
+// math
+extern vec_t VectorNormalize (vec3_t v);
+extern float NormalizeAngle (float angle);
+extern vec_t VectorLength (const vec3_t v);
+static vec_t VectorSeparation(vec3_t v0, vec3_t v1);
 
 
 /*---------------------------------------------------------------------
@@ -196,4 +197,23 @@ extern cvar_t * cheats;
 extern cvar_t * ctf_loops;
 extern cvar_t * sv_suicidepenalty;
 
-extern cvar_t * _nix_poorman;
+
+/*---------------------------------------------------------------------
+-----------------------------detect.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+
+extern std::array<short, 32> detect_max_yaw;
+extern std::array<short, 32> detect_max_pitch;
+extern std::array<edict_t*, 32> distractor;
+extern void validateInputs(int playerSlot, usercmd_t * now, usercmd_t * old);
+extern void spawnDistraction(edict_t * ent,int slot);
+
+
+/*---------------------------------------------------------------------
+-----------------------------deathmatch.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+#define stget(e,x) *(unsigned int*)(e+x)
+#define stset(e,x,v) *(unsigned int*)(e+x) = v
+#include "deathmatch.h"

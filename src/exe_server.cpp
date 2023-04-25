@@ -94,24 +94,23 @@ std::array<int, 32> client_framecounters = {0};
 #if 1
 void my_SV_ClientThink(void *cl, usercmd_t *cmd)
 {
-
-	if ( _nix_poorman->value ) {
-		int player = getPlayerSlot(cl);
-		// SOFPPNIX_DEBUG("player slot: %d\n", player);
-
-		if ( player == -1 ) error_exit("Illegal player slot");
-
-		// increment frame counter, don't skip valuable button changes, OR defer them to next frame
-		if ( ( client_framecounters[player]++ % 2 ) ) {
-			// skip this frame
-			// Defer all data from previous frame to this one.
-			return;
-		}
-		// Adjust msec by factor of 2
-		cmd->msec *= 2;
-	}
+	edict_t * ent = *(unsigned int*)(cl + CLIENT_ENT);
+	gclient_t * gcl = ent->client;
+	// short * delta_angles = gcl->ps.pmove.delta_angles;
+	// SOFPPNIX_DEBUG("delta_angles: %d %d %d\n", delta_angles[0], delta_angles[1], delta_angles[2]);
+	// validateInputs(getPlayerSlot(cl),cmd,(void*)cmd+0x18);
 	orig_SV_ClientThink(cl,cmd);
 
+	// short * origin = gcl->ps.pmove.origin;
+	// SOFPPNIX_DEBUG("origin: %d %d %d\n", origin[0], origin[1], origin[2]);
+
+	// short * velocity = gcl->ps.pmove.velocity;
+	// SOFPPNIX_DEBUG("velocity: %hd %hd %hd\n", velocity[0], velocity[1], velocity[2]);
+	
+	// SOFPPNIX_DEBUG("VelocityFloat: %f %f %f\n",ent->velocity[0],ent->velocity[1],ent->velocity[2]);
+	
+	vec_t vel = VectorLength(ent->velocity);
+	SOFPPNIX_DEBUG("Velocity: %f\n",vel);
 }
 #else
 

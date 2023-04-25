@@ -119,3 +119,20 @@ extern void my_ShutdownGame(void);
 
 extern void (*orig_SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
 extern void my_SpawnEntities (char *mapname, char *entstring, char *spawnpoint);
+
+
+extern void (*orig_ClientBegin) (edict_t *ent);
+extern void my_ClientBegin(edict_t * ent);
+
+extern void (*orig_PutClientInServer) (edict_t *ent);
+extern void my_PutClientInServer (edict_t *ent);
+
+
+extern edict_t * (*orig_G_Spawn) (void);
+
+extern void (*orig_ClientDisconnect) (edict_t *ent);
+extern void my_ClientDisconnect(void);
+
+
+extern void (*orig_setDMMode)(void * self,int newtype);
+extern void my_setDMMode(void * self,int newtype);

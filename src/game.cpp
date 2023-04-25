@@ -82,12 +82,22 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 		error_exit("Failed to get current library information\n");
 	}
 	void *base_addr = info.dli_fbase;
+	SOFPPNIX_DEBUG("Base address: %08X\n", base_addr);
 	dlclose(handle);
 
 	// I am not editing the return, I am detouring original, but still.
 	// Ctrl method of inline patching defeats detours. Take caution.
-	orig_ShutdownGame = createDetour(game_exports->Shutdown, my_ShutdownGame,5);
 	orig_SpawnEntities = createDetour(game_exports->SpawnEntities, my_SpawnEntities,5);
+	orig_ShutdownGame = createDetour(game_exports->Shutdown, my_ShutdownGame,5);
+	
+	orig_ClientBegin = createDetour(game_exports->ClientBegin, my_ClientBegin,5);
+	orig_ClientDisconnect = createDetour(game_exports->ClientDisconnect, my_ClientDisconnect,5);
+
+	// Must use fixed address on reusable detours.
+	orig_PutClientInServer = createDetour((int)base_addr + 0x00238BE8, my_PutClientInServer,6);
+	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
+
+	applyDeathmatchHooks(base_addr);
 
 	// ---------------------------WP EDIT---------------------------------
 	memoryAdjust(base_addr + 0x14964E,5,0x90);
@@ -116,8 +126,16 @@ void my_ShutdownGame(void)
 	/*
 		free all detour mallocs
 	*/
-	free(orig_ShutdownGame);
+
 	free(orig_SpawnEntities);
+	free(orig_ShutdownGame);
+	
+	free(orig_ClientBegin);
+	free(orig_ClientDisconnect);
+
+	free(orig_PutClientInServer);
+
+	freeDeathmatchHooks();
 }
 
 void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
@@ -128,8 +146,62 @@ void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
 
 	GamespyHeartbeatCtrlNotify();
 
-	// initialise poorman framecounter
-	for (int i = 0; i < client_framecounters.size(); ++i) {
-		client_framecounters[i] = 0;
-	}
+}
+
+/*
+===========
+ClientBegin
+
+called when a client has finished connecting, and is ready
+to be placed into the game.  This will happen every level load.
+============
+*/
+void my_ClientBegin(edict_t * ent)
+{
+	
+	orig_ClientBegin(ent);
+
+	int slot = ent->s.skinnum;
+
+	SOFPPNIX_DEBUG("Client Begin!\n");
+
+	// Distract.
+	spawnDistraction(ent,slot);
+}
+
+/*
+===========
+ClientDisconnect
+
+Called when a player drops from the server.
+Will not be called between levels.
+============
+*/
+void my_ClientDisconnect(void)
+{
+	// free edict
+	// if ( distractor[i] ) 
+}
+
+/*
+===========
+PutClientInServer
+
+Called when a player connects to a server or respawns in
+a deathmatch.
+============
+*/
+void my_PutClientInServer (edict_t *ent)
+{
+	orig_PutClientInServer(ent);
+
+	SOFPPNIX_DEBUG("PutClientInServer!\n");
+
+	int slot = ent->s.skinnum;
+	SOFPPNIX_DEBUG("Slot: %d\n",slot);
+	return;
+	detect_max_pitch[slot] = 0;
+	detect_max_yaw[slot] = 0;
+	distractor[slot] = NULL;
+
 }

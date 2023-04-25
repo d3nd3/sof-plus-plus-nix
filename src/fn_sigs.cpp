@@ -77,3 +77,10 @@ void * (*orig_GetGameAPI) (void * import) = NULL;
 void * (*orig_Sys_GetGameAPI)(void * params) = 0x08209C50;
 void (*orig_ShutdownGame)(void) = NULL;
 void (*orig_SpawnEntities) (char *mapname, char *entstring, char *spawnpoint) = NULL;
+
+void (*orig_ClientBegin)(edict_t * ent) = NULL;
+void (*orig_ClientDisconnect) (edict_t *ent) = NULL;
+void (*orig_PutClientInServer) (edict_t *ent) = NULL;
+
+edict_t * (*orig_G_Spawn) (void) = NULL;
+void (* orig_setDMMode)(void * self,int newtype) = NULL;

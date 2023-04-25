@@ -55,7 +55,34 @@ enum ScriptConditionT
 
 #define SV_CONFIGSTRINGS 0x203A2374
 
+/*
 
+	client_state_t	state;
+	char			userinfo[MAX_INFO_STRING];		// name, etc
+	int				lastframe;			// for delta compression
+	usercmd_t		lastcmd;			// for filling in big drops
+	int				commandMsec;		// every seconds this is reset, if user									// commands exhaust it, assume time cheating
+	int				frame_latency[LATENCY_COUNTS];
+	int				ping;
+	int				message_size[RATE_MESSAGES];	// used to rate drop packets
+	int				rate;
+	int				surpressCount;		// number of messages rate supressed
+	edict_t			*edict;				// EDICT_NUM(clientnum+1)
+	char			name[32];			// extracted from userinfo, high bits masked
+	int				messagelevel;		// for filtering printed messages
+	// The datagram is written to by sound calls, prints, temp ents, etc.
+	// It can be harmlessly overflowed.
+	sizebuf_t		datagram;
+	byte			datagram_buf[MAX_MSGLEN];
+	client_frame_t	frames[UPDATE_BACKUP];	// updates can be delta'd from here
+	byte			*download;			// file being downloaded
+	int				downloadsize;		// total bytes (can't use EOF because of paks)
+	int				downloadcount;		// bytes sent
+	int				lastmessage;		// sv.framenum when packet was last received
+	int				lastconnect;
+	int				challenge;			// challenge of this user, randomly generated
+	netchan_t		netchan;
+*/
 #define SV_CLIENT 0x203FEC94 //pointer to current player being parsed
 #define CLIENT_BASE 0x20396EEC
 #define SIZE_OF_CLIENT 0xd2ac
@@ -64,11 +91,99 @@ enum ScriptConditionT
 #define CLIENT_NETMESSAGE 0x52b5 //could be wrong i think its 0x52b4
 #define CLIENT_NETCHAN 0x526C
 #define CLIENT_NETCHAN_IP 0x5284
-#define CLIENT_MSEC
+#define CLIENT_MSEC 0x220
 
 #define STUFFTEXT 0xD
 
+
+/*
+	// Known to server.
+	player_state_t				ps;										// Communicated by server to clients.
+	int							ping;
+	// Private to game.
+	client_persistant_t			pers;
+	client_respawn_t			resp;
+	pmove_state_t				old_pmove;								// Dor detecting out-of-pmove changes.
+	float						moveScale;								// scale down max speed for dmreal
+//	CPlayerStats				m_PlayerStats;							// Money et al.
+	invPub_c					*inv;
+	player_dmInfo_ic			*dmInfo;
+	body_c						*body;
+	char						oldNetName[128];							//body needs to remember what the last name was, so corrections don't constantly get sent back
+	char						oldSkinRequest[MAX_SKINNAME_LENGTH];		//body needs to remember what the last requested skin was, so corrections don't constantly get sent back
+	char						oldTeamnameRequest[MAX_TEAMNAME_LENGTH];	//body needs to remember what the last requested teamname was, so corrections don't constantly get sent back
+	byte						restart_count;
+	// Client layout stuff.
+	qboolean					showscores;								// Set layout stat for scores.
+	qboolean					showinventory;							// Set layout stat for inventory.
+	qboolean					showhelp;								// Set layout stat for help.						
+	// Action buttons.
+	int							buttons;
+	int							oldbuttons;
+	int							latched_buttons;
+	qboolean					oktofire;
+	float						fireEvent;
+	float						altfireEvent;
+	// Damage stuff. Sum up damage over an entire frame, so shotgun blasts give a single big kick.
+	int							damage_blood;							// damage taken out of health
+	int							damage_knockback;						// impact damage
+	int							damage_armor;							// need this for appropriate feedback
+	vec3_t						damage_from;							// origin for vector calculatio						
+	// View paramters.
+	float						killer_yaw;								// when dead, look at killer			
+	vec3_t						weaponkick_angles;						// weapon kicks
+	vec3_t						kick_origin;
+	float						v_dmg_roll, v_dmg_pitch, v_dmg_time;	// damage kicks
+	float						fall_time, fall_value;					// for view drop on fall
+	float						damage_alpha;
+	float						bonus_alpha;
+	float						blinding_alpha;
+	float						blinding_alpha_delta;					// added by Jake so we can control how fast the drop off from the blinding effect is
+	float						gas_blend;
+	vec3_t						damage_blend;
+	vec3_t						v_angle;								// aiming direction
+	float						bobtime;								// so off-ground doesn't change it
+	vec3_t						oldviewangles;
+	vec3_t						oldvelocity;
+	int							old_waterlevel;
+	vec3_t						fade_rgb;								// fade screen to this color;
+	float						fade_alpha;
+	edict_t						*chase_target;							// spectator chase-cam
+	qboolean					update_chase;
+	// Animation vars.
+	int							anim_end;
+	int							anim_priority;
+	qboolean					anim_duck;
+	qboolean					anim_run;
+	qboolean					running;
+	qboolean					ghosted;								// Invulnerability effect
+	qboolean					goggles_on;								// Light Intensifier goggles are on.
+	// Timers.
+	float						next_drown_time;						// Player drown debouncing.
+	float						respawn_time;							// Player can respawn when time > this.
+	float						respawn_invuln_time;					// Player is invulnerable until time > this.
+	float						showhelp_time;							// Player help de-activates when time > this.
+	// Music.
+	int							musicTime;
+	// What colors are used to draw other player's playernames.
+	byte						playernameColors[MAX_CLIENTS];			
+	byte						oldPlayernameColors[MAX_CLIENTS];
+	//  Camera related stuff.
+	int							RemoteCameraLockCount;
+	int							RemoteCameraNumber;
+	int							RemoteCameraType;
+	int							MercCameraNumber;
+	qboolean					CameraIs3rdPerson;
+	// Anti flooding vars
+	float				flood_locktill;			// locked from talking
+	float				flood_when[10];			// when messages were said
+	int					flood_whenhead;			// head pointer for when said
+	float				flood_nextnamechange;	// next time for valid nick change
+	float				flood_nextkill;			// next time for suicide
+	float						friction_time;
+*/
 #define GCLIENT_BASE 0x5015D6C4
+#define GCLIENT_BASE_LINUX 0x5015D6C4
 #define SIZE_OF_GCLIENT 0x600
 #define GCLIENT_PS_BOD 0x7C
 #define GCLIENT_TEAM 0x324
@@ -89,6 +204,8 @@ enum ScriptConditionT
 
 #define GCLIENT_LATCHED_BUTTONS 0x484
 #define GCLIENT_BUTTONS 0x47C
+#define GCLIENT_PS_PM_DELTA 0x14
+#define GCLIENT_PS_PM_ORIGIN 0x4
 
 
 #define SIZE_OF_EDICT 0x464
@@ -125,7 +242,6 @@ enum ScriptConditionT
 #define EDICT_COUNT 0x318
 #define EDICT_DELAY 0x364
 #define EDICT_OWNER 0x160
-
 
 
 #define CSCRIPT_SCRIPTCONDITION 0x108

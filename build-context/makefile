@@ -21,7 +21,14 @@ OBJS= \
 ../obj/main.o \
 ../obj/serverlist.o \
 ../obj/util.o \
-../obj/httpdl.o
+../obj/httpdl.o \
+../obj/detect.o \
+../obj/dm_always.o \
+../obj/deathmatch.o \
+../obj/dm_sofree.o \
+../obj/dm_standard.o \
+../obj/dm_ctf.o \
+../obj/dm_realistic.o
 
 CFLAGS= -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
 LDFLAGS= -m32 -shared -o ../out/test.so -L /minizip/build
@@ -34,6 +41,26 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 ../out/$(BINARY): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o ../out/test.so $(LINKUS)
 
+
+../obj/dm_realistic.o : ../src/dm_realistic.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+
+../obj/dm_ctf.o : ../src/dm_ctf.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+../obj/dm_standard.o : ../src/dm_standard.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+../obj/dm_sofree.o : ../src/dm_sofree.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+../obj/deathmatch.o : ../src/deathmatch.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/dm_always.o : ../src/dm_always.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/detect.o : ../src/detect.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/clipboard.o : ../src/clipboard.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/commands.o : ../src/commands.cpp

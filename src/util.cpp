@@ -344,3 +344,59 @@ void dump_usercmd(usercmd_t& cmd)
 	std::cout << "  altfireEvent: " << cmd.altfireEvent << std::endl;
 	std::cout << "}" << std::endl;
 }
+
+vec_t VectorNormalize (vec3_t v)
+{
+	float	length, ilength;
+
+	length = DotProduct(v, v);
+	length = sqrt (length);		// FIXME
+
+	if (length)
+	{
+		ilength = 1/length;
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
+	}
+		
+	return length;
+
+}
+
+float NormalizeAngle (float angle)
+{
+// FIXME:  make this use fmod
+	while (angle >= 360)
+	{
+		angle -= 360;
+	}
+	while (angle < 0)
+	{
+		angle += 360;
+	}
+	return angle;
+}
+
+
+vec_t VectorLength(vec3_t v)
+{
+	float	length;
+	
+	length = DotProduct(v, v);
+	length = sqrt (length);		// FIXME
+
+	return length;
+}
+
+static vec_t VectorSeparation(vec3_t v0, vec3_t v1)
+{
+	vec3_t	v;
+	float	length;
+
+	VectorSubtract(v0, v1, v);
+	length = DotProduct(v, v);
+	length = sqrt (length);		// FIXME
+
+	return length;
+}
