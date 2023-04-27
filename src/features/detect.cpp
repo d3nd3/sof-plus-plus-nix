@@ -62,12 +62,12 @@ void validateInputs(int playerSlot, usercmd_t * now, usercmd_t * old)
 	*/
 	// pitch
 	if ( newMaxAngle(now->angles[0],old->angles[0], detect_max_pitch[playerSlot]) ) {
-		SOFPPNIX_DEBUG("max_pitch: %d\n", detect_max_pitch[playerSlot]);
+		SOFPPNIX_DEBUG("max_pitch: %d", detect_max_pitch[playerSlot]);
 	}
 
 	// yaw
 	if ( newMaxAngle(now->angles[1],old->angles[1], detect_max_yaw[playerSlot]) ) {
-		SOFPPNIX_DEBUG("max_yaw: %d\n", detect_max_yaw[playerSlot]);
+		SOFPPNIX_DEBUG("max_yaw: %d", detect_max_yaw[playerSlot]);
 	}
 	
 }
@@ -81,12 +81,12 @@ void spawnDistraction(edict_t * ent,int slot)
 	short * origin = gcl->ps.pmove.origin;
 	// gclient_t * gcl = *(unsigned int*)((void*)ent + EDICT_GCLIENT);
 	// short * origin = (short*)((void*)gcl + GCLIENT_PS_PM_ORIGIN);
-	// SOFPPNIX_DEBUG("Origin: %hd %hd %hd\n",origin[0],origin[1],origin[2]);
+	// SOFPPNIX_DEBUG("Origin: %hd %hd %hd",origin[0],origin[1],origin[2]);
 
-	SOFPPNIX_DEBUG("VelocityFloat: %f %f %f\n",ent->velocity[0],ent->velocity[1],ent->velocity[2]);
+	SOFPPNIX_DEBUG("VelocityFloat: %f %f %f",ent->velocity[0],ent->velocity[1],ent->velocity[2]);
 	
 	vec_t vel = VectorLength(ent->velocity);
-	SOFPPNIX_DEBUG("Velocity: %f\n",vel);
+	SOFPPNIX_DEBUG("Velocity: %f",vel);
 }
 
 

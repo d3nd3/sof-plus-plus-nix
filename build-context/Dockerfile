@@ -19,11 +19,9 @@ RUN cp /minizip/build/*.h /usr/include/minizip/
 RUN cp /minizip/*.h /usr/include/minizip/
 RUN cp /minizip/build/libminizip.a /lib/
 
-WORKDIR /
+WORKDIR /src
 
-
-
-COPY makefile /
+# COPY makefile /
 
 
 CMD ["make"]

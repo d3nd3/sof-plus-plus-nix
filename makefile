@@ -1,4 +1,4 @@
 all:
-	$(MAKE) -C build-context
+	$(MAKE) -C src
 %:
-	$(MAKE) -C build-context $@
+	$(MAKE) -C src $@

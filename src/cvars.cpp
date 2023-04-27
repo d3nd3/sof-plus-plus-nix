@@ -18,6 +18,8 @@ cvar_t * sv_suicidepenalty = NULL;
 
 cvar_t * _nix_deathmatch = NULL;
 
+cvar_t * _nix_version = NULL;
+
 
 /*
 	If the cvar already exists, the value will not be set.
@@ -26,6 +28,10 @@ cvar_t * _nix_deathmatch = NULL;
 */
 void CreateCvars(void)
 {
+
+	_nix_version = orig_Cvar_Get(		"_++nix_version", 		"0", 	NULL, 									NULL);
+
+
 	//									name					value	flags										modifiedCallback
 
 	// Already Existing
@@ -52,4 +58,67 @@ void CreateCvars(void)
 	mapname = orig_Cvar_Get(			"mapname",				"",		CVAR_NOSET,										NULL);
 
 	_nix_deathmatch = orig_Cvar_Get( "_++nix_deathmatch","0",NULL,NULL);
+}
+
+cvar_t * findCvar(char * cvarname)
+{
+	cvar_t	*var;
+	cvar_t * cvar_vars = *(unsigned int*)0x083FFD64;
+	
+	for (var=cvar_vars ; var ; var=var->next)
+		if (!strcmp (cvarname, var->name))
+			return var;
+	return NULL;
+}
+
+/*
+	Fine to call "Zone" Free. Because CopyString uses zones.
+*/
+void setCvarUnsignedInt(cvar_t * which,unsigned int val){
+	which->modified = true;
+	orig_Z_Free(which->string);
+	char intstring[64];
+	which->value = (float)val;
+	sprintf(intstring,"%u",val);
+	which->string = orig_CopyString(intstring);
+}
+
+
+void setCvarInt(cvar_t * which,int val){
+	which->modified = true;
+	orig_Z_Free(which->string);
+	char intstring[64];
+	which->value = (float)val;
+	sprintf(intstring,"%d",val);
+	which->string = orig_CopyString(intstring);
+}
+
+void setCvarByte(cvar_t * which, unsigned char val) {
+	which->modified = true;
+	orig_Z_Free(which->string);
+	char bytestring[64];
+	sprintf(bytestring,"%hhu",val);
+	which->value = atof(bytestring);
+	which->string = orig_CopyString(bytestring);
+}
+
+
+void setCvarFloat(cvar_t * which, float val) {
+
+	which->modified = true;
+	orig_Z_Free(which->string);
+	char floatstring[64];
+	sprintf(floatstring,"%f",val);
+	which->string = orig_CopyString(floatstring);
+	which->value = val;
+}
+
+void setCvarString(cvar_t * which, char * newstr) {
+
+	which->modified = true;
+	orig_Z_Free(which->string);
+	
+	
+	which->string = orig_CopyString(newstr);
+	which->value = atof(which->string);
 }

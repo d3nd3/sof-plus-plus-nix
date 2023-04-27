@@ -11,7 +11,7 @@ void SOFPPNIX_DEBUG(char * msg, ... ) {
 
 	char color[1024];
 	
-	snprintf(color,1024,"%c%s%c%s",P_PURPLE,"[sof++nix_Debug] : ",P_YELLOW,text);
+	snprintf(color,1024,"%c%s%c%s\n",P_PURPLE,"[sof++nix_Debug] : ",P_YELLOW,text);
 
 	orig_Com_Printf(color);
 	#endif
@@ -27,7 +27,7 @@ void SOFPPNIX_PRINT(char * msg, ... ) {
 
 	char color[1024];
 	
-	snprintf(color,1024,"%c%s%c%s",P_PINK,"[sof++nix] : ",P_TEXT,text);
+	snprintf(color,1024,"%c%s%c%s\n",P_PINK,"[sof++nix] : ",P_TEXT,text);
 
 	orig_Com_Printf(color);
 }
@@ -264,7 +264,7 @@ void create_file_dir_if_not_exists(const char* file_path) {
 	free(dir_path);
 }
 
-
+// std::stoi
 int c_string_to_int(char * in_str) {
 	std::string str(in_str);
 	size_t pos;
@@ -400,3 +400,265 @@ static vec_t VectorSeparation(vec3_t v0, vec3_t v1)
 
 	return length;
 }
+
+// A helper template to unpack an array into a variadic function call
+template <typename F, typename T, size_t N, size_t... Is>
+void array_to_variadic_impl(F f,edict_t * ent, short id, const std::array<T, N>& arr, std::index_sequence<Is...>) {
+  f(ent,id,arr[Is]...); // expand the array elements as arguments
+}
+
+// A wrapper template to deduce the array size and generate an index sequence
+template <typename F, typename T, size_t N>
+void array_to_variadic(F f,edict_t * ent, short id, const std::array<T, N>& arr) {
+  array_to_variadic_impl(f,ent,id, arr, std::make_index_sequence<N>{}); // make an index sequence from 0 to N-1
+}
+
+// A variadic function to print some integers
+void print_ints(void * x, ...) {
+  std::cout << x;
+  va_list args;
+  va_start(args, x);
+  int y;
+  while ((y = va_arg(args, int)) != 0) { // assume 0 is the sentinel value
+	std::cout << " " << y;
+  }
+  va_end(args);
+  std::cout << "\n";
+}
+int arraySize = 0;
+std::array<void*,10> formatString(const std::string& format, const std::vector<std::string>& inputs) {
+	arraySize = 0;
+	std::array<void*,10> result;
+	std::istringstream ss(format);
+	std::string token;
+	int i = 0;
+	std::cout << "before getline: " << format << std::endl;
+	while (std::getline(ss, token, '%')) {
+		if (token.empty()) continue;
+		char type = token[0];
+		switch (type) {
+			case 'd': {
+				int value = int(std::stoi(inputs[i]));
+				result[arraySize++] = (void*)value;
+				break;
+			}
+			case 'p': {
+				std::cout << "p" << std::endl;
+				char value = char(std::stoi(inputs[i]));
+				result[arraySize++] = (void*)value;
+				break;
+			}
+			case 's': {
+				
+				result[arraySize++] = new std::string(inputs[i]);
+				break;
+			}
+			case 'h': {
+				if (token[1] == 'd') {
+					short value = short(std::stoi(inputs[i]));
+					result[arraySize++] = (void*)value;
+				} else if (token[1] == 'u') {
+					unsigned short value = std::stoul(inputs[i]);
+					result[arraySize++] = (void*)value;
+				}
+				break;
+			}
+		}
+		i++;
+	}
+	//print array result using sofppdebug
+	SOFPPNIX_DEBUG("ARRAY SIZE: %d",arraySize);
+	for(int i = 0; i < arraySize; i++) {
+		SOFPPNIX_DEBUG("ARRAY[%d]: %d",i,result[i]);
+	}
+
+	return result;
+}
+
+void SP_PRINT_MULTI(edict_t * ent, short id, std::string& format, std::vector<std::string>& inputs) {
+
+	std::array<void*,10> args = formatString(format, inputs);
+	array_to_variadic(orig_SP_Print,ent,id, args);
+}
+
+void crc_checksum(const char * data,std::string & checksum)
+{
+	unsigned int crc = crc32(0L, NULL, 0);
+	crc = crc32(crc, reinterpret_cast<const Bytef*>(data), strlen(data));
+	std::stringstream ss;
+	ss << std::hex << std::setfill('0') << std::setw(8) << crc;
+	checksum = ss.str();
+}
+
+
+int changesize(FILE *fp, off_t size)
+{
+	int filedes = fileno(fp);
+	return ftruncate(filedes, size);
+}
+
+void* fast_realloc(void * buffer,int size)
+{
+	void * tmp = realloc(buffer,size);
+	if ( tmp == NULL ) {
+		error_exit("realloc failed");
+	}
+	return tmp;
+}
+
+// Convert a string to lowercase
+std::string toLowercase(const std::string& str) {
+	std::string result(str);
+	for (auto& c : result) {
+		c = std::tolower(c);
+	}
+	return result;
+}
+
+// Search for a case-insensitive substring within a string
+bool strcasestr(const std::string& str, const std::string& substr) {
+	std::string str_lower = toLowercase(str);
+	std::string substr_lower = toLowercase(substr);
+	return (strstr(str_lower.c_str(), substr_lower.c_str()) != nullptr);
+}
+
+/*
+	ensure minimum input size of 16.
+*/
+void my_itoa(int i, char * out_str) {
+	snprintf(out_str, 16, "%d", i);
+}
+
+/*
+
+--------------------LINKED LISTS-------------------------
+GOOD FOR OFTEN ADDING DELETING ELEMENTS
+THUS MEMORY MANAGEMENT.
+	list_t *list = list_create();
+	int *a = malloc(sizeof(int));
+	int *b = malloc(sizeof(int));
+	int *c = malloc(sizeof(int));
+	*a = 1;
+	*b = 2;
+	*c = 3;
+	list_append(list, a);
+*/
+
+/* Initialize a new linked list */
+list_t *list_create() {
+	list_t *list = malloc(sizeof(list_t));
+	if (!list) {
+		fprintf(stderr, "Error: Unable to allocate memory for list_t\n");
+		exit(EXIT_FAILURE);
+	}
+	memset(list, 0, sizeof(list_t));
+	return list;
+}
+
+/* Destroy a linked list and free all its memory */
+void list_destroy(list_t *list) {
+	if (!list) {
+		return;
+	}
+	list_node_t *node = list->head;
+	while (node) {
+		list_node_t *next = node->next;
+		free(node);
+		node = next;
+	}
+	free(list);
+}
+
+/* Create a new node with the given data */
+list_node_t *list_node_create(void *data) {
+	list_node_t *node = malloc(sizeof(list_node_t));
+	if (!node) {
+		fprintf(stderr, "Error: Unable to allocate memory for list_node_t\n");
+		exit(EXIT_FAILURE);
+	}
+	memset(node, 0, sizeof(list_node_t));
+	node->data = data;
+	return node;
+}
+
+/* Add a node to the end of the linked list */
+void list_append(list_t *list, void *data) {
+	list_node_t *node = list_node_create(data);
+	if (!list->head) {
+		/* Empty list */
+		list->head = node;
+		list->tail = node;
+	} else {
+		/* Non-empty list */
+		list->tail->next = node;
+		node->prev = list->tail;
+		list->tail = node;
+	}
+	list->count++;
+}
+
+/* Remove a node from the linked list */
+void list_remove(list_t *list, list_node_t *node) {
+	if (!node) {
+		return;
+	}
+	if (node == list->head) {
+		/* Remove the head node */
+		list->head = node->next;
+	} else {
+		node->prev->next = node->next;
+	}
+	if (node == list->tail) {
+		/* Remove the tail node */
+		list->tail = node->prev;
+	} else {
+		node->next->prev = node->prev;
+	}
+	free(node);
+	list->count--;
+}
+
+/* Print the linked list */
+void list_print(list_t *list) {
+	printf("List (count=%ld):\n", list->count);
+	list_node_t *node = list->head;
+	while (node) {
+		printf("%p -> ", node->data);
+		node = node->next;
+	}
+	printf("NULL\n");
+}
+
+
+void LoadTextFile(const char *fileName, char **text)
+{
+	FILE *ifp; //a file pointer for file read/write
+	long length; //the length of the file
+
+	//opening the file
+	ifp = fopen(fileName, "r");
+	if (ifp == NULL)
+	{
+		error_exit("Can't open input file \"%s\"!\n", fileName);
+	}
+	else
+	{
+		//getting the length of the file
+		fseek(ifp, 0, SEEK_END);
+		length = ftell(ifp);
+		fseek(ifp, 0, SEEK_SET);
+
+		//allocating memory for the string
+		*text = malloc(length + 1);
+
+		//reading the file into the string
+		fread(*text, 1, length, ifp);
+
+		//closing the file
+		fclose(ifp);
+
+		//adding a null terminator
+		(*text)[length] = '\0';
+	}
+}
+

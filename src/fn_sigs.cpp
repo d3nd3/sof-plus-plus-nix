@@ -36,16 +36,30 @@ void ( *orig_PF_Configstring)(int index, char * string) = 0x080a7710;
 
 
 // ----SHARED-----
+
+
+char *(*orig_CopyString) (char *in) = 0x08120C3C;
+void (*orig_Z_FreeTags) (int tag) = 0x08120DB4;
+void (*orig_Z_Free) (void *ptr) = 0x08120CBC;
 void (*orig_Sys_Quit) (void) = 0x0820AF40;
 void (*orig_Sys_Error) (char *error, ...) = 0x082099A4;
 
-int (*orig_FS_LoadFile)(char * name,void ** something, bool button) = 0x08124724;
+int	(*orig_FS_LoadFile) (char *name, void **buf, bool OverridePak = false) = 0x08124724;
 char * (*orig_FS_Userdir)(void) = 0x08126BE0;
 
+void (*orig_SP_Register)(const char *Package) = 0x08131D38;
+int (*orig_SP_GetStringID)(char * instr) = 0x081326A4;
+const char	*(*orig_SP_GetStringText)(unsigned short ID) = 0x0813279C;//0x0813492C;
+void (*orig_SP_Print)(edict_t *ent, unsigned short ID, ...) = 0x081328D0;
+
+int (*orig_SP_SPrint)(char *buffer, int buffer_size, unsigned short ID, ...) = 0x081331D4;
+
+void (*orig_Cbuf_Execute)(void) = 0x08116E38;
+void ( * orig_Cbuf_AddText)(char * text) = 0x0811927C;
 void (*orig_Cmd_ExecuteString)(const char * string) = 0x08118388;
-int     (*orig_Cmd_Argc) (void) = 0x081194FC;
+int     (*orig_Cmd_Argc) (void) = 0x081194B0;
 char    *(*orig_Cmd_Argv) (int i) = 0x081194C8;
-char    *(*orig_Cmd_Args) (void) = 0x081194B0;
+char    *(*orig_Cmd_Args) (void) = 0x081194FC;
 void (*orig_Qcommon_Init)(int one, char** two) = 0x0811E6E8;
 void (*orig_Qcommon_Shutdown)(void) = 0x081211E0;
 

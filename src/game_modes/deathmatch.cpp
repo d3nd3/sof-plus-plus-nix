@@ -63,6 +63,15 @@ gamerules_c * orig_modes[] = {
 	// &dm_ctb
 };
 
+/*
+	8 bytes of padding at start of vtable.
+	vtable pointer lives at classObj+4
+*/
+void fixupClassesForLinux(void)
+{
+	// rules-> entry point. requires gcc linux compatibility.
+	*(unsigned int*)(&dm_always) = *(unsigned int*)(&dm_always) - 8;
+}
 
 gamerules_c * intercept = NULL;
 gamerules_c base_gamerules_c;
@@ -113,6 +122,7 @@ private:
 // __attribute__((thiscall))
 void  my_setDMMode(void * self,int dmmode)
 {
+	SOFPPNIX_DEBUG("my_setDMMode : %i",dmmode);
 	int sofree_dmmode = (int)(_nix_deathmatch->value);
 
 	if ( sofree_dmmode > 0 ) {
@@ -145,7 +155,7 @@ void  my_setDMMode(void * self,int dmmode)
 			// Since the sof library was compiled with a gcc which uses the +4 as vtable
 			// We have to give it -4 as pointer.
 			// The vtable pointer also needs to start 8 bytes back. :/
-			*(unsigned int*)(&dm_always) = *(unsigned int*)(&dm_always) - 8;
+			
 			stset(self,8,(void*)(&dm_always)-4);
 
 			// save the original gamerules_c in SoF memory.
@@ -216,7 +226,7 @@ sofplus on_map_begin is also a spawnentities hook but console code is pushed AFT
 void	gamerules_c::levelInit(void){
 	void (*o)(void * self) = stget(stget(orig,4)+8+0x10,0);
 
-	SOFPPNIX_DEBUG("Fallback level init ... should be dmctf\n");
+	SOFPPNIX_DEBUG("Fallback level init ... should be dmctf");
 	// dm specific levelinit fallback func
 	o(orig);
 

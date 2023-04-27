@@ -12,6 +12,9 @@
 #include <algorithm>
 #include <unordered_map>
 
+
+#include <stdarg.h>
+
 #include <cerrno>
 
 #include <thread>
@@ -34,9 +37,14 @@
 #include <sys/stat.h>
 #include <sys/syscall.h>
 
+#include <execinfo.h>
+
 #include <libgen.h>
 
+#include <iomanip>
+
 #include <curl/curl.h>
+#include <zlib.h>
 
 #include <openssl/evp.h>
 #include <openssl/md4.h>
@@ -45,6 +53,11 @@
 #include "fn_sigs.h"
 
 
+/*---------------------------------------------------------------------
+-----------------------------main.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+extern const char * SOFREESP;
 /*---------------------------------------------------------------------
 -----------------------------game.cpp----------------------------
  ---------------------------------------------------------------------
@@ -56,6 +69,8 @@ extern unsigned char chktbl2[3000];
 -----------------------------httpdl.cpp----------------------------
  ---------------------------------------------------------------------
 */
+#include <boost/filesystem.hpp>
+
 enum enum_dl_status {
 	DS_UNCERTAIN,
 	DS_FAILURE,
@@ -112,7 +127,13 @@ extern void loadHttpCache(void);
 -----------------------------exe_shared.cpp----------------------------
  ---------------------------------------------------------------------
 */
-
+extern char __BUILD_YEAR;
+extern char __BUILD_MONTH;
+extern char __BUILD_DAY;
+extern char __BUILD_NUMBER;
+extern int next_available_ID;
+extern int sofreebuild_len;
+extern char sofreebuildstring[128];
 extern void my_test(void);
 /*---------------------------------------------------------------------
 ------------------------------util.cpp---------------------------------
@@ -132,24 +153,63 @@ extern void memoryAdjust(void * addr, int size, unsigned char val);
 // net
 extern void NetadrToSockadr (netadr_t *a, struct sockaddr_in *s);
 extern void SockadrToNetadr (struct sockaddr_in *s, netadr_t *a);
+extern void dump_usercmd(usercmd_t& cmd);
 
 // utils
 extern void error_exit(char* message,...);
 extern void hexdump(void *addr_start, void *addr_end);
-extern int c_string_to_int(char * in_str);
 extern void create_dir_if_not_exists(const char* dir_path);
 extern void create_file_dir_if_not_exists(const char* file_path);
+extern void crc_checksum(const char * data,std::string & checksum);
+extern int changesize(FILE *fp, off_t size);
+extern void* fast_realloc(void * buffer,int size);
+extern std::string toLowercase(const std::string& str);
+extern bool strcasestr(const std::string& str, const std::string& substr);
+extern void LoadTextFile(const char *fileName, char **text);
+
+// linked lists
+
+/* Define a struct to represent each element in the linked list */
+typedef struct list_node {
+    struct list_node *next;
+    struct list_node *prev;
+    void *data;
+} list_node_t;
+
+/* Define a struct to represent the linked list itself */
+typedef struct list {
+    list_node_t *head;
+    list_node_t *tail;
+    size_t count;
+} list_t;
+
+/* Initialize a new linked list */
+extern list_t *list_create();
+extern void list_destroy(list_t *list);
+extern list_node_t *list_node_create(void *data);
+extern void list_append(list_t *list, void *data);
+extern void list_remove(list_t *list, list_node_t *node);
+extern void list_print(list_t *list);
+
+// sof specific
 extern int countPlayersInGame(void);
 extern bool isServerEmpty(void);
 extern int getPlayerSlot(void * in_client);
-extern void dump_usercmd(usercmd_t& cmd);
 
 // math
+extern void my_itoa(int i, char * out_str);
+extern int c_string_to_int(char * in_str);
 extern vec_t VectorNormalize (vec3_t v);
 extern float NormalizeAngle (float angle);
 extern vec_t VectorLength (const vec3_t v);
 static vec_t VectorSeparation(vec3_t v0, vec3_t v1);
 
+
+// A variadic function to print some integers
+extern void print_ints(void * x, ...);
+extern int arraySize;
+extern std::array<void*,10> formatString(const std::string& format, const std::vector<std::string>& inputs);
+extern void SP_PRINT_MULTI(edict_t * ent, short id, std::string& format, std::vector<std::string>& inputs);
 
 /*---------------------------------------------------------------------
 -----------------------------serverlist.cpp----------------------------
@@ -176,11 +236,24 @@ extern void cmd_nix_test(void);
 extern void cmd_nix_client_map(void);
 extern void cmd_nix_checksum(void);
 
+extern void nix_draw_clear(void);
+extern void nix_draw_string(void);
+extern void nix_draw_string2(void);
+extern void nix_draw_altstring(void);
+extern void nix_spackage_list(void);
+extern void nix_spackage_register(void);
+extern void nix_spackage_print_ref(void);
+extern void nix_spackage_print_id(void);
+extern void nix_spackage_print_obit(void);
+extern void nix_spackage_print_string(void);
+extern void nix_spackage_gettext(void);
+
 /*---------------------------------------------------------------------
 -----------------------------cvars.cpp----------------------------
  ---------------------------------------------------------------------
 */
 extern void CreateCvars(void);
+extern cvar_t * _nix_version;
 extern cvar_t * maxclients;
 extern cvar_t * sv_public;
 extern cvar_t * gamespyport;
@@ -198,6 +271,13 @@ extern cvar_t * ctf_loops;
 extern cvar_t * sv_suicidepenalty;
 
 extern cvar_t * _nix_deathmatch;
+
+extern cvar_t * findCvar(char * cvarname);
+extern void setCvarUnsignedInt(cvar_t * which,unsigned int val);
+extern void setCvarInt(cvar_t * which,int val);
+extern void setCvarByte(cvar_t * which, unsigned char val);
+extern void setCvarFloat(cvar_t * which, float val);
+extern void setCvarString(cvar_t * which, char * newstr);
 
 /*---------------------------------------------------------------------
 -----------------------------detect.cpp----------------------------
@@ -217,4 +297,5 @@ extern void spawnDistraction(edict_t * ent,int slot);
 */
 #define stget(e,x) *(unsigned int*)((void*)e+x)
 #define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
+extern void fixupClassesForLinux(void);
 #include "deathmatch.h"

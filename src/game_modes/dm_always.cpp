@@ -54,44 +54,49 @@ void	always_gamerules_c::preLevelInit(void){
 /*
 called by SpawnEntities
 sofplus on_map_begin is also a spawnentities hook but console code is pushed AFTER spawnentities is called so later than this.
+
+There is a strange feature. Called "Defer". In SV_Map @sv_init.c Cbuf_CopyToDefer ();
+and SV_Begin_f @sv_user.c Cbuf_InsertFromDefer(). Any console commands inserted on same frame as map change.
+Are saved and unloaded when a client connects.
 */
 void	always_gamerules_c::levelInit(void){
-
-#if 0
+	SOFPPNIX_DEBUG("always_gamerules_c::levelInit()");
 	next_available_ID = 0;
+	std::string sp_name = "++nix";
 
-	// sofree genetic levelinti code
-	char temp[64];
-	sprintf(temp,"%s/strip/%s.sp",user->string,"sofree");
-	FILE * sofree_strip = fopen(temp,"rb");
-	if ( sofree_strip) {
-		// already exists
-		fclose(sofree_strip);
-	} else {
-		// create it
-		FILE  * depend = fopen(temp,"w+b");
-		if ( depend == NULL ) {
-			orig_Com_Printf("WARNING: failed to write sofree.sp\n");
-			// MessageBox(NULL,"Fix sofree.sp please",NULL,MB_OK);
-			// ExitProcess(1);
-			orig_Com_Error(ERR_FATAL,"Unable to create sofree string package, contact developer\n");
-		} else {
-			//write the file
-			fprintf(depend,SOFREESP);
-			fclose(depend);	
-		}	
+	std::string sp_file_path = "strip/" + sp_name + ".sp";
+	FILE* depend = nullptr;
+	if ( orig_FS_LoadFile(sp_file_path.c_str(),NULL,false) == -1 ) {
+		sp_file_path = orig_FS_Userdir() + std::string("/") + sp_file_path;
+		depend = fopen(sp_file_path.c_str(), "wb");
+		if (depend == nullptr) {
+			error_exit("WARNING: failed to write to %s\n",sp_file_path.c_str());
+		}
+		else {
+			// doesnt' exist
+			SOFPPNIX_DEBUG("Creating %s.sp file",sp_name.c_str());
+			fprintf(depend, "%s", SOFREESP);
+			fclose(depend);
+		}
 	}
 
-	orig_Cbuf_AddText("sf_sv_spackage_register sofree.sp\n");
+	// std::string cmd = "++nix_spackage_register " + sp_name + ".sp\n";
+	std::string cmd = "echo Work please?\n";
+	SOFPPNIX_DEBUG("Calling %s",cmd.c_str());
+	// spackage_register handles crc and ID correction.
+	orig_Cbuf_AddText(cmd.c_str());
+	sizebuf_t * cmd_buf = 0x083F51D0;
+	if ( cmd_buf->cursize > 0 ) {
+		SOFPPNIX_DEBUG("LevelInitcmd_buf->cursize = %i",cmd_buf->cursize);
+		hexdump((unsigned char*)cmd_buf->data,(unsigned char*)cmd_buf->data + cmd_buf->cursize);
+	}
+	// orig_Cbuf_Execute();
 
 	// sets build number bottom right
-	orig_Cbuf_AddText("sf_sv_draw_clear\n");
+	// orig_Cbuf_AddText("++nix_draw_clear\n");
 
-	// orig_Com_Printf("Before level init\n");
-	#endif
 	// dm specific levelinit fallback func
-	currentGameMode->levelInit();
-	// orig_Com_Printf("Level Init Complete\n");
+	// currentGameMode->levelInit();
 }
 char	*always_gamerules_c::getGameName(void){
 	return currentGameMode->getGameName();
@@ -235,13 +240,13 @@ float	always_gamerules_c::clientCalculateWaver(edict_t *ent, int atkID){
  
  Begin Intermission ->
  ClientBeginServerFrame ->
- 	respawn()
- 		PutClientInServer ->
+	respawn()
+		PutClientInServer ->
  spectator_respawn ->
  ClientBeginDeathmatch ->
  ClientBegin ->
- 	PutClientInServer ->
- 		DM->ClientRespawn
+	PutClientInServer ->
+		DM->ClientRespawn
 */
 bool new_client[32];
 short client_gravity[32];
@@ -417,7 +422,7 @@ void always_gamerules_c::removeHooks(void) {
 
 void always_gamerules_c::applyHooks(void) {
 	
-	SOFPPNIX_DEBUG("applyHooks\n");
+	SOFPPNIX_DEBUG("applyHooks");
 
 	#if 0
 	orig_Cmd_Score_f = (Cmd_Score_f_type)DetourCreate((LPVOID)0x500F6710,(LPVOID)&my_Cmd_Score_f,DETOUR_TYPE_JMP,6);

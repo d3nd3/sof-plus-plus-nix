@@ -9,7 +9,6 @@ extern unsigned int * clientinst;
 extern unsigned int * objinst;
 
 
-extern char SOFREESP[32768];
 #include "../src/Game/gamecpp/q_shared.h"
 
 

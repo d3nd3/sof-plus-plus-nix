@@ -49,9 +49,24 @@ extern void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_
 
 
 // --Shared--
+extern int (*orig_FS_LoadFile) (char *name, void **buf, bool OverridePak = false);
+extern char *(*orig_CopyString) (char *in);
+extern void (*orig_Z_FreeTags) (int tag);
+extern void (*orig_Z_Free) (void *ptr);
 extern void (*orig_Sys_Quit) (void); 
 extern void (*orig_Sys_Error) (char *error, ...);
+
+extern void (*orig_SP_Register)(const char *Package);
+extern int (*orig_SP_GetStringID)(char * instr);
+extern const char	*(*orig_SP_GetStringText)(unsigned short ID);
+extern void (*orig_SP_Print)(edict_t *ent, unsigned short ID, ...);
+extern int (*orig_SP_SPrint)(char *buffer, int buffer_size, unsigned short ID, ...);
+
+extern void (*orig_Cbuf_Execute)(void);
+extern void my_Cbuf_Execute(void);
+extern void ( * orig_Cbuf_AddText)(char * text);
 extern void (*orig_Cmd_ExecuteString)(const char * string);
+
 extern int     (*orig_Cmd_Argc) (void);
 extern char    *(*orig_Cmd_Argv) (int i);
 extern char    *(*orig_Cmd_Args) (void);
@@ -71,7 +86,7 @@ extern void my_Cmd_RemoveCommand(char * cmd);
 extern void (*orig_Com_Printf) (char *msg, ...);
 extern void my_Com_Printf(char *msg,...);
 
-extern int (*orig_FS_LoadFile)(char * name,void ** something, bool button);
+extern int (*orig_FS_LoadFile)(char * name,void ** something, bool overidePak=false);
 extern char * (*orig_FS_Userdir)(void);
 
 extern unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int len, int out_seq_id);

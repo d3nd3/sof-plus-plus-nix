@@ -1,7 +1,25 @@
 #include "common.h"
 
-
 #define NOP 0x90
+
+const char * SOFREESP = R"(
+VERSION 1
+ID 7
+REFERENCE ++NIX
+DESCRIPTION "SoF Plus Plus Linux."
+COUNT 2
+INDEX 0
+{
+	REFERENCE LAYOUT_CUSTOM_S
+	FLAGS SP_FLAG_LAYOUT
+	TEXT_ENGLISH "%s"
+}
+INDEX 1
+{
+	REFERENCE CREDIT_CUSTOM_S
+	FLAGS SP_FLAG_CREDIT
+	TEXT_ENGLISH "%s"
+})";
 
 void setupMemory(void);
 
@@ -19,7 +37,13 @@ int chdir(const char *path)
 }
 
 void segfault_handler(int signal) {
+	std::cout << "Caught signal " << signal << std::endl;
 
+	void *bt[10];
+	size_t size = backtrace(bt, 10);
+	backtrace_symbols_fd(bt, size, STDERR_FILENO);
+
+	exit(1);
 }
 void __attribute__ ((constructor)) begin() {
 	// printf("sof++nix_DEBUG: LD_PRELOAD Constructor\n");
@@ -189,7 +213,7 @@ void __attribute__ ((constructor)) begin() {
 	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
 	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
 
-
+	orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
 	// callE8Patch(0x080B1809,&my_test);
 
