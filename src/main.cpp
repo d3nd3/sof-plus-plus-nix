@@ -169,7 +169,7 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x080C60E7,5,NOP);
 
 	// Silence status response (print?)
-	memoryAdjust(0x080C623A,5,NOP);
+	// memoryAdjust(0x080C623A,5,NOP);
 
 
 //---------------------- S_NOSOUND 1 CVAR NOT CRASH -------------------------

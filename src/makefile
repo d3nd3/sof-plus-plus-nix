@@ -56,46 +56,49 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 
 	$(CC) $(LDFLAGS) $(BUILD_NUMBER_LDFLAGS) $(OBJS) -o ../out/test.so $(LINKUS)
 
-../obj/dm_realistic.o : ./dm_realistic.cpp
+
+# game_modes
+../obj/deathmatch.o : ./game_modes/deathmatch.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/dm_realistic.o : ./game_modes/dm_realistic.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/dm_ctf.o : ./game_modes/dm_ctf.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/dm_standard.o : ./game_modes/dm_standard.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/dm_sofree.o : ./game_modes/dm_sofree.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/dm_always.o : ./game_modes/dm_always.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-
-../obj/dm_ctf.o : ./dm_ctf.cpp
+# features
+../obj/detect.o : ./features/detect.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/clipboard.o : ./features/clipboard.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/serverlist.o : ./features/serverlist.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/httpdl.o : ./features/httpdl.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-../obj/dm_standard.o : ./dm_standard.cpp
+# core
+../obj/exe_shared.o : ./core/exe_shared.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/exe_server.o : ./core/exe_server.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/exe_client.o : ./core/exe_client.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/game.o : ./core/game.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-../obj/dm_sofree.o : ./dm_sofree.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-
-../obj/deathmatch.o : ./deathmatch.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/dm_always.o : ./dm_always.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/detect.o : ./detect.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/clipboard.o : ./clipboard.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
+# normal
 ../obj/commands.o : ./commands.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/cvars.o : ./cvars.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/exe_shared.o : ./exe_shared.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/exe_server.o : ./exe_server.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/exe_client.o : ./exe_client.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/fn_sigs.o : ./fn_sigs.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/game.o : ./game.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/httpdl.o : ./httpdl.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/main.o : ./main.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/serverlist.o : ./serverlist.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/util.o : ./util.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
