@@ -71,7 +71,6 @@ extern unsigned char chktbl2[3000];
 -----------------------------httpdl.cpp----------------------------
  ---------------------------------------------------------------------
 */
-#include <boost/filesystem.hpp>
 
 enum enum_dl_status {
 	DS_UNCERTAIN,
