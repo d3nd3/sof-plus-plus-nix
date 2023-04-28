@@ -34,6 +34,9 @@
 
 #include "common.h"
 
+char layoutstring[1024];
+int layoutstring_len = 0;
+
 //dm_sofree_c
 dm_sofree_c dm_sofree;
 // dm_none_c dm_none;

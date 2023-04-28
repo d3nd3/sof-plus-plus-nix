@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include <regex>
+
 
 #include <stdarg.h>
 
@@ -195,6 +197,7 @@ extern void list_print(list_t *list);
 extern int countPlayersInGame(void);
 extern bool isServerEmpty(void);
 extern int getPlayerSlot(void * in_client);
+extern void * getClientX(int slot);
 
 // math
 extern void my_itoa(int i, char * out_str);
@@ -295,6 +298,9 @@ extern void spawnDistraction(edict_t * ent,int slot);
 -----------------------------deathmatch.cpp----------------------------
  ---------------------------------------------------------------------
 */
+extern char layoutstring[1024];
+extern int layoutstring_len;
+extern bool show_score[16];
 #define stget(e,x) *(unsigned int*)((void*)e+x)
 #define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
 extern void fixupClassesForLinux(void);

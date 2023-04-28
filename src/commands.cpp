@@ -258,11 +258,17 @@ void cmd_nix_test(void)
 	SOFPPNIX_DEBUG("%04X",out);
 }
 
-char layoutstring[1024];
-int layoutstring_len = 0;
 /*
 	0 arguments
-	clears screen.
+	clears screen. ( Excluding scoreboard ).
+
+	Puts a watermark on the screen.
+
+	Intention: Clear without remove watermark.
+
+	CheckEvents ( clear in case ClientMessage not called. )
+	ClientMessage ( clear + draw )
+	ClientEndFrame ( custom draw )
 */
 void nix_draw_clear(void)
 {
@@ -278,9 +284,10 @@ void nix_draw_clear(void)
 		SOFPPNIX_PRINT("++nix_draw_clear -h");
 		return;
 	}
+	SOFPPNIX_DEBUG("Clearing screen");
 	layoutstring_len = 0;
 	layoutstring[0] = 0x00;
-	sprintf(layoutstring,"xr %i yb -16 altstring \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
+	sprintf(layoutstring,"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
 	// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
 }
 /*
@@ -437,6 +444,19 @@ void nix_spackage_list(void)
 		SOFPPNIX_PRINT("++nix_spackage_list -h");
 		return;
 	}
+
+	char * verbose = NULL;
+	char * substring = NULL;
+	for ( int i = 1; i <= c; i++ ) {
+		if ( !strcmp(orig_Cmd_Argv(i),"verbose") ) {
+			verbose = orig_Cmd_Argv(i);
+		} else if ( substring == NULL ) {
+			substring = orig_Cmd_Argv(i);
+		}
+	}
+	SOFPPNIX_DEBUG("verbose %s",verbose);
+	SOFPPNIX_DEBUG("substring %s",substring);
+
 	int i;
 	cvar_t * savecvar = NULL;
 	int count = 0;
@@ -448,9 +468,10 @@ void nix_spackage_list(void)
 			// sprintf(line,"%s",(SV_CONFIGSTRINGS+(CS_SOUNDS+i)*MAX_QPATH));
 			strcpy(line,SV_CONFIGSTRINGS+(CS_STRING_PACKAGES+i)*MAX_QPATH);
 			
-			if ( c ==  1 ) {
-				if ( strcasestr(std::string(line),std::string(orig_Cmd_Argv(1) ) ) ) {
-					if ( !strcmp(orig_Cmd_Argv(2),"verbose") ) 
+			// Only show ones that match the substring
+			if ( substring != NULL ) {
+				if ( strcasestr(std::string(line),std::string( substring ) ) ) {
+					if ( verbose ) 
 						SOFPPNIX_PRINT("%s",line);
 
 					char tmpname[64];
@@ -458,20 +479,20 @@ void nix_spackage_list(void)
 					savecvar = orig_Cvar_Get( tmpname,"",0,NULL);
 					setCvarString(savecvar,line);
 					count++;
-
 				}
 			} else {
-				if ( !strcmp(orig_Cmd_Argv(2),"verbose") ) {
-					
+				// Show EVERY one
+				// no arguments supplied
+				// get the first 2 lines of the file?
+				if ( verbose ) {
 					char fname[64];
 					sprintf(fname,"strip/%s.sp",line);
 					unsigned char * filedata;
-					int ret = orig_FS_LoadFile(fname,&filedata,false);
-					// orig_Com_Printf("ret is %08X\n",ret);
-					if ( ret != -1 ) {
-						// fgets(fileline, sizeof(fileline), spfile);
-						// fgets(fileline, sizeof(fileline), spfile);
 
+					SOFPPNIX_DEBUG("fname %s",fname);
+					// Does the string package exist?
+					int ret = orig_FS_LoadFile(fname,&filedata,false);
+					if ( ret != -1 ) {
 						char * d = filedata;
 						char * second_line = NULL;
 						
@@ -497,9 +518,8 @@ void nix_spackage_list(void)
 
 						orig_Z_Free(filedata);
 					}
-					
 				}
-
+				
 				char tmpname[64];
 				sprintf(tmpname,"%s%i","_++nix_spackage_",i);
 				savecvar = orig_Cvar_Get( tmpname,"",0,NULL);
@@ -513,6 +533,21 @@ void nix_spackage_list(void)
 	setCvarInt(finalcount,count);
 	
 	// Cmd_CalcFreeImageSlots();
+}
+// there is a newline at the end of each string
+// Use regex to extract `ID [0-9]\r\n` from line
+void extractID(char * line) {
+	// define the regex pattern, it should match 1+ numbers and 0+ \r or \n
+	std::regex r("ID [0-9]+[\r\n]*");
+	// define a string containing the text to search
+	std::string s(line);
+	// try to match the regular expression with the string
+	std::smatch m;
+	// if there is a match
+	if (std::regex_search(s, m, r)) {
+		// print the match
+		std::cout << m.str() << std::endl;
+	}
 }
 
 /*
@@ -569,21 +604,25 @@ void nix_spackage_register(void)
 		
 		// READ
 		while ( fgets(line,512,IN_FILE) ) {
-			// there is a newline at the end of each string
-			char * find = strstr(line,"ID ");
-			if ( find ) {
-				find += 3;
-				char comp[16];
-				my_itoa(valid_ID[next_available_ID],comp);
-				find[strlen(find)-1] = 0x00;
-				if ( !strncmp(find,comp,3) ) {
-					// ID is already equal to next_available_ID
-					// mybuffer won't be used anymore
-					// use the original file
-					id_is_fine = true;
-				} else{
+
+			// define the regex pattern, it should match 1+ numbers and 0+ \r or \n
+			std::regex r("ID ([0-9]+)[\r\n]*");
+			std::string s(line);
+			std::smatch m;
+			if (std::regex_search(s, m, r)) {
+				// print the match
+				// std::cout << m.str() << std::endl;
+
+				// extract the ID using match ()
+				int id = std::stoi(m[1]);
+				// print the id
+				SOFPPNIX_DEBUG("ID: %i",id);
+
+				// if the ID is equal to the next available ID
+				if ( id != valid_ID[next_available_ID] ) {
+					// Not equal, requires change.
 					// adjust the ID
-					sprintf(line,"ID %i\n",valid_ID[next_available_ID]);
+					snprintf(line,sizeof(line),"ID %i\n",valid_ID[next_available_ID]);
 				}
 			}
 			mybuffer = fast_realloc(mybuffer,512*(line_count+1));

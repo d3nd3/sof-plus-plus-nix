@@ -2,8 +2,7 @@
 
 #define NOP 0x90
 
-const char * SOFREESP = R"(
-VERSION 1
+const char * SOFREESP = R"(VERSION 1
 ID 7
 REFERENCE ++NIX
 DESCRIPTION "SoF Plus Plus Linux."
@@ -198,6 +197,7 @@ void __attribute__ ((constructor)) begin() {
 
 //-------------------------------CONSOLE INPUT DEBUG-----------------
 	// memoryAdjust(0x08209ae0,2,NOP);
+
 
 
 ////////////////////////////////////////////////////

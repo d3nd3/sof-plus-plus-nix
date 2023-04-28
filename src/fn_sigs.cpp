@@ -47,7 +47,7 @@ void (*orig_Sys_Error) (char *error, ...) = 0x082099A4;
 int	(*orig_FS_LoadFile) (char *name, void **buf, bool OverridePak = false) = 0x08124724;
 char * (*orig_FS_Userdir)(void) = 0x08126BE0;
 
-void (*orig_SP_Register)(const char *Package) = 0x08131D38;
+void (*orig_SP_Register)(const char *Package) = 0x081348A8;
 int (*orig_SP_GetStringID)(char * instr) = 0x081326A4;
 const char	*(*orig_SP_GetStringText)(unsigned short ID) = 0x0813279C;//0x0813492C;
 void (*orig_SP_Print)(edict_t *ent, unsigned short ID, ...) = 0x081328D0;

@@ -58,6 +58,8 @@ sofplus on_map_begin is also a spawnentities hook but console code is pushed AFT
 There is a strange feature. Called "Defer". In SV_Map @sv_init.c Cbuf_CopyToDefer ();
 and SV_Begin_f @sv_user.c Cbuf_InsertFromDefer(). Any console commands inserted on same frame as map change.
 Are saved and unloaded when a client connects.
+
+Use Cbuf_ExecuteString here if you don't want deffered commands.
 */
 void	always_gamerules_c::levelInit(void){
 	SOFPPNIX_DEBUG("always_gamerules_c::levelInit()");
@@ -80,23 +82,14 @@ void	always_gamerules_c::levelInit(void){
 		}
 	}
 
-	// std::string cmd = "++nix_spackage_register " + sp_name + ".sp\n";
-	std::string cmd = "echo Work please?\n";
-	SOFPPNIX_DEBUG("Calling %s",cmd.c_str());
+	std::string cmd = "++nix_spackage_register " + sp_name + ".sp\n";
 	// spackage_register handles crc and ID correction.
-	orig_Cbuf_AddText(cmd.c_str());
-	sizebuf_t * cmd_buf = 0x083F51D0;
-	if ( cmd_buf->cursize > 0 ) {
-		SOFPPNIX_DEBUG("LevelInitcmd_buf->cursize = %i",cmd_buf->cursize);
-		hexdump((unsigned char*)cmd_buf->data,(unsigned char*)cmd_buf->data + cmd_buf->cursize);
-	}
-	// orig_Cbuf_Execute();
-
+	orig_Cmd_ExecuteString(cmd.c_str());
 	// sets build number bottom right
-	// orig_Cbuf_AddText("++nix_draw_clear\n");
+	orig_Cmd_ExecuteString("++nix_draw_clear\n");
 
 	// dm specific levelinit fallback func
-	// currentGameMode->levelInit();
+	currentGameMode->levelInit();
 }
 char	*always_gamerules_c::getGameName(void){
 	return currentGameMode->getGameName();
@@ -107,7 +100,32 @@ int		always_gamerules_c::checkItemSpawn(edict_t *ent,Pickup **pickup){
 int		always_gamerules_c::checkItemAfterSpawn(edict_t *ent,Pickup *pickup){
 	return currentGameMode->checkItemAfterSpawn(ent,pickup);
 }
+/*
+Ideal place to put SP clear. Before other SP commands.
+*/
 void	always_gamerules_c::checkEvents(void){
+
+	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	for ( int i = 0 ; i < maxclients->value;i++ ) {
+		void * a_client_t = svs_clients+i*0xd2ac;
+		int state = stget(a_client_t,0);
+		if (state != cs_spawned )
+			continue;
+		// Clear every frame.
+		edict_t * ent = stget(a_client_t,CLIENT_ENT);
+		SOFPPNIX_DEBUG("ent === %08X",ent);
+		orig_SP_Print(ent,0x0700,"*");
+	}
+
+	// void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	// for ( int i = 0 ; i < maxclients->value;i++ ) {
+	// 	void * client_t = svs_clients + i * 0xd2ac;
+	// 	int state = *(int*)(client_t);
+	// 	if (state != cs_spawned )
+	// 		continue;
+	// 	player_count +=1;
+	// }
+	
 	currentGameMode->checkEvents();
 }
 void	always_gamerules_c::respawnUntouchedItem(edict_t *ent) {
@@ -290,9 +308,37 @@ void	always_gamerules_c::clientDropWeapon(edict_t *ent,int type, int clipSize){
 float	always_gamerules_c::always_gamerules_c::clientGetMovescale(edict_t *ent){
 	return currentGameMode->clientGetMovescale(ent);
 }
+
+/*
+G_RunFrame -> ClientEndFrames @g_main.cpp
+// THis is called by ClientEndServerFrame
+ Its called after Scoreboard, which is useful.
+
+ Clear in dm->checkEvents
+ Second Clear in dm->ClientScoreboardMessage
+ Extra Drawings Here.
+*/
 //c4
-// THis is called by clientBegin and G_RunFrame
+
 void	always_gamerules_c::clientEndFrame(edict_t *ent){
+
+
+	// SOFPPNIX_DEBUG("Player slot : %i",ent->s.skinnum);
+	// correct layering.
+	
+	// Draw Custom 2D.
+	if ( stget(getClientX(ent->s.skinnum),0) == cs_spawned && layoutstring[0] ) {
+
+		SOFPPNIX_DEBUG("Draw Custom 2D %s\n",layoutstring);
+		// orig_SP_Print(ent,0x0700,layoutstring);
+		orig_SP_Print(ent,0x0A00,"0");
+	}
+
+	// always show scoreboard during intermission
+	// player can toggle scoreboard when its not intermission.
+	// if ( !show_score[sendToSlot] && !(*level_intermissiontime) ) return;
+
+
 	// orig_Com_Printf("clientEndFrame\n");
 	currentGameMode->clientEndFrame(ent);
 }
@@ -328,27 +374,29 @@ void	always_gamerules_c::clientRespawn(edict_t *ent){
 	currentGameMode->clientRespawn(ent);
 
 }
+
+/*
+Active when player has their scoreboard open.
+Called by ClientEndServerFrame, every 32 frames. (3.2 seconds)
+if (ent->client->showscores && !(level.framenum & 31))
+		dm->clientScoreboardMessage(ent,ent->enemy,false);
+
+Goal : draw even when the scoreboard is not open. Surely I just put code in another function.
+
+The default function clears the screen before writing. This means we cannot draw _before_ it.
+Maybe just draw after it?
+dmctf_clientScoreboardMessage : NOP Clear.
+
+In SoFree We made the real showscores to always be true, thus making this function always be called.
+But I am not doing that here.
+checkEvents is instead clearing. Which is earlier than clientEndFrame.
+*/
 //d8
-void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file){
-
-	#if 0
-	// orig_Com_Printf("clientScoreboardMessage\n");
-	int sendToSlot = get_player_slot_from_ent(ent);
-	// they dont have scoreboard enabled
-	
-	// orig_Com_Printf(" score : %02X for player %i\n", show_score[sendToSlot], sendToSlot);
-	//clear
-	orig_SP_Print(ent,0x0700,"*");
-	
-	if ( layoutstring[0] ) {
-		orig_SP_Print(ent,0x0700,layoutstring);
-		// orig_Com_Printf("layout string is %s\n",layoutstring);
-	}
-	if ( !show_score[sendToSlot] && !(*level_intermissiontime) ) return;
-	// scoreboard of mod
-
-	#endif
+void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
+{
+	// Draw Official Scoreboard First because it clears screen.
 	currentGameMode->clientScoreboardMessage(ent,killer,log_file);
+	
 }
 //dc
 void	always_gamerules_c::clientStealthAndFatigueMeter(edict_t *ent){

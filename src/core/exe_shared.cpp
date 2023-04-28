@@ -5,8 +5,14 @@ unsigned char chktbl2[3000];
 int sofreebuild_len;
 char sofreebuildstring[128];
 void my_Qcommon_Init(int one , char ** two) {
+
+
 	orig_Qcommon_Init(one,two);
-	
+
+	SOFPPNIX_DEBUG("Config strings = %08X\n",0x082AF680 + 0x454);
+	// SOFPPNIX_DEBUG("config strings = %08X\n",stget(0x0824A34E,0));
+
+
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
 	unsigned char * lin_chktbl = 0x08293C80;
@@ -30,9 +36,9 @@ void my_Qcommon_Init(int one , char ** two) {
 	sprintf(sofreebuildstring,"++nix build %s ",tmp_chr);
 	sofreebuild_len = strlen(sofreebuildstring);
 	// turn it grey
-	for (int i = 0; i < sofreebuild_len; i++ ) {
-		*(sofreebuildstring+i) = *(sofreebuildstring+i) | 0x80;
-	}
+	// for (int i = 0; i < sofreebuild_len; i++ ) {
+	// 	*(sofreebuildstring+i) = *(sofreebuildstring+i) | 0x80;
+	// }
 
 	setCvarString(_nix_version,tmp_chr);
 	SOFPPNIX_PRINT("++nix Initialised. Version :  %s",tmp_chr);

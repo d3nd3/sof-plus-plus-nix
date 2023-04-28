@@ -52,7 +52,12 @@ enum ScriptConditionT
 #define stset(e,x,v) *(unsigned int*)(e+x) = v
 
 
-#define SV_CONFIGSTRINGS 0x203A2374
+// #define SV_CONFIGSTRINGS 0x203A2374
+
+// #define SV_CONFIGSTRINGS 0x00732500
+// #define SV_CONFIGSTRINGS 0x0824A34E
+#define SV_CONFIGSTRINGS 0x82AFAD4
+
 
 /*
 

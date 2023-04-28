@@ -285,12 +285,17 @@ int c_string_to_int(char * in_str) {
 	return num;
 }
 
+void * getClientX(int slot)
+{
+	static void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	return svs_clients + slot * 0xd2ac;
+}
+
 int countPlayersInGame(void)
 {
 	int player_count = 0;
-	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
 	for ( int i = 0 ; i < maxclients->value;i++ ) {
-		void * client_t = svs_clients + i * 0xd2ac;
+		void * client_t = getClientX(i);
 		int state = *(int*)(client_t);
 		if (state != cs_spawned )
 			continue;
@@ -432,8 +437,15 @@ std::array<void*,10> formatString(const std::string& format, const std::vector<s
 	std::istringstream ss(format);
 	std::string token;
 	int i = 0;
-	std::cout << "before getline: " << format << std::endl;
+	// std::cout << "before getline: " << format << std::endl;
+	// print all inputs
+	// for (auto& input : inputs) {
+	// 	std::cout << "input: " << input << std::endl;
+	// }
+
 	while (std::getline(ss, token, '%')) {
+		// skip first token
+		if (i == 0) continue;
 		if (token.empty()) continue;
 		char type = token[0];
 		switch (type) {
@@ -443,7 +455,7 @@ std::array<void*,10> formatString(const std::string& format, const std::vector<s
 				break;
 			}
 			case 'p': {
-				std::cout << "p" << std::endl;
+				std::cout << "p " << i << std::endl;
 				char value = char(std::stoi(inputs[i]));
 				result[arraySize++] = (void*)value;
 				break;
