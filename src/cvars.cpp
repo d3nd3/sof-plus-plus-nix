@@ -19,6 +19,8 @@ cvar_t * sv_suicidepenalty = NULL;
 cvar_t * _nix_deathmatch = NULL;
 
 cvar_t * _nix_version = NULL;
+cvar_t * _nix_violence = NULL;
+cvar_t ** p_nix_violence = &_nix_violence;
 
 
 /*
@@ -52,12 +54,22 @@ void CreateCvars(void)
 
 
 	cheats = orig_Cvar_Get(				"cheats", 				"0", 	CVAR_SERVERINFO, 								NULL);
-	sv_violence = orig_Cvar_Get(		"sv_violence",			"0",	CVAR_SERVERINFO,								NULL);
+	sv_violence = orig_Cvar_Get(		"sv_violence",			"63",	CVAR_SERVERINFO,								NULL);
 
 	deathmatch = orig_Cvar_Get(			"deathmatch", 			"0", 	CVAR_ARCHIVE, 									NULL);
 	mapname = orig_Cvar_Get(			"mapname",				"",		CVAR_NOSET,										NULL);
 
 	_nix_deathmatch = orig_Cvar_Get( "_++nix_deathmatch","0",NULL,NULL);
+
+	*p_nix_violence = orig_Cvar_Get( "_++nix_violence","63",NULL,NULL);
+
+	// repond pretending to be low violence.
+    int offset = (int)&p_nix_violence - 0x829CCC8;
+	SOFPPNIX_DEBUG("%d - %d",(int)&p_nix_violence,0x829CCC8);
+	memoryUnprotect(0x080A9AA5);
+	*(int*)0x080A9AA5 = offset;
+	memoryProtect(0x080A9AA5);
+
 }
 
 cvar_t * findCvar(char * cvarname)

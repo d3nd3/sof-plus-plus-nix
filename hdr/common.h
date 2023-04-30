@@ -51,6 +51,8 @@
 #include <openssl/evp.h>
 #include <openssl/md4.h>
 
+#include <bsd/string.h>
+
 #include "engine.h"
 #include "fn_sigs.h"
 
@@ -161,7 +163,7 @@ extern void error_exit(char* message,...);
 extern void hexdump(void *addr_start, void *addr_end);
 extern void create_dir_if_not_exists(const char* dir_path);
 extern void create_file_dir_if_not_exists(const char* file_path);
-extern void crc_checksum(const char * data,std::string & checksum);
+extern void crc_checksum(const char * data,std::string & checksum, int length);
 extern int changesize(FILE *fp, off_t size);
 extern void* fast_realloc(void * buffer,int size);
 extern std::string toLowercase(const std::string& str);
@@ -273,6 +275,8 @@ extern cvar_t * ctf_loops;
 extern cvar_t * sv_suicidepenalty;
 
 extern cvar_t * _nix_deathmatch;
+extern cvar_t * _nix_violence;
+extern cvar_t ** p_nix_violence;
 
 extern cvar_t * findCvar(char * cvarname);
 extern void setCvarUnsignedInt(cvar_t * which,unsigned int val);
@@ -299,7 +303,6 @@ extern void spawnDistraction(edict_t * ent,int slot);
 */
 extern char layoutstring[1024];
 extern int layoutstring_len;
-extern bool show_score[16];
 #define stget(e,x) *(unsigned int*)((void*)e+x)
 #define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
 extern void fixupClassesForLinux(void);

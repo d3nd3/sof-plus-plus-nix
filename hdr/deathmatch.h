@@ -439,9 +439,10 @@ public:
 class dm_standard_c:public gamerules_c
 {
 public:
-	void levelInit(void);
+	// void levelInit(void);
 	void applyHooks(void);
 	void removeHooks(void);
+
 };
 
 class dm_realistic_c:public gamerules_c
@@ -458,8 +459,20 @@ public:
 	// void levelInit(void);
 	void applyHooks(void);
 	void removeHooks(void);
+
+
 };
 
 
-
 extern always_gamerules_c dm_always;
+//dm_sofree_c
+extern dm_sofree_c dm_sofree;
+
+// dm_none_c dm_none;
+extern dm_standard_c dm_standard;
+// dm_assassin_c dm_assassin;
+// dm_arsenal_c dm_arsenal;
+extern dm_ctf_c dm_ctf;
+extern dm_realistic_c dm_realistic;
+// dm_control_c dm_control;
+// dm_ctb_c dm_ctb;

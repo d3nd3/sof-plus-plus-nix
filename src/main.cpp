@@ -1,24 +1,24 @@
 #include "common.h"
 
 #define NOP 0x90
-
-const char * SOFREESP = R"(VERSION 1
-ID 7
-REFERENCE ++NIX
-DESCRIPTION "SoF Plus Plus Linux."
-COUNT 2
-INDEX 0
-{
-	REFERENCE LAYOUT_CUSTOM_S
-	FLAGS SP_FLAG_LAYOUT
-	TEXT_ENGLISH "%s"
-}
-INDEX 1
-{
-	REFERENCE CREDIT_CUSTOM_S
-	FLAGS SP_FLAG_CREDIT
-	TEXT_ENGLISH "%s"
-})";
+// Doesn't like tabs.
+const char * SOFREESP = "VERSION 1\n\
+ID 7\n\
+REFERENCE ++NIX\n\
+DESCRIPTION \"SoF Plus PLus Linux.\"\n\
+COUNT 2\n\
+INDEX 0\n\
+{\n\
+  REFERENCE LAYOUT_CUSTOM\n\
+  FLAGS SP_FLAG_LAYOUT\n\
+  TEXT_ENGLISH \"%s\"\n\
+}\n\
+INDEX 1\n\
+{\n\
+  REFERENCE CREDIT_CUSTOM\n\
+  FLAGS SP_FLAG_CREDIT\n\
+  TEXT_ENGLISH \"%s\"\n\
+}\n";
 
 void setupMemory(void);
 
@@ -197,6 +197,14 @@ void __attribute__ ((constructor)) begin() {
 
 //-------------------------------CONSOLE INPUT DEBUG-----------------
 	// memoryAdjust(0x08209ae0,2,NOP);
+
+
+//----------------------SV_VIOLENCE CL_VIOLENCE DONT REJECT------------------------
+	memoryAdjust(0x080AA7B8,1,0xEB);
+//---------------------SV_VIOLENCE PURE = TRUE SV_SpawnServer-------------------
+	memoryAdjust(0x080A86EF,1,0xEB);
+	memoryAdjust(0x080A8703,1,0xEB);
+
 
 
 

@@ -288,6 +288,7 @@ void nix_draw_clear(void)
 	layoutstring_len = 0;
 	layoutstring[0] = 0x00;
 	sprintf(layoutstring,"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
+	layoutstring_len = strlen(layoutstring);
 	// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
 }
 /*
@@ -582,17 +583,17 @@ void nix_spackage_register(void)
 		return;
 	}
 	in_file_path = orig_FS_Userdir() + std::string("/") +  in_file_path;
-	
+	SOFPPNIX_DEBUG("in_file_path %s",in_file_path.c_str());
 	// If the file does not exist inside USER. Treat normally.
 	FILE * IN_FILE = fopen(in_file_path.c_str(),"r+");
 	if ( !IN_FILE ) {
+		SOFPPNIX_DEBUG("Detected not in user!");
 		char * shorten= strchr(one,'.');
 		if ( shorten ) {
 			*shorten = 0x00;	
 		}
+		SOFPPNIX_DEBUG("Registering %s!",one);
 		orig_SP_Register(one);
-
-		fclose(IN_FILE);
 		return;
 
 	} else {
@@ -602,6 +603,8 @@ void nix_spackage_register(void)
 		int line_count = 0;
 		bool id_is_fine = false;
 		
+		char * continuous_buf = NULL;
+		int written = 0;
 		// READ
 		while ( fgets(line,512,IN_FILE) ) {
 
@@ -625,17 +628,35 @@ void nix_spackage_register(void)
 					snprintf(line,sizeof(line),"ID %i\n",valid_ID[next_available_ID]);
 				}
 			}
+			int now = strlen(line)+1;
+			continuous_buf = fast_realloc(continuous_buf,written + now);
+			// full line is copied
+			// where to start writing to. should be == written. because its written_pos + 1
+
+			// SOFPPNIX_DEBUG("Writing %s to %p",line,continuous_buf+written);
+			strlcpy(continuous_buf+written,line,now);
+			// null character is ignored. and overwritten next iter
+			written += now-1;
+
+			// mybuffer is set of 512 bytes, each with a null string in it.
 			mybuffer = fast_realloc(mybuffer,512*(line_count+1));
-			strcpy(mybuffer + (line_count*512),line);
+			strlcpy(mybuffer + (line_count*512),line,512);
 			line_count++;
 		}
+		// restore a null character.
+		continuous_buf[written] = 0x00;
 		fclose(IN_FILE);
 		/*
 			TODO: Generate checksum for this file contents
 			Then 
 		*/
+
 		std::string crc_file;
-		crc_checksum(mybuffer,crc_file);
+		// Don't include null character in checksum.
+		crc_checksum(continuous_buf,crc_file,written-1);
+		SOFPPNIX_DEBUG("CRC: %s\n",crc_file.c_str());
+		if (continuous_buf)
+			free(continuous_buf);
 		// $USER/strip/origname-DEADBEEF.sp
 
 		// remove .sp from one

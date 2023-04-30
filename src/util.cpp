@@ -13,7 +13,7 @@ void SOFPPNIX_DEBUG(char * msg, ... ) {
 	
 	snprintf(color,1024,"%c%s%c%s\n",P_PURPLE,"[sof++nix_Debug] : ",P_YELLOW,text);
 
-	orig_Com_Printf(color);
+	orig_Com_Printf("%s",color);
 	#endif
 }
 
@@ -29,7 +29,7 @@ void SOFPPNIX_PRINT(char * msg, ... ) {
 	
 	snprintf(color,1024,"%c%s%c%s\n",P_PINK,"[sof++nix] : ",P_TEXT,text);
 
-	orig_Com_Printf(color);
+	orig_Com_Printf("%s",color);
 }
 void shutdown_program(void);
 void error_exit(char* format,...) {
@@ -443,9 +443,13 @@ std::array<void*,10> formatString(const std::string& format, const std::vector<s
 	// 	std::cout << "input: " << input << std::endl;
 	// }
 
+	bool skip_first = false;
 	while (std::getline(ss, token, '%')) {
 		// skip first token
-		if (i == 0) continue;
+		if ( !skip_first ) {
+			skip_first = true;
+			continue;
+		}
 		if (token.empty()) continue;
 		char type = token[0];
 		switch (type) {
@@ -456,13 +460,12 @@ std::array<void*,10> formatString(const std::string& format, const std::vector<s
 			}
 			case 'p': {
 				std::cout << "p " << i << std::endl;
-				char value = char(std::stoi(inputs[i]));
-				result[arraySize++] = (void*)value;
+				result[arraySize++] = (void*)char(std::stoi(inputs[i]));
 				break;
 			}
 			case 's': {
-				
-				result[arraySize++] = new std::string(inputs[i]);
+				std::cout << "string! : " << inputs[i].c_str() << std::endl;
+				result[arraySize++] = inputs[i].c_str();
 				break;
 			}
 			case 'h': {
@@ -493,10 +496,10 @@ void SP_PRINT_MULTI(edict_t * ent, short id, std::string& format, std::vector<st
 	array_to_variadic(orig_SP_Print,ent,id, args);
 }
 
-void crc_checksum(const char * data,std::string & checksum)
+void crc_checksum(const char * data,std::string & checksum, int length)
 {
 	unsigned int crc = crc32(0L, NULL, 0);
-	crc = crc32(crc, reinterpret_cast<const Bytef*>(data), strlen(data));
+	crc = crc32(crc, reinterpret_cast<const Bytef*>(data), length);
 	std::stringstream ss;
 	ss << std::hex << std::setfill('0') << std::setw(8) << crc;
 	checksum = ss.str();

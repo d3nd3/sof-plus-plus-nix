@@ -391,8 +391,10 @@ Called when a player drops from the server.
 Will not be called between levels.
 ============
 */
-void my_ClientDisconnect(void)
+void my_ClientDisconnect(edict_t * ent)
 {
+	orig_ClientDisconnect(ent);
+
 	// free edict
 	// if ( distractor[i] ) 
 }

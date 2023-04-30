@@ -236,8 +236,9 @@ void	gamerules_c::levelInit(void){
 }
 char	*gamerules_c::getGameName(void){
 	char *(*o)(void * self) = stget(stget(orig,4)+8+0x14,0);
-
-	return o(orig);
+	char * gn = o(orig);
+	SOFPPNIX_DEBUG("Gamename is : %s",gn);
+	return gn;
 }
 int		gamerules_c::checkItemSpawn(edict_t *ent,Pickup **pickup){
 	int (*o)(void * self,edict_t *ent,Pickup **pickup) = stget(stget(orig,4)+8+0x18,0);

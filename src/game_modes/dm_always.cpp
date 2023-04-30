@@ -64,12 +64,17 @@ Use Cbuf_ExecuteString here if you don't want deffered commands.
 void	always_gamerules_c::levelInit(void){
 	SOFPPNIX_DEBUG("always_gamerules_c::levelInit()");
 	next_available_ID = 0;
-	std::string sp_name = "++nix";
+	std::string sp_name = "nix";
+	
 
 	std::string sp_file_path = "strip/" + sp_name + ".sp";
 	FILE* depend = nullptr;
-	if ( orig_FS_LoadFile(sp_file_path.c_str(),NULL,false) == -1 ) {
+
+	void * buffer = NULL;
+	int len = 0;
+	if ( (len = orig_FS_LoadFile(sp_file_path.c_str(),&buffer,false)) == -1 ) {
 		sp_file_path = orig_FS_Userdir() + std::string("/") + sp_file_path;
+		create_file_dir_if_not_exists(sp_file_path.c_str());
 		depend = fopen(sp_file_path.c_str(), "wb");
 		if (depend == nullptr) {
 			error_exit("WARNING: failed to write to %s\n",sp_file_path.c_str());
@@ -80,6 +85,29 @@ void	always_gamerules_c::levelInit(void){
 			fprintf(depend, "%s", SOFREESP);
 			fclose(depend);
 		}
+	} else {
+		
+		std::string crc_current;
+		crc_checksum(buffer,crc_current,len);
+		SOFPPNIX_DEBUG("It exists, now compare its checksum");
+
+		std::string crc_inbuilt;
+		crc_checksum(SOFREESP, crc_inbuilt,strlen(SOFREESP));
+		if ( crc_inbuilt != crc_current)  {
+			SOFPPNIX_DEBUG("Crc are different!");
+			sp_file_path = orig_FS_Userdir() + std::string("/") + sp_file_path;
+			depend = fopen(sp_file_path.c_str(), "wb");
+			if (depend == nullptr) {
+				error_exit("WARNING: failed to write to %s\n",sp_file_path.c_str());
+			}
+			else {
+				// doesnt' exist
+				SOFPPNIX_DEBUG("Creating %s.sp file",sp_name.c_str());
+				fprintf(depend, "%s", SOFREESP);
+				fclose(depend);
+			}
+		}
+		orig_Z_Free(buffer);
 	}
 
 	std::string cmd = "++nix_spackage_register " + sp_name + ".sp\n";
@@ -113,7 +141,6 @@ void	always_gamerules_c::checkEvents(void){
 			continue;
 		// Clear every frame.
 		edict_t * ent = stget(a_client_t,CLIENT_ENT);
-		SOFPPNIX_DEBUG("ent === %08X",ent);
 		orig_SP_Print(ent,0x0700,"*");
 	}
 
@@ -319,9 +346,10 @@ G_RunFrame -> ClientEndFrames @g_main.cpp
  Extra Drawings Here.
 */
 //c4
-
+#define STAT_LAYOUTS 9
 void	always_gamerules_c::clientEndFrame(edict_t *ent){
 
+	// SOFPPNIX_DEBUG("clientEndFrame\n");
 
 	// SOFPPNIX_DEBUG("Player slot : %i",ent->s.skinnum);
 	// correct layering.
@@ -329,9 +357,12 @@ void	always_gamerules_c::clientEndFrame(edict_t *ent){
 	// Draw Custom 2D.
 	if ( stget(getClientX(ent->s.skinnum),0) == cs_spawned && layoutstring[0] ) {
 
-		SOFPPNIX_DEBUG("Draw Custom 2D %s\n",layoutstring);
-		// orig_SP_Print(ent,0x0700,layoutstring);
-		orig_SP_Print(ent,0x0A00,"0");
+		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
+		
+		// SOFPPNIX_DEBUG("Draw Custom 2D %s\n",layoutstring);
+		orig_SP_Print(ent,0x0700,layoutstring);
+
+		// orig_SP_Print(ent,0x0A00);
 	}
 
 	// always show scoreboard during intermission
@@ -390,6 +421,9 @@ dmctf_clientScoreboardMessage : NOP Clear.
 In SoFree We made the real showscores to always be true, thus making this function always be called.
 But I am not doing that here.
 checkEvents is instead clearing. Which is earlier than clientEndFrame.
+
+G_SetStats called by ClientEndServerFrame, sets ent->client->ps.stats[STAT_LAYOUTS] |= 1;
+Which is required for client to show any scoreboard / layout strings.
 */
 //d8
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)

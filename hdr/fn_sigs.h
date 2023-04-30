@@ -148,7 +148,7 @@ extern void my_PutClientInServer (edict_t *ent);
 extern edict_t * (*orig_G_Spawn) (void);
 
 extern void (*orig_ClientDisconnect) (edict_t *ent);
-extern void my_ClientDisconnect(void);
+extern void my_ClientDisconnect(edict_t *ent);
 
 
 // __attribute__((thiscall))

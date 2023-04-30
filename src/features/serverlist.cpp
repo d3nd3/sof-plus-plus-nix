@@ -175,8 +175,12 @@ void GetServerList(void)
 		unacked_server.queryTime = now;
 		unacked_server.lastSentTime = now;
 
+		// SOFPPNIX_DEBUG("ip is : %d.%d.%d.%d:%d\n",addr.ip[0],addr.ip[1],addr.ip[2],addr.ip[3],htons(addr.port));
+
 		// store the netadr_t in the gs_items vector
 		gs_items.push_back(unacked_server);
+
+
 	}
 
 /*
@@ -338,6 +342,8 @@ void my_menu_AddServer(netadr_t addr,char *data)
 */
 void nonBlockingServerResponses(void)
 {
+	static int i_queryid = 2;
+
 	unsigned char buffer[1400];
 	struct sockaddr_in in_addr;
 	socklen_t addrlen = sizeof(in_addr);
@@ -402,7 +408,12 @@ void nonBlockingServerResponses(void)
 				const char* in_cheats = cheats->value == 1.0f ? "enabled" : "disabled";
 				int in_ctf_loops = std::lround(ctf_loops->value);
 				int suicide_penalty = std::lround(sv_suicidepenalty->value);
-				const char* queryid = "3.1";
+
+
+				i_queryid++;
+				char queryid[64];
+				snprintf(queryid,sizeof(queryid),"%d.1",i_queryid);
+				// static const char * queryid = "3.1";
 
 				std::string player_data;
 				for (int i = 0; i < numplayers; i++) {
@@ -466,7 +477,7 @@ void nonBlockingServerResponses(void)
 					gamename, gamever, location, in_hostname, in_hostport, in_mapname, gametype,
 					numplayers, maxplayers, gamemode, violence, in_timelimit, in_fraglimit,
 					in_dmflags, movescale, in_cheats, in_ctf_loops, suicide_penalty,player_data.c_str(), queryid);
-
+				
 				// player_0\John Mullinsqqu\frags_0\0\ping_0\38\skin_0\dekker\team_0\The Order
 				std::cout << response << std::endl;
 
@@ -502,7 +513,11 @@ void nonBlockingServerResponses(void)
 				std::cout << "sv_violence is : " << sv_violence->string << std::endl;
 				int violence = c_string_to_int(sv_violence->string);
 
-				const char* queryid = "3.1";
+
+				i_queryid++;
+				// const char* queryid = "3.1";
+				char queryid[64];
+				snprintf(queryid,sizeof(queryid),"%d.1",i_queryid);
 				// Generate the response string using snprintf
 				char response[1024];
 				snprintf(response, sizeof(response), "\\hostname\\%s\\"
@@ -675,10 +690,57 @@ But hook is in place, to silence the WON heartbeat code.(crashes). could nop.
 */
 void GamespyHeartbeat(void)
 {
+	/*
+		NOT USED.
+	*/ 
 	return;
 	if ( !sv_public->value ) return;
+	SOFPPNIX_DEBUG("Sending heartbeat to gamespy");
 	// \\heartbeat\\%d\\gamename\\%s
-	std::cout << "Not yet implemented heartbeat" << std::endl;
+	
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd < 0) {
+		SOFPPNIX_PRINT("Error: Failed to create socket.\n");
+		return 1;
+	}
+
+	// int timeout = 2000; // user timeout in milliseconds [ms]
+	// setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (char*) &timeout, sizeof(timeout));
+
+	// Set the maximum segment size for outgoing TCP packets
+	// int maxseg = 1400;
+	// if (setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, sizeof(maxseg)) < 0) {
+	//     error_exit("Failed to set maximum segment size.\n");
+	// }
+
+	struct addrinfo hints;
+	struct addrinfo *res;
+	std::memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	int status = getaddrinfo("sof1master.megalag.org", NULL, &hints, &res);
+	if (status != 0) {
+		error_exit("Failed to resolve hostname.\n");
+	}
+	struct sockaddr_in server_addr;
+	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
+	server_addr.sin_port = htons(28900);
+	freeaddrinfo(res);
+
+	if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+		error_exit("Failed to connect to server.\n");
+	}
+
+
+	static int heartbeat = 0;
+
+	char message[128];
+	snprintf(message,"\\heartbeat\\%d\\gamename\\%s",heartbeat,"sofretail");
+	if (send(sockfd, message, strlen(message), 0) < 0) {
+		error_exit("Failed to send message.\n");
+	}
+	heartbeat++;
 }
 
 /*
