@@ -83,10 +83,10 @@ void spawnDistraction(edict_t * ent,int slot)
 	// short * origin = (short*)((void*)gcl + GCLIENT_PS_PM_ORIGIN);
 	// SOFPPNIX_DEBUG("Origin: %hd %hd %hd",origin[0],origin[1],origin[2]);
 
-	SOFPPNIX_DEBUG("VelocityFloat: %f %f %f",ent->velocity[0],ent->velocity[1],ent->velocity[2]);
+	// SOFPPNIX_DEBUG("VelocityFloat: %f %f %f",ent->velocity[0],ent->velocity[1],ent->velocity[2]);
 	
-	vec_t vel = VectorLength(ent->velocity);
-	SOFPPNIX_DEBUG("Velocity: %f",vel);
+	// vec_t vel = VectorLength(ent->velocity);
+	// SOFPPNIX_DEBUG("Velocity: %f",vel);
 }
 
 

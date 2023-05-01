@@ -125,7 +125,6 @@ private:
 // __attribute__((thiscall))
 void  my_setDMMode(void * self,int dmmode)
 {
-	SOFPPNIX_DEBUG("my_setDMMode : %i",dmmode);
 	int sofree_dmmode = (int)(_nix_deathmatch->value);
 
 	if ( sofree_dmmode > 0 ) {
@@ -150,7 +149,6 @@ void  my_setDMMode(void * self,int dmmode)
 		if ( dmmode == 1 || dmmode == 5 || dmmode == 4){
 			//rules == my_rules. 8 = gamerules_c * rules
 			// Which gamerules_c to call later.
-			SOFPPNIX_DEBUG("DM MODE : %i",dmmode);
 			currentGameMode = orig_modes[dmmode];
 
 			// GIVES DM_ALWAYS THE POWER TO ROUTE.
@@ -158,7 +156,6 @@ void  my_setDMMode(void * self,int dmmode)
 			// Since the sof library was compiled with a gcc which uses the +4 as vtable
 			// We have to give it -4 as pointer.
 			// The vtable pointer also needs to start 8 bytes back. :/
-			
 			stset(self,8,(void*)(&dm_always)-4);
 
 			// save the original gamerules_c in SoF memory.
@@ -229,7 +226,6 @@ sofplus on_map_begin is also a spawnentities hook but console code is pushed AFT
 void	gamerules_c::levelInit(void){
 	void (*o)(void * self) = stget(stget(orig,4)+8+0x10,0);
 
-	SOFPPNIX_DEBUG("Fallback level init ... should be dmctf");
 	// dm specific levelinit fallback func
 	o(orig);
 

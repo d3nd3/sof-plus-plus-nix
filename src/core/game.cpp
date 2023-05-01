@@ -268,7 +268,8 @@ also passes in pointers for ref_gl library. ri
 	//SV_ModelIndex
 	int		(*modelindex) (const char *name); = 198
 */
-bool first_load = true;
+
+void *base_addr = NULL;
 game_export_t * my_Sys_GetGameAPI (void *params) {
 
 	/*
@@ -293,8 +294,8 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	if (rc == 0) {
 		error_exit("Failed to get current library information\n");
 	}
-	void *base_addr = info.dli_fbase;
-	SOFPPNIX_DEBUG("Base address: %08X\n", base_addr);
+	base_addr = info.dli_fbase;
+	// SOFPPNIX_DEBUG("Base address: %08X\n", base_addr);
 	dlclose(handle);
 
 	// I am not editing the return, I am detouring original, but still.
@@ -304,6 +305,8 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	
 	orig_ClientBegin = createDetour(game_exports->ClientBegin, my_ClientBegin,5);
 	orig_ClientDisconnect = createDetour(game_exports->ClientDisconnect, my_ClientDisconnect,5);
+	orig_ClientUserinfoChanged = createDetour(game_exports->ClientUserinfoChanged, my_ClientUserinfoChanged,9);
+	orig_G_RunFrame = createDetour(game_exports->RunFrame, my_G_RunFrame,5);
 
 	// Must use fixed address on reusable detours.
 	orig_PutClientInServer = createDetour((int)base_addr + 0x00238BE8, my_PutClientInServer,6);
@@ -315,28 +318,22 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	memoryAdjust(base_addr + 0x14964E,5,0x90);
 	memoryAdjust(base_addr + 0x1496D0,5,0x90);
 
-	//-------------------------------SCOREBOARD ALWAYS PRINT-------------------------------------
+	//----------------------------SCOREBOARD ALWAYS PRINT (unlocks layout)-----------------------------
 	memoryAdjust(base_addr + 0xa9bdc,1,0x00);
+	memoryAdjust(base_addr + 0xA9BD2,2,0x90);
 
-	// sv_map -> sv_spawnserver ( AFTER SV_InitGame ) -> spawnentities -> fx_init -> addCommand("fx_save");
-	// So we are before they attempt to add the commands.
-	// fx_init called by qcommon_init double add.
-	if( first_load ) {
-		first_load = false;
-		orig_Cmd_RemoveCommand("fx_save");
-		orig_Cmd_RemoveCommand("fx_load");
-	}
+
 	return game_exports;
 }
 
 void my_ShutdownGame(void)
 {
-	SOFPPNIX_DEBUG("Shutting down game!!!\n");
+	SOFPPNIX_DEBUG("Shutting down game.so\n");
 	orig_ShutdownGame();
 
 
-	orig_Cmd_RemoveCommand("fx_save");
-	orig_Cmd_RemoveCommand("fx_load");
+	// orig_Cmd_RemoveCommand("fx_save");
+	// orig_Cmd_RemoveCommand("fx_load");
 	/*
 		free all detour mallocs
 	*/
@@ -348,18 +345,150 @@ void my_ShutdownGame(void)
 	free(orig_ClientDisconnect);
 
 	free(orig_PutClientInServer);
+	free(orig_ClientUserinfoChanged);
+	free(orig_G_RunFrame);
 
 	freeDeathmatchHooks();
-}
 
+	base_addr = NULL;
+}
+/*
+===========Can Replace entities here.================
+{
+"_fade" ".35"
+"color" "1.000000 1.000000 0.658824"
+"light" "200"
+"_color" "1.000000 1.000000 0.658824"
+"origin" "384.49 -487.5 248"
+"classname" "light"
+}
+*/
 void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
 {
 
-	SOFPPNIX_DEBUG("SpawnEntities!\n");
-	orig_SpawnEntities(mapname,entstring,spawnpoint);
+	std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>> outer_map;
+
+	std::string input(entstring);
+	std::size_t start = input.find('{');
+	while (start != std::string::npos) {
+		std::size_t end = input.find('}', start);
+		if (end == std::string::npos) {
+			std::cerr << "Error: Invalid input (missing closing brace)\n";
+			return 1;
+		}
+
+		// Extract the substring between the braces
+		std::string entry_str = input.substr(start + 1, end - start - 1);
+
+		// Parse the attributes in the entry string
+		std::unordered_map<std::string, std::string> inner_map;
+		std::size_t attr_start = 0;
+		while (attr_start < entry_str.size() ) {
+			// Find opening double quote
+			std::size_t attr_name_start = entry_str.find('"', attr_start);
+			if (attr_name_start == std::string::npos) {
+				break;
+			}
+			// Find the attribute name
+			std::size_t attr_name_end = entry_str.find('"', attr_name_start + 1);
+			if (attr_name_end == std::string::npos) {
+				std::cerr << "Error: Invalid input (missing closing quote)\n";
+				return 1;
+			}
+			std::string attr_name = entry_str.substr(attr_name_start + 1, attr_name_end - attr_name_start - 1);
+
+			// Find the attribute value
+			std::size_t value_start = entry_str.find('"', attr_name_end + 1);
+			if (value_start == std::string::npos) {
+				std::cerr << "Error: Invalid input (missing opening quote)\n";
+				return 1;
+			}
+			std::size_t value_end = entry_str.find('"', value_start + 1);
+			if (value_end == std::string::npos) {
+				std::cerr << "Error: Invalid input (missing closing quote)\n";
+				return 1;
+			}
+
+			// Add the attribute name-value pair to the inner map
+			inner_map[attr_name] = entry_str.substr(value_start + 1, value_end - value_start - 1);
+
+			// Move the start index to the end of the attribute value
+			attr_start = value_end + 1;
+		}
+		// Add the inner map to the outer map using the "classname" attribute value as the key
+		std::string classname = inner_map["classname"];
+		outer_map[classname].push_back(inner_map);
+
+		// Move the start index to the next '{'
+		start = input.find('{', end + 1);
+	}
+
+	std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>> new_entries;
+	for (const auto& [classname, entries] : outer_map) {
+		if (classname == "info_player_team1" || classname == "info_player_team2") {
+			for (const auto& entry : entries) {
+				std::unordered_map<std::string, std::string> new_entry;
+				new_entry["classname"] = "info_player_deathmatch";
+				new_entry["origin"] = entry["origin"];
+				new_entries["info_player_deathmatch"].push_back(new_entry);
+			}
+		}
+	}
+	
+	// Apply the modifications
+	for (const auto& [classname, entries] : new_entries) {
+		outer_map[classname].insert(outer_map[classname].end(), entries.begin(), entries.end());
+	}
+	
+	// Now convert it back into a string.
+	std::string new_entstring;
+	// The first entry will be "worldspawn"
+	new_entstring += "{\n";
+	// iterate the attributes in the worldspawn entry
+	for (const auto& [attr_name, attr_value] : outer_map["worldspawn"][0]) {
+		new_entstring += "\"" + attr_name + "\" \"" + attr_value + "\"\n";
+	}
+	new_entstring += "}\n";
+	for (const auto& [classname, entries] : outer_map) {
+		if (classname == "worldspawn") {
+			continue;
+		}
+		for (const auto& entry : entries) {
+			new_entstring += "{\n";
+			for (const auto& [attr_name, attr_value] : entry) {
+				new_entstring += "\"" + attr_name + "\" \"" + attr_value + "\"\n";
+			}
+			new_entstring += "}\n";
+		}
+	}
+	
+	// Print the contents of the outer map
+	// for (const auto& [classname, entries] : outer_map) {
+	// 	std::cout << "Classname: " << classname << '\n';
+	// 	for (const auto& entry : entries) {
+	// 		std::cout << "  Entry:\n";
+	// 		for (const auto& [attr_name, attr_value] : entry) {
+	// 			std::cout << "    " << attr_name << ": " << attr_value << '\n';
+	// 		}
+	// 	}
+	// }
+
+	// std::cout << *new_entstring << std::endl;
+
+	// SOFPPNIX_DEBUG("SpawnEntities!");
+	// SOFPPNIX_DEBUG("SpawnEntities! %s",entstring);
+	orig_SpawnEntities(mapname,new_entstring.c_str(),spawnpoint);
+	// orig_SpawnEntities(mapname,entstring,spawnpoint);
 
 	GamespyHeartbeatCtrlNotify();
 
+
+	// sv_map -> sv_spawnserver ( AFTER SV_InitGame ) -> spawnentities -> fx_init -> addCommand("fx_save");
+	// So we are before they attempt to add the commands.
+	// fx_init called by qcommon_init ( CL_Init ) double add.
+	
+	orig_Cmd_RemoveCommand("fx_save");
+	orig_Cmd_RemoveCommand("fx_load");
 }
 
 /*
@@ -372,12 +501,11 @@ to be placed into the game.  This will happen every level load.
 */
 void my_ClientBegin(edict_t * ent)
 {
-	
 	orig_ClientBegin(ent);
 
 	int slot = ent->s.skinnum;
 
-	SOFPPNIX_DEBUG("Client Begin!\n");
+	prev_showscores[slot] = false;
 
 	// Distract.
 	spawnDistraction(ent,slot);
@@ -411,13 +539,38 @@ void my_PutClientInServer (edict_t *ent)
 {
 	orig_PutClientInServer(ent);
 
-	SOFPPNIX_DEBUG("PutClientInServer!\n");
 
 	int slot = ent->s.skinnum;
-	SOFPPNIX_DEBUG("Slot: %d\n",slot);
 	return;
 	detect_max_pitch[slot] = 0;
 	detect_max_yaw[slot] = 0;
 	distractor[slot] = NULL;
 
+}
+
+
+void my_ClientUserinfoChanged (edict_t *ent, char *userinfo, bool not_first_time)
+{
+	// SOFPPNIX_DEBUG("User info is : %s\n",userinfo);
+	orig_ClientUserinfoChanged(ent,userinfo,not_first_time);
+}
+
+float my_G_RunFrame (int serverframe)
+{
+	// SOFPPNIX_DEBUG("G_RunFrame!\n");
+	float ret = orig_G_RunFrame(serverframe);
+	/*
+		Only place after ClientEndFrames, because ClientScoreboardMessage is calling clear.
+		Lets draw layout here.
+	*/
+
+	for ( int i = 0 ; i < maxclients->value;i++ ) {
+		void * client_t = getClientX(i);
+		int state = *(int*)(client_t);
+		if (state != cs_spawned )
+			continue;
+		edict_t * ent = stget(client_t,CLIENT_ENT);
+		orig_SP_Print(ent,0x0700,layoutstring);
+	}
+	return ret;
 }

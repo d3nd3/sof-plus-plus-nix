@@ -62,11 +62,9 @@ Are saved and unloaded when a client connects.
 Use Cbuf_ExecuteString here if you don't want deffered commands.
 */
 void	always_gamerules_c::levelInit(void){
-	SOFPPNIX_DEBUG("always_gamerules_c::levelInit()");
 	next_available_ID = 0;
 	std::string sp_name = "nix";
 	
-
 	std::string sp_file_path = "strip/" + sp_name + ".sp";
 	FILE* depend = nullptr;
 
@@ -81,7 +79,6 @@ void	always_gamerules_c::levelInit(void){
 		}
 		else {
 			// doesnt' exist
-			SOFPPNIX_DEBUG("Creating %s.sp file",sp_name.c_str());
 			fprintf(depend, "%s", SOFREESP);
 			fclose(depend);
 		}
@@ -89,12 +86,10 @@ void	always_gamerules_c::levelInit(void){
 		
 		std::string crc_current;
 		crc_checksum(buffer,crc_current,len);
-		SOFPPNIX_DEBUG("It exists, now compare its checksum");
 
 		std::string crc_inbuilt;
 		crc_checksum(SOFREESP, crc_inbuilt,strlen(SOFREESP));
 		if ( crc_inbuilt != crc_current)  {
-			SOFPPNIX_DEBUG("Crc are different!");
 			sp_file_path = orig_FS_Userdir() + std::string("/") + sp_file_path;
 			depend = fopen(sp_file_path.c_str(), "wb");
 			if (depend == nullptr) {
@@ -102,7 +97,6 @@ void	always_gamerules_c::levelInit(void){
 			}
 			else {
 				// doesnt' exist
-				SOFPPNIX_DEBUG("Creating %s.sp file",sp_name.c_str());
 				fprintf(depend, "%s", SOFREESP);
 				fclose(depend);
 			}
@@ -130,19 +124,20 @@ int		always_gamerules_c::checkItemAfterSpawn(edict_t *ent,Pickup *pickup){
 }
 /*
 Ideal place to put SP clear. Before other SP commands.
+Issue: The clear clears the scoreboard, so can't have scoreboard on slow timer.
 */
 void	always_gamerules_c::checkEvents(void){
 
-	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
-	for ( int i = 0 ; i < maxclients->value;i++ ) {
-		void * a_client_t = svs_clients+i*0xd2ac;
-		int state = stget(a_client_t,0);
-		if (state != cs_spawned )
-			continue;
-		// Clear every frame.
-		edict_t * ent = stget(a_client_t,CLIENT_ENT);
-		orig_SP_Print(ent,0x0700,"*");
-	}
+	// void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	// for ( int i = 0 ; i < maxclients->value;i++ ) {
+	// 	void * a_client_t = svs_clients+i*0xd2ac;
+	// 	int state = stget(a_client_t,0);
+	// 	if (state != cs_spawned )
+	// 		continue;
+	// 	// Clear every frame.
+	// 	edict_t * ent = stget(a_client_t,CLIENT_ENT);
+	// 	// orig_SP_Print(ent,0x0700,"*");
+	// }
 
 	// void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
 	// for ( int i = 0 ; i < maxclients->value;i++ ) {
@@ -348,28 +343,26 @@ G_RunFrame -> ClientEndFrames @g_main.cpp
 //c4
 #define STAT_LAYOUTS 9
 void	always_gamerules_c::clientEndFrame(edict_t *ent){
-
+	
 	// SOFPPNIX_DEBUG("clientEndFrame\n");
 
 	// SOFPPNIX_DEBUG("Player slot : %i",ent->s.skinnum);
 	// correct layering.
 	
 	// Draw Custom 2D.
-	if ( stget(getClientX(ent->s.skinnum),0) == cs_spawned && layoutstring[0] ) {
+	void * client = getClientX(ent->s.skinnum);
+	// SOFPPNIX_DEBUG("cclient : %08X",client);
+	if ( stget(client,0) == cs_spawned && layoutstring[0] ) {
 
+		// force layouts ON.
 		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
-		
-		// SOFPPNIX_DEBUG("Draw Custom 2D %s\n",layoutstring);
-		orig_SP_Print(ent,0x0700,layoutstring);
-
-		// orig_SP_Print(ent,0x0A00);
 	}
 
 	// always show scoreboard during intermission
 	// player can toggle scoreboard when its not intermission.
 	// if ( !show_score[sendToSlot] && !(*level_intermissiontime) ) return;
 
-
+	
 	// orig_Com_Printf("clientEndFrame\n");
 	currentGameMode->clientEndFrame(ent);
 }
@@ -424,13 +417,64 @@ checkEvents is instead clearing. Which is earlier than clientEndFrame.
 
 G_SetStats called by ClientEndServerFrame, sets ent->client->ps.stats[STAT_LAYOUTS] |= 1;
 Which is required for client to show any scoreboard / layout strings.
+
+Clear in dm->checkEvents ( reliable clear ? )
+ Second Clear Here
+ Extra Drawings dm->clientEndFrame.
+ {ORDER of DRAWING doesn't really matter unless co-ordinates are equal/overlapping.}
+
+ This function still only called if showscores is TRUE.
+
+ ISSUE: The clear in checkEvents wipes away this scoreboard.
+ AKA If its not drawn every frame, its not drawn at all, everything has lifetime of 1 frame.
+
+ Test: Only allow this function to call clear? 3.2 second..
+
+ SoF does not use "Clear" to hide contents, it uses ent->client->ps.stats[STAT_LAYOUTS] |= 1;
+ In G_setSStats : ent->client->ps.stats[STAT_LAYOUTS] = 0; 
+ if ( dm ) ent->client->ps.stats[STAT_LAYOUTS] |= 1; ent->client->ps.stats[STAT_LAYOUTS] |= 2;
+
+G_RunFrame
+  ClientBeginServerFrame
+  dm->checkEvents();
+  ClientEndServerFrames
+    ClientEndServerFrame {This function returns early if intermission is displayed. Thats why watermark not visible}
+ 	  G_SetStats(ent) {if ( dm ) ent->client->ps.stats[STAT_LAYOUTS] |= 1; ent->client->ps.stats[STAT_LAYOUTS] |= 2;}
+ 	  if (ent->client->showscores && !(level.framenum & 31))
+	  	dm->clientScoreboardMessage(ent,ent->enemy,false);
+	  dm->clientEndFrame(ent); OVERRIDE G_SETSTATS here.
+
+  Question: How to hide scoreboard whilst keeping LAYOUT = 1. Requires a clear.
+
+  The client has a MEMORY of whats to be displayed. If you send 2 draw command on top without using clear.
+  You have multiple layers buildings up. To change content, requires clear. Which will make the scoreboard also have to be redrawn, which makes ping change. TLDR: Draw commands are persistent.
+
 */
 //d8
+bool prev_showscores[32] = {0};
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
-	// Draw Official Scoreboard First because it clears screen.
-	currentGameMode->clientScoreboardMessage(ent,killer,log_file);
-	
+	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
+	// SOFPPNIX_DEBUG("framenum is : %i",level_framenum);
+
+	void * gclient = stget(ent, EDICT_GCLIENT);
+	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
+	// SOFPPNIX_DEBUG("show_scores is : %i",show_scores);
+	int slot = ent->s.skinnum;
+	if ( show_scores && ( !prev_showscores[slot] || !(level_framenum & 31) ) ) {
+		// every 32 server frames = 3.2 seconds
+		// Draw Official Scoreboard ( contains a clear ).
+		currentGameMode->clientScoreboardMessage(ent,killer,log_file);
+	}
+	// turn off.
+	if ( !show_scores && prev_showscores[slot] ) {
+		// SOFPPNIX_DEBUG("Clearing Screen");
+		// Clear Screen.
+		orig_SP_Print(ent,0x0700,"*");
+	}
+
+	// will only be true
+	prev_showscores[slot] = show_scores;
 }
 //dc
 void	always_gamerules_c::clientStealthAndFatigueMeter(edict_t *ent){
@@ -503,8 +547,6 @@ void always_gamerules_c::removeHooks(void) {
 
 
 void always_gamerules_c::applyHooks(void) {
-	
-	SOFPPNIX_DEBUG("applyHooks");
 
 	#if 0
 	orig_Cmd_Score_f = (Cmd_Score_f_type)DetourCreate((LPVOID)0x500F6710,(LPVOID)&my_Cmd_Score_f,DETOUR_TYPE_JMP,6);

@@ -84,10 +84,9 @@ void __attribute__ ((constructor)) begin() {
 	// SV_New_f Protocol changed from `32` to `33`
 	memoryAdjust(0x80B031A,1,0x21);
 
-	// correct argv pointer - SVC_DirectConnect adjusts the 6th parameter to be the same as the 5th
-	memoryAdjust(0x80AA49D,1,0x05);
-	// correct argv pointer - SVC_DirectConnect adjusts the 5th parameter to be the same as the 4th
-	memoryAdjust(0x80AA46C,1,0x04);
+	// fix original in case used bad patch.
+	memoryAdjust(0x80AA49D,1,0x06);
+	memoryAdjust(0x80AA46C,1,0x05);
 
 	// ignore connmode check - SVC_DirectConnect , some authorization check
 	memoryAdjust(0x80AA6B7,1,0x75);
@@ -206,7 +205,12 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x080A8703,1,0xEB);
 
 
-
+//---------------------RCON PUBLIC PASS COMMAND FILTER--------------------------------
+	callE8Patch(0x080AB1A4,&public_rcon_command);
+	memoryAdjust(0x080AAFC9,1,0xEB);
+	memoryAdjust(0x080AAF9F,1,0xEB);
+	memoryAdjust(0x080AB0B8,2,NOP);
+	memoryAdjust(0x080AB0D6,1,0xEB);
 
 ////////////////////////////////////////////////////
 	

@@ -287,7 +287,8 @@ int c_string_to_int(char * in_str) {
 
 void * getClientX(int slot)
 {
-	static void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);
+	void *one = stget(0x0829D134,0);
+	void * svs_clients = stget(one,0x10C);
 	return svs_clients + slot * 0xd2ac;
 }
 

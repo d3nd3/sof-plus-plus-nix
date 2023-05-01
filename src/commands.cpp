@@ -284,10 +284,10 @@ void nix_draw_clear(void)
 		SOFPPNIX_PRINT("++nix_draw_clear -h");
 		return;
 	}
-	SOFPPNIX_DEBUG("Clearing screen");
+	// SOFPPNIX_DEBUG("Clearing screen");
 	layoutstring_len = 0;
 	layoutstring[0] = 0x00;
-	sprintf(layoutstring,"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
+	sprintf(layoutstring,"xr %i yb -16 altstring \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
 	layoutstring_len = strlen(layoutstring);
 	// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
 }
@@ -559,8 +559,6 @@ ensures ID in file is equal to next_available_ID.
 */
 void nix_spackage_register(void)
 {
-	SOFPPNIX_DEBUG("nix_spackage_register");
-	
 	int c = orig_Cmd_Argc() - 1;
 	char * one = orig_Cmd_Argv(1);
 	if ( !strcmp(one,"-h" ) ) {
@@ -583,16 +581,13 @@ void nix_spackage_register(void)
 		return;
 	}
 	in_file_path = orig_FS_Userdir() + std::string("/") +  in_file_path;
-	SOFPPNIX_DEBUG("in_file_path %s",in_file_path.c_str());
 	// If the file does not exist inside USER. Treat normally.
 	FILE * IN_FILE = fopen(in_file_path.c_str(),"r+");
 	if ( !IN_FILE ) {
-		SOFPPNIX_DEBUG("Detected not in user!");
 		char * shorten= strchr(one,'.');
 		if ( shorten ) {
 			*shorten = 0x00;	
 		}
-		SOFPPNIX_DEBUG("Registering %s!",one);
 		orig_SP_Register(one);
 		return;
 
@@ -618,8 +613,6 @@ void nix_spackage_register(void)
 
 				// extract the ID using match ()
 				int id = std::stoi(m[1]);
-				// print the id
-				SOFPPNIX_DEBUG("ID: %i",id);
 
 				// if the ID is equal to the next available ID
 				if ( id != valid_ID[next_available_ID] ) {
@@ -654,7 +647,6 @@ void nix_spackage_register(void)
 		std::string crc_file;
 		// Don't include null character in checksum.
 		crc_checksum(continuous_buf,crc_file,written-1);
-		SOFPPNIX_DEBUG("CRC: %s\n",crc_file.c_str());
 		if (continuous_buf)
 			free(continuous_buf);
 		// $USER/strip/origname-DEADBEEF.sp
@@ -684,7 +676,7 @@ void nix_spackage_register(void)
 				SOFPPNIX_DEBUG("Created %s",new_file_path.c_str());
 			}
 		}
-		SOFPPNIX_DEBUG("Registering %s",new_file_path.c_str());
+		// SOFPPNIX_DEBUG("Registering %s",new_file_path.c_str());
 
 		orig_SP_Register(registerFileName.c_str());
 

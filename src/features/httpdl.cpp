@@ -206,8 +206,8 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	bool do_download = false;
 	for (const auto& file_data : zip_content) {
-		std::cout << "File Name: " << file_data.filename << std::endl;
-		std::cout << "File CRC-32: " << std::hex << file_data.crc << std::endl;
+		// std::cout << "File Name: " << file_data.filename << std::endl;
+		// std::cout << "File CRC-32: " << std::hex << file_data.crc << std::endl;
 
 		std::string full_file_pathname = std::string(orig_FS_Userdir()) + std::string("/") +  file_data.filename;
 		// Check if file exists on disk
@@ -239,11 +239,11 @@ void httpdl_thread_get(std::string * rel_map_path) {
 
 	if ( !do_download ) 
 	{
-		SOFPPNIX_DEBUG("Not downloading because file not found or crc matches on disk\n");
+		// SOFPPNIX_DEBUG("Not downloading because file not found or crc matches on disk\n");
 		delete rel_map_path;
 		download_status = DS_FAILURE;
 
-		SOFPPNIX_DEBUG("Thread ending!\n");
+		// SOFPPNIX_DEBUG("Thread ending!\n");
 		return;
 	}
 	// SOFPPNIX_DEBUG("PREPARING DOWNLOAD!\n");
@@ -459,7 +459,7 @@ bool partialHttpBlobs(char * remote_url)
 		SOFPPNIX_DEBUG("The content length had no value\n");
 		return false;
 	}
-	SOFPPNIX_DEBUG("File Size of %s == %i\n",remote_url,file_size);
+	// SOFPPNIX_DEBUG("File Size of %s == %i\n",remote_url,file_size);
 
 	/*
 		Let http data cb call malloc

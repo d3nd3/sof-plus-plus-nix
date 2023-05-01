@@ -65,7 +65,7 @@ void CreateCvars(void)
 
 	// repond pretending to be low violence.
     int offset = (int)&p_nix_violence - 0x829CCC8;
-	SOFPPNIX_DEBUG("%d - %d",(int)&p_nix_violence,0x829CCC8);
+
 	memoryUnprotect(0x080A9AA5);
 	*(int*)0x080A9AA5 = offset;
 	memoryProtect(0x080A9AA5);

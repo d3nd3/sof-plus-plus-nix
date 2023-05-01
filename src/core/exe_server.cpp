@@ -91,7 +91,6 @@ cl->commandMsec = 1800;		// 1600 + some slop
 
 std::array<int, 32> client_framecounters = {0};
 
-#if 1
 void my_SV_ClientThink(void *cl, usercmd_t *cmd)
 {
 	edict_t * ent = *(unsigned int*)(cl + CLIENT_ENT);
@@ -112,40 +111,7 @@ void my_SV_ClientThink(void *cl, usercmd_t *cmd)
 	// vec_t vel = VectorLength(ent->velocity);
 	// SOFPPNIX_DEBUG("Velocity: %f",vel);
 }
-#else
 
-/*
- realized I can exploit the olddelta inside the same clc_move.
-
- i really want to have a hook at an earlier time in the function, but it's not possible.
-
-  latched buttons = any button that is on now, but wasn't on in previous buttons
-*/
-void my_SV_ClientThink(void *cl, usercmd_t *cmd)
-{
-	if ( _nix_poorman->value ) {
-
-		int player = getPlayerSlot(cl);
-		// SOFPPNIX_DEBUG("player slot: %d\n", player);
-
-		if ( player == -1 ) error_exit("Illegal player slot");
-
-		// increment frame counter, don't skip valuable button changes, OR defer them to next frame
-		if ( ( client_framecounters[player]++ % 2 ) ) {
-			// skip this frame
-			// Defer all data from previous frame to this one.
-			return;
-		}
-		orig_SV_ClientThink(cl,(void*)cmd+0x18);
-
-	}
-	// usercmd_t * oldcmd = (void*)cmd+0x18;
-	// SOFPPNIX_DEBUG("forwardmove: %hu\n", cmd->forwardmove);
-	// hexdump((void*)cmd-0x18,(void*)cmd+0x18);
-	orig_SV_ClientThink(cl,cmd);
-}
-
-#endif
 
 /*
 	from used as base for move contents.
@@ -160,4 +126,44 @@ void my_PAK_ReadDeltaUsercmd (void *in_packet, usercmd_t *from, usercmd_t *move)
 	// dump_usercmd(*from);
 	// SOFPPNIX_DEBUG("TO : \n");
 	// dump_usercmd(*move);
+}
+
+void rcon_fraglimit(void)
+{
+	SOFPPNIX_PRINT("FRAGLIMIT!");
+}
+void rcon_timelimit(void)
+{
+	SOFPPNIX_PRINT("TIMELIMIT!");
+}
+void rcon_deathmatch(void)
+{
+	SOFPPNIX_PRINT("DEATHMATCH!");
+}
+
+// generate a std dictionary // map
+// typedef void (*cmd)(void);
+
+
+std::unordered_map<std::string,rcon_cmd_type> cmd_map;
+void public_rcon_command(void)
+{
+
+	// Its already been tokenized with macro expansion disabled.
+
+	std::regex r("^(fraglimit|timelimit|map|deathmatch|set_dmflags|unset_dmflags|list_dmflags)$");
+	std::string s(orig_Cmd_Argv(1));
+	std::smatch m;
+	if (std::regex_search(s, m, r)) {
+		// print the match
+		std::cout << "MATCH : " << m.str() << std::endl;
+		// check if cmd_argv(1) is a key into cmd_map, if it is, execute the function
+
+		// SOFPPNIX_PRINT("before : %s",orig_Cmd_Args());
+
+		std::string rcon_cmd = orig_Cmd_Args();
+		orig_Cmd_TokenizeString(rcon_cmd.c_str(),false);
+		// SOFPPNIX_PRINT("total : %s",orig_Cmd_Args());
+		cmd_map[m.str()]();
+	}
 }

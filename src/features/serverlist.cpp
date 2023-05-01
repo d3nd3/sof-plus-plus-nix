@@ -376,7 +376,7 @@ void nonBlockingServerResponses(void)
 			// OBJECTIVE: pass any '\\status\\' queries if we are server /w public 1
 			if ( sv_public->value && !strncmp((char*)buffer, "\\status\\", 8) ) {
 				// received every 30 seconds... (if info completed)
-				SOFPPNIX_DEBUG("Got a \\status\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
+				// SOFPPNIX_DEBUG("Got a \\status\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 				// TODO: send back a response
 				// == BASIC + INFO + RULES + PLAYERS
 
@@ -450,7 +450,7 @@ void nonBlockingServerResponses(void)
 					}
 				}
 
-				std::cout << "Player data: " << player_data << std::endl;
+				// std::cout << "Player data: " << player_data << std::endl;
 				
 				// Generate the response string using snprintf
 				char response[1024];
@@ -479,7 +479,7 @@ void nonBlockingServerResponses(void)
 					in_dmflags, movescale, in_cheats, in_ctf_loops, suicide_penalty,player_data.c_str(), queryid);
 				
 				// player_0\John Mullinsqqu\frags_0\0\ping_0\38\skin_0\dekker\team_0\The Order
-				std::cout << response << std::endl;
+				// std::cout << response << std::endl;
 
 				if ( sendto(gs_select_sock, response, strlen(response), 0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
 					error_exit("sendto() failed responding to \\info\\ query try public 0 if continued error");
@@ -487,16 +487,16 @@ void nonBlockingServerResponses(void)
 				
 			} else if ( sv_public->value && !strncmp((char*)buffer, "\\info\\", 6) ) {
 				// received every 5 minutes... (if on the radar)
-				SOFPPNIX_DEBUG("Got a \\info\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
+				// SOFPPNIX_DEBUG("Got a \\info\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 				// prepare data to send back as response
 
 				// \hostname\Example\hostport\8080\mapname\dm/suddm2\gametype\DM\numplayers\0\maxplayers\16\gamemode\openplaying\violence\0\final\\queryid\6.1
 
 				const char* in_hostname = hostname->string;
-				std::cout << "hostport is : " << hostport->string << std::endl;
 				int in_hostport = c_string_to_int(hostport->string);
 				const char* in_mapname = mapname->string;
 				const char* gametype = "Unknown";
+				
 				switch ( std::lround(deathmatch->value) ) {
 					case 1: gametype = "DM"; break;
 					case 2: gametype = "Assassin"; break;
@@ -506,13 +506,11 @@ void nonBlockingServerResponses(void)
 					case 6: gametype = "Control"; break;
 					case 7: gametype = "CTB"; break;
 				}
+
 				int numplayers = countPlayersInGame();
-				std::cout << "maxclients is : " << maxclients->string << std::endl;
 				int maxplayers = c_string_to_int(maxclients->string);
 				const char* gamemode = "openplaying";
-				std::cout << "sv_violence is : " << sv_violence->string << std::endl;
 				int violence = c_string_to_int(sv_violence->string);
-
 
 				i_queryid++;
 				// const char* queryid = "3.1";
@@ -532,7 +530,7 @@ void nonBlockingServerResponses(void)
 					in_hostname, in_hostport, in_mapname, gametype,
 					numplayers, maxplayers, gamemode, violence, queryid);
 
-				std::cout << response << std::endl;
+				// std::cout << response << std::endl;
 
 				// Send the response back to the in_addr that sent the query
 				if ( sendto(gs_select_sock, response, strlen(response), 0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
@@ -751,7 +749,7 @@ void GamespyHeartbeatCtrlNotify(void)
 {
 	if ( !sv_public->value ) return;
 
-	SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
+	// SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
 	
 	//fill in the gamespyport and hostport
 	char formedData[256];
@@ -761,13 +759,11 @@ void GamespyHeartbeatCtrlNotify(void)
 	struct sockaddr_in gs_server_info;
 	NetadrToSockadr(&sof1master_ip,&gs_server_info);
 
-	std::cout << "gamespy " << gs_select_sock << " ?" << std::endl;
 	// sendto gs_server_info on gs_select_sock, Ensure send using gamespy socket
 	if (sendto(gs_select_sock, formedData, strlen(formedData), 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
 		error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
 	}
 
-	std::cout << "hostport" << std::endl;
 	// now the hostport variant Ensure send using hostport socket
 	snprintf(formedData, 256, "\\hostport\\%s\\gamespyport\\%s\\", hostport->string,gamespyport->string);
 	// netsrc_t sock, int length, void *data, netadr_t to

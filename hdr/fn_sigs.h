@@ -67,6 +67,8 @@ extern void my_Cbuf_Execute(void);
 extern void ( * orig_Cbuf_AddText)(char * text);
 extern void (*orig_Cmd_ExecuteString)(const char * string);
 
+
+extern void (*orig_Cmd_TokenizeString) (char *text, qboolean macroExpand);
 extern int     (*orig_Cmd_Argc) (void);
 extern char    *(*orig_Cmd_Argv) (int i);
 extern char    *(*orig_Cmd_Args) (void);
@@ -150,7 +152,13 @@ extern edict_t * (*orig_G_Spawn) (void);
 extern void (*orig_ClientDisconnect) (edict_t *ent);
 extern void my_ClientDisconnect(edict_t *ent);
 
+extern void (*orig_ClientUserinfoChanged) (edict_t *ent, char *userinfo, bool not_first_time);
+extern void my_ClientUserinfoChanged (edict_t *ent, char *userinfo, bool not_first_time);
+
 
 // __attribute__((thiscall))
 extern void ( *orig_setDMMode)(void * self,int newtype);
 extern void my_setDMMode(void * self,int newtype);
+
+extern float (*orig_G_RunFrame) (int serverframe);
+extern float my_G_RunFrame (int serverframe);

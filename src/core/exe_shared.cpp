@@ -4,14 +4,11 @@ CURL * curl_handle = NULL;
 unsigned char chktbl2[3000];
 int sofreebuild_len;
 char sofreebuildstring[128];
+
 void my_Qcommon_Init(int one , char ** two) {
 
 
 	orig_Qcommon_Init(one,two);
-
-	SOFPPNIX_DEBUG("Config strings = %08X\n",0x082AF680 + 0x454);
-	// SOFPPNIX_DEBUG("config strings = %08X\n",stget(0x0824A34E,0));
-
 
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
@@ -36,9 +33,9 @@ void my_Qcommon_Init(int one , char ** two) {
 	sprintf(sofreebuildstring,"++nix build %s ",tmp_chr);
 	sofreebuild_len = strlen(sofreebuildstring);
 	// turn it grey
-	// for (int i = 0; i < sofreebuild_len; i++ ) {
-	// 	*(sofreebuildstring+i) = *(sofreebuildstring+i) | 0x80;
-	// }
+	for (int i = 0; i < sofreebuild_len; i++ ) {
+		*(sofreebuildstring+i) = *(sofreebuildstring+i) | 0x80;
+	}
 
 	setCvarString(_nix_version,tmp_chr);
 	SOFPPNIX_PRINT("++nix Initialised. Version :  %s",tmp_chr);
@@ -56,9 +53,24 @@ void my_Qcommon_Init(int one , char ** two) {
 	// my_Cmd_AddCommand("pingservers",&my_CL_PingServers);
 
 	CreateCommands();
+
+
+	orig_Cmd_RemoveCommand("fx_save");
+	orig_Cmd_RemoveCommand("fx_load");
+	
 	
 
 	fixupClassesForLinux();
+
+	cmd_map["fraglimit"] = &rcon_fraglimit;
+	cmd_map["timelimit"] = &rcon_timelimit;
+	cmd_map["deathmatch"] = &rcon_deathmatch;
+
+	cmd_map["map"] = 0x080AE3E8;
+	cmd_map["set_dmflags"] = 0x080A28EC;
+	cmd_map["unset_dmflags"] = 0x080A2A90;
+	cmd_map["list_dmflags"] = 0x080A25A0;
+
 
 	// Gamespy Port Init
 	gs_select_sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -90,7 +102,6 @@ void my_Qcommon_Init(int one , char ** two) {
 
 		// memset 0 the master
 		memset(&sof1master_ip, 0, sizeof(sof1master_ip));
-		std::cout << "sof1master" << std::endl;
 		orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
 
 		// orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);

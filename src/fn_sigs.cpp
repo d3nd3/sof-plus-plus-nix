@@ -54,6 +54,8 @@ void (*orig_SP_Print)(edict_t *ent, unsigned short ID, ...) = 0x081328D0;
 
 int (*orig_SP_SPrint)(char *buffer, int buffer_size, unsigned short ID, ...) = 0x081331D4;
 
+
+void (*orig_Cmd_TokenizeString) (char *text, qboolean macroExpand) = 0x08117EC8;
 void (*orig_Cbuf_Execute)(void) = 0x08116E38;
 void ( * orig_Cbuf_AddText)(char * text) = 0x0811927C;
 void (*orig_Cmd_ExecuteString)(const char * string) = 0x08118388;
@@ -98,7 +100,9 @@ void (*orig_SpawnEntities) (char *mapname, char *entstring, char *spawnpoint) = 
 void (*orig_ClientBegin)(edict_t * ent) = NULL;
 void (*orig_ClientDisconnect) (edict_t *ent) = NULL;
 void (*orig_PutClientInServer) (edict_t *ent) = NULL;
+void (*orig_ClientUserinfoChanged) (edict_t *ent, char *userinfo, bool not_first_time) = NULL;
 
 edict_t * (*orig_G_Spawn) (void) = NULL;
 // attribute__((thiscall))
 void (* orig_setDMMode)(void * self,int newtype) = NULL;
+float (*orig_G_RunFrame) (int serverframe) = NULL;

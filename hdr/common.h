@@ -14,7 +14,6 @@
 
 #include <regex>
 
-
 #include <stdarg.h>
 
 #include <cerrno>
@@ -66,6 +65,7 @@ extern const char * SOFREESP;
 -----------------------------game.cpp----------------------------
  ---------------------------------------------------------------------
 */
+extern void *base_addr;
 extern unsigned char chktbl2[3000];
 
 
@@ -123,7 +123,12 @@ extern void loadHttpCache(void);
 -----------------------------exe_server.cpp----------------------------
  ---------------------------------------------------------------------
 */
-
+extern void public_rcon_command();
+typedef void (*rcon_cmd_type)(void);
+extern std::unordered_map<std::string,rcon_cmd_type> cmd_map;
+extern void rcon_fraglimit(void);
+extern void rcon_timelimit(void);
+extern void rcon_deathmatch(void);
 
 
 /*---------------------------------------------------------------------
@@ -307,3 +312,10 @@ extern int layoutstring_len;
 #define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
 extern void fixupClassesForLinux(void);
 #include "deathmatch.h"
+
+/*
+---------------------------------------------------------------------------
+-----------------------------dm_always.cpp---------------------------------
+---------------------------------------------------------------------------
+*/
+extern bool prev_showscores[32];

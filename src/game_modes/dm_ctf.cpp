@@ -10,7 +10,6 @@
 // }
 void dm_ctf_c::applyHooks(void)
 {
-	SOFPPNIX_DEBUG("Need level init to be called");
 	// orig->applyHooks();
 }
 
