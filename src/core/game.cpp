@@ -332,8 +332,6 @@ void my_ShutdownGame(void)
 	orig_ShutdownGame();
 
 
-	// orig_Cmd_RemoveCommand("fx_save");
-	// orig_Cmd_RemoveCommand("fx_load");
 	/*
 		free all detour mallocs
 	*/
@@ -481,14 +479,7 @@ void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
 	// orig_SpawnEntities(mapname,entstring,spawnpoint);
 
 	GamespyHeartbeatCtrlNotify();
-
-
-	// sv_map -> sv_spawnserver ( AFTER SV_InitGame ) -> spawnentities -> fx_init -> addCommand("fx_save");
-	// So we are before they attempt to add the commands.
-	// fx_init called by qcommon_init ( CL_Init ) double add.
 	
-	orig_Cmd_RemoveCommand("fx_save");
-	orig_Cmd_RemoveCommand("fx_load");
 }
 
 /*

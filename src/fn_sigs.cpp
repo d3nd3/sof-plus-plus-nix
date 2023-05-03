@@ -4,6 +4,8 @@
 //---------------------------------EXECUTABLE----------------------------
 
 // ---CLIENT-----
+void (*orig_CL_Init)(void) = 0x080C897C;
+
 void (*orig_CL_Frame) (int msec) = 0x080C84F8;
 
 char * (*orig_SV_StatusString)(void) = 0x080A97A4;
@@ -37,7 +39,6 @@ void ( *orig_PF_Configstring)(int index, char * string) = 0x080a7710;
 
 // ----SHARED-----
 
-
 char *(*orig_CopyString) (char *in) = 0x08120C3C;
 void (*orig_Z_FreeTags) (int tag) = 0x08120DB4;
 void (*orig_Z_Free) (void *ptr) = 0x08120CBC;
@@ -63,6 +64,7 @@ int     (*orig_Cmd_Argc) (void) = 0x081194B0;
 char    *(*orig_Cmd_Argv) (int i) = 0x081194C8;
 char    *(*orig_Cmd_Args) (void) = 0x081194FC;
 void (*orig_Qcommon_Init)(int one, char** two) = 0x0811E6E8;
+void (*orig_Qcommon_Frame)(int msec) = 0x0811EE7C;
 void (*orig_Qcommon_Shutdown)(void) = 0x081211E0;
 
 void (*orig_Cmd_AddCommand)(char * cmd, void * callback) = 0x08119514;

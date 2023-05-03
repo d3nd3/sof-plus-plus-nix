@@ -21,9 +21,13 @@ OBJS= \
 ../obj/game.o \
 ../obj/main.o \
 ../obj/serverlist.o \
-../obj/util.o \
 ../obj/httpdl.o \
 ../obj/detect.o \
+../obj/python.o \
+../obj/entity.o \
+../obj/decorators.o \
+../obj/memory.o \
+../obj/util.o \
 ../obj/dm_always.o \
 ../obj/deathmatch.o \
 ../obj/dm_sofree.o \
@@ -31,9 +35,9 @@ OBJS= \
 ../obj/dm_ctf.o \
 ../obj/dm_realistic.o
 
-CFLAGS= -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
+CFLAGS= -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/ `python3.9-config --cflags`
 LDFLAGS= -m32 -shared -o ../out/test.so -L /minizip/build
-LINKUS= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic
+LINKUS= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic `python3.9-config --ldflags --embed`
 
 # Name of text file containing build number.
 BUILD_NUMBER_FILE=buildnum
@@ -55,6 +59,16 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 	@echo $$(($$(cat $(BUILD_NUMBER_FILE)) + 1)) > $(BUILD_NUMBER_FILE)
 
 	$(CC) $(LDFLAGS) $(BUILD_NUMBER_LDFLAGS) $(OBJS) -o ../out/test.so $(LINKUS)
+
+
+# python_api
+../obj/entity.o : ./python_api/entity.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/decorators.o : ./python_api/decorators.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/memory.o : ./python_api/memory.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
 
 
 # game_modes
@@ -80,6 +94,10 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/httpdl.o : ./features/httpdl.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/python.o : ./features/python.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+
 
 # core
 ../obj/exe_shared.o : ./core/exe_shared.cpp

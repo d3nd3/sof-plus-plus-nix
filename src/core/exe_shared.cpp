@@ -5,10 +5,33 @@ unsigned char chktbl2[3000];
 int sofreebuild_len;
 char sofreebuildstring[128];
 
+void my_Qcommon_Frame(int msec)
+{
+	// outputs the console buffer to stdout
+	// sizebuf_t * cmd_buf = 0x083F51D0;
+	// if ( cmd_buf->cursize > 0 ) {
+	// 	SOFPPNIX_DEBUG("CL_Frame1cmd_buf->cursize = %i",cmd_buf->cursize);
+	// 	hexdump((unsigned char*)cmd_buf->data,(unsigned char*)cmd_buf->data + cmd_buf->cursize);
+	// }
+
+	// Check if the error indicator is set
+	if (PyErr_Occurred()) {
+		// Print the Python error message to stdout
+		PyErr_PrintEx(0);
+	}
+
+	isHTTPdone();
+
+	orig_Qcommon_Frame(msec);
+}
+
 void my_Qcommon_Init(int one , char ** two) {
 
 
 	orig_Qcommon_Init(one,two);
+
+
+	pythonInit();
 
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
@@ -53,12 +76,6 @@ void my_Qcommon_Init(int one , char ** two) {
 	// my_Cmd_AddCommand("pingservers",&my_CL_PingServers);
 
 	CreateCommands();
-
-
-	orig_Cmd_RemoveCommand("fx_save");
-	orig_Cmd_RemoveCommand("fx_load");
-	
-	
 
 	fixupClassesForLinux();
 
@@ -113,7 +130,7 @@ void my_Qcommon_Init(int one , char ** two) {
 
 void my_Qcommon_Shutdown(void)
 {
-
+	Py_Finalize();
 	curl_global_cleanup();
 
 	orig_Qcommon_Shutdown();

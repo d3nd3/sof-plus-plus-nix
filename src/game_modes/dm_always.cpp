@@ -288,22 +288,52 @@ float	always_gamerules_c::clientCalculateWaver(edict_t *ent, int atkID){
 	PutClientInServer ->
 		DM->ClientRespawn
 */
-bool new_client[32];
-short client_gravity[32];
-void	always_gamerules_c::clientConnect(edict_t *ent){
-	#if 0
-	int p = get_player_slot_from_ent(ent);
-	for ( int j = 0; j < 2; j++ ) {
-		// show_score[p] = true;
-		reso2d[p][j] = 0;
-	}
-	new_client[p] = true;
-	#endif
-	currentGameMode->clientConnect(ent);
+/*
+When receiving/extracting arguments, 'O' does not increase ref count.
 
+When creating/calling functions, 'O' does increase ref count.
+*/
+void	always_gamerules_c::clientConnect(edict_t *ent){
+	const char * name = "connect";
+	PyObject * connecting_player = PyCapsule_New(ent, NULL, NULL);
+	// Py_INCREF(connecting_player);
+	
+	for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
+		PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
+		// PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"ii",100,999);
+
+		Py_INCREF(player_connect_callbacks[i]);
+		// returns None
+		Py_DECREF(result);
+	}
+	Py_XDECREF(connecting_player);
+	currentGameMode->clientConnect(ent);
 }
 //a8
+/*
+	example: ent=dieing_player, inflictor=rocket, killer=attacker_player
+*/
 void	always_gamerules_c::clientDie(edict_t *ent, edict_t *inflictor, edict_t *killer){
+	
+	// SOFPPNIX_DEBUG("ent : %08X, inflictor : %08X, killer : %08X",ent,inflictor,killer);	
+
+	const char * name = "die";
+	// pointer, name, destructor
+	PyObject * died = PyCapsule_New(ent, "died", NULL);
+	PyObject * inflicting_ent = PyCapsule_New(inflictor, "inflictor", NULL);
+	PyObject * killer_player = PyCapsule_New(killer, "killer", NULL);
+
+	for ( int i = 0; i < player_die_callbacks.size(); i++ ) {
+
+		PyObject* result = PyObject_CallFunction(player_die_callbacks[i],"OOO",died,inflicting_ent,killer_player);
+		// returns None
+		Py_XDECREF(result);
+	}
+
+	Py_XDECREF(died);
+	Py_XDECREF(inflicting_ent);
+	Py_XDECREF(killer_player);
+
 	currentGameMode->clientDie(ent,inflictor,killer);
 }
 //ac
@@ -316,6 +346,16 @@ void	always_gamerules_c::clientPreDisconnect(edict_t *ent){
 }
 //b4
 void	always_gamerules_c::clientDisconnect(edict_t *ent){
+	const char * name = "disconnect";
+	PyObject * who = PyCapsule_New(ent, NULL, NULL);
+
+	for ( int i = 0; i < player_disconnect_callbacks.size(); i++ ) {
+		PyObject* result = PyObject_CallFunction(player_disconnect_callbacks[i],"O",who);
+		// returns None
+		Py_XDECREF(result);
+	}
+	Py_XDECREF(who);
+
 	currentGameMode->clientDisconnect(ent);
 }
 //b8
@@ -386,15 +426,18 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 
  This function is called from within PutClientInServer
 */
-void	always_gamerules_c::clientRespawn(edict_t *ent){
-	// orig_Com_Printf("Client Respawn!!\n");
-	#if 0
-	int p = get_player_slot_from_ent(ent);
-	ent->client->ps.pmove.gravity = client_gravity[p];
-	// enable ui trick force drawing
-	ent->client->showscores = 1;
+void	always_gamerules_c::clientRespawn(edict_t *ent) {
 
-	#endif
+	const char * name = "respawn";
+	PyObject * who = PyCapsule_New(ent, NULL, NULL);
+
+	for ( int i = 0; i < player_respawn_callbacks.size(); i++ ) {
+		PyObject* result = PyObject_CallFunction(player_respawn_callbacks[i],"O",who);
+		// returns None
+		Py_XDECREF(result);
+	}
+
+	Py_XDECREF(who);
 	currentGameMode->clientRespawn(ent);
 
 }

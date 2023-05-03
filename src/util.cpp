@@ -677,4 +677,3 @@ void LoadTextFile(const char *fileName, char **text)
 		(*text)[length] = '\0';
 	}
 }
-

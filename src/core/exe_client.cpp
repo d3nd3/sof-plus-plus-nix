@@ -19,16 +19,16 @@ typedef struct cvar_s
 	decimals where 1/N , where N is power of 2 can be represented exactly as floating point.
 */
 
+void my_CL_Init(void)
+{
+	// fx_init called in here
+	orig_CL_Init();
+}
+
 
 void my_CL_Frame(int msec)
 {
-	// sizebuf_t * cmd_buf = 0x083F51D0;
-	// if ( cmd_buf->cursize > 0 ) {
-	// 	SOFPPNIX_DEBUG("CL_Frame1cmd_buf->cursize = %i",cmd_buf->cursize);
-	// 	hexdump((unsigned char*)cmd_buf->data,(unsigned char*)cmd_buf->data + cmd_buf->cursize);
-	// }
 
-	isHTTPdone();
 
 	// if (dedicated->value) return;
 	orig_CL_Frame(msec);

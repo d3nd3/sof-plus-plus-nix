@@ -52,6 +52,8 @@
 
 #include <bsd/string.h>
 
+#include <python3.9/Python.h>
+
 #include "engine.h"
 #include "fn_sigs.h"
 
@@ -233,8 +235,29 @@ extern void GetServerList(void);
 extern void nonBlockingServerResponses(void);
 extern void GamespyHeartbeatCtrlNotify(void);
 extern void GamespyHeartbeat(void);
+/*---------------------------------------------------------------------
+-----------------------------python.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+extern void pythonInit(void);
+extern void list_refcount(void);
+extern PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks,PyObject* args);
+// is an extern "C" typedef already.
+PyMODINIT_FUNC PyInit_c_decorator_events(void);
 
+/*---------------------------------------------------------------------
+--------------------------py_api/decorators.cpp------------------------
+ ---------------------------------------------------------------------
+*/
+extern std::vector<PyObject*> player_die_callbacks;
+extern std::vector<PyObject*> player_connect_callbacks;
+extern std::vector<PyObject*> player_disconnect_callbacks;
+extern std::vector<PyObject*> player_respawn_callbacks;
 
+/*---------------------------------------------------------------------
+--------------------------py_api/entitiy.cpp------------------------
+ ---------------------------------------------------------------------
+*/
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------

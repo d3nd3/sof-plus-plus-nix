@@ -212,6 +212,9 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x080AB0B8,2,NOP);
 	memoryAdjust(0x080AB0D6,1,0xEB);
 
+//--------------------------SILENCE CMD_REMOVECOMMAND DONT CARE-------------------------------
+	memoryAdjust(0x081195E9,5,NOP);
+
 ////////////////////////////////////////////////////
 	
 	// ------------------Shared-----------------
@@ -224,6 +227,7 @@ void __attribute__ ((constructor)) begin() {
 	// Apply executable command creation here ( server & client )
 	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
 	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
+	orig_Qcommon_Frame = createDetour(orig_Qcommon_Frame , &my_Qcommon_Frame, 5);
 
 	orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
@@ -243,6 +247,7 @@ void __attribute__ ((constructor)) begin() {
 	orig_menu_AddServer = createDetour(orig_menu_AddServer,&my_menu_AddServer,5);
 
 	orig_CL_Frame = createDetour(orig_CL_Frame , &my_CL_Frame,5);
+	orig_CL_Init = createDetour(orig_CL_Init , &my_CL_Init,5);
 
 	// orig_PAK_WriteDeltaUsercmd = createDetour(orig_PAK_WriteDeltaUsercmd , &my_PAK_WriteDeltaUsercmd,5);
 

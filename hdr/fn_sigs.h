@@ -17,6 +17,9 @@ extern void my_SV_ClientThink(void *cl, usercmd_t *cmd);
 extern void ( *orig_PF_Configstring)(int index, char * string);
 
 // --Client--
+extern void (*orig_CL_Init) (void);
+extern void my_CL_Init (void);
+
 extern void (*orig_CL_Frame) (int msec);
 extern void my_CL_Frame(int msec);
 
@@ -75,6 +78,9 @@ extern char    *(*orig_Cmd_Args) (void);
 
 extern void (*orig_Qcommon_Init)(int one, char** two);
 extern void my_Qcommon_Init(int one , char ** two);
+
+extern void (*orig_Qcommon_Frame)(int msec);
+extern void my_Qcommon_Frame(int msec);
 
 extern void (*orig_Qcommon_Shutdown)(void);
 extern void my_Qcommon_Shutdown(void);
