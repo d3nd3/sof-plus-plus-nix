@@ -244,7 +244,30 @@ extern void list_refcount(void);
 extern PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks,PyObject* args);
 // is an extern "C" typedef already.
 PyMODINIT_FUNC PyInit_c_decorator_events(void);
+/*---------------------------------------------------------------------
+-----------------------------py_api/memory.cpp----------------------------
+ ---------------------------------------------------------------------
+*/
+class MemoryItem {
+public:
+	MemoryItem(std::string name,std::string type,unsigned int offset,std::string info) {
+		this->name = name;
+		this->type = type;
+		this->offset = offset;
+		this->info = info;
+	}
 
+	virtual PyObject* get_py(void* baseAddress)=0;
+protected:
+	std::string name;
+	std::string type;
+	unsigned int offset;
+	std::string info;
+
+public:
+	static void initMemoryItems(void);
+	static std::unordered_map<std::string, MemoryItem*> entityProperties;
+};
 /*---------------------------------------------------------------------
 --------------------------py_api/decorators.cpp------------------------
  ---------------------------------------------------------------------
@@ -255,9 +278,10 @@ extern std::vector<PyObject*> player_disconnect_callbacks;
 extern std::vector<PyObject*> player_respawn_callbacks;
 
 /*---------------------------------------------------------------------
---------------------------py_api/entitiy.cpp------------------------
+--------------------------py_api/entity.cpp------------------------
  ---------------------------------------------------------------------
 */
+extern PyObject* createEntDict(edict_t * backing_ent);
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------

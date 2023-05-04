@@ -47,5 +47,6 @@ static PyObject* py_on_player_respawn(PyObject* self,PyObject* args) {
 	Python Interpreter is aware of c function symbol names apparently.
 */
 PyMODINIT_FUNC PyInit_c_decorator_events(void) {
+	
 	return PyModule_Create(&c_decorator_events);
 }

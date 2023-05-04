@@ -32,6 +32,7 @@ void my_Qcommon_Init(int one , char ** two) {
 
 
 	pythonInit();
+	
 
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
@@ -67,6 +68,8 @@ void my_Qcommon_Init(int one , char ** two) {
 	curl_global_init(CURL_GLOBAL_NOTHING);
 
 	SOFPPNIX_PRINT("Curl Version : %s",curl_version());
+
+	SOFPPNIX_PRINT("Python version : %s", Py_GetVersion());
 	
 	// Init has been done!
 	// ------------------- CREATING COMMANDS --------------------

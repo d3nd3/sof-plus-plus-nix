@@ -319,9 +319,12 @@ void	always_gamerules_c::clientDie(edict_t *ent, edict_t *inflictor, edict_t *ki
 
 	const char * name = "die";
 	// pointer, name, destructor
-	PyObject * died = PyCapsule_New(ent, "died", NULL);
-	PyObject * inflicting_ent = PyCapsule_New(inflictor, "inflictor", NULL);
-	PyObject * killer_player = PyCapsule_New(killer, "killer", NULL);
+	// PyObject * died = PyCapsule_New(ent, "died", NULL);
+	PyObject * died = createEntDict(ent);
+	// PyObject * inflicting_ent = PyCapsule_New(inflictor, "inflictor", NULL);
+	PyObject * inflicting_ent = createEntDict(ent);
+	// PyObject * killer_player = PyCapsule_New(killer, "killer", NULL);
+	PyObject * killer_player = createEntDict(ent);
 
 	for ( int i = 0; i < player_die_callbacks.size(); i++ ) {
 

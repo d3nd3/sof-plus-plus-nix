@@ -1,27 +1,13 @@
 #include "common.h"
-class MemoryItem {
-public:
-	MemoryItem(std::string name,std::string type,unsigned int offset,std::string info) {
-		this->name = name;
-		this->type = type;
-		this->offset = offset;
-		this->info = info;
-	}
-protected:
-	std::string name;
-	std::string type;
-	unsigned int offset;
-	std::string info;
 
-public:
-	static void initMemoryItems(void);
-	static std::unordered_map<std::string, MemoryItem*> entityProperties;
-};
 
 class FloatMemoryItem : public MemoryItem {
 public:
 	FloatMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"float",offset,info) {}
 
+	PyObject* get_py(void* baseAddress) {
+		return PyFloat_FromDouble(*(float*)(baseAddress + offset));
+	}
 	float get(void* baseAddress) {
 		return *(float*)(baseAddress + offset);
 	}
@@ -33,6 +19,9 @@ class IntMemoryItem : public MemoryItem {
 public:
 	IntMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"int",offset,info) {}
 
+	PyObject* get_py(void* baseAddress) {
+		return PyLong_FromLong(*(int*)(baseAddress + offset));
+	}
 	int get(void* baseAddress) {
 		return *(int*)(baseAddress + offset);
 	}
@@ -44,6 +33,11 @@ class VectorMemoryItem : public MemoryItem {
 public:
 	VectorMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"vector",offset,info) {}
 
+	PyObject* get_py(void* baseAddress) {
+		vec3_t vec;
+		VectorCopy(*(vec3_t*)(baseAddress + offset),vec);
+		return Py_BuildValue("(fff)",vec[0],vec[1],vec[2]);
+	}
 	vec3_t* get(void* baseAddress) {
 		return (vec3_t*)(baseAddress + offset);
 	}
@@ -56,6 +50,10 @@ class Vector2DMemoryItem : public MemoryItem {
 public:
 	Vector2DMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"vector2d",offset,info) {}
 
+	PyObject* get_py(void* baseAddress) {
+		
+		return Py_BuildValue("(ff)",*(vec_t*)(baseAddress + offset),*(vec_t*)(baseAddress + offset + sizeof(vec_t)));
+	}
 	vec2_t* get(void* baseAddress) {
 		return (vec2_t*)(baseAddress + offset);
 	}
@@ -68,6 +66,9 @@ class ShortVector2DMemoryItem : public MemoryItem {
 public:
 	ShortVector2DMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"shortvector2d",offset,info) {}
 
+	PyObject* get_py(void* baseAddress) {
+		return Py_BuildValue("(hh)",*(short*)(baseAddress + offset), *(short*)(baseAddress + offset + sizeof(short)));
+	}
 	short* get(void* baseAddress) {
 		return (short*)(baseAddress + offset);
 	}
@@ -79,7 +80,9 @@ public:
 class StringMemoryItem : public MemoryItem {
 public:
 	StringMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"string",offset,info) {}
-
+	PyObject* get_py(void * baseAddress) {
+		return PyUnicode_FromString((char*)(baseAddress + offset));
+	}
 	std::string get(void* baseAddress) {
 		return (char*)(baseAddress + offset);
 	}
@@ -91,6 +94,9 @@ class PointerMemoryItem : public MemoryItem {
 public:
 	PointerMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"pointer",offset,info) {}
 
+	PyObject* get_py(void* baseAddress) {
+		return PyLong_FromVoidPtr(*(void**)(baseAddress + offset));
+	}
 	void* get(void* baseAddress) {
 		return *(void**)(baseAddress + offset);
 	}
@@ -101,7 +107,9 @@ public:
 class ShortMemoryItem : public MemoryItem {
 public:
 	ShortMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"short",offset,info) {}
-
+	PyObject* get_py(void* baseAddress) {
+		return PyLong_FromLong(*(short*)(baseAddress + offset));
+	}
 	short get(void* baseAddress) {
 		return *(short*)(baseAddress + offset);
 	}
@@ -112,7 +120,9 @@ public:
 class ByteMemoryItem : public MemoryItem {
 public:
 	ByteMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"byte",offset,info) {}
-
+	PyObject* get_py(void* baseAddress) {
+		return PyLong_FromLong(*(char*)(baseAddress + offset));
+	}
 	char get(void* baseAddress) {
 		return *(char*)(baseAddress + offset);
 	}
@@ -124,7 +134,9 @@ public:
 class ShortVectorMemoryItem : public MemoryItem {
 public:
 	ShortVectorMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"shortvector",offset,info) {}
-
+	PyObject* get_py(void* baseAddress) {
+		return Py_BuildValue("(hhh)",*(short*)(baseAddress + offset), *(short*)(baseAddress + offset + sizeof(short)), *(short*)(baseAddress + offset + sizeof(short) * 2));
+	}
 	short* get(void* baseAddress) {
 		return (short*)(baseAddress + offset);
 	}
@@ -134,7 +146,7 @@ public:
 };
 
 
-
+static std::unordered_map<std::string, MemoryItem*> MemoryItem::entityProperties;
 void MemoryItem::initMemoryItems(void)
 {
 	//--------------------------------------------------------------------------------------------------------

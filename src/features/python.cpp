@@ -116,6 +116,9 @@ void pythonInit(void)
 
 	Py_DECREF(pGlobals);
 	Py_DECREF(sof_events_module);
+
+
+	MemoryItem::initMemoryItems();
 }
 
 /*
