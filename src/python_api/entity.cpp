@@ -33,89 +33,57 @@ void py_ent_spawn(PyObject * self, PyObject * classname)
 ----------------------------------------CUSTOM ENT DICT--------------------------------------
 */
 
+// // Structure for defining getter and setter functions
+// typedef struct {
+// 	const char *name;    // Name of the attribute
+// 	getter get;          // Getter function pointer
+// 	setter set;          // Setter function pointer
+// 	const char *doc;     // Documentation string for the attribute
+// 	void *closure;       // Additional data for the getter/setter
+// } PyGetSetDef;
+
+
+
+// --------------------------------------------------------------------------------------
+// EntDict struct moved to common.h
+
 #if 0
-typedef struct {
-	PyDictObject dict; // inherit from PyDictObject
-	// add any custom fields here
-} EntDict;
-
-// define a custom __setitem__ method
-static int
-EntDict_setitem(EntDict *self, PyObject *key, PyObject *value)
-{
-	// print a message when an item is added
-	printf("Adding item to EntDict: %s\n", PyUnicode_AsUTF8(key));
-	// call the base class method
-	return PyDict_Type.tp_as_mapping->mp_ass_subscript((PyObject *)self, key, value);
-}
-
-// define the type slots
-static PyType_Slot EntDict_slots[] = {
-	// {Py_tp_base, &PyDict_Type}, // set the base class to PyDict_Type
-	{Py_mp_ass_subscript, EntDict_setitem}, // override the __setitem__ method
-	{0, 0}
-};
-
-// define the type specification
-static PyType_Spec EntDict_spec = {
-	"EntDict", // the name of the type
-	sizeof(EntDict), // the size of the type object
-	0, // the size of the type object
-	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_DICT_SUBCLASS, // base flags,
-	EntDict_slots // the slots
-};
-
-// create the type object
-static PyObject *
-EntDict_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
-{
-	// calls PyType_Ready internally.
-	// return PyType_FromSpec(&EntDict_spec);
-	PyObject * bases = PyTuple_Pack(1, &PyDict_Type);
-	return PyType_FromSpecWithBases(&EntDict_spec,bases);
-}
-#else
-typedef struct {
-	// order matters here. dict is at top.
-	// PyObject_HEAD
-	PyDictObject dict;
-} MyDict;
-
-
-static PyObject* MyDict_get(PyObject *self, PyObject *key) {
+static PyObject* EntDict_get(PyObject *self, PyObject *key) {
 	return PyDict_GetItem(self, key);
 }
 
-static int MyDict_set(PyObject *self, PyObject *key, PyObject *value) {
+static int EntDict_set(PyObject *self, PyObject *key, PyObject *value) {
 	return PyDict_SetItem(self, key, value);
 }
 
-static PyMethodDef MyDict_methods[] = {
+static PyMethodDef EntDict_methods[] = {
 	// {"get", (PyCFunction)MyDict_get, METH_O, "Get a value from the dictionary."},
 	// {"set", (PyCFunction)MyDict_set, METH_VARARGS, "Set a value in the dictionary."},
 	{NULL,NULL}  /* Sentinel */
 };
-
+#endif
 /*
 	constructor.
 	yourClass() = _call ... _new ... _init
 */
-static int MyDict_init(MyDict *self, PyObject *args, PyObject *kwds) {
+static int EntDict_init(EntDict *self, PyObject *args, PyObject *kwds) {
 	if (PyDict_Type.tp_init((PyObject *)self, args, kwds) < 0)
 			return -1;
 		// self->state = 0;
 	return 0;
 }
 
-static PyTypeObject MyDict_Type = {
+
+
+static PyTypeObject EntDict_Type = {
 	PyObject_HEAD_INIT(&PyType_Type)
-	"MyDict",             /* tp_name */
-	sizeof(MyDict), /* tp_basicsize */
+	"EntDict",             /* tp_name */
+	sizeof(EntDict), /* tp_basicsize */
 	0,                         /* tp_itemsize */
 	0,                         /* tp_dealloc */
 	0,                         /* tp_print */
-	0,                         /* tp_getattr */
-	0,                         /* tp_setattr */
+	0,                         /* tp_getattr - tp_getattro using strings.*/
+	0,                         /* tp_setattr - tp_setattro using strings.*/
 	0,                         /* tp_reserved */
 	0,                         /* tp_repr */
 	0,                         /* tp_as_number */
@@ -124,111 +92,100 @@ static PyTypeObject MyDict_Type = {
 	0,                         /* tp_hash  */
 	0,                         /* tp_call */
 	0,                         /* tp_str */
-	0,                         /* tp_getattro */
-	0,                         /* tp_setattro */
+	0,                         /*
+	 tp_getattro
+	  - Get an attribute’s value -
+	   __getattribute__ __getattr__
+	   Called when an attribute lookup has not found the attribute in the usual places
+	*/
+	0,                         /* tp_setattro - Set an attribute’s value or remove the attribute. - __setattr__ __delattr__*/
 	0,                         /* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_DICT_SUBCLASS,        /* tp_flags */
-	"Noddy objects",           /* tp_doc */
+	"SoF1 Entity",           /* tp_doc */
 	0,                         /* tp_traverse */
 	0,                         /* tp_clear */
 	0,                         /* tp_richcompare */
 	0,                         /* tp_weaklistoffset */
 	0,                         /* tp_iter */
 	0,                         /* tp_iternext */
-	MyDict_methods,             /* tp_methods */
+	0,             /* tp_methods */
 	0,             				/* tp_members */
-	0,                         /* tp_getset */
+	0,                         /* tp_getset - An optional pointer to a static NULL-terminated array of PyGetSetDef structures, declaring computed attributes of instances of this type. However, please note that tp_getset is used to define attribute access for object attributes, not for dictionary-like access using the [] operator.*/
 	&PyDict_Type,                         /* tp_base */
 	0,                         /* tp_dict */
 	0,                         /* tp_descr_get */
 	0,                         /* tp_descr_set */
 	0,                         /* tp_dictoffset */
-	(initproc)MyDict_init,      /* tp_init */
+	(initproc)EntDict_init,      /* tp_init */
 	0,                         /* tp_alloc */
 	0,                 /* tp_new */
 };
-#endif
-
 
 /*
 -------------------------------------CREATE THE ENT DICT INSTANCE-----------------------------------------
 PyObject* l = PyLong_FromLong(123)
 	// Finally, add some items to the dictionary
 	PyDict_SetItemString((PyObject*)ent_dict, "lookupthiskey", );
+
+	MemoryItem::entityProperties is a unordered_map of entity_property type and offsets.
+
 */
-#if 0
-static void addEntProperties(EntDict* ent_dict,edict_t * backing_ent)
+
+static void addEntProperties(PyObject* ent_dict,edict_t * c_ent)
 {
+	/*
+		Why add them if setters getters work.
+		Because then the script users cannot iterate the dict?
+		The setters and getters have to update the dictionary too.
+
+		Ensuring synchronization between SoF memory and the python dict representation.
+		When the ent dict is created by converting edict_t pointer at event cb. That is the moment of synchronization.
+	*/
+	#if 0
 	// Read from the entities memory using get() and store inside the ent dict.
+	// first = Key, second = Value
 	for( const auto &pair : MemoryItem::entityProperties ) {
-		PyObject* val = pair.second->get_py(backing_ent);
-		PyDict_SetItemString((PyObject *)ent_dict, pair.first.c_str() , val);//b
+		
+		
+		PyObject* val = NULL;
+		pair.second->get((void*)c_ent,val); //n
+		PyDict_SetItemString(ent_dict, pair.first.c_str() , val);//b
 		Py_DECREF(val);
+		
 	}
+	#endif
 }
-#endif
-PyObject* createEntDict(edict_t * backing_ent)
+
+/*
+	The first field of the type item structure is the inherited object type.
+
+	A dict item holding a hidden __ent__ field which is the c ent pointer
+	The dict also has overriden set/get functions which access the memory directly.
+*/
+PyObject* createEntDict(edict_t * c_ent)
 {
-	MyDict_Type.tp_base = &PyDict_Type;
+	EntDict_Type.tp_base = &PyDict_Type;
+	// EntDict_Type.tp_getset = entity_getset_list;
+	EntDict_Type.tp_as_mapping = &entity_mapping_methods;
+
 	std::cout << "Further0" << std::endl;
-	if (PyType_Ready(&MyDict_Type) < 0) {
+	if (PyType_Ready(&EntDict_Type) < 0) {
 		PyErr_Print();
 		error_exit("Failed to Type Ready");
 	}
-	// Py_INCREF(&MyDict_Type);
-		
-	std::cout << "Further1" << std::endl;
-	// PyObject* ent_dict = MyDict_new(&MyDict_Type, NULL, NULL);
 
-	PyObject *ent_dict = PyObject_CallObject((PyObject *) &MyDict_Type, NULL);
+	// override some things that were 'inherited' by PyType_Ready
 
 
-	// Create the ent_dict instance
-	// PyObject* ent_dict = EntDict_new(NULL, NULL, NULL);
-	// if ( ent_dict == NULL ) {
-	// 	PyErr_Print();
-	// 	error_exit("Failed to create ent dict");
-	// }
-	// PyObject* real_dict = PyDict_New();
-	// if ( real_dict == NULL ) {
-	// 	PyErr_Print();
-	// 	error_exit("Failed to create real_dict");
-	// }
-	std::cout << "Further2" << std::endl;
-	// Insert the backing_ent into the dictionary
-	PyObject *value = PyCapsule_New(backing_ent, NULL, NULL);
-	if ( value == NULL ) {
-		PyErr_Print();
-		error_exit("Failed to create capsule");
-	}
+	PyObject *ent_dict = PyObject_CallObject((PyObject *) &EntDict_Type, NULL);
 
-	// Generate an integer
-	// PyObject* l = PyLong_FromLong(123);
+	// no reason to use capsules.
+	EntDict* ed = (EntDict*)ent_dict;
+	ed->c_ent = c_ent;
 
-	/*
-		So its not the value that is the problem.
-		Its not the key name that is the problem.
-		Its the ent_dict.
-
-		PyDict_Check returning false.
-	*/
-	std::cout << "Further3" << std::endl;
-	
-	//b
-	// Py_INCREF(value);
-	// Py_INCREF(ent_dict);
-	if ( PyDict_SetItemString(ent_dict, "entent", value) == -1 ) {
-		// PyErr_SetString(PyExc_RuntimeError, "Failed to set __ent__");
-		std::cout << "BAD!" << std::endl;
-		PyErr_Print();
-		error_exit("Failed to set __ent__");
-	}
-	// Py_DECREF(value);
-
-	std::cout << "Further4" << std::endl;
 	// Add every other ent specific object
-	// addEntProperties(ent_dict,backing_ent);
-
+	addEntProperties(ent_dict,c_ent);
 	// Py_DECREF(ent_dict);
+	std::cout << "5" << std::endl;
 	return ent_dict;
 }

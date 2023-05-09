@@ -248,6 +248,9 @@ PyMODINIT_FUNC PyInit_c_decorator_events(void);
 -----------------------------py_api/memory.cpp----------------------------
  ---------------------------------------------------------------------
 */
+extern PyMappingMethods entity_mapping_methods;
+// extern PyGetSetDef *entity_getset_list;
+
 class MemoryItem {
 public:
 	MemoryItem(std::string name,std::string type,unsigned int offset,std::string info) {
@@ -257,8 +260,29 @@ public:
 		this->info = info;
 	}
 
-	virtual PyObject* get_py(void* baseAddress)=0;
-protected:
+	virtual void get(void* baseAddress, PyObject* &value)=0;
+
+	
+	virtual void get(void* baseAddress, short* &value);
+	virtual void get(void* baseAddress, float* &value);
+	virtual void get(void* baseAddress, char &value);
+	virtual void get(void* baseAddress, int &value);
+	virtual void get(void* baseAddress, short &value);
+	virtual void get(void* baseAddress, float &value);
+	virtual void get(void* baseAddress, void* &value);
+	virtual void get(void* baseAddress, std::string &value);
+
+	virtual void set(void* baseAddress,short* value);
+	virtual void set(void* baseAddress,float* value);
+	virtual void set(void* baseAddress,char value);
+	virtual void set(void* baseAddress,int value);
+	virtual void set(void* baseAddress,short value);
+	virtual void set(void* baseAddress,float value);
+	virtual void set(void* baseAddress,void * value);
+	virtual void set(void* baseAddress,std::string value);
+
+	virtual void set(void* baseAddress, PyObject* value)=0;
+
 	std::string name;
 	std::string type;
 	unsigned int offset;
@@ -281,7 +305,14 @@ extern std::vector<PyObject*> player_respawn_callbacks;
 --------------------------py_api/entity.cpp------------------------
  ---------------------------------------------------------------------
 */
-extern PyObject* createEntDict(edict_t * backing_ent);
+extern PyObject* createEntDict(edict_t * c_ent);
+typedef struct {
+	// order matters here. dict is at top.
+	// PyObject_HEAD ( not required for inherited original types )
+	PyDictObject dict;
+	// Custom fields here.
+	edict_t * c_ent;
+} EntDict;
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------
