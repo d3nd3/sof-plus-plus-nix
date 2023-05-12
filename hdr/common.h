@@ -57,6 +57,9 @@
 #include "engine.h"
 #include "fn_sigs.h"
 
+#define stget(e,x) *(unsigned int*)((void*)e+x)
+#define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
+
 
 /*---------------------------------------------------------------------
 -----------------------------main.cpp----------------------------
@@ -242,8 +245,7 @@ extern void GamespyHeartbeat(void);
 extern void pythonInit(void);
 extern void list_refcount(void);
 extern PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks,PyObject* args);
-// is an extern "C" typedef already.
-PyMODINIT_FUNC PyInit_c_decorator_events(void);
+
 /*---------------------------------------------------------------------
 -----------------------------py_api/memory.cpp----------------------------
  ---------------------------------------------------------------------
@@ -301,6 +303,9 @@ extern std::vector<PyObject*> player_connect_callbacks;
 extern std::vector<PyObject*> player_disconnect_callbacks;
 extern std::vector<PyObject*> player_respawn_callbacks;
 
+extern std::vector<PyObject*> frame_early_callbacks;
+extern std::vector<PyObject*> map_spawn_callbacks;
+
 /*---------------------------------------------------------------------
 --------------------------py_api/entity.cpp------------------------
  ---------------------------------------------------------------------
@@ -313,6 +318,13 @@ typedef struct {
 	// Custom fields here.
 	edict_t * c_ent;
 } EntDict;
+
+void initEntDictType(void);
+/*---------------------------------------------------------------------
+--------------------------py_api/ppnix.cpp------------------------
+ ---------------------------------------------------------------------
+*/
+extern std::vector<PyObject*> ppnix_delayedRun_callbacks;
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------
@@ -386,8 +398,7 @@ extern void spawnDistraction(edict_t * ent,int slot);
 */
 extern char layoutstring[1024];
 extern int layoutstring_len;
-#define stget(e,x) *(unsigned int*)((void*)e+x)
-#define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
+
 extern void fixupClassesForLinux(void);
 #include "deathmatch.h"
 

@@ -1,5 +1,7 @@
 #include "common.h"
 
+
+
 void SOFPPNIX_DEBUG(char * msg, ... ) {
 	#ifdef DEBUG
 	char text[1024];

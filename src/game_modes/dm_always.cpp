@@ -110,6 +110,12 @@ void	always_gamerules_c::levelInit(void){
 	// sets build number bottom right
 	orig_Cmd_ExecuteString("++nix_draw_clear\n");
 
+	for ( int i = 0; i < map_spawn_callbacks.size(); i++ ) {
+		PyObject* result = PyObject_CallFunction(map_spawn_callbacks[i],"");
+		// returns None
+		Py_XDECREF(result);
+	}
+
 	// dm specific levelinit fallback func
 	currentGameMode->levelInit();
 }
@@ -295,16 +301,13 @@ When creating/calling functions, 'O' does increase ref count.
 */
 void	always_gamerules_c::clientConnect(edict_t *ent){
 	const char * name = "connect";
-	PyObject * connecting_player = PyCapsule_New(ent, NULL, NULL);
+	PyObject * connecting_player = createEntDict(ent);
 	// Py_INCREF(connecting_player);
 	
 	for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
-		// PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"ii",100,999);
-
-		Py_INCREF(player_connect_callbacks[i]);
 		// returns None
-		Py_DECREF(result);
+		Py_XDECREF(result);
 	}
 	Py_XDECREF(connecting_player);
 	currentGameMode->clientConnect(ent);
@@ -318,12 +321,9 @@ void	always_gamerules_c::clientDie(edict_t *ent, edict_t *inflictor, edict_t *ki
 	// SOFPPNIX_DEBUG("ent : %08X, inflictor : %08X, killer : %08X",ent,inflictor,killer);	
 
 	const char * name = "die";
-	// pointer, name, destructor
-	// PyObject * died = PyCapsule_New(ent, "died", NULL);
+
 	PyObject * died = createEntDict(ent);
-	// PyObject * inflicting_ent = PyCapsule_New(inflictor, "inflictor", NULL);
 	PyObject * inflicting_ent = createEntDict(ent);
-	// PyObject * killer_player = PyCapsule_New(killer, "killer", NULL);
 	PyObject * killer_player = createEntDict(ent);
 
 	for ( int i = 0; i < player_die_callbacks.size(); i++ ) {
@@ -350,7 +350,7 @@ void	always_gamerules_c::clientPreDisconnect(edict_t *ent){
 //b4
 void	always_gamerules_c::clientDisconnect(edict_t *ent){
 	const char * name = "disconnect";
-	PyObject * who = PyCapsule_New(ent, NULL, NULL);
+	PyObject * who = createEntDict(ent);
 
 	for ( int i = 0; i < player_disconnect_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(player_disconnect_callbacks[i],"O",who);
@@ -432,7 +432,7 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 void	always_gamerules_c::clientRespawn(edict_t *ent) {
 
 	const char * name = "respawn";
-	PyObject * who = PyCapsule_New(ent, NULL, NULL);
+	PyObject * who = createEntDict(ent);
 
 	for ( int i = 0; i < player_respawn_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(player_respawn_callbacks[i],"O",who);

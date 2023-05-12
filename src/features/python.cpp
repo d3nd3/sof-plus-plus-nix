@@ -1,6 +1,9 @@
 #include "common.h"
 
+extern PyModuleDef PlayerModule;
 extern PyModuleDef EntModule;
+extern PyModuleDef PpnixModule;
+extern PyModuleDef EventModule;
 /*
 s: C string to str
 s#: C string, length to str
@@ -72,26 +75,31 @@ void pythonInit(void)
 	PyList_Append(sysPath, curDir);//b
 	Py_DECREF(curDir);
 
+	initEntDictType();
+	MemoryItem::initMemoryItems();
+	
+	PyObject* mod_ppnix = PyModule_Create(&PpnixModule);
+	PyObject* mod_event = PyModule_Create(&EventModule);
 
-/*
-	If docs say :
-	Return value: New reference
-	Then you have to call DECREF on it. When done.
-*/	
+	PyObject* mod_ent = PyModule_Create(&EntModule);
+	PyObject* mod_player = PyModule_Create(&PlayerModule);
+
+
 // ----------------------------------------------------------------
-	PyObject* sof_events_module = PyInit_c_decorator_events();//n
-
-	// Add sof_events module to the built-in sys.modules dictionary
-	PyObject* sys_dict = PyImport_GetModuleDict();//b
-	if ( PyDict_SetItemString(sys_dict, "events", sof_events_module) == -1 ) { //b
-		error_exit("Failed to add sof_events module to sys.modules");
-		return;
-	}
-
+	// Add mod_events to built-in sys.modules dictionary
+	// PyObject* sys_dict = PyImport_GetModuleDict();//b
+	// if ( PyDict_SetItemString(sys_dict, "event", mod_event) == -1 ) { //b
+	// 	error_exit("Failed to add mod_event module to sys.modules");
+	// }
 	PyObject *pGlobals = PyDict_New();//n
-	PyDict_SetItemString(pGlobals, "event", sof_events_module);
+	PyDict_SetItemString(pGlobals, "ppnix", mod_ppnix);
+	PyDict_SetItemString(pGlobals, "event", mod_event);
 
-	// PyObject *pModuleDict = PyModule_GetDict(sof_events_module);//b
+	PyDict_SetItemString(pGlobals, "ent", mod_ent);
+	PyDict_SetItemString(pGlobals, "player", mod_player);
+	
+	
+	// PyObject *pModuleDict = PyModule_GetDict(mod_event);//b
 
 	// // Iterate over the items of pModuleDict
 	// PyObject *key, *value;
@@ -114,11 +122,7 @@ void pythonInit(void)
 	PyObject *pResult = PyRun_File(fp, "sofppnix.py", Py_file_input, pGlobals, NULL);
 	fclose(fp);
 
-	Py_DECREF(pGlobals);
-	Py_DECREF(sof_events_module);
-
-
-	MemoryItem::initMemoryItems();
+	
 }
 
 /*
@@ -144,7 +148,7 @@ PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks
 	// SOFPPNIX_DEBUG("Argument type: %s", func_type_name);
 
 	// Py_RETURN_NONE;
-	// We want to keep this.
+	// We want to keep this. TODO: cleanup callback if remove.
 	Py_INCREF(callback);
 	return callback;
 }

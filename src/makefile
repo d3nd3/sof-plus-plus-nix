@@ -25,6 +25,8 @@ OBJS= \
 ../obj/detect.o \
 ../obj/python.o \
 ../obj/entity.o \
+../obj/ppnix.o \
+../obj/player.o \
 ../obj/decorators.o \
 ../obj/memory.o \
 ../obj/util.o \
@@ -62,13 +64,16 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 
 
 # python_api
+../obj/player.o : ./python_api/player.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/entity.o : ./python_api/entity.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/ppnix.o : ./python_api/ppnix.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/decorators.o : ./python_api/decorators.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/memory.o : ./python_api/memory.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
-
 
 
 # game_modes

@@ -2,7 +2,7 @@
 ---------------------Executable---------------------
 */
 
-// --Server--
+// -------------------Server-----------------
 // Builds the string that is sent as heartbeats and status replies
 // {E8 DIRECT OVERRIDE}
 extern char * (*orig_SV_StatusString)(void);
@@ -13,10 +13,12 @@ extern void my_SV_Map_f(void);
 extern void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd);
 extern void my_SV_ClientThink(void *cl, usercmd_t *cmd);
 
-
 extern void ( *orig_PF_Configstring)(int index, char * string);
 
-// --Client--
+extern void (*orig_SV_RunGameFrame) (void);
+extern void my_SV_RunGameFrame(void);
+
+// -------------------Client------------------
 extern void (*orig_CL_Init) (void);
 extern void my_CL_Init (void);
 
@@ -168,3 +170,5 @@ extern void my_setDMMode(void * self,int newtype);
 
 extern float (*orig_G_RunFrame) (int serverframe);
 extern float my_G_RunFrame (int serverframe);
+
+extern int (*orig_PB_AddArmor)(edict_t *ent, int amount);

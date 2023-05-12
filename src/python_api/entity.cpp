@@ -1,13 +1,17 @@
 #include "common.h"
 
-void py_ent_spawn(PyObject * self, PyObject * classname);
+/*
+c4 = ent.spawn("item_c4")
+*/
+static PyObject * py_ent_spawn(PyObject * self, PyObject * classname);
 
+//name,c_func,flags,docstring
 static PyMethodDef EntMethods[] = {
 	{"spawn", py_ent_spawn, METH_VARARGS,"Spawn a new entity."},
 
 	{NULL, NULL, 0, NULL}
 };
-
+//base,name,doc,size,methods
 PyModuleDef EntModule = {
 	PyModuleDef_HEAD_INIT, "ent", "a module for manipulating entities.", -1, EntMethods,
 	NULL, NULL, NULL, NULL
@@ -18,14 +22,15 @@ PyMODINIT_FUNC PyInit_EntModule(void) {
 	return PyModule_Create(&EntModule);
 }
 
-// python script calls this. ent_spawn("classname")
-void py_ent_spawn(PyObject * self, PyObject * classname)
+static PyObject * py_ent_spawn(PyObject * self, PyObject * args)
 {
-	//parse classname as python string
-	char * str = PyUnicode_AsUTF8(classname);
+	edict_t * ent = orig_G_Spawn();
 
 
-	Py_RETURN_NONE;
+	// PyObject * ret = PyLong_FromVoidPtr(ent);
+	PyObject * ret = createEntDict(ent);
+	return ret;
+	// Py_RETURN_NONE;
 }
 
 
@@ -47,21 +52,7 @@ void py_ent_spawn(PyObject * self, PyObject * classname)
 // --------------------------------------------------------------------------------------
 // EntDict struct moved to common.h
 
-#if 0
-static PyObject* EntDict_get(PyObject *self, PyObject *key) {
-	return PyDict_GetItem(self, key);
-}
 
-static int EntDict_set(PyObject *self, PyObject *key, PyObject *value) {
-	return PyDict_SetItem(self, key, value);
-}
-
-static PyMethodDef EntDict_methods[] = {
-	// {"get", (PyCFunction)MyDict_get, METH_O, "Get a value from the dictionary."},
-	// {"set", (PyCFunction)MyDict_set, METH_VARARGS, "Set a value in the dictionary."},
-	{NULL,NULL}  /* Sentinel */
-};
-#endif
 /*
 	constructor.
 	yourClass() = _call ... _new ... _init
@@ -72,8 +63,6 @@ static int EntDict_init(EntDict *self, PyObject *args, PyObject *kwds) {
 		// self->state = 0;
 	return 0;
 }
-
-
 
 static PyTypeObject EntDict_Type = {
 	PyObject_HEAD_INIT(&PyType_Type)
@@ -131,6 +120,19 @@ PyObject* l = PyLong_FromLong(123)
 
 */
 
+void initEntDictType(void)
+{
+	EntDict_Type.tp_base = &PyDict_Type;
+	// EntDict_Type.tp_getset = entity_getset_list;
+
+	// uses memory_getter memory_setter from memory.cpp
+	EntDict_Type.tp_as_mapping = &entity_mapping_methods;
+
+	if (PyType_Ready(&EntDict_Type) < 0) {
+		PyErr_Print();
+		error_exit("Failed to Type Ready");
+	}
+}
 static void addEntProperties(PyObject* ent_dict,edict_t * c_ent)
 {
 	/*
@@ -141,19 +143,15 @@ static void addEntProperties(PyObject* ent_dict,edict_t * c_ent)
 		Ensuring synchronization between SoF memory and the python dict representation.
 		When the ent dict is created by converting edict_t pointer at event cb. That is the moment of synchronization.
 	*/
-	#if 0
+	
 	// Read from the entities memory using get() and store inside the ent dict.
 	// first = Key, second = Value
 	for( const auto &pair : MemoryItem::entityProperties ) {
-		
-		
 		PyObject* val = NULL;
 		pair.second->get((void*)c_ent,val); //n
 		PyDict_SetItemString(ent_dict, pair.first.c_str() , val);//b
 		Py_DECREF(val);
-		
 	}
-	#endif
 }
 
 /*
@@ -164,15 +162,7 @@ static void addEntProperties(PyObject* ent_dict,edict_t * c_ent)
 */
 PyObject* createEntDict(edict_t * c_ent)
 {
-	EntDict_Type.tp_base = &PyDict_Type;
-	// EntDict_Type.tp_getset = entity_getset_list;
-	EntDict_Type.tp_as_mapping = &entity_mapping_methods;
 
-	std::cout << "Further0" << std::endl;
-	if (PyType_Ready(&EntDict_Type) < 0) {
-		PyErr_Print();
-		error_exit("Failed to Type Ready");
-	}
 
 	// override some things that were 'inherited' by PyType_Ready
 
@@ -186,6 +176,5 @@ PyObject* createEntDict(edict_t * c_ent)
 	// Add every other ent specific object
 	addEntProperties(ent_dict,c_ent);
 	// Py_DECREF(ent_dict);
-	std::cout << "5" << std::endl;
 	return ent_dict;
 }

@@ -146,14 +146,10 @@ class StringMemoryItem : public MemoryItem {
 public:
 	StringMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"string",offset,info) {}
 	void get(void* baseAddress, PyObject* &value) {
-		std::cout << "get_string" << std::endl;
 		char * in_str = *(char**)(baseAddress + offset);
-
 		if ( in_str == NULL ) {
-			std::cout << "Reading Null String pointer" << std::endl;
 			in_str = "";
-		} else
-			SOFPPNIX_DEBUG("HM : %s\n",in_str);
+		}
 		value = PyUnicode_FromString(in_str);
 	}
 	void get(void* baseAddress, std::string &value) {
@@ -165,7 +161,6 @@ public:
 	void set(void* baseAddress, PyObject* value) {
 		if (PyUnicode_Check(value)) {
 			const char* strValue = PyUnicode_AsUTF8(value);
-			std::cout << "setting str to :" << strValue << std::endl;
 			size_t length = strlen(strValue);
 			/*
 			This caches the UTF-8 representation of the string in the Unicode object, and subsequent calls will return a pointer to the same buffer. The caller is not responsible for deallocating the buffer. The buffer is deallocated and pointers to it become invalid when the Unicode object is garbage collected.
@@ -274,6 +269,11 @@ public:
 static PyObject* memory_getter(PyObject *self, PyObject * key) {
 	std::cout << "Generic getter called" << std::endl;
 
+	/*
+		Why do we need to read from memory if the py dict is in sync?
+	*/
+
+	#if 0
 	// Convert PyObject* key to char*
 	std::string key_str;
 	char * c = NULL;
@@ -291,63 +291,43 @@ static PyObject* memory_getter(PyObject *self, PyObject * key) {
 		MemoryItem::entityProperties[key_str]->get(ed->c_ent, value);
 		return value;
 	}
-	// Key is not a string? Let Original Handle it.
+	#endif
 
-	// Call original getter.
-	PyObject* result = PyObject_GetAttr(self, PyUnicode_FromString("__getitem__"));
-	if (result == NULL) {
-		PyErr_Print();
-		error_exit("Error occurred while retrieving the getter");
-	}
-	PyObject* value = PyObject_CallFunctionObjArgs(result, key, NULL);
-	Py_DECREF(result);
-	if (value == NULL) {
-		PyErr_Print();
-		error_exit("Error occurred while calling the getter");
-	}
-	// Py_DECREF(value);
-	
-	return value;
+	PyObject* val = NULL;
+	val = PyDict_GetItem(self, key); // get the value associated with the key
+
+	// Whatever GetItem returns, I return.
+	return val;
 }
 
 static int memory_setter(PyObject *self, PyObject * key, PyObject *value) {
+	
 	std::cout << "Generic setter called" << std::endl;
+	// Update dict.
+	int ret = PyDict_SetItem(self, key , value);
+	if ( ret != -1 ) {//b
 
-	// Convert PyObject* key to char*
-	std::string key_str;
-	char * c = NULL;
-	if (PyUnicode_Check(key)) {
-		c = PyUnicode_AsUTF8(key);
-		if (c == NULL) {
-			PyErr_Print();
-			error_exit("Cannot decode key");
+		// Convert PyObject* key to char*
+		std::string key_str;
+		char * c = NULL;
+		if (PyUnicode_Check(key)) {
+			c = PyUnicode_AsUTF8(key);
+			if (c == NULL) {
+				PyErr_Print();
+				error_exit("Cannot decode key");
+			}
+			key_str = c;
+			EntDict * ed = (EntDict*)self;
+			if ( MemoryItem::entityProperties.count(key_str) > 0 ) {
+				// Key exists
+				// Writes SoF Memory.
+				MemoryItem::entityProperties[key_str]->set(ed->c_ent, value);
+			}
 		}
-		key_str = c;
-		EntDict * ed = (EntDict*)self;
-
-		// Writes SoF Memory.
-		MemoryItem::entityProperties[key_str]->set(ed->c_ent, value);
-		return 0; //success
-	}
-	// Key is not a string? Let Original Handle it.
-
-	// Call the original dictionary setter
-	PyObject* result = PyObject_GetAttr(self, PyUnicode_FromString("__setitem__"));
-	if (result == NULL) {
-		PyErr_Print();
-		error_exit("Error occurred while retrieving the setter");
-	}
-	PyObject* args = PyTuple_Pack(2, key, value);
-	PyObject* setResult = PyObject_CallObject(result, args);
-	Py_DECREF(result);
-	Py_DECREF(args);
-	if (setResult == NULL) {
-		PyErr_Print();
-		error_exit("Error occurred while calling the setter");
+		Py_DECREF(value);
 	}
 
-	Py_DECREF(setResult);
-	return 0; // Return 0 to indicate success
+	return ret;
 }
 
 #if 0

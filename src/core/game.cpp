@@ -311,6 +311,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// Must use fixed address on reusable detours.
 	orig_PutClientInServer = createDetour((int)base_addr + 0x00238BE8, my_PutClientInServer,6);
 	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
+	orig_PB_AddArmor = (int)base_addr + 0x00237658;
 
 	applyDeathmatchHooks(base_addr);
 
@@ -337,13 +338,11 @@ void my_ShutdownGame(void)
 
 	free(orig_SpawnEntities);
 	free(orig_ShutdownGame);
-	
 	free(orig_ClientBegin);
 	free(orig_ClientDisconnect);
-
-	free(orig_PutClientInServer);
 	free(orig_ClientUserinfoChanged);
 	free(orig_G_RunFrame);
+	free(orig_PutClientInServer);
 
 	freeDeathmatchHooks();
 

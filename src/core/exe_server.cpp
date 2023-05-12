@@ -167,3 +167,17 @@ void public_rcon_command(void)
 		cmd_map[m.str()]();
 	}
 }
+
+
+void my_SV_RunGameFrame(void)
+{
+	// Trying to use this for events that run every frame.
+	// Although quake probably wanted you to use `think` callbacks.
+	for ( int i = 0; i < frame_early_callbacks.size(); i++ ) {
+		PyObject* result = PyObject_CallFunction(frame_early_callbacks[i],"");
+		// returns None
+		Py_XDECREF(result);
+	}
+
+	orig_SV_RunGameFrame();
+}

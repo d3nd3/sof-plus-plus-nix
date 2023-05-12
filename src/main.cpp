@@ -262,6 +262,7 @@ void __attribute__ ((constructor)) begin() {
 	// Apply game detours here
 	orig_Sys_GetGameAPI = createDetour(orig_Sys_GetGameAPI,&my_Sys_GetGameAPI,9);
 
+	orig_SV_RunGameFrame = createDetour(orig_SV_RunGameFrame,&my_SV_RunGameFrame,5);
 }
 
 // __builtin_return_address(0)

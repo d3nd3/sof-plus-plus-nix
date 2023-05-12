@@ -36,6 +36,8 @@ void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd) = 0x080B1470;
 
 void ( *orig_PF_Configstring)(int index, char * string) = 0x080a7710;
 
+void (*orig_SV_RunGameFrame) (void) = 0x080AB8F8;
+
 
 // ----SHARED-----
 
@@ -108,3 +110,5 @@ edict_t * (*orig_G_Spawn) (void) = NULL;
 // attribute__((thiscall))
 void (* orig_setDMMode)(void * self,int newtype) = NULL;
 float (*orig_G_RunFrame) (int serverframe) = NULL;
+
+int (*orig_PB_AddArmor)(edict_t *ent, int amount) = NULL;
