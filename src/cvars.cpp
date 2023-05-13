@@ -22,54 +22,62 @@ cvar_t * _nix_version = NULL;
 cvar_t * _nix_violence = NULL;
 cvar_t ** p_nix_violence = &_nix_violence;
 
+cvar_t * _nix_slidefix = NULL;
+
 
 /*
 	If the cvar already exists, the value will not be set.
 	These are soft values, if not set already.
 	So any other source that sets the cvar, will have priority.
 */
-void CreateCvars(void)
+void createServerCvars(void)
 {
-
-	_nix_version = orig_Cvar_Get(		"_++nix_version", 		"0", 	NULL, 									NULL);
-
-
 	//									name					value	flags										modifiedCallback
 
-	// Already Existing
-	sv_public = orig_Cvar_Get(			"public", 				"0", 	NULL, 											NULL);
-	
-	gamespyport = orig_Cvar_Get(		"gamespyport", 			"0", 	CVAR_NOSET, 									NULL);
-	hostport = orig_Cvar_Get(			"hostport", 			"0", 	CVAR_NOSET, 									NULL);
+		// Already Existing
+		sv_public = orig_Cvar_Get(			"public", 				"0", 	NULL, 											NULL);
+		
+		gamespyport = orig_Cvar_Get(		"gamespyport", 			"0", 	CVAR_NOSET, 									NULL);
+		hostport = orig_Cvar_Get(			"hostport", 			"0", 	CVAR_NOSET, 									NULL);
 
-	dmflags = orig_Cvar_Get(			"dmflags", 				"0", 	CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 	NULL);
-	maxclients = orig_Cvar_Get(			"maxclients", 			"16", 	CVAR_SERVERINFO | CVAR_LATCH , 					NULL);
-	hostname = orig_Cvar_Get(			"hostname", 			"", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
-	timelimit = orig_Cvar_Get(			"timelimit", 			"0", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
-	fraglimit = orig_Cvar_Get(			"fraglimit", 			"0", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
-	g_movescale = orig_Cvar_Get(		"g_movescale", 			"1", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
-	ctf_loops = orig_Cvar_Get(			"ctf_loops", 			"3", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
-	sv_suicidepenalty = orig_Cvar_Get(	"sv_suicidepenalty", 	"2", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
+		dmflags = orig_Cvar_Get(			"dmflags", 				"0", 	CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 	NULL);
+		maxclients = orig_Cvar_Get(			"maxclients", 			"16", 	CVAR_SERVERINFO | CVAR_LATCH , 					NULL);
+		hostname = orig_Cvar_Get(			"hostname", 			"", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
+		timelimit = orig_Cvar_Get(			"timelimit", 			"0", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
+		fraglimit = orig_Cvar_Get(			"fraglimit", 			"0", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
+		g_movescale = orig_Cvar_Get(		"g_movescale", 			"1", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
+		ctf_loops = orig_Cvar_Get(			"ctf_loops", 			"3", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
+		sv_suicidepenalty = orig_Cvar_Get(	"sv_suicidepenalty", 	"2", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
 
 
 
-	cheats = orig_Cvar_Get(				"cheats", 				"0", 	CVAR_SERVERINFO, 								NULL);
-	sv_violence = orig_Cvar_Get(		"sv_violence",			"63",	CVAR_SERVERINFO,								NULL);
+		cheats = orig_Cvar_Get(				"cheats", 				"0", 	CVAR_SERVERINFO, 								NULL);
+		sv_violence = orig_Cvar_Get(		"sv_violence",			"63",	CVAR_SERVERINFO,								NULL);
 
-	deathmatch = orig_Cvar_Get(			"deathmatch", 			"0", 	CVAR_ARCHIVE, 									NULL);
-	mapname = orig_Cvar_Get(			"mapname",				"",		CVAR_NOSET,										NULL);
+		deathmatch = orig_Cvar_Get(			"deathmatch", 			"0", 	CVAR_ARCHIVE, 									NULL);
+		mapname = orig_Cvar_Get(			"mapname",				"",		CVAR_NOSET,										NULL);
 
-	_nix_deathmatch = orig_Cvar_Get( "_++nix_deathmatch","0",NULL,NULL);
+		_nix_deathmatch = orig_Cvar_Get( "_++nix_deathmatch","0",NULL,NULL);
 
-	*p_nix_violence = orig_Cvar_Get( "_++nix_violence","63",NULL,NULL);
+		*p_nix_violence = orig_Cvar_Get( "_++nix_violence","63",NULL,NULL);
 
-	// repond pretending to be low violence.
-    int offset = (int)&p_nix_violence - 0x829CCC8;
+		_nix_slidefix = orig_Cvar_Get( "_++nix_slidefix","1",NULL,NULL);
 
-	memoryUnprotect(0x080A9AA5);
-	*(int*)0x080A9AA5 = offset;
-	memoryProtect(0x080A9AA5);
+		// repond pretending to be low violence.
+	    int offset = (int)&p_nix_violence - 0x829CCC8;
 
+		memoryUnprotect(0x080A9AA5);
+		*(int*)0x080A9AA5 = offset;
+		memoryProtect(0x080A9AA5);
+}
+void createClientCvars(void)
+{
+	//									name					value	flags										modifiedCallback
+}
+void createSharedCvars(void)
+{
+	//									name					value	flags										modifiedCallback
+	_nix_version = orig_Cvar_Get(		"_++nix_version", 		"0", 	NULL, 									NULL);
 }
 
 cvar_t * findCvar(char * cvarname)

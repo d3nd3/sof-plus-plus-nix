@@ -58,6 +58,11 @@ O&: anything to object (via converter)
 	The internal player_die function would register the on_die function to a std::vector of callbacks.
 	Then when the c realm calls the player_die function, it would iterate through the std::vector and call each callback.
 */
+
+static void pythonLoadUserScripts(void);
+
+
+PyObject *pGlobals;
 void pythonInit(void)
 {
 	// Register the module with the interpreter check return value
@@ -67,6 +72,9 @@ void pythonInit(void)
 	// 	error_exit("Failed to add c_decorator_events to interpreter");
 	// 	return;
 	// }
+
+	// clean up previous.
+	Py_Finalize();
 	Py_Initialize();
 
 	// Add the current directory to script load path
@@ -86,43 +94,70 @@ void pythonInit(void)
 
 
 // ----------------------------------------------------------------
-	// Add mod_events to built-in sys.modules dictionary
-	// PyObject* sys_dict = PyImport_GetModuleDict();//b
-	// if ( PyDict_SetItemString(sys_dict, "event", mod_event) == -1 ) { //b
-	// 	error_exit("Failed to add mod_event module to sys.modules");
-	// }
-	PyObject *pGlobals = PyDict_New();//n
+
+	pGlobals = PyDict_New();//n
 	PyDict_SetItemString(pGlobals, "ppnix", mod_ppnix);
 	PyDict_SetItemString(pGlobals, "event", mod_event);
 
 	PyDict_SetItemString(pGlobals, "ent", mod_ent);
 	PyDict_SetItemString(pGlobals, "player", mod_player);
-	
-	
-	// PyObject *pModuleDict = PyModule_GetDict(mod_event);//b
-
-	// // Iterate over the items of pModuleDict
-	// PyObject *key, *value;
-	// Py_ssize_t pos = 0;
-	// while (PyDict_Next(pModuleDict, &pos, &key, &value)) { //b
-	// 	// Check if the value is a function
-	// 	if (PyCallable_Check(value)) {
-	// 		// Get the key as a C string
-	// 		const char *name = PyUnicode_AsUTF8(key);//tied to key.
-	// 		// Add the value to the global dictionary with the same key
-	// 		PyDict_SetItemString(pGlobals, name, value); //b
-	// 	}
-	// }
-
-	
+		
 // ----------------------------------------------------------------
-	// Open the Python file
-	FILE *fp = fopen("sofppnix.py", "r");
-	// (FILE *fp, const char *filename, int start, PyObject *globals, PyObject *locals)
-	PyObject *pResult = PyRun_File(fp, "sofppnix.py", Py_file_input, pGlobals, NULL);
-	fclose(fp);
 
-	
+	pythonLoadUserScripts();
+}
+
+/*
+	Loads all .py python scripts within user/python directory.
+	Any decorator defined in these files is appended to the decorator callbacks.
+	And removed at the end of each map, so you can edit the python file inbetween maps.
+	And they are reloaded at the start of each map again.
+*/
+static void pythonLoadUserScripts(void)
+{
+
+
+	std::string python_folder(orig_FS_Userdir() + std::string("/python/"));
+	// std::vector<std::string> pythonFiles;
+	DIR* dir;
+	struct dirent* entry;
+	dir = opendir(python_folder.c_str());
+	if (dir == NULL) {
+		// Dir probably doesnt' exist.
+		create_file_dir_if_not_exists(python_folder.c_str());
+
+		// Successfully created directory, open it
+		dir = opendir(python_folder.c_str());
+		if (dir == NULL) {
+			error_exit("Error opening python directory");
+		}
+	}
+
+	while ((entry = readdir(dir)) != NULL) {
+		if (entry->d_type == DT_REG && strcmp(entry->d_name + strlen(entry->d_name) - 3, ".py") == 0) {
+			// Construct the full file path
+			char file_path[PATH_MAX];
+			snprintf(file_path, sizeof(file_path), "%s%s", python_folder.c_str(), entry->d_name);  // Replace "directory_path" with the actual directory path
+
+			// Load the Python file
+			FILE *fp = fopen(file_path, "r");
+			if (fp != NULL) {
+				// Do something with python file.
+				// (FILE *fp, const char *filename, int start, PyObject *globals, PyObject *locals)
+				PyObject *pResult = PyRun_File(fp, file_path, Py_file_input, pGlobals, NULL);
+
+
+
+				fclose(fp);
+				
+			} else {
+				// Failed to open the file
+				error_exit("Problem opening one of the python script files in python userdir.");
+			}
+		}
+	}
+	closedir(dir);
+
 }
 
 /*

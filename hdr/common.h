@@ -40,6 +40,8 @@
 
 #include <execinfo.h>
 
+#include <dirent.h>
+
 #include <libgen.h>
 
 #include <iomanip>
@@ -128,6 +130,7 @@ extern void loadHttpCache(void);
 -----------------------------exe_server.cpp----------------------------
  ---------------------------------------------------------------------
 */
+extern void serverInit(void);
 extern void public_rcon_command();
 typedef void (*rcon_cmd_type)(void);
 extern std::unordered_map<std::string,rcon_cmd_type> cmd_map;
@@ -148,6 +151,7 @@ extern int next_available_ID;
 extern int sofreebuild_len;
 extern char sofreebuildstring[128];
 extern void my_test(void);
+extern void slideFix(void);
 /*---------------------------------------------------------------------
 ------------------------------util.cpp---------------------------------
 ---------------------------------------------------------------------
@@ -242,9 +246,11 @@ extern void GamespyHeartbeat(void);
 -----------------------------python.cpp----------------------------
  ---------------------------------------------------------------------
 */
+extern PyObject *pGlobals;
 extern void pythonInit(void);
 extern void list_refcount(void);
 extern PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks,PyObject* args);
+
 
 /*---------------------------------------------------------------------
 -----------------------------py_api/memory.cpp----------------------------
@@ -298,6 +304,7 @@ public:
 --------------------------py_api/decorators.cpp------------------------
  ---------------------------------------------------------------------
 */
+extern std::vector<std::vector<PyObject*>*> decorators;
 extern std::vector<PyObject*> player_die_callbacks;
 extern std::vector<PyObject*> player_connect_callbacks;
 extern std::vector<PyObject*> player_disconnect_callbacks;
@@ -305,6 +312,8 @@ extern std::vector<PyObject*> player_respawn_callbacks;
 
 extern std::vector<PyObject*> frame_early_callbacks;
 extern std::vector<PyObject*> map_spawn_callbacks;
+
+extern void removeDecoratorCallbacks(void);
 
 /*---------------------------------------------------------------------
 --------------------------py_api/entity.cpp------------------------
@@ -351,7 +360,10 @@ extern void nix_spackage_gettext(void);
 -----------------------------cvars.cpp----------------------------
  ---------------------------------------------------------------------
 */
-extern void CreateCvars(void);
+extern void createServerCvars(void);
+extern void createClientCvars(void);
+extern void createSharedCvars(void);
+
 extern cvar_t * _nix_version;
 extern cvar_t * maxclients;
 extern cvar_t * sv_public;
@@ -372,6 +384,8 @@ extern cvar_t * sv_suicidepenalty;
 extern cvar_t * _nix_deathmatch;
 extern cvar_t * _nix_violence;
 extern cvar_t ** p_nix_violence;
+
+extern cvar_t * _nix_slidefix;
 
 extern cvar_t * findCvar(char * cvarname);
 extern void setCvarUnsignedInt(cvar_t * which,unsigned int val);

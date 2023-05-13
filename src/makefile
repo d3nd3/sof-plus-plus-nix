@@ -38,8 +38,8 @@ OBJS= \
 ../obj/dm_realistic.o
 
 CFLAGS= -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/ `python3.9-config --cflags`
-LDFLAGS= -m32 -shared -o ../out/test.so -L /minizip/build
-LINKUS= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic `python3.9-config --ldflags --embed`
+LDFLAGS= -m32 -shared -o ../out/test.so -L /minizip/build -L ../build_python
+LINKUS= -lcurl -lX11 -Wl,-Bstatic -l:libpython3.9.a -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm -lm
 
 # Name of text file containing build number.
 BUILD_NUMBER_FILE=buildnum

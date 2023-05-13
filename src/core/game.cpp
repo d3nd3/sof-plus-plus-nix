@@ -323,6 +323,9 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	memoryAdjust(base_addr + 0xa9bdc,1,0x00);
 	memoryAdjust(base_addr + 0xA9BD2,2,0x90);
 
+	// Decorators registered. .py files loaded. Interpreter Reset.
+	pythonInit();
+
 	return game_exports;
 }
 
@@ -345,6 +348,10 @@ void my_ShutdownGame(void)
 	free(orig_PutClientInServer);
 
 	freeDeathmatchHooks();
+
+
+	// Clear Python callbacks.
+	removeDecoratorCallbacks();
 
 	base_addr = NULL;
 }

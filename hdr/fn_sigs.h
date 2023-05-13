@@ -125,6 +125,10 @@ extern char	* (*orig_va)(char *format, ...);
 extern void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...);
 
 
+extern void (*orig_PM_StepSlideMove) (int num);
+extern void my_PM_StepSlideMove(int num);
+
+
 /*
 ---------------------Ref Library---------------------
 */

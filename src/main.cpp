@@ -217,7 +217,7 @@ void __attribute__ ((constructor)) begin() {
 
 ////////////////////////////////////////////////////
 	
-	// ------------------Shared-----------------
+	// --------------------------------Shared----------------------------------------
 	// printf("first deotur\n");
 	orig_Cmd_AddCommand = createDetour(orig_Cmd_AddCommand, &my_Cmd_AddCommand,5);
 	// printf("second deotur\n");
@@ -233,6 +233,9 @@ void __attribute__ ((constructor)) begin() {
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
 	// callE8Patch(0x080B1809,&my_test);
 
+
+	//Slidefix
+	callE8Patch(0x0812E643,&my_PM_StepSlideMove);
 
 
 //-------------------------------------------Client-------------------------------------

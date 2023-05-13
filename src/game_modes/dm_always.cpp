@@ -431,18 +431,17 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 */
 void	always_gamerules_c::clientRespawn(edict_t *ent) {
 
-	const char * name = "respawn";
-	PyObject * who = createEntDict(ent);
+	currentGameMode->clientRespawn(ent);
 
+	PyObject * who = createEntDict(ent);
 	for ( int i = 0; i < player_respawn_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(player_respawn_callbacks[i],"O",who);
 		// returns None
 		Py_XDECREF(result);
 	}
-
 	Py_XDECREF(who);
-	currentGameMode->clientRespawn(ent);
 
+	// orig_PB_AddArmor(ent,100);
 }
 
 /*

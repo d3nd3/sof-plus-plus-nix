@@ -86,6 +86,9 @@ unsigned char (*orig_COM_BlockSequenceCheckByte)(unsigned char * src , int len,i
 
 void (*orig_PAK_ReadDeltaUsercmd) (void *in_packet, usercmd_t *from, usercmd_t *move) = 0x080BA5BC;
 
+
+void (*orig_PM_StepSlideMove) (int num) = 0x0812D9BC;
+void my_PM_StepSlideMove (int num);
 /*
 ---------------------Ref Library---------------------
 */

@@ -1,5 +1,71 @@
 #include "common.h"
 
+void serverInit(void)
+{
+	if ( dedicated->value == 1.0f ) {
+		createServerCvars();
+
+		//--------------------------------PYTHON-------------------------------------
+		decorators.push_back(&player_die_callbacks);
+		decorators.push_back(&player_connect_callbacks);
+		decorators.push_back(&player_disconnect_callbacks);
+		decorators.push_back(&player_respawn_callbacks);
+		decorators.push_back(&frame_early_callbacks);
+		decorators.push_back(&map_spawn_callbacks);
+
+		Py_Initialize();
+
+		SOFPPNIX_PRINT("Python version : %s", Py_GetVersion());
+
+
+		//------------------------SOFREE STRINGPACKAGE STUFF------------------------
+	
+		fixupClassesForLinux();
+
+		//------------------------------CUSTOM RCON--------------------------
+		cmd_map["fraglimit"] = &rcon_fraglimit;
+		cmd_map["timelimit"] = &rcon_timelimit;
+		cmd_map["deathmatch"] = &rcon_deathmatch;
+
+		cmd_map["map"] = 0x080AE3E8;
+		cmd_map["set_dmflags"] = 0x080A28EC;
+		cmd_map["unset_dmflags"] = 0x080A2A90;
+		cmd_map["list_dmflags"] = 0x080A25A0;
+
+
+		
+		// ------------------------ GAMESPY BROADCASTING -----------------------
+		if ( sv_public->value ) {
+
+			SOFPPNIX_PRINT("Server is public.");
+			
+			// Bind to port
+			struct sockaddr_in addr;
+			memset(&addr, 0, sizeof(addr));
+			addr.sin_family = AF_INET;
+			addr.sin_port = htons(gamespyport->value);
+			addr.sin_addr.s_addr = INADDR_ANY;
+
+			if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+				error_exit("Unable to bind to gamespy port");
+			}
+
+			// gamespyport hostport map change -> 27900
+			// master checks using src port 28904 '\\info\\' ~every 5 minutes
+			// master checks using src port 28902 '\\status\\' ~every 30 seconds
+			// client query server list -> 28900
+
+			// memset 0 the master
+			memset(&sof1master_ip, 0, sizeof(sof1master_ip));
+			orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
+
+			// orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);
+			// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
+			// orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
+		}
+	}
+}
+
 char saved_map_arg1[MAX_STRING_CHARS];
 bool map_saving = false;
 void map_continue(void)

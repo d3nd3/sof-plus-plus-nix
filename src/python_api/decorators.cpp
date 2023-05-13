@@ -39,30 +39,42 @@ PyModuleDef EventModule = {
 	def connect_original(ent):
 		print("CONNECT")
 */
-
+std::vector<std::vector<PyObject*>*> decorators;
 std::vector<PyObject*> player_die_callbacks;
+std::vector<PyObject*> player_connect_callbacks;
+std::vector<PyObject*> player_disconnect_callbacks;
+std::vector<PyObject*> player_respawn_callbacks;
+std::vector<PyObject*> frame_early_callbacks;
+std::vector<PyObject*> map_spawn_callbacks;
+
+void removeDecoratorCallbacks(void)
+{
+	for ( const auto &decorator : decorators  ) {
+		decorator->clear();
+	}
+}
+
 static PyObject* py_on_player_die( PyObject* self,PyObject* args) {
 	return register_callback("die",player_die_callbacks,args);
 }
-std::vector<PyObject*> player_connect_callbacks;
+
 static PyObject* py_on_player_connect( PyObject* self,PyObject* args) {
 	return register_callback("connect",player_connect_callbacks,args);
 }
-std::vector<PyObject*> player_disconnect_callbacks;
+
 static PyObject* py_on_player_disconnect(PyObject* self,PyObject* args) {
 	return register_callback("disconnect",player_disconnect_callbacks,args);
 }
-std::vector<PyObject*> player_respawn_callbacks;
+
 static PyObject* py_on_player_respawn(PyObject* self,PyObject* args) {
 	return register_callback("respawn",player_respawn_callbacks,args);
 }
 
-std::vector<PyObject*> frame_early_callbacks;
+
 static PyObject* py_on_frame_early(PyObject* self,PyObject* args) {
 	return register_callback("frame_early",frame_early_callbacks,args);
 }
 
-std::vector<PyObject*> map_spawn_callbacks;
 static PyObject* py_on_map_spawn(PyObject* self,PyObject* args) {
 	return register_callback("map_spawn",map_spawn_callbacks,args);
 }

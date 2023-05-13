@@ -25,15 +25,17 @@ void my_Qcommon_Frame(int msec)
 	orig_Qcommon_Frame(msec);
 }
 
+
+/*
+	Shared Init
+*/
 void my_Qcommon_Init(int one , char ** two) {
 
 
 	orig_Qcommon_Init(one,two);
 
-
-	pythonInit();
 	
-
+	
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
 	unsigned char * lin_chktbl = 0x08293C80;
@@ -47,10 +49,12 @@ void my_Qcommon_Init(int one , char ** two) {
 	lin_chktbl[2611] = 0x00;
 	lin_chktbl[2647] = 0x00;
 
-	// call this early because below might depend on a cvar.
-	CreateCvars();
 
-	
+	createClientCvars();
+	createSharedCvars();
+
+
+	//------------------------PLUS PLUS NIX VERSION----------------------------
 	char tmp_chr[256];
 	sprintf(tmp_chr,"%hu%02hhu%02hhu.%hu",(unsigned int)&__BUILD_YEAR,(unsigned int)((&__BUILD_MONTH)-16) & 0xF,(unsigned int)(&__BUILD_DAY)-64,(unsigned int)&__BUILD_NUMBER);
 
@@ -69,7 +73,7 @@ void my_Qcommon_Init(int one , char ** two) {
 
 	SOFPPNIX_PRINT("Curl Version : %s",curl_version());
 
-	SOFPPNIX_PRINT("Python version : %s", Py_GetVersion());
+	
 	
 	// Init has been done!
 	// ------------------- CREATING COMMANDS --------------------
@@ -80,19 +84,10 @@ void my_Qcommon_Init(int one , char ** two) {
 
 	CreateCommands();
 
-	fixupClassesForLinux();
 
-	cmd_map["fraglimit"] = &rcon_fraglimit;
-	cmd_map["timelimit"] = &rcon_timelimit;
-	cmd_map["deathmatch"] = &rcon_deathmatch;
-
-	cmd_map["map"] = 0x080AE3E8;
-	cmd_map["set_dmflags"] = 0x080A28EC;
-	cmd_map["unset_dmflags"] = 0x080A2A90;
-	cmd_map["list_dmflags"] = 0x080A25A0;
-
-
-	// Gamespy Port Init
+	/*
+		Used by client and server.
+	*/
 	gs_select_sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (gs_select_sock < 0) {
 		error_exit("Failed to create gamespy socket.\n");
@@ -101,33 +96,9 @@ void my_Qcommon_Init(int one , char ** two) {
 	int flags = fcntl(gs_select_sock, F_GETFL, 0);
 	fcntl(gs_select_sock, F_SETFL, flags | O_NONBLOCK);
 
-	if ( sv_public->value ) {
-		SOFPPNIX_PRINT("Server is public.");
-		
-		// Bind to port
-		struct sockaddr_in addr;
-		memset(&addr, 0, sizeof(addr));
-		addr.sin_family = AF_INET;
-		addr.sin_port = htons(gamespyport->value);
-		addr.sin_addr.s_addr = INADDR_ANY;
 
-		if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-			error_exit("Unable to bind to gamespy port");
-		}
-
-		// gamespyport hostport map change -> 27900
-		// master checks using src port 28904 '\\info\\' ~every 5 minutes
-		// master checks using src port 28902 '\\status\\' ~every 30 seconds
-		// client query server list -> 28900
-
-		// memset 0 the master
-		memset(&sof1master_ip, 0, sizeof(sof1master_ip));
-		orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
-
-		// orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);
-		// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
-		// orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
-	}
+	// Has to be below the gs_select_sock line above.
+	serverInit();
 
 }
 
@@ -333,4 +304,68 @@ void my_Cbuf_Execute(void)
 	// 	}
 	// }	
 	orig_Cbuf_Execute();
+}
+
+
+
+static void slideFix(void)
+{
+	/*
+		Longer you are in the air, the faster you fall.
+
+		pml.velocity[2] -= pm->s.gravity * pml.frametime;
+		OVERRIDING THIS.
+
+		if the applied velocity[2] due to gravity, is 
+
+		if frametime * sv_gravity * frametime < 0.125 slide ON
+		if frametime * sv_gravity * frametime < 0.125 slide OFF
+
+		
+		extratime += msec;
+		cls.frametime = extratime/1000.0;
+
+		cls.frametime is frametime in seconds.
+
+		I guess because frametime is applied to gravity.
+		And also applied to origin :
+		origin = velocity * frametime.
+
+		But velocity is velocity = gravity * frametime.
+	*/
+
+	// void * pml = stget(0x0829DD2C,0);
+	void * pml = 0x084278C0;
+	float * vel_y = (void*)pml + 0x14;
+	float * frametime = pml + 0x3C;
+	int * ladder = (void*)pml + 0x68;
+
+
+	// void * pm = stget(0x0829DD28,0);
+	void * pm = 0x084278A0;
+	edict_t ** groundEntity = pm + 0xE4;
+	
+	if ( _nix_slidefix->value == 1.0f ) {
+		if ( !(*groundEntity) && !(*ladder) )
+    	{
+    		// Velocity here already includes the calculation:
+    		// pml.velocity[2] -= pm->s.gravity * pml.frametime
+    		// If the calculated "ORIGIN offset" would be > -0.125
+    		// new Origin change too small.
+			if (*vel_y < 0 && *vel_y * *frametime > -0.125 )
+			{
+				// SOFPPNIX_DEBUG("slideFix : %f %f",*vel_y,*frametime);
+				
+				// This will get multiplied by frametime to calculate origin_offset.
+				*vel_y = -0.125001 / *frametime;
+				// oriign_offset = frametime*frametime*sv_gravity
+			}	
+		}
+	}
+}
+
+void my_PM_StepSlideMove(int num)
+{
+	slideFix();
+	orig_PM_StepSlideMove(num);
 }
