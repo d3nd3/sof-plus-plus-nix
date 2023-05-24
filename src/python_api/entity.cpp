@@ -163,18 +163,20 @@ static void addEntProperties(PyObject* ent_dict,edict_t * c_ent)
 PyObject* createEntDict(edict_t * c_ent)
 {
 
-
 	// override some things that were 'inherited' by PyType_Ready
 
-
+	// This is like new EntDict.
 	PyObject *ent_dict = PyObject_CallObject((PyObject *) &EntDict_Type, NULL);
+	if ( ent_dict) {
+		// no reason to use capsules.
+		EntDict* ed = (EntDict*)ent_dict;
+		// crash?
+		ed->c_ent = c_ent;
 
-	// no reason to use capsules.
-	EntDict* ed = (EntDict*)ent_dict;
-	ed->c_ent = c_ent;
-
-	// Add every other ent specific object
-	addEntProperties(ent_dict,c_ent);
-	// Py_DECREF(ent_dict);
+		// Add every other ent specific object
+		addEntProperties(ent_dict,c_ent);
+		// Py_DECREF(ent_dict);
+	}
+	
 	return ent_dict;
 }

@@ -107,8 +107,9 @@ void	always_gamerules_c::levelInit(void){
 	std::string cmd = "++nix_spackage_register " + sp_name + ".sp\n";
 	// spackage_register handles crc and ID correction.
 	orig_Cmd_ExecuteString(cmd.c_str());
+
 	// sets build number bottom right
-	orig_Cmd_ExecuteString("++nix_draw_clear\n");
+	nix_draw_clear(NULL);
 
 	for ( int i = 0; i < map_spawn_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(map_spawn_callbacks[i],"");
@@ -300,8 +301,10 @@ When receiving/extracting arguments, 'O' does not increase ref count.
 When creating/calling functions, 'O' does increase ref count.
 */
 void	always_gamerules_c::clientConnect(edict_t *ent){
+	//SOFPPNIX_DEBUG("Connecting Player");
 	const char * name = "connect";
 	PyObject * connecting_player = createEntDict(ent);
+	if ( !connecting_player ) return;
 	// Py_INCREF(connecting_player);
 	
 	for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
@@ -311,6 +314,9 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 	}
 	Py_XDECREF(connecting_player);
 	currentGameMode->clientConnect(ent);
+
+	// Send them the watermark
+	orig_SP_Print(ent,0x0700,strip_layouts[ent->s.skinnum]);
 }
 //a8
 /*
@@ -325,6 +331,8 @@ void	always_gamerules_c::clientDie(edict_t *ent, edict_t *inflictor, edict_t *ki
 	PyObject * died = createEntDict(ent);
 	PyObject * inflicting_ent = createEntDict(ent);
 	PyObject * killer_player = createEntDict(ent);
+
+	if ( !died || !inflicting_ent || !killer_player ) return;
 
 	for ( int i = 0; i < player_die_callbacks.size(); i++ ) {
 
@@ -351,7 +359,7 @@ void	always_gamerules_c::clientPreDisconnect(edict_t *ent){
 void	always_gamerules_c::clientDisconnect(edict_t *ent){
 	const char * name = "disconnect";
 	PyObject * who = createEntDict(ent);
-
+	if ( !who ) return;
 	for ( int i = 0; i < player_disconnect_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(player_disconnect_callbacks[i],"O",who);
 		// returns None
@@ -379,23 +387,20 @@ G_RunFrame -> ClientEndFrames @g_main.cpp
 // THis is called by ClientEndServerFrame
  Its called after Scoreboard, which is useful.
 
- Clear in dm->checkEvents
- Second Clear in dm->ClientScoreboardMessage
- Extra Drawings Here.
+ dm->checkEvents -  Not Active
+ dm->ClientScoreboardMessage - Clear if toggle close scoreboard.
+ dm->clientEndFrame - overrides G_SetStats. To force Layout on.
 */
 //c4
 #define STAT_LAYOUTS 9
 void	always_gamerules_c::clientEndFrame(edict_t *ent){
 	
 	// SOFPPNIX_DEBUG("clientEndFrame\n");
-
-	// SOFPPNIX_DEBUG("Player slot : %i",ent->s.skinnum);
 	// correct layering.
-	
 	// Draw Custom 2D.
 	void * client = getClientX(ent->s.skinnum);
 	// SOFPPNIX_DEBUG("cclient : %08X",client);
-	if ( stget(client,0) == cs_spawned && layoutstring[0] ) {
+	if ( stget(client,0) == cs_spawned && strip_layouts[ent->s.skinnum][0] ) {
 
 		// force layouts ON.
 		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
@@ -405,7 +410,6 @@ void	always_gamerules_c::clientEndFrame(edict_t *ent){
 	// player can toggle scoreboard when its not intermission.
 	// if ( !show_score[sendToSlot] && !(*level_intermissiontime) ) return;
 
-	
 	// orig_Com_Printf("clientEndFrame\n");
 	currentGameMode->clientEndFrame(ent);
 }
@@ -432,67 +436,54 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 void	always_gamerules_c::clientRespawn(edict_t *ent) {
 
 	currentGameMode->clientRespawn(ent);
-
-	PyObject * who = createEntDict(ent);
+	PyObject* who = NULL;	
+	who = createEntDict(ent);
+	if (!who) return;
+	// Continue with the code logic using 'who'
+	
 	for ( int i = 0; i < player_respawn_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_respawn_callbacks[i],"O",who);
-		// returns None
-		Py_XDECREF(result);
+		PyObject* result = PyObject_CallFunction(player_respawn_callbacks[i], "O", who);
+		if (result == NULL) {
+			// Error occurred during the function call
+			PyErr_Print();  // Print the error information
+			// Handle the error
+		} else {
+			// Process the result
+			// ...
+			Py_XDECREF(result);  // Release the reference to the result object
+		}
 	}
 	Py_XDECREF(who);
-
-	// orig_PB_AddArmor(ent,100);
 }
 
 /*
+This function was Forced to be called every ClientEndServerFrame.
+
 Active when player has their scoreboard open.
 Called by ClientEndServerFrame, every 32 frames. (3.2 seconds)
 if (ent->client->showscores && !(level.framenum & 31))
 		dm->clientScoreboardMessage(ent,ent->enemy,false);
 
-Goal : draw even when the scoreboard is not open. Surely I just put code in another function.
-
-The default function clears the screen before writing. This means we cannot draw _before_ it.
-Maybe just draw after it?
-dmctf_clientScoreboardMessage : NOP Clear.
-
-In SoFree We made the real showscores to always be true, thus making this function always be called.
-But I am not doing that here.
-checkEvents is instead clearing. Which is earlier than clientEndFrame.
-
 G_SetStats called by ClientEndServerFrame, sets ent->client->ps.stats[STAT_LAYOUTS] |= 1;
 Which is required for client to show any scoreboard / layout strings.
 
-Clear in dm->checkEvents ( reliable clear ? )
- Second Clear Here
- Extra Drawings dm->clientEndFrame.
+ dm->checkEvents - NotActive.
+ clientScorebordMessage - Clear if toggle off.
+ dm->clientEndFrame - overrides G_SetStats. To force Layout on.
  {ORDER of DRAWING doesn't really matter unless co-ordinates are equal/overlapping.}
 
- This function still only called if showscores is TRUE.
-
- ISSUE: The clear in checkEvents wipes away this scoreboard.
- AKA If its not drawn every frame, its not drawn at all, everything has lifetime of 1 frame.
-
- Test: Only allow this function to call clear? 3.2 second..
-
- SoF does not use "Clear" to hide contents, it uses ent->client->ps.stats[STAT_LAYOUTS] |= 1;
- In G_setSStats : ent->client->ps.stats[STAT_LAYOUTS] = 0; 
- if ( dm ) ent->client->ps.stats[STAT_LAYOUTS] |= 1; ent->client->ps.stats[STAT_LAYOUTS] |= 2;
-
+SV_Frame
+SV_RunGameFrame
 G_RunFrame
   ClientBeginServerFrame
   dm->checkEvents();
   ClientEndServerFrames
-    ClientEndServerFrame {This function returns early if intermission is displayed. Thats why watermark not visible}
- 	  G_SetStats(ent) {if ( dm ) ent->client->ps.stats[STAT_LAYOUTS] |= 1; ent->client->ps.stats[STAT_LAYOUTS] |= 2;}
- 	  if (ent->client->showscores && !(level.framenum & 31))
-	  	dm->clientScoreboardMessage(ent,ent->enemy,false);
+	ClientEndServerFrame {This function returns early if intermission is displayed. Thats why watermark not visible}
+	  G_SetStats(ent) {if ( dm ) ent->client->ps.stats[STAT_LAYOUTS] |= 1; ent->client->ps.stats[STAT_LAYOUTS] |= 2;}
+	  if (ent->client->showscores && !(level.framenum & 31))
+		dm->clientScoreboardMessage(ent,ent->enemy,false);
 	  dm->clientEndFrame(ent); OVERRIDE G_SETSTATS here.
 
-  Question: How to hide scoreboard whilst keeping LAYOUT = 1. Requires a clear.
-
-  The client has a MEMORY of whats to be displayed. If you send 2 draw command on top without using clear.
-  You have multiple layers buildings up. To change content, requires clear. Which will make the scoreboard also have to be redrawn, which makes ping change. TLDR: Draw commands are persistent.
 
 */
 //d8
@@ -510,12 +501,14 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 		// every 32 server frames = 3.2 seconds
 		// Draw Official Scoreboard ( contains a clear ).
 		currentGameMode->clientScoreboardMessage(ent,killer,log_file);
+		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
 	}
-	// turn off.
+	// was off toggled.
 	if ( !show_scores && prev_showscores[slot] ) {
 		// SOFPPNIX_DEBUG("Clearing Screen");
 		// Clear Screen.
 		orig_SP_Print(ent,0x0700,"*");
+		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
 	}
 
 	// will only be true

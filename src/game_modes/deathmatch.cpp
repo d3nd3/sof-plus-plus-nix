@@ -397,7 +397,7 @@ int		gamerules_c::arePlayerTeamsOn(void){
 int		gamerules_c::allowAutoWeaponSwitch(void){
 	int (*o)(void * self) = stget(stget(orig,4)+8+0x94,0);
 
-	o(orig);
+	return o(orig);
 }
 //98
 void	gamerules_c::initPlayerDMInfo(edict_t *ent){
@@ -415,7 +415,7 @@ void gamerules_c::registerPlayerIcons(void){
 float	gamerules_c::clientCalculateWaver(edict_t *ent, int atkID){
 	float (*o)(void * self, edict_t *ent, int atkID) = stget(stget(orig,4)+8+0xa0,0);
 	
-	o(orig,ent,atkID);
+	return o(orig,ent,atkID);
 }
 //a4
 void	gamerules_c::clientConnect(edict_t *ent){

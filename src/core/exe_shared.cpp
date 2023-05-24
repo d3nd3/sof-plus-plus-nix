@@ -61,9 +61,9 @@ void my_Qcommon_Init(int one , char ** two) {
 	sprintf(sofreebuildstring,"++nix build %s ",tmp_chr);
 	sofreebuild_len = strlen(sofreebuildstring);
 	// turn it grey
-	for (int i = 0; i < sofreebuild_len; i++ ) {
-		*(sofreebuildstring+i) = *(sofreebuildstring+i) | 0x80;
-	}
+	// for (int i = 0; i < sofreebuild_len; i++ ) {
+	// 	*(sofreebuildstring+i) = *(sofreebuildstring+i) | 0x80;
+	// }
 
 	setCvarString(_nix_version,tmp_chr);
 	SOFPPNIX_PRINT("++nix Initialised. Version :  %s",tmp_chr);

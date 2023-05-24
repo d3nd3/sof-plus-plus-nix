@@ -309,6 +309,7 @@ extern std::vector<PyObject*> player_die_callbacks;
 extern std::vector<PyObject*> player_connect_callbacks;
 extern std::vector<PyObject*> player_disconnect_callbacks;
 extern std::vector<PyObject*> player_respawn_callbacks;
+extern std::vector<PyObject*> player_say_callbacks;
 
 extern std::vector<PyObject*> frame_early_callbacks;
 extern std::vector<PyObject*> map_spawn_callbacks;
@@ -334,6 +335,20 @@ void initEntDictType(void);
  ---------------------------------------------------------------------
 */
 extern std::vector<PyObject*> ppnix_delayedRun_callbacks;
+
+
+
+/*---------------------------------------------------------------------
+--------------------------py_api/player.cpp------------------------
+ ---------------------------------------------------------------------
+*/
+
+extern void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, char * fmt, ...);
+extern void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, char * fmt, ...);
+
+extern void nix_draw_string_direct(edict_t * ent,char * message);
+extern void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, bool gray);
+extern void nix_draw_clear(edict_t * ent);
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------
@@ -343,18 +358,8 @@ extern void cmd_nix_client_state(void);
 extern void cmd_nix_test(void);
 extern void cmd_nix_client_map(void);
 extern void cmd_nix_checksum(void);
+extern void nix_draw_clear(edict_t * ent);
 
-extern void nix_draw_clear(void);
-extern void nix_draw_string(void);
-extern void nix_draw_string2(void);
-extern void nix_draw_altstring(void);
-extern void nix_spackage_list(void);
-extern void nix_spackage_register(void);
-extern void nix_spackage_print_ref(void);
-extern void nix_spackage_print_id(void);
-extern void nix_spackage_print_obit(void);
-extern void nix_spackage_print_string(void);
-extern void nix_spackage_gettext(void);
 
 /*---------------------------------------------------------------------
 -----------------------------cvars.cpp----------------------------
@@ -410,8 +415,8 @@ extern void spawnDistraction(edict_t * ent,int slot);
 -----------------------------deathmatch.cpp----------------------------
  ---------------------------------------------------------------------
 */
-extern char layoutstring[1024];
-extern int layoutstring_len;
+extern std::array<char [1024],32> strip_layouts;
+extern std::array<int,32> strip_layout_size;
 
 extern void fixupClassesForLinux(void);
 #include "deathmatch.h"

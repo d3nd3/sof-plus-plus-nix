@@ -109,9 +109,16 @@ void (*orig_ClientDisconnect) (edict_t *ent) = NULL;
 void (*orig_PutClientInServer) (edict_t *ent) = NULL;
 void (*orig_ClientUserinfoChanged) (edict_t *ent, char *userinfo, bool not_first_time) = NULL;
 
+void (*orig_Cmd_Say_f) (edict_t *ent, qboolean team, qboolean arg0) = NULL;
+
+
 edict_t * (*orig_G_Spawn) (void) = NULL;
 // attribute__((thiscall))
 void (* orig_setDMMode)(void * self,int newtype) = NULL;
 float (*orig_G_RunFrame) (int serverframe) = NULL;
 
 int (*orig_PB_AddArmor)(edict_t *ent, int amount) = NULL;
+
+//text print
+void	(*orig_clprintf) (edict_t *ent, edict_t *from, int color, char *fmt, ...) = NULL;
+void	(*orig_cprintf) (edict_t *ent, int printlevel, char *fmt, ...);

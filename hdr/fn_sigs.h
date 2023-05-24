@@ -18,6 +18,9 @@ extern void ( *orig_PF_Configstring)(int index, char * string);
 extern void (*orig_SV_RunGameFrame) (void);
 extern void my_SV_RunGameFrame(void);
 
+extern void (*orig_Cmd_Say_f) (edict_t *ent, qboolean team, qboolean arg0);
+extern void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0);
+
 // -------------------Client------------------
 extern void (*orig_CL_Init) (void);
 extern void my_CL_Init (void);
@@ -67,6 +70,10 @@ extern const char	*(*orig_SP_GetStringText)(unsigned short ID);
 extern void (*orig_SP_Print)(edict_t *ent, unsigned short ID, ...);
 extern int (*orig_SP_SPrint)(char *buffer, int buffer_size, unsigned short ID, ...);
 
+
+//EXEC_NOW = ExecuteString
+//EXEC_INSERT = Cbuf_InsertText
+//EXEC_APPEND = Cbuf_AddText
 extern void (*orig_Cbuf_Execute)(void);
 extern void my_Cbuf_Execute(void);
 extern void ( * orig_Cbuf_AddText)(char * text);
@@ -176,3 +183,7 @@ extern float (*orig_G_RunFrame) (int serverframe);
 extern float my_G_RunFrame (int serverframe);
 
 extern int (*orig_PB_AddArmor)(edict_t *ent, int amount);
+
+
+extern void	(*orig_clprintf) (edict_t *ent, edict_t *from, int color, char *fmt, ...);
+extern void	(*orig_cprintf) (edict_t *ent, int printlevel, char *fmt, ...);

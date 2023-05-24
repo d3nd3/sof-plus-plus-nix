@@ -225,17 +225,17 @@ also passes in pointers for ref_gl library. ri
 	void	(*bcaption) (int printlevel, unsigned short ID); = 0x14C
 	//PF_cinprintf
 	void	(*cinprintf) (edict_t *ent,int x, int y, int textspeed, char *text); = 0x150
-	//PF_centerprintf
+	//PF_centerprintf - center of screen
 	void	(*centerprintf) (edict_t *ent, char *fmt, ...); = 0x154
-	//PF_welcomeprint
+	//PF_welcomeprint - bottom of screen
 	void	(*welcomeprint) (edict_t *ent); // 44 = 0x158
-	//PF_clprintf
+	//PF_clprintf - Team Say
 	void	(*clprintf) (edict_t *ent, edict_t *from, int color, char *fmt, ...); = 0x15C
-	//PF_cprintf
+	//PF_cprintf - All Say if PRINT_CHAT printlevel used.
 	void	(*cprintf) (edict_t *ent, int printlevel, char *fmt, ...); = 0x160
-	//PF_dprintf
+	//PF_dprintf - Debug Printf
 	void	(*dprintf) (char *fmt, ...); = 0x164
-	//PF_bprintf
+	//PF_bprintf - Broadcast Printf
 	void	(*bprintf) (int printlevel, char *fmt, ...) = 0x168
 
 	//Cmd_Args
@@ -298,6 +298,13 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// SOFPPNIX_DEBUG("Base address: %08X\n", base_addr);
 	dlclose(handle);
 
+	// SOFPPNIX_DEBUG("AHA  : %08X",0x198 - stget(params,4) );
+	orig_clprintf = stget(params,0x198-0x15C);
+	orig_cprintf = stget(params,0x198-0x160);
+	//0x128 == 0x70 , 0x128 - 0x70 = B8
+
+	//0x38 == 0x168 , 0x168 - 0x38 = 130
+
 	// I am not editing the return, I am detouring original, but still.
 	// Ctrl method of inline patching defeats detours. Take caution.
 	orig_SpawnEntities = createDetour(game_exports->SpawnEntities, my_SpawnEntities,5);
@@ -306,7 +313,8 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	orig_ClientBegin = createDetour(game_exports->ClientBegin, my_ClientBegin,5);
 	orig_ClientDisconnect = createDetour(game_exports->ClientDisconnect, my_ClientDisconnect,5);
 	orig_ClientUserinfoChanged = createDetour(game_exports->ClientUserinfoChanged, my_ClientUserinfoChanged,9);
-	orig_G_RunFrame = createDetour(game_exports->RunFrame, my_G_RunFrame,5);
+	// orig_G_RunFrame = createDetour(game_exports->RunFrame, my_G_RunFrame,5);
+	orig_Cmd_Say_f = createDetour((int)base_addr + 0x00188DB0,my_Cmd_Say_f,9);
 
 	// Must use fixed address on reusable detours.
 	orig_PutClientInServer = createDetour((int)base_addr + 0x00238BE8, my_PutClientInServer,6);
@@ -320,7 +328,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	memoryAdjust(base_addr + 0x1496D0,5,0x90);
 
 	//----------------------------SCOREBOARD ALWAYS PRINT (unlocks layout)-----------------------------
-	memoryAdjust(base_addr + 0xa9bdc,1,0x00);
+	memoryAdjust(base_addr + 0xa9bdc,1,0x00); //ClientEndServerFrame
 	memoryAdjust(base_addr + 0xA9BD2,2,0x90);
 
 	// Decorators registered. .py files loaded. Interpreter Reset.
@@ -339,6 +347,7 @@ void my_ShutdownGame(void)
 		free all detour mallocs
 	*/
 
+	free(orig_Cmd_Say_f);
 	free(orig_SpawnEntities);
 	free(orig_ShutdownGame);
 	free(orig_ClientBegin);
@@ -551,6 +560,9 @@ void my_ClientUserinfoChanged (edict_t *ent, char *userinfo, bool not_first_time
 	orig_ClientUserinfoChanged(ent,userinfo,not_first_time);
 }
 
+/*
+Disabled this because it floods the clients and they overflow on vid_restart
+*/
 float my_G_RunFrame (int serverframe)
 {
 	// SOFPPNIX_DEBUG("G_RunFrame!\n");
@@ -569,4 +581,54 @@ float my_G_RunFrame (int serverframe)
 		orig_SP_Print(ent,0x0700,layoutstring);
 	}
 	return ret;
+}
+
+
+void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
+{
+	// char	text[151];
+
+	/*
+	if ( arg0 ) {
+		snprintf(text,151,"%s %s\n",orig_Cmd_Argv(0),orig_Cmd_Args())
+	} else {
+		snprintf(text,151,"%s\n",orig_Cmd_Args())
+	}
+	*/
+	char * text;
+	if ( arg0 ) {
+		text = orig_Cmd_Argv(0);
+	} else {
+		text = orig_Cmd_Argv(1);
+	}
+
+	PyObject* who = NULL;	
+	who = createEntDict(ent);
+	if (!who) return;
+	// buffers are copied internally.
+	for ( int i = 0; i < player_say_callbacks.size(); i++ ) {
+		PyObject* result = PyObject_CallFunction(player_say_callbacks[i], "Os", who,text);
+		if (result == NULL) {
+			// Error occurred during the function call
+			PyErr_Print();  // Print the error information
+			// Handle the error
+		} else {
+			// Process the result
+			// ...
+			Py_XDECREF(result);  // Release the reference to the result object
+		}
+	}
+
+#if 0
+	if ( !strcmp(text,".players") ) {
+		//Both clprintf and cprintf make beep sounds ( if PRINT_CHAT used ).
+		// 0 = all say, inserts name
+		// 1 = team say , inserts name
+		// orig_clprintf(ent,ent,1,"%s\n","Just A Test");
+		// orig_cprintf(ent,PRINT_CHAT,"%s","Just a Test");
+		orig_cprintf(ent,PRINT_HIGH,P_RED ".players is command is disabled\n");
+		return;
+	}
+#endif
+	orig_Cmd_Say_f(ent,team,arg0);
 }

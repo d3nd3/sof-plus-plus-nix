@@ -106,6 +106,18 @@ void pythonInit(void)
 
 	pythonLoadUserScripts();
 }
+static int functionExists(const char* functionName, PyObject* pGlobals) {
+	// Check if the function exists in the current namespace or global namespace
+	PyObject* pFunc = PyDict_GetItemString(pGlobals, functionName);
+	if (pFunc == NULL) {
+		PyErr_Clear();  // Clear the error if the function doesn't exist
+		return 0;       // Function does not exist
+	}
+
+	// Function exists
+	Py_DECREF(pFunc);
+	return 1;
+}
 
 /*
 	Loads all .py python scripts within user/python directory.
@@ -145,7 +157,12 @@ static void pythonLoadUserScripts(void)
 				// Do something with python file.
 				// (FILE *fp, const char *filename, int start, PyObject *globals, PyObject *locals)
 				PyObject *pResult = PyRun_File(fp, file_path, Py_file_input, pGlobals, NULL);
-
+				if (pResult == NULL) {
+					// An error occurred
+					PyErr_Print();  // Print the error message
+					PyErr_Clear();  // Clear the error
+					// Handle the error or take appropriate actions
+				}
 
 
 				fclose(fp);
