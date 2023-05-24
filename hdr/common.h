@@ -138,6 +138,9 @@ extern void rcon_fraglimit(void);
 extern void rcon_timelimit(void);
 extern void rcon_deathmatch(void);
 
+extern std::array<char [1024],32> strip_layouts;
+extern std::array<int,32> strip_layout_size;
+
 
 /*---------------------------------------------------------------------
 -----------------------------exe_shared.cpp----------------------------
@@ -349,6 +352,8 @@ extern void player_spackage_print_ref(edict_t * ent, char * file_ref, char * str
 extern void nix_draw_string_direct(edict_t * ent,char * message);
 extern void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, bool gray);
 extern void nix_draw_clear(edict_t * ent);
+
+extern void nix_spackage_register(void);
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------
@@ -415,8 +420,6 @@ extern void spawnDistraction(edict_t * ent,int slot);
 -----------------------------deathmatch.cpp----------------------------
  ---------------------------------------------------------------------
 */
-extern std::array<char [1024],32> strip_layouts;
-extern std::array<int,32> strip_layout_size;
 
 extern void fixupClassesForLinux(void);
 #include "deathmatch.h"

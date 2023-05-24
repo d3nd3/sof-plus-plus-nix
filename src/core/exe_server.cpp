@@ -1,5 +1,8 @@
 #include "common.h"
 
+std::array<char [1024],32> strip_layouts;
+std::array<int,32> strip_layout_size;
+
 void serverInit(void)
 {
 	if ( dedicated->value == 1.0f ) {
