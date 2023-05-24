@@ -10,21 +10,6 @@ void CreateCommands(void)
 
 	// command to output checksum
 	my_Cmd_AddCommand("++nix_checksum",&cmd_nix_checksum);
-
-	
-	orig_Cmd_AddCommand("++nix_draw_string",(void*)nix_draw_string);
-	orig_Cmd_AddCommand("++nix_draw_string2",(void*)nix_draw_string2);
-	orig_Cmd_AddCommand("++nix_draw_altstring",(void*)nix_draw_altstring);
-	orig_Cmd_AddCommand("++nix_draw_clear",(void*)nix_draw_clear);
-
-	orig_Cmd_AddCommand("++nix_spackage_register",(void*)nix_spackage_register);
-	orig_Cmd_AddCommand("++nix_spackage_print_id",(void*)nix_spackage_print_id);
-	orig_Cmd_AddCommand("++nix_spackage_print_ref",(void*)nix_spackage_print_ref);
-	orig_Cmd_AddCommand("++nix_spackage_print_obit",(void*)nix_spackage_print_obit);
-	orig_Cmd_AddCommand("++nix_spackage_print_string",(void*)nix_spackage_print_string);
-	orig_Cmd_AddCommand("++nix_spackage_list",(void*)nix_spackage_list);
-	
-	orig_Cmd_AddCommand("++nix_spackage_gettext",(void*)nix_spackage_gettext);
 	
 }
 

@@ -6,7 +6,8 @@ RUN apt-get -y update && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo 
 
 WORKDIR /
 
-RUN git clone https://github.com/zlib-ng/minizip-ng minizip
+RUN git clone -b "3.0.10" https://github.com/zlib-ng/minizip-ng minizip
+
 
 WORKDIR /minizip
 
@@ -23,6 +24,7 @@ WORKDIR /src
 
 # COPY makefile /
 
+RUN apt-get -y update && apt-get -y install libbsd-dev libpython3.9-dev libpython3.9 python3.9 python3.9-dev && rm -rf /var/lib/apt/lists/*
 
 CMD ["make"]
 #ENTRYPOINT "make"

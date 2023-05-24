@@ -578,7 +578,7 @@ float my_G_RunFrame (int serverframe)
 		if (state != cs_spawned )
 			continue;
 		edict_t * ent = stget(client_t,CLIENT_ENT);
-		orig_SP_Print(ent,0x0700,layoutstring);
+		// orig_SP_Print(ent,0x0700,layoutstring);
 	}
 	return ret;
 }

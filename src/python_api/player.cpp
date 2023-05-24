@@ -84,10 +84,13 @@ static PyObject * py_player_draw_text(PyObject * self, PyObject * args)
 	char input[256];
 	snprintf(input,256,"++nix_draw_string %u %u \"%.*s\"\n",x,y,(int)length,msg);
 	// orig_Cmd_ExecuteString(input);
-	if ( who == Py_None )
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
 		// broadcast.
-		who = NULL;
-	nix_draw_string(who,x,y,input,gray);
+		ent = NULL;
+	else
+		ent = who->c_ent;
+	nix_draw_string(ent,x,y,input,gray);
 
 	Py_RETURN_NONE;
 }
@@ -110,7 +113,16 @@ static PyObject * py_player_draw_centered(PyObject * self, PyObject * args)
 	// 256 upper, although the function can discard remaining.
 	char input[256];
 	snprintf(input,256,"%.*s",(int)length,msg);
-	player_spackage_print_ref(who->c_str,"++NIX","CENTER_CENTERED",input);
+
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+
+
+	player_spackage_print_ref(ent,"++NIX","CENTER_CENTERED",input);
 
 	Py_RETURN_NONE;
 }
@@ -133,7 +145,14 @@ static PyObject * py_player_draw_centered_lower(PyObject * self, PyObject * args
 	// 256 upper, although the function can discard remaining.
 	char input[256];
 	snprintf(input,256,"%.*s",(int)length,msg);
-	player_spackage_print_ref(who->c_str,"++NIX","CENTER_CENTERED_LOWER",input);
+
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+	player_spackage_print_ref(ent,"++NIX","CENTER_CENTERED_LOWER",input);
 
 	Py_RETURN_NONE;
 }
@@ -156,7 +175,14 @@ static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args)
 	// 256 upper, although the function can discard remaining.
 	char input[256];
 	snprintf(input,256,"%.*s",(int)length,msg);
-	player_spackage_print_ref(who->c_str,"++NIX","CUSTOM_TYPEAMATIC",input);
+
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+	player_spackage_print_ref(ent,"++NIX","CUSTOM_TYPEAMATIC",input);
 
 	Py_RETURN_NONE;
 }
@@ -176,7 +202,14 @@ static PyObject * py_player_con_print(PyObject * self, PyObject * args)
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
-	orig_cprintf(who->c_ent,PRINT_HIGH,"%.*s\n",(int)length,msg);
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+
+	orig_cprintf(ent,PRINT_HIGH,"%.*s\n",(int)length,msg);
 	Py_RETURN_NONE;
 }
 
@@ -205,7 +238,7 @@ void nix_draw_clear(edict_t * ent)
 			orig_SP_Print(ent,0x0700,"*");
 		}
 		// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
-		return
+		return;
 	}
 	int i = ent->s.skinnum;
 	strip_layouts[i][0] = 0x00;
@@ -306,6 +339,7 @@ void nix_draw_string_direct(edict_t * ent,char * message)
 		}
 		return;
 	}
+	int i = ent->s.skinnum;
 	if ( strip_layout_size[i] + newlen <= 1024 ) {
 		char newstring[256];
 		strcat(strip_layouts[i], newstring);
@@ -614,7 +648,7 @@ void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref
 	// unformmated.
 	char * cfmt = stget(orig_SP_GetStringText(package_id),0x0C);
 	// std::cout << test;
-	std::string fmt(cfmt);
+	std::string sfmt(cfmt);
 
 	std::vector<std::string> inputs;
 	va_list args;
@@ -626,7 +660,7 @@ void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref
 		SOFPPNIX_DEBUG("input %s", inputs.back().c_str());
 		arg = va_arg(args, char*);
 	}
-	SP_PRINT_MULTI(ent,package_id,fmt,inputs);
+	SP_PRINT_MULTI(ent,package_id,sfmt,inputs);
 }
 
 //typedef void (*SP_Print)(edict_t *ent, unsigned short ID, ...);
@@ -638,7 +672,7 @@ void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char
 	
 	// unformmated.
 	char * cfmt = stget(orig_SP_GetStringText(package_id),0x0C);
-	std::string fmt(cfmt);
+	std::string sfmt(cfmt);
 
 	std::vector<std::string> inputs;
 	va_list args;
@@ -650,5 +684,5 @@ void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char
 		SOFPPNIX_DEBUG("input %s", inputs.back().c_str());
 		arg = va_arg(args, char*);
 	}
-	SP_PRINT_MULTI(ent,package_id,fmt,inputs);;
+	SP_PRINT_MULTI(ent,package_id,sfmt,inputs);;
 }
