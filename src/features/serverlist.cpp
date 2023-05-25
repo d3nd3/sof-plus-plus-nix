@@ -350,7 +350,7 @@ void nonBlockingServerResponses(void)
 	fd_set readfds;
 	struct timeval timeout;
 
-	if ( gs_items.size() == 0 && !sv_public->value ) {
+	if ( gs_items.size() == 0 && (sv_public && !sv_public->value || !sv_public) ) {
 		// no items to process and not public
 		return;
 	}
@@ -374,7 +374,7 @@ void nonBlockingServerResponses(void)
 		if (recv_len > 0) {
 
 			// OBJECTIVE: pass any '\\status\\' queries if we are server /w public 1
-			if ( sv_public->value && !strncmp((char*)buffer, "\\status\\", 8) ) {
+			if ( sv_public && sv_public->value && !strncmp((char*)buffer, "\\status\\", 8) ) {
 				// received every 30 seconds... (if info completed)
 				// SOFPPNIX_DEBUG("Got a \\status\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 				// TODO: send back a response
@@ -485,7 +485,7 @@ void nonBlockingServerResponses(void)
 					error_exit("sendto() failed responding to \\info\\ query try public 0 if continued error");
 				}
 				
-			} else if ( sv_public->value && !strncmp((char*)buffer, "\\info\\", 6) ) {
+			} else if ( sv_public && sv_public->value && !strncmp((char*)buffer, "\\info\\", 6) ) {
 				// received every 5 minutes... (if on the radar)
 				// SOFPPNIX_DEBUG("Got a \\info\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 				// prepare data to send back as response
@@ -692,7 +692,7 @@ void GamespyHeartbeat(void)
 		NOT USED.
 	*/ 
 	return;
-	if ( !sv_public->value ) return;
+	if ( !sv_public || (sv_public && !sv_public->value) ) return;
 	SOFPPNIX_DEBUG("Sending heartbeat to gamespy");
 	// \\heartbeat\\%d\\gamename\\%s
 	
@@ -747,7 +747,7 @@ void GamespyHeartbeat(void)
 */
 void GamespyHeartbeatCtrlNotify(void)
 {
-	if ( !sv_public->value ) return;
+	if ( !sv_public || (sv_public && !sv_public->value) ) return;
 
 	// SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
 	

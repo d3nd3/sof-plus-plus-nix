@@ -434,6 +434,9 @@ void print_ints(void * x, ...) {
   std::cout << "\n";
 }
 int arraySize = 0;
+/*
+	For the sake of % symbols in .sp file.
+*/
 std::array<void*,10> formatString(const std::string& format, const std::vector<std::string>& inputs) {
 	arraySize = 0;
 	std::array<void*,10> result;
@@ -462,12 +465,12 @@ std::array<void*,10> formatString(const std::string& format, const std::vector<s
 				break;
 			}
 			case 'p': {
-				std::cout << "p " << i << std::endl;
+				// std::cout << "p " << i << std::endl;
 				result[arraySize++] = (void*)char(std::stoi(inputs[i]));
 				break;
 			}
 			case 's': {
-				std::cout << "string! : " << inputs[i].c_str() << std::endl;
+				// std::cout << "string! : " << inputs[i].c_str() << std::endl;
 				result[arraySize++] = inputs[i].c_str();
 				break;
 			}
@@ -485,10 +488,10 @@ std::array<void*,10> formatString(const std::string& format, const std::vector<s
 		i++;
 	}
 	//print array result using sofppdebug
-	SOFPPNIX_DEBUG("ARRAY SIZE: %d",arraySize);
-	for(int i = 0; i < arraySize; i++) {
-		SOFPPNIX_DEBUG("ARRAY[%d]: %d",i,result[i]);
-	}
+	// SOFPPNIX_DEBUG("ARRAY SIZE: %d",arraySize);
+	// for(int i = 0; i < arraySize; i++) {
+	// 	SOFPPNIX_DEBUG("ARRAY[%d]: %d",i,result[i]);
+	// }
 
 	return result;
 }

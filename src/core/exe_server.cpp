@@ -7,6 +7,8 @@ void serverInit(void)
 {
 	if ( dedicated->value == 1.0f ) {
 		createServerCvars();
+		// Slidefix
+		callE8Patch(0x0812E643,&my_PM_StepSlideMove);
 
 		//--------------------------------PYTHON-------------------------------------
 		decorators.push_back(&player_die_callbacks);

@@ -596,19 +596,29 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		snprintf(text,151,"%s\n",orig_Cmd_Args())
 	}
 	*/
-	char * text;
+	int i;
 	if ( arg0 ) {
-		text = orig_Cmd_Argv(0);
+		i = 0;
 	} else {
-		text = orig_Cmd_Argv(1);
+		i = 1;
 	}
 
+	char total[150];
+	total[0] = 0x00;
+	while(true) {
+		strcat(total,orig_Cmd_Argv(i));
+		if ( i == orig_Cmd_Argc() -1 )
+			break;
+		strcat(total, " ");
+		i++;
+	}
+	
 	PyObject* who = NULL;	
 	who = createEntDict(ent);
 	if (!who) return;
 	// buffers are copied internally.
 	for ( int i = 0; i < player_say_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_say_callbacks[i], "Os", who,text);
+		PyObject* result = PyObject_CallFunction(player_say_callbacks[i], "Os", who,total);
 		if (result == NULL) {
 			// Error occurred during the function call
 			PyErr_Print();  // Print the error information
@@ -631,7 +641,7 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		return;
 	}
 #endif
-	if ( text[0] != '.' ) {
+	if ( total[0] != '.' ) {
 		orig_Cmd_Say_f(ent,team,arg0);
 	}
 }

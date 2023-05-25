@@ -21,8 +21,8 @@ INDEX 1\n\
 }\n\
 INDEX 2\n\
 {\n\
-  REFERENCE CENTER_BOT_CUSTOM\n\
-  FLAGS SP_FLAG_CENTERED \n\
+  REFERENCE CENTER_LOWER_CUSTOM\n\
+  FLAGS SP_FLAG_CAPTIONED SP_FLAG_ALWAYS_PRINT\n\
   TEXT_ENGLISH \"%s\"\n\
 }\n\
 INDEX 3\n\
@@ -34,7 +34,7 @@ INDEX 3\n\
 INDEX 4\n\
 {\n\
   REFERENCE CENTER_CUSTOM\n\
-  FLAGS SP_FLAG_CAPTIONED SP_FLAG_ALWAYS_PRINT \n\
+  FLAGS SP_FLAG_CENTERED\n\
   TEXT_ENGLISH \"%s\"\n\
 }\n";
 
@@ -257,10 +257,6 @@ void __attribute__ ((constructor)) begin() {
 	orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
 	// callE8Patch(0x080B1809,&my_test);
-
-
-	//Slidefix
-	callE8Patch(0x0812E643,&my_PM_StepSlideMove);
 
 
 //-------------------------------------------Client-------------------------------------

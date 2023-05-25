@@ -1,10 +1,10 @@
 #include "common.h"
 
 /*
-# player.draw_text(100,100,"Edit!")
-# player.draw_typeamatic(text)
-# player.draw_centered(text)
-# player.draw_centered_lower(text)
+# player.draw_text_at(100,100,"Edit!")
+# player.draw_typeamatic(ent,text)
+# player.draw_centered(ent,text)
+# player.draw_centered_lower(ent,text)
 # player.con_print(ent,text)
 
 # player.equip_armor(ent,100)
@@ -13,7 +13,7 @@ static PyObject * py_player_equip_armor(PyObject * self, PyObject * args);
 
 static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_centered(PyObject * self, PyObject * args);
-static PyObject * py_player_draw_centered_lower(PyObject * self, PyObject * args);
+static PyObject * py_player_draw_lower(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args);
 static PyObject * py_player_con_print(PyObject * self, PyObject * args);
 
@@ -22,7 +22,7 @@ static PyMethodDef PlayerMethods[] = {
 	{"equip_armor", py_player_equip_armor, METH_VARARGS,"Give a player armor"},
 	{"draw_text_at", py_player_draw_text_at, METH_VARARGS,"Draw text at pos on player screen"},
 	{"draw_centered", py_player_draw_centered, METH_VARARGS,"Draw centered text on player screen"},
-	{"draw_centered_lower", py_player_draw_centered_lower, METH_VARARGS,"Draw centered lower text on player screen"},
+	{"draw_lower", py_player_draw_lower, METH_VARARGS,"Draw centered lower text on player screen"},
 	{"draw_typeamatic", py_player_draw_typeamatic, METH_VARARGS,"Draw cinematic text on player screen"},
 	{"con_print", py_player_con_print, METH_VARARGS,"Print console text on player screen"},
 
@@ -82,7 +82,7 @@ static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args)
 
 	// 256 upper, although the function can discard remaining.
 	char input[256];
-	snprintf(input,256,"++nix_draw_string %u %u \"%.*s\"\n",x,y,(int)length,msg);
+	snprintf(input,256,"%.*s",(int)length,msg);
 	// orig_Cmd_ExecuteString(input);
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
@@ -105,7 +105,7 @@ static PyObject * py_player_draw_centered(PyObject * self, PyObject * args)
 	Py_ssize_t length;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"s#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
 		error_exit("Python: Failed to parse args in py_player_draw_centered");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -122,7 +122,7 @@ static PyObject * py_player_draw_centered(PyObject * self, PyObject * args)
 		ent = who->c_ent;
 
 
-	player_spackage_print_ref(ent,"++NIX","CENTER_CENTERED",input);
+	player_spackage_print_ref(ent,"++NIX","CENTER_CUSTOM",input,NULL);
 
 	Py_RETURN_NONE;
 }
@@ -131,13 +131,13 @@ args:
 	recipient ent handle or 0 for broadcast
 	string what
 */
-static PyObject * py_player_draw_centered_lower(PyObject * self, PyObject * args)
+static PyObject * py_player_draw_lower(PyObject * self, PyObject * args)
 {
 	char * msg;
 	Py_ssize_t length;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"s#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
 		error_exit("Python: Failed to parse args in py_player_draw_centered_lower");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -152,7 +152,7 @@ static PyObject * py_player_draw_centered_lower(PyObject * self, PyObject * args
 		ent = NULL;
 	else
 		ent = who->c_ent;
-	player_spackage_print_ref(ent,"++NIX","CENTER_CENTERED_LOWER",input);
+	player_spackage_print_ref(ent,"++NIX","CENTER_LOWER_CUSTOM",input,NULL);
 
 	Py_RETURN_NONE;
 }
@@ -182,7 +182,37 @@ static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args)
 		ent = NULL;
 	else
 		ent = who->c_ent;
-	player_spackage_print_ref(ent,"++NIX","CUSTOM_TYPEAMATIC",input);
+	player_spackage_print_ref(ent,"++NIX","CINEMATIC_CUSTOM",input,NULL);
+
+	Py_RETURN_NONE;
+}
+/*
+args:
+	recipient ent handle or 0 for broadcast
+	string what
+*/
+static PyObject * py_player_draw_original(PyObject * self, PyObject * args)
+{
+	char * msg;
+	Py_ssize_t length;
+	// Not null-terminated.
+	EntDict * who;
+	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+		error_exit("Python: Failed to parse args in py_player_draw_typeamatic");
+	}
+	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
+
+	// 256 upper, although the function can discard remaining.
+	char input[256];
+	snprintf(input,256,"%.*s",(int)length,msg);
+
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+	player_spackage_print_ref(ent,"++NIX","ORIGINAL_CUSTOM",input,NULL);
 
 	Py_RETURN_NONE;
 }
@@ -198,7 +228,7 @@ static PyObject * py_player_con_print(PyObject * self, PyObject * args)
 	EntDict * who;
 	// Not null-terminated.
 	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
-		error_exit("Python: Failed to parse args in py_player_draw_typeamatic");
+		error_exit("Python: Failed to parse args in py_player_con_print");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
@@ -276,6 +306,7 @@ void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qbo
 	
 	int newlen = strlen(newstring);
 
+	// broadcast
 	if ( ent == NULL ) {
 
 		for ( int i =0; i < 32; i++ ) {
@@ -633,7 +664,7 @@ print_ref ent SOFREE CHEER extra_Args...
 	ExtraArgs
 
 */
-void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, char * fmt, ...)
+void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, ...)
 {
 	char temp[64];
 	sprintf(temp,"%s_%s",file_ref,string_ref);
@@ -643,7 +674,7 @@ void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref
 	if ( package_id == -1 )
 		error_exit("Error ++nix_spackage_print_ref : cant find the string refs %s %s",file_ref,string_ref);
 	
-	SOFPPNIX_DEBUG("package_id %i",package_id);
+	// SOFPPNIX_DEBUG("package_id %i",package_id);
 
 	// unformmated.
 	char * cfmt = stget(orig_SP_GetStringText(package_id),0x0C);
@@ -657,7 +688,7 @@ void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref
 	while (arg != NULL)
 	{
 		inputs.push_back(std::string(arg));
-		SOFPPNIX_DEBUG("input %s", inputs.back().c_str());
+		// SOFPPNIX_DEBUG("input %s", inputs.back().c_str());
 		arg = va_arg(args, char*);
 	}
 	SP_PRINT_MULTI(ent,package_id,sfmt,inputs);
@@ -665,7 +696,7 @@ void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref
 
 //typedef void (*SP_Print)(edict_t *ent, unsigned short ID, ...);
 // who,num
-void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, char * fmt, ...)
+void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...)
 {
 	unsigned short package_id = file_id << 8;
 	package_id |= string_index;
@@ -681,7 +712,7 @@ void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char
 	while (arg != NULL)
 	{
 		inputs.push_back(std::string(arg));
-		SOFPPNIX_DEBUG("input %s", inputs.back().c_str());
+		// SOFPPNIX_DEBUG("input %s", inputs.back().c_str());
 		arg = va_arg(args, char*);
 	}
 	SP_PRINT_MULTI(ent,package_id,sfmt,inputs);;

@@ -346,11 +346,12 @@ extern std::vector<PyObject*> ppnix_delayedRun_callbacks;
  ---------------------------------------------------------------------
 */
 
-extern void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, char * fmt, ...);
-extern void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, char * fmt, ...);
+extern void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...);
+extern void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, ...);
 
 extern void nix_draw_string_direct(edict_t * ent,char * message);
-extern void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, bool gray);
+extern void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qboolean gray);
+
 extern void nix_draw_clear(edict_t * ent);
 
 extern void nix_spackage_register(void);

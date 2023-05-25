@@ -14,11 +14,14 @@ void my_Qcommon_Frame(int msec)
 	// 	hexdump((unsigned char*)cmd_buf->data,(unsigned char*)cmd_buf->data + cmd_buf->cursize);
 	// }
 
-	// Check if the error indicator is set
-	if (PyErr_Occurred()) {
-		// Print the Python error message to stdout
-		PyErr_PrintEx(0);
+	if ( dedicated->value == 1.0f ) {
+		// Check if the error indicator is set
+		if (PyErr_Occurred()) {
+			// Print the Python error message to stdout
+			PyErr_PrintEx(0);
+		}	
 	}
+	
 
 	isHTTPdone();
 
@@ -110,7 +113,7 @@ void my_Qcommon_Shutdown(void)
 	orig_Qcommon_Shutdown();
 
 	// close the gamespy socket
-	if ( sv_public->value || gs_select_sock ) {
+	if ( sv_public && sv_public->value || gs_select_sock ) {
 		close(gs_select_sock);
 	}
 }

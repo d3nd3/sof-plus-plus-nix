@@ -5,6 +5,14 @@
 	C REALM CALLS PYTHON FUNCTION THAT HAVE BEEN REGISTERED BECAUSE OF CALLBACKS REGISTERED HERE. ( THEY USED DECORATORS TO REGISTER THEIR CALLBACKS in python_api/decorators.cpp )
 
 	DECORATORS == REGISTER CALLBACK.
+
+	@event.die
+	@event.connect
+	@event.disconnect
+	@event.respawn
+	@event.say
+	@event.frame_early
+	@event.map_spawn
 */
 
 static PyObject* py_on_player_die(PyObject* self,PyObject* args);
