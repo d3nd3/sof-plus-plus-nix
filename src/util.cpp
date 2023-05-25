@@ -13,7 +13,7 @@ void SOFPPNIX_DEBUG(char * msg, ... ) {
 
 	char color[1024];
 	
-	snprintf(color,1024,"%c%s%c%s\n",P_PURPLE,"[sof++nix_Debug] : ",P_YELLOW,text);
+	snprintf(color,1024,"%s%s%s\n",P_PURPLE"[sof++nix_Debug] : ",P_YELLOW,text);
 
 	orig_Com_Printf("%s",color);
 	#endif
@@ -29,7 +29,7 @@ void SOFPPNIX_PRINT(char * msg, ... ) {
 
 	char color[1024];
 	
-	snprintf(color,1024,"%c%s%c%s\n",P_PINK,"[sof++nix] : ",P_TEXT,text);
+	snprintf(color,1024,"%s%s%s\n",P_PINK"[sof++nix] : ",P_TEXT,text);
 
 	orig_Com_Printf("%s",color);
 }

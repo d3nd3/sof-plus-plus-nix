@@ -62,6 +62,7 @@ Are saved and unloaded when a client connects.
 Use Cbuf_ExecuteString here if you don't want deffered commands.
 */
 void	always_gamerules_c::levelInit(void){
+
 	next_available_ID = 0;
 	std::string sp_name = "nix";
 	
@@ -301,6 +302,7 @@ When receiving/extracting arguments, 'O' does not increase ref count.
 When creating/calling functions, 'O' does increase ref count.
 */
 void	always_gamerules_c::clientConnect(edict_t *ent){
+
 	//SOFPPNIX_DEBUG("Connecting Player");
 	const char * name = "connect";
 	PyObject * connecting_player = createEntDict(ent);
@@ -368,6 +370,8 @@ void	always_gamerules_c::clientDisconnect(edict_t *ent){
 	Py_XDECREF(who);
 
 	currentGameMode->clientDisconnect(ent);
+
+	nix_draw_clear(ent);
 }
 //b8
 void	always_gamerules_c::clientDropItem(edict_t *ent,int type,int ammoCount){
@@ -490,6 +494,7 @@ G_RunFrame
 bool prev_showscores[32] = {0};
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
+
 	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
 	// SOFPPNIX_DEBUG("framenum is : %i",level_framenum);
 

@@ -277,6 +277,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 		Its some functions that the game library imports.
 	*/
 	game_exports = orig_Sys_GetGameAPI(params);
+	
 	/*
 		gamex86.so is loaded here
 		ret is a list of function address which are exported to the main executable.
@@ -620,7 +621,7 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	}
 
 #if 0
-	if ( !strcmp(text,".players") ) {
+	if ( text[0] == '.'' ) {
 		//Both clprintf and cprintf make beep sounds ( if PRINT_CHAT used ).
 		// 0 = all say, inserts name
 		// 1 = team say , inserts name
@@ -630,5 +631,7 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		return;
 	}
 #endif
-	orig_Cmd_Say_f(ent,team,arg0);
+	if ( text[0] != '.' ) {
+		orig_Cmd_Say_f(ent,team,arg0);
+	}
 }

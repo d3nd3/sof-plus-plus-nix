@@ -42,6 +42,7 @@ void setupMemory(void);
 
 int chdir(const char *path)
 {
+	// std::cout << "Lol!!" << __builtin_return_address(0);
 	static bool initalized = false;
 	static int (*orig_chdir)(const char * p);
 	if ( !initalized ) {
@@ -234,6 +235,8 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x081195E9,5,NOP);
 
 ////////////////////////////////////////////////////
+
+
 	
 	// --------------------------------Shared----------------------------------------
 	// printf("first deotur\n");
@@ -244,8 +247,12 @@ void __attribute__ ((constructor)) begin() {
 
 	// Apply executable command creation here ( server & client )
 	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
+
+
 	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
+
 	orig_Qcommon_Frame = createDetour(orig_Qcommon_Frame , &my_Qcommon_Frame, 5);
+
 
 	orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
@@ -267,6 +274,7 @@ void __attribute__ ((constructor)) begin() {
 	// Might be needed for adjusting the info return payload DM -> 0 CTF -> 4.
 	orig_menu_AddServer = createDetour(orig_menu_AddServer,&my_menu_AddServer,5);
 
+
 	orig_CL_Frame = createDetour(orig_CL_Frame , &my_CL_Frame,5);
 	orig_CL_Init = createDetour(orig_CL_Init , &my_CL_Init,5);
 
@@ -280,9 +288,9 @@ void __attribute__ ((constructor)) begin() {
 
 	// orig_PF_Configstring = createDetour( orig_PF_Configstring, &my_PF_Configstring, 5);
 
-	// Apply game detours here
-	orig_Sys_GetGameAPI = createDetour(orig_Sys_GetGameAPI,&my_Sys_GetGameAPI,9);
-
+//-----------------------------------------GAME------------------------------------------
+	// orig_Sys_GetGameAPI = createDetour(0x08209C50,&my_Sys_GetGameAPI,9);
+	callE8Patch(0x080A736F,&my_Sys_GetGameAPI);
 	orig_SV_RunGameFrame = createDetour(orig_SV_RunGameFrame,&my_SV_RunGameFrame,5);
 }
 

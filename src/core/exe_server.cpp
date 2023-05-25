@@ -1,7 +1,7 @@
 #include "common.h"
 
 std::array<char [1024],32> strip_layouts;
-std::array<int,32> strip_layout_size;
+std::array<int,32> strip_layout_size = {0};
 
 void serverInit(void)
 {
@@ -13,6 +13,7 @@ void serverInit(void)
 		decorators.push_back(&player_connect_callbacks);
 		decorators.push_back(&player_disconnect_callbacks);
 		decorators.push_back(&player_respawn_callbacks);
+		decorators.push_back(&player_say_callbacks);
 		decorators.push_back(&frame_early_callbacks);
 		decorators.push_back(&map_spawn_callbacks);
 

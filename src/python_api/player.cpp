@@ -11,7 +11,7 @@
 */
 static PyObject * py_player_equip_armor(PyObject * self, PyObject * args);
 
-static PyObject * py_player_draw_text(PyObject * self, PyObject * args);
+static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_centered(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_centered_lower(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args);
@@ -20,7 +20,7 @@ static PyObject * py_player_con_print(PyObject * self, PyObject * args);
 //name,c_func,flags,docstring
 static PyMethodDef PlayerMethods[] = {
 	{"equip_armor", py_player_equip_armor, METH_VARARGS,"Give a player armor"},
-	{"draw_text", py_player_draw_text, METH_VARARGS,"Draw text on player screen"},
+	{"draw_text_at", py_player_draw_text_at, METH_VARARGS,"Draw text at pos on player screen"},
 	{"draw_centered", py_player_draw_centered, METH_VARARGS,"Draw centered text on player screen"},
 	{"draw_centered_lower", py_player_draw_centered_lower, METH_VARARGS,"Draw centered lower text on player screen"},
 	{"draw_typeamatic", py_player_draw_typeamatic, METH_VARARGS,"Draw cinematic text on player screen"},
@@ -66,7 +66,7 @@ args:
 	char* text
 	bool gray.
 */
-static PyObject * py_player_draw_text(PyObject * self, PyObject * args)
+static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args)
 {
 	
 	char * msg;
