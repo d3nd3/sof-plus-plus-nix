@@ -88,6 +88,9 @@ extern char    *(*orig_Cmd_Args) (void);
 extern void (*orig_Qcommon_Init)(int one, char** two);
 extern void my_Qcommon_Init(int one , char ** two);
 
+extern void (*orig_Cbuf_AddLateCommands)(void);
+extern void (my_Cbuf_AddLateCommands)(void);
+
 extern void (*orig_Qcommon_Frame)(int msec);
 extern void my_Qcommon_Frame(int msec);
 

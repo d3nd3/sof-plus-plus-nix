@@ -6,6 +6,8 @@ std::array<int,32> strip_layout_size = {0};
 void serverInit(void)
 {
 	if ( dedicated->value == 1.0f ) {
+		Py_Initialize();
+
 		createServerCvars();
 		// Slidefix
 		callE8Patch(0x0812E643,&my_PM_StepSlideMove);
@@ -18,8 +20,6 @@ void serverInit(void)
 		decorators.push_back(&player_say_callbacks);
 		decorators.push_back(&frame_early_callbacks);
 		decorators.push_back(&map_spawn_callbacks);
-
-		Py_Initialize();
 
 		SOFPPNIX_PRINT("Python version : %s", Py_GetVersion());
 
@@ -38,37 +38,7 @@ void serverInit(void)
 		cmd_map["unset_dmflags"] = 0x080A2A90;
 		cmd_map["list_dmflags"] = 0x080A25A0;
 
-
 		
-		// ------------------------ GAMESPY BROADCASTING -----------------------
-		if ( sv_public->value ) {
-
-			SOFPPNIX_PRINT("Server is public.");
-			
-			// Bind to port
-			struct sockaddr_in addr;
-			memset(&addr, 0, sizeof(addr));
-			addr.sin_family = AF_INET;
-			addr.sin_port = htons(gamespyport->value);
-			addr.sin_addr.s_addr = INADDR_ANY;
-
-			if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-				error_exit("Unable to bind to gamespy port");
-			}
-
-			// gamespyport hostport map change -> 27900
-			// master checks using src port 28904 '\\info\\' ~every 5 minutes
-			// master checks using src port 28902 '\\status\\' ~every 30 seconds
-			// client query server list -> 28900
-
-			// memset 0 the master
-			memset(&sof1master_ip, 0, sizeof(sof1master_ip));
-			orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
-
-			// orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);
-			// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
-			// orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
-		}
 	}
 }
 
@@ -89,14 +59,16 @@ cmd_argv(1) = mapname
 int * cmd_argc = 0x083F9200;
 void my_SV_Map_f(void)
 {
+	// SOFPPNIX_DEBUG("SV_Map!");
 	if ( map_saving ) {
 		// How do know if this was called by callback or by a user.
-		if ( orig_Cmd_Argc >= 3 ) {
+		if ( orig_Cmd_Argc() >= 3 ) {
 			if ( !strcmp(orig_Cmd_Argv(2), "fgdd46hg") ) {
 				// DOWNLOAD ALREADY DONE.
 				// SOFPPNIX_PRINT("Calling original map_f p2\n");
 				*cmd_argc = 2;
 				map_saving = false;
+
 				orig_SV_Map_f();
 				return;
 			}

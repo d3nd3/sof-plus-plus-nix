@@ -15,7 +15,9 @@ static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_centered(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_lower(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args);
+static PyObject * py_player_clear_text(PyObject * self, PyObject * args);
 static PyObject * py_player_con_print(PyObject * self, PyObject * args);
+
 
 //name,c_func,flags,docstring
 static PyMethodDef PlayerMethods[] = {
@@ -24,6 +26,7 @@ static PyMethodDef PlayerMethods[] = {
 	{"draw_centered", py_player_draw_centered, METH_VARARGS,"Draw centered text on player screen"},
 	{"draw_lower", py_player_draw_lower, METH_VARARGS,"Draw centered lower text on player screen"},
 	{"draw_typeamatic", py_player_draw_typeamatic, METH_VARARGS,"Draw cinematic text on player screen"},
+	{"clear_text", py_player_clear_text, METH_VARARGS,"Clear the text that is drawn on player screen"},
 	{"con_print", py_player_con_print, METH_VARARGS,"Print console text on player screen"},
 
 	{NULL, NULL, 0, NULL} //sentinel
@@ -243,7 +246,37 @@ static PyObject * py_player_con_print(PyObject * self, PyObject * args)
 	Py_RETURN_NONE;
 }
 
+static void refreshScreen(edict_t * ent)
+{
+	void * gclient = stget(ent, EDICT_GCLIENT);
+	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
+	if ( show_scores ) {
+		prev_showscores[ent->s.skinnum] = false;
+	} else {
+		prev_showscores[ent->s.skinnum] = true;
+	}
+}
 
+static PyObject * py_player_clear_text(PyObject * self, PyObject * args)
+{
+
+	EntDict * who;
+	// Not null-terminated.
+	if (!PyArg_ParseTuple(args,"O",&who)) {
+		error_exit("Python: Failed to parse args in py_player_clear_text");
+	}
+	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
+
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+
+	nix_draw_clear(ent);
+	Py_RETURN_NONE;
+}
 /*
 	0 arguments
 	clears screen. ( Excluding scoreboard ).
@@ -262,20 +295,25 @@ void nix_draw_clear(edict_t * ent)
 		// SOFPPNIX_DEBUG("Clearing screen");
 		for ( int i =0; i < 32; i++ ) {
 			strip_layouts[i][0] = 0x00;
-			sprintf(strip_layouts[i],"xr %i yb -16 string \"%s\" ",0 - (strip_layout_size[i]*8+8),sofreebuildstring);
+			sprintf(strip_layouts[i],"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
 			strip_layout_size[i] = strlen(strip_layouts[i]);
 
-			orig_SP_Print(ent,0x0700,"*");
+			client_t * client = getClientX(i);
+			edict_t * ent = stget(client,CLIENT_ENT);
+			refreshScreen(ent);
 		}
 		// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
+
 		return;
 	}
 	int i = ent->s.skinnum;
 	strip_layouts[i][0] = 0x00;
-	sprintf(strip_layouts[i],"xr %i yb -16 string \"%s\" ",0 - (strip_layout_size[i]*8+8),sofreebuildstring);
+	sprintf(strip_layouts[i],"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
 	strip_layout_size[i] = strlen(strip_layouts[i]);
-	orig_SP_Print(ent,0x0700,"*");
+	refreshScreen(ent);
 }
+
+
 /*
 yb yBottom 0 = bottom of screen, up=negative, down=positive
 yt yTop 0 = top of screen, up=negative, down=positive
@@ -299,9 +337,9 @@ void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qbo
 
 	char newstring[256];
 	if ( ! gray ) {
-		snprintf(newstring,256,"xv %i yv %i string \"%s\" ",offsetx,offsety,message);
+		snprintf(newstring,256,"xv %i yv %i string \"%s\" ",offsetx+157,offsety+114,message);
 	} else {
-		snprintf(newstring,256,"xv %i yv %i altstring \"%s\" ",offsetx,offsety,message);
+		snprintf(newstring,256,"xv %i yv %i altstring \"%s\" ",offsetx+157,offsety+114,message);
 	}
 	
 	int newlen = strlen(newstring);
@@ -316,7 +354,11 @@ void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qbo
 			} else {
 				SOFPPNIX_PRINT("Cant draw this , run out of space");
 			}
+			client_t * client = getClientX(i);
+			edict_t * ent = stget(client,CLIENT_ENT);
+			refreshScreen(ent);
 		}
+		
 		return;
 	}
 
@@ -327,7 +369,7 @@ void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qbo
 	} else {
 		SOFPPNIX_PRINT("Cant draw this , run out of space");
 	}
-
+	refreshScreen(ent);
 }
 /*
 more direct version of above.
@@ -367,7 +409,11 @@ void nix_draw_string_direct(edict_t * ent,char * message)
 			} else {
 				SOFPPNIX_PRINT("Cant draw this , run out of space");
 			}
+			client_t * client = getClientX(i);
+			edict_t * ent = stget(client,CLIENT_ENT);
+			refreshScreen(ent);
 		}
+		
 		return;
 	}
 	int i = ent->s.skinnum;
@@ -378,6 +424,7 @@ void nix_draw_string_direct(edict_t * ent,char * message)
 	} else {
 		SOFPPNIX_PRINT("Cant draw this , run out of space");
 	}
+	refreshScreen(ent);
 }
 
 // 32kb

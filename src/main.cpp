@@ -68,11 +68,13 @@ void __attribute__ ((constructor)) begin() {
 
 	// Prevent SDL from having ugly message? (seg deploy parachute)
 	signal(SIGSEGV, segfault_handler);
+
+	// setupMemory();
 }
 
 
  void setupMemory() {
-	// printf("sof++nix_DEBUG: First Init patches + detours\n");
+	printf("sof++nix_DEBUG: First Init patches + detours\n");
 
 
 //-----------------ALWAYS 1.07f CLIENT----------------- NO need to use patch
@@ -248,6 +250,7 @@ void __attribute__ ((constructor)) begin() {
 	// Apply executable command creation here ( server & client )
 	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
 
+	orig_Cbuf_AddLateCommands = createDetour(orig_Cbuf_AddLateCommands,&my_Cbuf_AddLateCommands,5);
 
 	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
 
@@ -257,6 +260,7 @@ void __attribute__ ((constructor)) begin() {
 	orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
 	// callE8Patch(0x080B1809,&my_test);
+
 
 
 //-------------------------------------------Client-------------------------------------
@@ -280,13 +284,24 @@ void __attribute__ ((constructor)) begin() {
 
 //-----------------------------------------Server------------------------------------------
 	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
-	orig_PAK_ReadDeltaUsercmd = createDetour(orig_PAK_ReadDeltaUsercmd , &my_PAK_ReadDeltaUsercmd,5);
+	// void * addr = 0x080A3E9D;
+	// memoryUnprotect(addr);
+	// unsigned char * p = addr;
+	// p[0] = 0xB8;
+	// // *(int*)(p+1) = &my_SV_Map_f - (int)addr - 5;
+	// *(int*)(p+1) = &my_SV_Map_f;
+	// p[5] = 0x90;
+	// memoryProtect(addr);
+
+	// orig_PAK_ReadDeltaUsercmd = createDetour(orig_PAK_ReadDeltaUsercmd , &my_PAK_ReadDeltaUsercmd,5);
 
 	// orig_PF_Configstring = createDetour( orig_PF_Configstring, &my_PF_Configstring, 5);
 
+
 //-----------------------------------------GAME------------------------------------------
-	// orig_Sys_GetGameAPI = createDetour(0x08209C50,&my_Sys_GetGameAPI,9);
-	callE8Patch(0x080A736F,&my_Sys_GetGameAPI);
+	orig_Sys_GetGameAPI = createDetour(0x08209C50,&my_Sys_GetGameAPI,9);
+	// callE8Patch(0x080A736F,&my_Sys_GetGameAPI);
+
 	orig_SV_RunGameFrame = createDetour(orig_SV_RunGameFrame,&my_SV_RunGameFrame,5);
 }
 

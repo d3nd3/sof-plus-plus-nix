@@ -109,8 +109,7 @@ void	always_gamerules_c::levelInit(void){
 	// spackage_register handles crc and ID correction.
 	orig_Cmd_ExecuteString(cmd.c_str());
 
-	// sets build number bottom right
-	nix_draw_clear(NULL);
+	
 
 	for ( int i = 0; i < map_spawn_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(map_spawn_callbacks[i],"");
@@ -317,6 +316,8 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 	Py_XDECREF(connecting_player);
 	currentGameMode->clientConnect(ent);
 
+	// sets build number bottom right
+	nix_draw_clear(ent);
 	// Send them the watermark
 	orig_SP_Print(ent,0x0700,strip_layouts[ent->s.skinnum]);
 }

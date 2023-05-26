@@ -348,13 +348,14 @@ void my_ShutdownGame(void)
 		free all detour mallocs
 	*/
 
-	free(orig_Cmd_Say_f);
+	
 	free(orig_SpawnEntities);
 	free(orig_ShutdownGame);
 	free(orig_ClientBegin);
 	free(orig_ClientDisconnect);
 	free(orig_ClientUserinfoChanged);
-	free(orig_G_RunFrame);
+	// free(orig_G_RunFrame);
+	free(orig_Cmd_Say_f);
 	free(orig_PutClientInServer);
 
 	freeDeathmatchHooks();

@@ -28,17 +28,15 @@ void my_Qcommon_Frame(int msec)
 	orig_Qcommon_Frame(msec);
 }
 
-
 /*
-	Shared Init
+A safer place to call init code because cvars work.
+And its before dedicated_start, thus before game init code, which is ran each level change.
 */
-void my_Qcommon_Init(int one , char ** two) {
+void my_Cbuf_AddLateCommands(void)
+{
 
+	orig_Cbuf_AddLateCommands();
 
-	orig_Qcommon_Init(one,two);
-
-	
-	
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
 	unsigned char * lin_chktbl = 0x08293C80;
@@ -102,7 +100,47 @@ void my_Qcommon_Init(int one , char ** two) {
 
 	// Has to be below the gs_select_sock line above.
 	serverInit();
+}
+/*
+	Shared Init
 
+	QCommon_Init called dedicated_start, which calls map.
+	Thus SV_InitGameProgs which calls GetGameAPI is called within Qcommon_Init.
+*/
+void my_Qcommon_Init(int one , char ** two) {
+	// orig_Cvar_Get crashing Z_malloc before Qcommon_Init.
+	
+	orig_Qcommon_Init(one,two);
+
+	// This cvar is set by dedicated_start dedicated.cfg
+	// ------------------------ GAMESPY BROADCASTING -----------------------
+	if ( sv_public->value ) {
+		SOFPPNIX_PRINT("Server is public.");
+		
+		// Bind to port
+		struct sockaddr_in addr;
+		memset(&addr, 0, sizeof(addr));
+		addr.sin_family = AF_INET;
+		addr.sin_port = htons(gamespyport->value);
+		addr.sin_addr.s_addr = INADDR_ANY;
+
+		if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+			error_exit("Unable to bind to gamespy port");
+		}
+
+		// gamespyport hostport map change -> 27900
+		// master checks using src port 28904 '\\info\\' ~every 5 minutes
+		// master checks using src port 28902 '\\status\\' ~every 30 seconds
+		// client query server list -> 28900
+
+		// memset 0 the master
+		memset(&sof1master_ip, 0, sizeof(sof1master_ip));
+		orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
+
+		// orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);
+		// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
+		// orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
+	}
 }
 
 void my_Qcommon_Shutdown(void)

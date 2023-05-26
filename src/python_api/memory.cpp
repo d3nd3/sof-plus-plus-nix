@@ -267,7 +267,7 @@ public:
 */
 //--Generic
 static PyObject* memory_getter(PyObject *self, PyObject * key) {
-	std::cout << "Generic getter called" << std::endl;
+	// std::cout << "Generic getter called" << std::endl;
 
 	/*
 		Why do we need to read from memory if the py dict is in sync?

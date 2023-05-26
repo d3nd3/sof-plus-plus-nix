@@ -29,10 +29,11 @@ WORKDIR /app/Python-3.9.2
 
 # Configure Python build
 # --enable-unicode=ucs4
-RUN ./configure --disable-shared --enable-optimizations
+# --enable-optimizations
+RUN ./configure --disable-shared LDFLAGS="-static"
 
 # Compile Python
-RUN make
+RUN make LDFLAGS="-static" LINKFORSHARED=" "
 
 # Set the entrypoint as a placeholder
 ENTRYPOINT ["/bin/bash"]

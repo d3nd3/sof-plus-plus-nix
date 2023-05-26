@@ -65,6 +65,8 @@ void (*orig_Cmd_ExecuteString)(const char * string) = 0x08118388;
 int     (*orig_Cmd_Argc) (void) = 0x081194B0;
 char    *(*orig_Cmd_Argv) (int i) = 0x081194C8;
 char    *(*orig_Cmd_Args) (void) = 0x081194FC;
+
+void (*orig_Cbuf_AddLateCommands)(void) = 0x08117160;
 void (*orig_Qcommon_Init)(int one, char** two) = 0x0811E6E8;
 void (*orig_Qcommon_Frame)(int msec) = 0x0811EE7C;
 void (*orig_Qcommon_Shutdown)(void) = 0x081211E0;

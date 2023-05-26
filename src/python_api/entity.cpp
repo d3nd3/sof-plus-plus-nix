@@ -4,10 +4,12 @@
 c4 = ent.spawn("item_c4")
 */
 static PyObject * py_ent_spawn(PyObject * self, PyObject * classname);
+static PyObject * py_ent_from_slot(PyObject * self, PyObject * args);
 
 //name,c_func,flags,docstring
 static PyMethodDef EntMethods[] = {
 	{"spawn", py_ent_spawn, METH_VARARGS,"Spawn a new entity."},
+	{"from_slot", py_ent_from_slot, METH_VARARGS,"Returns an entity from slot."},
 
 	{NULL, NULL, 0, NULL}
 };
@@ -33,6 +35,20 @@ static PyObject * py_ent_spawn(PyObject * self, PyObject * args)
 	// Py_RETURN_NONE;
 }
 
+static PyObject * py_ent_from_slot(PyObject * self, PyObject * args)
+{
+	unsigned int slot;
+	if (!PyArg_ParseTuple(args,"I",&slot)) {
+		error_exit("Python: Failed to parse args in py_player_draw_text");
+	}
+
+	client_t * client = getClientX(slot);
+	edict_t * ent = stget(client,CLIENT_ENT);
+	
+	PyObject * ret = createEntDict(ent);
+	return ret;
+	// Py_RETURN_NONE;
+}
 
 /*
 ----------------------------------------CUSTOM ENT DICT--------------------------------------
