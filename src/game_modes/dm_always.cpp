@@ -316,10 +316,19 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 	Py_XDECREF(connecting_player);
 	currentGameMode->clientConnect(ent);
 
+	int slot = ent->s.skinnum;
 	// sets build number bottom right
 	nix_draw_clear(ent);
 	// Send them the watermark
-	orig_SP_Print(ent,0x0700,strip_layouts[ent->s.skinnum]);
+	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
+
+	prev_showscores[slot] = 0;
+	page[slot] = 1;
+
+	stats_headShots[slot] = 0;
+	stats_throatShots[slot] = 0;
+	stats_nutShots[slot] = 0;
+	stats_armorsPicked[slot] = 0;
 }
 //a8
 /*
@@ -372,7 +381,7 @@ void	always_gamerules_c::clientDisconnect(edict_t *ent){
 
 	currentGameMode->clientDisconnect(ent);
 
-	nix_draw_clear(ent);
+
 }
 //b8
 void	always_gamerules_c::clientDropItem(edict_t *ent,int type,int ammoCount){
@@ -493,6 +502,8 @@ G_RunFrame
 */
 //d8
 bool prev_showscores[32] = {0};
+int page[32] = {1};
+std::vector<std::string> chatVectors;
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
 
@@ -503,18 +514,56 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
 	// SOFPPNIX_DEBUG("show_scores is : %i",show_scores);
 	int slot = ent->s.skinnum;
-	if ( show_scores && ( !prev_showscores[slot] || !(level_framenum & 31) ) ) {
+
+	// !(level_framenum & 31)
+	if ( show_scores == prev_showscores[slot] ) return;
+	if ( page[slot] == 3 ) {
+
+		//off
+		orig_SP_Print(ent,0x0700,"*");
+		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
+
+		page[slot] = 1;
+	} else 
+	if ( page[slot] == 1 ) {
+		//page1 - scoreboard
 		// every 32 server frames = 3.2 seconds
 		// Draw Official Scoreboard ( contains a clear ).
 		currentGameMode->clientScoreboardMessage(ent,killer,log_file);
 		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-	}
-	// was off toggled.
-	if ( !show_scores && prev_showscores[slot] ) {
-		// SOFPPNIX_DEBUG("Clearing Screen");
-		// Clear Screen.
+
+		page[slot]+=1;
+	} else
+	if ( page[slot] == 2 ) {
+		
+		//page2 - chat
 		orig_SP_Print(ent,0x0700,"*");
 		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
+
+		/*
+		ecah character takes 16 pixels because its scaled 2x for some reason.
+		*/
+		// int startY = -120;
+		int startY = 112-4*32-12;
+		// startY+=4;
+		// int startX = -160;
+		int startX = 160-30*8;
+		// startX+=4;
+		// 80 characters per line.
+		int startIndex = chatVectors.size() - 8;
+		if (startIndex < 0 ) startIndex = 0;
+		for (int i = chatVectors.size()-1; i >= startIndex; --i) {
+			char chat_sp[256];
+			// offsetx+157,offsety+114
+			//35 byte overhead per line
+			//8 lines.
+			
+			snprintf(chat_sp,256,"xv %i yv %i string \"%s\"",startX,startY,chatVectors[i].c_str());
+			// SOFPPNIX_DEBUG("Chat == %s",chatVectors[i].c_str());
+			orig_SP_Print(ent,0x700,chat_sp);
+			startY += 32;
+		}
+		page[slot]+=1;
 	}
 
 	// will only be true

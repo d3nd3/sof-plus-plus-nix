@@ -74,6 +74,10 @@ extern const char * SOFREESP;
 */
 extern void *base_addr;
 extern unsigned char chktbl2[3000];
+extern int stats_armorsPicked[32];
+extern int stats_headShots[32];
+extern int stats_throatShots[32];
+extern int stats_nutShots[32];
 
 
 /*---------------------------------------------------------------------
@@ -353,6 +357,7 @@ extern void nix_draw_string_direct(edict_t * ent,char * message);
 extern void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qboolean gray);
 
 extern void nix_draw_clear(edict_t * ent);
+extern void refreshScreen(edict_t * ent);
 
 extern void nix_spackage_register(void);
 /*---------------------------------------------------------------------
@@ -431,3 +436,5 @@ extern void fixupClassesForLinux(void);
 ---------------------------------------------------------------------------
 */
 extern bool prev_showscores[32];
+extern int page[32];
+extern std::vector<std::string> chatVectors;

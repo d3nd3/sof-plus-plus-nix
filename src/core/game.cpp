@@ -319,8 +319,12 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 
 	// Must use fixed address on reusable detours.
 	orig_PutClientInServer = createDetour((int)base_addr + 0x00238BE8, my_PutClientInServer,6);
+
+	// orig_itemArmorTouch = createDetour((int)base_addr + 0x001BE828,my_itemArmorTouch,5);
+	orig_PB_AddArmor = createDetour((int)base_addr + 0x00237658,my_PB_AddArmor,5);
+	orig_GetSequenceForGoreZoneDeath = createDetour((int)base_addr + 0x000EF278 , my_GetSequenceForGoreZoneDeath,6);
 	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
-	orig_PB_AddArmor = (int)base_addr + 0x00237658;
+	
 
 	applyDeathmatchHooks(base_addr);
 
@@ -331,6 +335,19 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	//----------------------------SCOREBOARD ALWAYS PRINT (unlocks layout)-----------------------------
 	memoryAdjust(base_addr + 0xa9bdc,1,0x00); //ClientEndServerFrame
 	memoryAdjust(base_addr + 0xA9BD2,2,0x90);
+
+
+	//-------------------------DISABLE FOOTSTEPS--------------------------------------------
+	memoryAdjust(base_addr + 0x000E23A8,5,0x90);
+	memoryAdjust(base_addr + 0x000E250C,5,0x90);
+
+	//--------------------------DISABLE JUMP SOUND--------------------------------
+	memoryAdjust(base_addr + 0x0023B6BA,2,0x90);
+
+	//-----------------------DISABLE WEAP TOUCH SOUND------------------------------
+	memoryAdjust(base_addr + 0x001BE4ED,2,0x90);
+	memoryAdjust(base_addr + 0x001BE308,2,0x90);
+	memoryAdjust(base_addr + 0x001BE16B,2,0x90);
 
 	// Decorators registered. .py files loaded. Interpreter Reset.
 	pythonInit();
@@ -357,12 +374,16 @@ void my_ShutdownGame(void)
 	// free(orig_G_RunFrame);
 	free(orig_Cmd_Say_f);
 	free(orig_PutClientInServer);
+	free(orig_PB_AddArmor);
+	free(orig_GetSequenceForGoreZoneDeath);
 
 	freeDeathmatchHooks();
 
 
 	// Clear Python callbacks.
 	removeDecoratorCallbacks();
+
+	chatVectors.clear();
 
 	base_addr = NULL;
 }
@@ -597,29 +618,67 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		snprintf(text,151,"%s\n",orig_Cmd_Args())
 	}
 	*/
-	int i;
+	int i,first;
 	if ( arg0 ) {
-		i = 0;
+		// command line sent as argv parts
+		// SOFPPNIX_DEBUG("ARG0");
+		first = 0;
 	} else {
-		i = 1;
+		//text here its sent all in say "argv[1]"
+		first = 1;
 	}
+	i = first;
+	// Create an empty list
+	PyObject* pyList = PyList_New(0);
+	char chatline[60];
+	char tmp[sizeof(chatline)];
+	tmp[0] = 0x00;
+	chatline[0] = 0x00;
+	bool once = false;
+	// SOFPPNIX_DEBUG("argc == %i\n",orig_Cmd_Argc());
+	while(i < orig_Cmd_Argc()) {
+		// Create a new string object
+		PyObject* pyString = PyUnicode_FromString(orig_Cmd_Argv(i));
+		// Append the string to the list
+		PyList_Append(pyList, pyString);
+		Py_DECREF(pyString);
 
-	char total[150];
-	total[0] = 0x00;
-	while(true) {
-		strcat(total,orig_Cmd_Argv(i));
-		if ( i == orig_Cmd_Argc() -1 )
-			break;
-		strcat(total, " ");
+		char * use;
+		char * empty = "";
+		char * space = " ";
+		if ( !once  ) {
+			once = true;
+			use = empty;	
+		}
+		else {
+			use = space;
+		}
+
+		snprintf(chatline,sizeof(chatline),"%s%s%s",tmp,use,orig_Cmd_Argv(i));
+		strcpy(tmp,chatline);
+		// SOFPPNIX_DEBUG("inebetween :%s",chatline);
+		// strcat(chatline,orig_Cmd_Argv(i));
 		i++;
 	}
+	void * gcl = stget(ent,EDICT_GCLIENT);
+	char * name = gcl + GCLIENT_PERS_NETNAME;
+
+	// SOFPPNIX_DEBUG("Name = %.*s",16,name);
+	char final[sizeof(chatline)];
+	if ( name[0] > 31 ) {
+		// give them cyan colour.
+		snprintf(final,sizeof(final),P_CYAN"%s [%i] %s",name,ent->s.skinnum,chatline);
+	} else {
+		snprintf(final,sizeof(final),"%s [%i] %s",name,ent->s.skinnum,chatline);
+	}
 	
+	// SOFPPNIX_DEBUG("final = %s",final);
 	PyObject* who = NULL;	
 	who = createEntDict(ent);
 	if (!who) return;
 	// buffers are copied internally.
 	for ( int i = 0; i < player_say_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_say_callbacks[i], "Os", who,total);
+		PyObject* result = PyObject_CallFunction(player_say_callbacks[i], "OO", who,pyList);
 		if (result == NULL) {
 			// Error occurred during the function call
 			PyErr_Print();  // Print the error information
@@ -630,7 +689,8 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 			Py_XDECREF(result);  // Release the reference to the result object
 		}
 	}
-
+	Py_XDECREF(who);
+	Py_XDECREF(pyList);
 #if 0
 	if ( text[0] == '.'' ) {
 		//Both clprintf and cprintf make beep sounds ( if PRINT_CHAT used ).
@@ -642,7 +702,65 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		return;
 	}
 #endif
-	if ( total[0] != '.' ) {
+	if ( orig_Cmd_Argv(first)[0] != '.' ) {
+		chatVectors.push_back(std::string(final));
+		for ( int i = 0 ; i < maxclients->value;i++ ) {
+			void * client = getClientX(i);
+			int state = *(int*)(client);
+			if (state != cs_spawned )
+				continue;
+			edict_t * ent = stget(client,CLIENT_ENT);
+			refreshScreen(ent);
+		}
 		orig_Cmd_Say_f(ent,team,arg0);
 	}
+}
+
+
+void my_itemArmorTouch(edict_t *self, edict_t *other, cplane_t *plane, mtexinfo_t *surf)
+{
+	
+	orig_itemArmorTouch(self,other,plane,surf);
+}
+
+int stats_headShots[32];
+int stats_throatShots[32];
+int stats_nutShots[32];
+mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags)
+{
+	void * level = stget(base_addr + 0x002ACB1C,0);
+	int throatshots_before = stget(level,0x580);
+	int nutshots_before = stget(level,0x584);
+	int headshots_before = stget(level,0x588);
+	
+	mmove_t * ret;
+	ret = orig_GetSequenceForGoreZoneDeath(self,monster,inflictor,attacker,damage,point,dflags,goal_bbox,ideal_move,reject_actionflags);
+
+	int throatshots_after = stget(level,0x580);
+	int nutshots_after = stget(level,0x584);
+	int headshots_after = stget(level,0x588);
+
+	if ( throatshots_after > throatshots_before ) {
+		stats_throatShots[attacker->s.skinnum] +=1;
+	}
+	if ( nutshots_after > nutshots_before ) {
+		stats_nutShots[attacker->s.skinnum] +=1;
+	}
+	if ( headshots_after > headshots_before ) {
+		stats_headShots[attacker->s.skinnum] +=1;
+	}
+
+	// SOFPPNIX_DEBUG("Headshots before : %i, Headshots after : %i",headshots_before,headshots_after);
+
+	return ret;
+}
+int stats_armorsPicked[32];
+int my_PB_AddArmor(edict_t *ent, int amount)
+{
+	
+	int ret = orig_PB_AddArmor(ent,amount);
+	if (ret) {
+		stats_armorsPicked[ent->s.skinnum] +=1;
+	}
+	return ret;
 }

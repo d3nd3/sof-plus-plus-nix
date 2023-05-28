@@ -12,22 +12,26 @@
 static PyObject * py_player_equip_armor(PyObject * self, PyObject * args);
 
 static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args);
+static PyObject * py_player_draw_direct(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_centered(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_lower(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args);
 static PyObject * py_player_clear_text(PyObject * self, PyObject * args);
 static PyObject * py_player_con_print(PyObject * self, PyObject * args);
+static PyObject * py_player_get_stats(PyObject * self, PyObject * args);
 
 
 //name,c_func,flags,docstring
 static PyMethodDef PlayerMethods[] = {
 	{"equip_armor", py_player_equip_armor, METH_VARARGS,"Give a player armor"},
 	{"draw_text_at", py_player_draw_text_at, METH_VARARGS,"Draw text at pos on player screen"},
+	{"draw_direct", py_player_draw_direct, METH_VARARGS,"Insert draw text directly into FLAG_LAYOUT."},
 	{"draw_centered", py_player_draw_centered, METH_VARARGS,"Draw centered text on player screen"},
 	{"draw_lower", py_player_draw_lower, METH_VARARGS,"Draw centered lower text on player screen"},
 	{"draw_typeamatic", py_player_draw_typeamatic, METH_VARARGS,"Draw cinematic text on player screen"},
 	{"clear_text", py_player_clear_text, METH_VARARGS,"Clear the text that is drawn on player screen"},
 	{"con_print", py_player_con_print, METH_VARARGS,"Print console text on player screen"},
+	{"get_stats",py_player_get_stats,METH_VARARGS,"Get stats for this player"},
 
 	{NULL, NULL, 0, NULL} //sentinel
 };
@@ -38,7 +42,33 @@ PyModuleDef PlayerModule = {
 	NULL, NULL, NULL, NULL //sentinel
 };
 
+static PyObject * py_player_get_stats(PyObject * self, PyObject * args)
+{
+	EntDict * who;
+	if (!PyArg_ParseTuple(args,"O",&who)) {
+		error_exit("Python: Failed to parse args in py_player_equip_armor");
+	}
 
+	edict_t * ent = who->c_ent;
+	int slot = ent->s.skinnum;
+	PyObject* pyDict = PyDict_New();
+	PyObject* stats_armor = PyLong_FromLong(stats_armorsPicked[slot]);
+	PyObject* stats_head = PyLong_FromLong(stats_headShots[slot]);
+	PyObject* stats_throat = PyLong_FromLong(stats_throatShots[slot]);
+	PyObject* stats_nut = PyLong_FromLong(stats_nutShots[slot]);
+
+	PyDict_SetItemString(pyDict, "armorpickups", stats_armor);
+	PyDict_SetItemString(pyDict, "headshots", stats_head);
+	PyDict_SetItemString(pyDict, "throatshots", stats_throat);
+	PyDict_SetItemString(pyDict, "nutshots", stats_nut);
+
+	Py_DECREF(stats_armor);
+	Py_DECREF(stats_head);
+	Py_DECREF(stats_throat);
+	Py_DECREF(stats_nut);
+	
+	return pyDict;
+}
 /*
 	edict_t *ent
 	int amount
@@ -245,16 +275,43 @@ static PyObject * py_player_con_print(PyObject * self, PyObject * args)
 	orig_cprintf(ent,PRINT_HIGH,"%.*s\n",(int)length,msg);
 	Py_RETURN_NONE;
 }
+static PyObject * py_player_draw_direct(PyObject * self, PyObject * args)
+{
+	char * msg;
+	Py_ssize_t length;
+	EntDict * who;
+	// Not null-terminated.
+	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+		error_exit("Python: Failed to parse args in py_player_con_print");
+	}
+	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
-static void refreshScreen(edict_t * ent)
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+
+	nix_draw_string_direct(ent,msg);
+	Py_RETURN_NONE;
+}
+void refreshScreen(edict_t * ent)
 {
 	void * gclient = stget(ent, EDICT_GCLIENT);
 	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
+	int slot = ent->s.skinnum;
 	if ( show_scores ) {
-		prev_showscores[ent->s.skinnum] = false;
+		prev_showscores[slot] = false;
 	} else {
-		prev_showscores[ent->s.skinnum] = true;
+		prev_showscores[slot] = true;
 	}
+	int p = page[slot];
+	p--;
+	if (p < 1) {
+		p+=3;
+	}
+	page[slot] = p;
 }
 
 static PyObject * py_player_clear_text(PyObject * self, PyObject * args)
@@ -293,15 +350,20 @@ void nix_draw_clear(edict_t * ent)
 {
 	if ( ent == NULL ) {
 		// SOFPPNIX_DEBUG("Clearing screen");
-		for ( int i =0; i < 32; i++ ) {
+
+		for ( int i = 0 ; i < maxclients->value;i++ ) {
+			void * client = getClientX(i);
+			int state = *(int*)(client);
+			if (state != cs_spawned )
+				continue;
 			strip_layouts[i][0] = 0x00;
 			sprintf(strip_layouts[i],"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
 			strip_layout_size[i] = strlen(strip_layouts[i]);
 
-			client_t * client = getClientX(i);
 			edict_t * ent = stget(client,CLIENT_ENT);
 			refreshScreen(ent);
 		}
+
 		// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
 
 		return;
@@ -337,9 +399,9 @@ void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qbo
 
 	char newstring[256];
 	if ( ! gray ) {
-		snprintf(newstring,256,"xv %i yv %i string \"%s\" ",offsetx+157,offsety+114,message);
+		snprintf(newstring,256,"xv %i yv %i string \"%s\" ",offsetx+160,offsety+112,message);
 	} else {
-		snprintf(newstring,256,"xv %i yv %i altstring \"%s\" ",offsetx+157,offsety+114,message);
+		snprintf(newstring,256,"xv %i yv %i altstring \"%s\" ",offsetx+160,offsety+112,message);
 	}
 	
 	int newlen = strlen(newstring);
@@ -347,14 +409,18 @@ void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qbo
 	// broadcast
 	if ( ent == NULL ) {
 
-		for ( int i =0; i < 32; i++ ) {
+		for ( int i = 0 ; i < maxclients->value;i++ ) {
+			void * client = getClientX(i);
+			int state = *(int*)(client);
+			if (state != cs_spawned )
+				continue;
+
 			if ( strip_layout_size[i] + newlen <= 1024 ) {
 				strcat(strip_layouts[i], newstring);
 				strip_layout_size[i]+=newlen;
 			} else {
 				SOFPPNIX_PRINT("Cant draw this , run out of space");
 			}
-			client_t * client = getClientX(i);
 			edict_t * ent = stget(client,CLIENT_ENT);
 			refreshScreen(ent);
 		}
@@ -401,15 +467,17 @@ void nix_draw_string_direct(edict_t * ent,char * message)
 	int newlen = strlen(newstring);
 
 	if ( ent == NULL ) {
-		for ( int i =0; i < 32; i++ ) {
+		for ( int i = 0 ; i < maxclients->value;i++ ) {
+			void * client = getClientX(i);
+			int state = *(int*)(client);
+			if (state != cs_spawned )
+				continue;
 			if ( strip_layout_size[i] + newlen <= 1024 ) {
-				char newstring[256];
 				strcat(strip_layouts[i], newstring);
 				strip_layout_size[i]+=newlen;
 			} else {
 				SOFPPNIX_PRINT("Cant draw this , run out of space");
 			}
-			client_t * client = getClientX(i);
 			edict_t * ent = stget(client,CLIENT_ENT);
 			refreshScreen(ent);
 		}
@@ -418,7 +486,6 @@ void nix_draw_string_direct(edict_t * ent,char * message)
 	}
 	int i = ent->s.skinnum;
 	if ( strip_layout_size[i] + newlen <= 1024 ) {
-		char newstring[256];
 		strcat(strip_layouts[i], newstring);
 		strip_layout_size[i]+=newlen;
 	} else {

@@ -43,8 +43,11 @@ static PyObject * py_ent_from_slot(PyObject * self, PyObject * args)
 	}
 
 	client_t * client = getClientX(slot);
+	int state = *(int*)(client);
+	if (state != cs_spawned ) {
+		Py_RETURN_NONE;
+	}
 	edict_t * ent = stget(client,CLIENT_ENT);
-	
 	PyObject * ret = createEntDict(ent);
 	return ret;
 	// Py_RETURN_NONE;

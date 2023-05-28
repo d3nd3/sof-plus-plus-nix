@@ -119,7 +119,11 @@ edict_t * (*orig_G_Spawn) (void) = NULL;
 void (* orig_setDMMode)(void * self,int newtype) = NULL;
 float (*orig_G_RunFrame) (int serverframe) = NULL;
 
+void (*orig_itemArmorTouch)(edict_t *self, edict_t *other, cplane_t *plane, mtexinfo_t *surf) = NULL;
 int (*orig_PB_AddArmor)(edict_t *ent, int amount) = NULL;
+
+mmove_t	* (*orig_GetSequenceForGoreZoneDeath)(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags) = NULL;
+
 
 //text print
 void	(*orig_clprintf) (edict_t *ent, edict_t *from, int color, char *fmt, ...) = NULL;
