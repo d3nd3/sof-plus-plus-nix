@@ -39,6 +39,9 @@ void ( *orig_PF_Configstring)(int index, char * string) = 0x080a7710;
 void (*orig_SV_RunGameFrame) (void) = 0x080AB8F8;
 
 
+int (*orig_SV_GhoulFileIndex) (char *name) = 0x080A9534;
+
+
 // ----SHARED-----
 
 char *(*orig_CopyString) (char *in) = 0x08120C3C;

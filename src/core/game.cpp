@@ -349,6 +349,14 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	memoryAdjust(base_addr + 0x001BE308,2,0x90);
 	memoryAdjust(base_addr + 0x001BE16B,2,0x90);
 
+
+	// -----------------------DISABLE SCOREBOARD CLEARS-------------------------
+	memoryAdjust(base_addr + 0x0015CF14,2,0x90);
+	memoryAdjust(base_addr + 0x00163286,2,0x90);
+	memoryAdjust(base_addr + 0x001625D3,2,0x90);
+	memoryAdjust(base_addr + 0x00164FA9,2,0x90);
+	memoryAdjust(base_addr + 0x001673F9,2,0x90);
+
 	// Decorators registered. .py files loaded. Interpreter Reset.
 	pythonInit();
 
@@ -630,7 +638,7 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	i = first;
 	// Create an empty list
 	PyObject* pyList = PyList_New(0);
-	char chatline[60];
+	char chatline[64];
 	char tmp[sizeof(chatline)];
 	tmp[0] = 0x00;
 	chatline[0] = 0x00;
@@ -661,18 +669,27 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		i++;
 	}
 	void * gcl = stget(ent,EDICT_GCLIENT);
-	char * name = gcl + GCLIENT_PERS_NETNAME;
+	unsigned char * name = gcl + GCLIENT_PERS_NETNAME;
 
 	// SOFPPNIX_DEBUG("Name = %.*s",16,name);
-	char final[sizeof(chatline)];
-	if ( name[0] > 31 ) {
-		// give them cyan colour.
-		snprintf(final,sizeof(final),P_CYAN"%s [%i] %s",name,ent->s.skinnum,chatline);
+	char final[2*sizeof(chatline)];
+	int color_count = 0;
+	for ( int i = 0; i < 16; i++ ) {
+		// SOFPPNIX_DEBUG("NAME : %02X",name[i]);
+		if ( name[i] == 0x00 ) break;
+		if (name[i] < 31) color_count++;
+	}
+	// colr-less name
+	// Need to give more buffer space to colored tags, so pads evenly
+	if ( name[0] > 31 || name[0] == 0x00 ) {
+		color_count+=1;
+		// give them cyan colour name.
+		snprintf(final,sizeof(chatline)+color_count,P_CYAN"%s [%i] %s",name,ent->s.skinnum,chatline);
 	} else {
-		snprintf(final,sizeof(final),"%s [%i] %s",name,ent->s.skinnum,chatline);
+		snprintf(final,sizeof(chatline)+color_count,"%s [%i] %s",name,ent->s.skinnum,chatline);
 	}
 	
-	// SOFPPNIX_DEBUG("final = %s",final);
+	// SOFPPNIX_DEBUG("final = %i, color_count %i",strlen(final),color_count);
 	PyObject* who = NULL;	
 	who = createEntDict(ent);
 	if (!who) return;
@@ -712,7 +729,8 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 			edict_t * ent = stget(client,CLIENT_ENT);
 			refreshScreen(ent);
 		}
-		orig_Cmd_Say_f(ent,team,arg0);
+		// orig_Cmd_Say_f(ent,team,arg0);
+		orig_cprintf(ent,PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
 	}
 }
 

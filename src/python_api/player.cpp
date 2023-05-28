@@ -14,6 +14,7 @@ static PyObject * py_player_equip_armor(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_direct(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_centered(PyObject * self, PyObject * args);
+static PyObject * py_player_draw_credit(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_lower(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args);
 static PyObject * py_player_clear_text(PyObject * self, PyObject * args);
@@ -26,6 +27,7 @@ static PyMethodDef PlayerMethods[] = {
 	{"equip_armor", py_player_equip_armor, METH_VARARGS,"Give a player armor"},
 	{"draw_text_at", py_player_draw_text_at, METH_VARARGS,"Draw text at pos on player screen"},
 	{"draw_direct", py_player_draw_direct, METH_VARARGS,"Insert draw text directly into FLAG_LAYOUT."},
+	{"draw_credit", py_player_draw_credit, METH_VARARGS,"Insert draw pic directly into FLAG_CREDIT."},
 	{"draw_centered", py_player_draw_centered, METH_VARARGS,"Draw centered text on player screen"},
 	{"draw_lower", py_player_draw_lower, METH_VARARGS,"Draw centered lower text on player screen"},
 	{"draw_typeamatic", py_player_draw_typeamatic, METH_VARARGS,"Draw cinematic text on player screen"},
@@ -156,6 +158,34 @@ static PyObject * py_player_draw_centered(PyObject * self, PyObject * args)
 
 
 	player_spackage_print_ref(ent,"++NIX","CENTER_CUSTOM",input,NULL);
+
+	Py_RETURN_NONE;
+}
+
+static PyObject * py_player_draw_credit(PyObject * self, PyObject * args)
+{
+	char * msg;
+	Py_ssize_t length;
+	// Not null-terminated.
+	EntDict * who;
+	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+		error_exit("Python: Failed to parse args in py_player_draw_credit");
+	}
+	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
+
+	// 256 upper, although the function can discard remaining.
+	char input[256];
+	snprintf(input,256,"%.*s",(int)length,msg);
+
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+
+
+	player_spackage_print_ref(ent,"++NIX","CREDIT_CUSTOM",input,NULL);
 
 	Py_RETURN_NONE;
 }

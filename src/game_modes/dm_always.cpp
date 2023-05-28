@@ -117,6 +117,8 @@ void	always_gamerules_c::levelInit(void){
 		Py_XDECREF(result);
 	}
 
+	orig_SV_GhoulFileIndex("c/c.m32");
+
 	// dm specific levelinit fallback func
 	currentGameMode->levelInit();
 }
@@ -529,6 +531,8 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 		//page1 - scoreboard
 		// every 32 server frames = 3.2 seconds
 		// Draw Official Scoreboard ( contains a clear ).
+		orig_SP_Print(ent,0x0700,"*");
+		
 		currentGameMode->clientScoreboardMessage(ent,killer,log_file);
 		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
 
@@ -540,24 +544,51 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 		orig_SP_Print(ent,0x0700,"*");
 		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
 
-		/*
-		ecah character takes 16 pixels because its scaled 2x for some reason.
-		*/
-		// int startY = -120;
-		int startY = 112-4*32-12;
+
+		int gapY = 32;
+		int widthX = 60;
+		// 4 lines for console print, 16 pixel alignment away from crosshair
+		int startY = -120+32+16;
+		// int startY = 112-4*gapY-12 - 2*gapY;
 		// startY+=4;
 		// int startX = -160;
-		int startX = 160-30*8;
+		int widthPixels = widthX*8;
+		int startX = -160 + (640 - 512)*0.5;
 		// startX+=4;
 		// 80 characters per line.
+
+
+		char tmp[128];
+		snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX,startY,"c/c");
+		orig_SP_Print(ent,0x0700,tmp);
+		snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX+256,startY,"c/c");
+		orig_SP_Print(ent,0x0700,tmp);
+
+
+		// snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX,startY+256,"c");
+		// orig_SP_Print(ent,0x0700,tmp);
+		// snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX+256,startY+256,"c");
+		// orig_SP_Print(ent,0x0700,tmp);
+
+		
+		// 512 background
+		
+		//32 * 8 = 256
+		// 24 pixel gap at bottom
+		startY += 12;
+		// line len can't be greater than 64 or escapes backgrnd.
+		// startX += (512 - line_len*8)*0.5;
+		startX += 4;
+		// Colored names consume space in buffer
 		int startIndex = chatVectors.size() - 8;
 		if (startIndex < 0 ) startIndex = 0;
-		for (int i = chatVectors.size()-1; i >= startIndex; --i) {
+		for (int i = startIndex; i < chatVectors.size(); ++i) {
 			char chat_sp[256];
 			// offsetx+157,offsety+114
-			//35 byte overhead per line
+			//23 byte overhead per line
 			//8 lines.
-			
+			// (60 + 23) * 8 = 664
+			// SOFPPNIX_DEBUG("Len = %i",strlen(chatVectors[i].c_str()));
 			snprintf(chat_sp,256,"xv %i yv %i string \"%s\"",startX,startY,chatVectors[i].c_str());
 			// SOFPPNIX_DEBUG("Chat == %s",chatVectors[i].c_str());
 			orig_SP_Print(ent,0x700,chat_sp);

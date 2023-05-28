@@ -21,6 +21,8 @@ extern void my_SV_RunGameFrame(void);
 extern void (*orig_Cmd_Say_f) (edict_t *ent, qboolean team, qboolean arg0);
 extern void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0);
 
+extern int (*orig_SV_GhoulFileIndex) (char *name);
+
 // -------------------Client------------------
 extern void (*orig_CL_Init) (void);
 extern void my_CL_Init (void);
