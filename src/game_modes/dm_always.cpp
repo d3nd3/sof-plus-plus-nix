@@ -291,9 +291,11 @@ float	always_gamerules_c::clientCalculateWaver(edict_t *ent, int atkID){
  ClientBeginServerFrame ->
 	respawn()
 		PutClientInServer ->
+			DM->ClientRespawn
  spectator_respawn ->
  ClientBeginDeathmatch ->
  ClientBegin ->
+ 	DM->ClientConnect
 	PutClientInServer ->
 		DM->ClientRespawn
 */
@@ -301,36 +303,17 @@ float	always_gamerules_c::clientCalculateWaver(edict_t *ent, int atkID){
 When receiving/extracting arguments, 'O' does not increase ref count.
 
 When creating/calling functions, 'O' does increase ref count.
+
+skinnum is set by PutClientInServer
 */
+
+// DONT USE THIS FUNCTION, ITS TOO EARLY.
+bool connected;
 void	always_gamerules_c::clientConnect(edict_t *ent){
-
+	connected = true;
 	//SOFPPNIX_DEBUG("Connecting Player");
-	const char * name = "connect";
-	PyObject * connecting_player = createEntDict(ent);
-	if ( !connecting_player ) return;
-	// Py_INCREF(connecting_player);
 	
-	for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
-		// returns None
-		Py_XDECREF(result);
-	}
-	Py_XDECREF(connecting_player);
 	currentGameMode->clientConnect(ent);
-
-	int slot = ent->s.skinnum;
-	// sets build number bottom right
-	nix_draw_clear(ent);
-	// Send them the watermark
-	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-
-	prev_showscores[slot] = 0;
-	page[slot] = 1;
-
-	stats_headShots[slot] = 0;
-	stats_throatShots[slot] = 0;
-	stats_nutShots[slot] = 0;
-	stats_armorsPicked[slot] = 0;
 }
 //a8
 /*
@@ -448,6 +431,18 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
  Code for new clients on connection do once here!
 
  This function is called from within PutClientInServer
+
+  Begin Intermission ->
+  ClientBeginServerFrame ->
+ 	respawn()
+ 		PutClientInServer ->
+ 			DM->ClientRespawn
+  spectator_respawn ->
+  ClientBeginDeathmatch ->
+  ClientBegin ->
+  	DM->ClientConnect
+ 	PutClientInServer ->
+ 		DM->ClientRespawn
 */
 void	always_gamerules_c::clientRespawn(edict_t *ent) {
 
@@ -544,7 +539,7 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 		orig_SP_Print(ent,0x0700,"*");
 		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
 
-
+		int chatLines = 7;
 		int gapY = 32;
 		int widthX = 60;
 		// 4 lines for console print, 16 pixel alignment away from crosshair
@@ -576,14 +571,20 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 		//32 * 8 = 256
 		// 24 pixel gap at bottom
 		startY += 12;
+		char chat_sp[256];
+		// draw help here.
+		snprintf(chat_sp,256,"xv %i yv %i string \"%s\"",startX,startY,".help .p=prev .r=restore .n=next VVV");
+		orig_SP_Print(ent,0x700,chat_sp);
+
+		startY += 32;
 		// line len can't be greater than 64 or escapes backgrnd.
 		// startX += (512 - line_len*8)*0.5;
-		startX += 4;
+		startX += 4; //border
 		// Colored names consume space in buffer
-		int startIndex = chatVectors.size() - 8;
+		int startIndex = chatVectors.size() - chatLines;
 		if (startIndex < 0 ) startIndex = 0;
 		for (int i = startIndex; i < chatVectors.size(); ++i) {
-			char chat_sp[256];
+			
 			// offsetx+157,offsety+114
 			//23 byte overhead per line
 			//8 lines.

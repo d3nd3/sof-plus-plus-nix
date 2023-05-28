@@ -302,6 +302,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// SOFPPNIX_DEBUG("AHA  : %08X",0x198 - stget(params,4) );
 	orig_clprintf = stget(params,0x198-0x15C);
 	orig_cprintf = stget(params,0x198-0x160);
+	orig_bprintf = stget(params,0x198-0x168);
 	//0x128 == 0x70 , 0x128 - 0x70 = B8
 
 	//0x38 == 0x168 , 0x168 - 0x38 = 130
@@ -574,9 +575,40 @@ a deathmatch.
 void my_PutClientInServer (edict_t *ent)
 {
 	orig_PutClientInServer(ent);
-
-
 	int slot = ent->s.skinnum;
+	if ( connected ) {
+		connected = false;
+		// ON CONNECT.
+
+		const char * name = "connect";
+		PyObject * connecting_player = createEntDict(ent);
+		if ( !connecting_player ) return;
+		// Py_INCREF(connecting_player);
+		
+		for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
+			PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
+			// returns None
+			Py_XDECREF(result);
+		}
+		Py_XDECREF(connecting_player);
+
+		
+
+		// sets build number bottom right
+		nix_draw_clear(ent);
+		// Send them the watermark
+		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
+
+		prev_showscores[slot] = 0;
+		page[slot] = 1;
+
+		stats_headShots[slot] = 0;
+		stats_throatShots[slot] = 0;
+		stats_nutShots[slot] = 0;
+		stats_armorsPicked[slot] = 0;
+	}
+
+	
 	return;
 	detect_max_pitch[slot] = 0;
 	detect_max_yaw[slot] = 0;
@@ -730,7 +762,8 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 			refreshScreen(ent);
 		}
 		// orig_Cmd_Say_f(ent,team,arg0);
-		orig_cprintf(ent,PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
+		// orig_cprintf(NULL,PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
+		orig_bprintf(PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
 	}
 }
 

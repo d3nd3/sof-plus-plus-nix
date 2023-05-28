@@ -435,6 +435,7 @@ extern void fixupClassesForLinux(void);
 -----------------------------dm_always.cpp---------------------------------
 ---------------------------------------------------------------------------
 */
+extern bool connected;
 extern bool prev_showscores[32];
 extern int page[32];
 extern std::vector<std::string> chatVectors;
