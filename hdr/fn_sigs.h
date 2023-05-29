@@ -199,3 +199,7 @@ extern void	(*orig_bprintf) (int printlevel, char *fmt, ...);
 
 extern mmove_t	* (*orig_GetSequenceForGoreZoneDeath)(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags);
 extern mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags);
+
+
+extern void (*orig_G_SetStats)(edict_t * ent);
+extern void my_G_SetStats(edict_t * ent);

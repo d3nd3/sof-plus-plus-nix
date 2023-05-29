@@ -330,18 +330,13 @@ void refreshScreen(edict_t * ent)
 {
 	void * gclient = stget(ent, EDICT_GCLIENT);
 	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
-	int slot = ent->s.skinnum;
+	int slot = slot_from_ent(ent);
 	if ( show_scores ) {
 		prev_showscores[slot] = false;
 	} else {
 		prev_showscores[slot] = true;
 	}
-	int p = page[slot];
-	p--;
-	if (p < 1) {
-		p+=3;
-	}
-	page[slot] = p;
+	showScoreboard(ent,slot,show_scores);
 }
 
 static PyObject * py_player_clear_text(PyObject * self, PyObject * args)
@@ -398,10 +393,10 @@ void nix_draw_clear(edict_t * ent)
 
 		return;
 	}
-	int i = ent->s.skinnum;
-	strip_layouts[i][0] = 0x00;
-	sprintf(strip_layouts[i],"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
-	strip_layout_size[i] = strlen(strip_layouts[i]);
+	int slot = slot_from_ent(ent);
+	strip_layouts[slot][0] = 0x00;
+	sprintf(strip_layouts[slot],"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
+	strip_layout_size[slot] = strlen(strip_layouts[slot]);
 	refreshScreen(ent);
 }
 

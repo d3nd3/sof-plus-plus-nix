@@ -290,7 +290,7 @@ void httpdl_thread_get(std::string * rel_map_path) {
 	*/
 	
 	if ( !error ) {
-		SOFPPNIX_DEBUG("Preparing to unzip %s\n",write_zip_here);
+		// SOFPPNIX_DEBUG("Preparing to unzip %s\n",write_zip_here);
 		// all happy?
 		if ( !unZipFile( write_zip_here, userdir) )
 		{
@@ -456,7 +456,7 @@ bool partialHttpBlobs(char * remote_url)
 	*/
 	int file_size = partial_Header_ContentLength(remote_url);
 	if ( file_size <= 0 ) {
-		SOFPPNIX_DEBUG("The content length had no value\n");
+		SOFPPNIX_DEBUG("Map not found\n");
 		return false;
 	}
 	// SOFPPNIX_DEBUG("File Size of %s == %i\n",remote_url,file_size);
@@ -618,14 +618,14 @@ bool unZipFile(char * in_zip, char * out_root )
 			return false;
 		}
 		if ( filename[strlen(filename)-1] == '/' || filename[strlen(filename)-1] == '\\' ) {
-			SOFPPNIX_DEBUG("Skipping directory : %s\n",filename);
+			// SOFPPNIX_DEBUG("Skipping directory : %s\n",filename);
 			if ( unzGoToNextFile(unz_file) != UNZ_OK ) {
 				break;
 			}
 			continue;
 		}
 
-		SOFPPNIX_DEBUG("Processing file : %s : size : %lu\n",filename,file_info.size_filename);
+		// SOFPPNIX_DEBUG("Processing file : %s : size : %lu\n",filename,file_info.size_filename);
 
 		// Will close the unz_file already.
 		int ret = unzOpenCurrentFile(unz_file);
@@ -701,7 +701,7 @@ bool unZipFile(char * in_zip, char * out_root )
 
 	closeAndDeleteZipFile(unz_file,in_zip);
 
-	SOFPPNIX_DEBUG("Successfully extracted and deleted : %s\n",in_zip);
+	// SOFPPNIX_DEBUG("Successfully extracted and deleted : %s\n",in_zip);
 	return true;
 }
 

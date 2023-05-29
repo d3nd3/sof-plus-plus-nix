@@ -5,11 +5,13 @@ c4 = ent.spawn("item_c4")
 */
 static PyObject * py_ent_spawn(PyObject * self, PyObject * classname);
 static PyObject * py_ent_from_slot(PyObject * self, PyObject * args);
+static PyObject * py_ent_get_slot(PyObject * self, PyObject * args);
 
 //name,c_func,flags,docstring
 static PyMethodDef EntMethods[] = {
 	{"spawn", py_ent_spawn, METH_VARARGS,"Spawn a new entity."},
 	{"from_slot", py_ent_from_slot, METH_VARARGS,"Returns an entity from slot."},
+	{"get_slot", py_ent_get_slot, METH_VARARGS,"Returns the slot of this entity."},
 
 	{NULL, NULL, 0, NULL}
 };
@@ -51,6 +53,21 @@ static PyObject * py_ent_from_slot(PyObject * self, PyObject * args)
 	PyObject * ret = createEntDict(ent);
 	return ret;
 	// Py_RETURN_NONE;
+}
+
+static PyObject * py_ent_get_slot(PyObject * self, PyObject * args)
+{
+	
+	EntDict * who;
+	if (!PyArg_ParseTuple(args,"O",&who)) {
+		error_exit("Python: Failed to parse args in py_ent_get_slot");
+	}
+
+	PyObject * ret = PyLong_FromLong(slot_from_ent(who->c_ent));
+	if ( ret == NULL ) {
+		error_exit("Python: Failed to create return value");
+	}
+	return ret;
 }
 
 /*

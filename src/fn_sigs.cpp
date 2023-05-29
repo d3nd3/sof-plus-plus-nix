@@ -132,3 +132,5 @@ mmove_t	* (*orig_GetSequenceForGoreZoneDeath)(void * self,edict_t &monster, edic
 void	(*orig_clprintf) (edict_t *ent, edict_t *from, int color, char *fmt, ...) = NULL;
 void	(*orig_cprintf) (edict_t *ent, int printlevel, char *fmt, ...);
 void	(*orig_bprintf) (int printlevel, char *fmt, ...);
+
+void (*orig_G_SetStats)(edict_t * ent) = NULL;

@@ -48,7 +48,13 @@ void	always_gamerules_c::clientSetDroppedWeaponThink(edict_t *ent){
 int		always_gamerules_c::isDM(void){
 	return currentGameMode->isDM();
 }
+/*
+	SpawnEntities
+		Called by InitDeathmatchSystem() dm.cpp
+*/
 void	always_gamerules_c::preLevelInit(void){
+	// Decorators registered. .py files loaded. Interpreter Reset.
+	pythonInit();
 	currentGameMode->preLevelInit();
 }
 /*
@@ -61,6 +67,7 @@ Are saved and unloaded when a client connects.
 
 Use Cbuf_ExecuteString here if you don't want deffered commands.
 */
+float last_intermissiontime = 0;
 void	always_gamerules_c::levelInit(void){
 
 	next_available_ID = 0;
@@ -118,6 +125,9 @@ void	always_gamerules_c::levelInit(void){
 	}
 
 	orig_SV_GhoulFileIndex("c/c.m32");
+
+	// For detecting first frame into intermission.
+	last_intermissiontime = 0;
 
 	// dm specific levelinit fallback func
 	currentGameMode->levelInit();
@@ -305,15 +315,49 @@ When receiving/extracting arguments, 'O' does not increase ref count.
 When creating/calling functions, 'O' does increase ref count.
 
 skinnum is set by PutClientInServer
+
+ent->client not initialised here.
 */
 
-// DONT USE THIS FUNCTION, ITS TOO EARLY.
-bool connected;
+// DONT USE skinnum in THIS FUNCTION, ITS TOO EARLY.
+// Any function that this calls, Also cannot use skinnum.
 void	always_gamerules_c::clientConnect(edict_t *ent){
-	connected = true;
-	//SOFPPNIX_DEBUG("Connecting Player");
 	
+	//SOFPPNIX_DEBUG("Connecting Player");
+	int slot = slot_from_ent(ent);
+
+	// SOFPPNIX_DEBUG("ent = %i",slot);
+	
+
+	const char * name = "connect";
+	PyObject * connecting_player = createEntDict(ent);
+	if ( !connecting_player ) return;
+	// Py_INCREF(connecting_player);
+	
+	for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
+		PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
+		// returns None
+		Py_XDECREF(result);
+	}
+	Py_XDECREF(connecting_player);
+
 	currentGameMode->clientConnect(ent);
+
+	void * gclient = stget(ent, EDICT_GCLIENT);
+	stset(gclient, GCLIENT_SHOWSCORES,0);
+	prev_showscores[slot] = 0;
+	page[slot] = 3;
+
+	// sets build number bottom right
+	nix_draw_clear(ent);
+	// Send them the watermark
+	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
+
+	stats_headShots[slot] = 0;
+	stats_throatShots[slot] = 0;
+	stats_nutShots[slot] = 0;
+	stats_armorsPicked[slot] = 0;
+	
 }
 //a8
 /*
@@ -389,27 +433,13 @@ G_RunFrame -> ClientEndFrames @g_main.cpp
  dm->checkEvents -  Not Active
  dm->ClientScoreboardMessage - Clear if toggle close scoreboard.
  dm->clientEndFrame - overrides G_SetStats. To force Layout on.
+
+ No longer true. Moved ClientScoreboardMessage to G_SetStats hook.
 */
 //c4
-#define STAT_LAYOUTS 9
+
 void	always_gamerules_c::clientEndFrame(edict_t *ent){
 	
-	// SOFPPNIX_DEBUG("clientEndFrame\n");
-	// correct layering.
-	// Draw Custom 2D.
-	void * client = getClientX(ent->s.skinnum);
-	// SOFPPNIX_DEBUG("cclient : %08X",client);
-	if ( stget(client,0) == cs_spawned && strip_layouts[ent->s.skinnum][0] ) {
-
-		// force layouts ON.
-		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
-	}
-
-	// always show scoreboard during intermission
-	// player can toggle scoreboard when its not intermission.
-	// if ( !show_score[sendToSlot] && !(*level_intermissiontime) ) return;
-
-	// orig_Com_Printf("clientEndFrame\n");
 	currentGameMode->clientEndFrame(ent);
 }
 //c8
@@ -497,30 +527,16 @@ G_RunFrame
 
 
 */
-//d8
-bool prev_showscores[32] = {0};
-int page[32] = {1};
-std::vector<std::string> chatVectors;
-void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
+void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0)
 {
-
-	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
-	// SOFPPNIX_DEBUG("framenum is : %i",level_framenum);
-
-	void * gclient = stget(ent, EDICT_GCLIENT);
-	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
-	// SOFPPNIX_DEBUG("show_scores is : %i",show_scores);
-	int slot = ent->s.skinnum;
-
-	// !(level_framenum & 31)
-	if ( show_scores == prev_showscores[slot] ) return;
+	
+	// SOFPPNIX_DEBUG("Scoreboard :: Page %i , SHowscores %i, Prevscores %i",page[slot],showscores,prev_showscores[slot]);	
 	if ( page[slot] == 3 ) {
 
 		//off
 		orig_SP_Print(ent,0x0700,"*");
 		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
 
-		page[slot] = 1;
 	} else 
 	if ( page[slot] == 1 ) {
 		//page1 - scoreboard
@@ -528,10 +544,9 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 		// Draw Official Scoreboard ( contains a clear ).
 		orig_SP_Print(ent,0x0700,"*");
 		
-		currentGameMode->clientScoreboardMessage(ent,killer,log_file);
+		currentGameMode->clientScoreboardMessage(ent,killer,logfile);
 		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
 
-		page[slot]+=1;
 	} else
 	if ( page[slot] == 2 ) {
 		
@@ -595,11 +610,62 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 			orig_SP_Print(ent,0x700,chat_sp);
 			startY += 32;
 		}
-		page[slot]+=1;
 	}
 
 	// will only be true
-	prev_showscores[slot] = show_scores;
+	prev_showscores[slot] = showscores;
+}
+//d8
+bool prev_showscores[32] = {0};
+int page[32] = {1};
+std::vector<std::string> chatVectors;
+
+void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
+{
+	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
+
+	void * gclient = stget(ent, EDICT_GCLIENT);
+	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
+	// SOFPPNIX_DEBUG("show_scores is : %i",show_scores);
+	int slot = slot_from_ent(ent);
+	// SOFPPNIX_DEBUG("clientScoreboard page : %i show_scores %i prev_scores %i",page[slot],show_scores,prev_showscores[slot]);
+
+	// SOFPPNIX_DEBUG("clientSCoreboardMessage %i",slot);
+
+	// Number of seconds the game lasted?
+	float* intermissiontime = stget(base_addr+0x002ACB1C,0) + 0x4F0;
+	if ( *intermissiontime > 0 ) {
+		if ( last_intermissiontime == 0 ) {
+			// guarantee set correct page when entering intermission
+			page[slot] = 1;
+		} else {
+			if ( show_scores == prev_showscores[slot] ) return;
+
+			page[slot] += 1;
+			if ( page[slot] > 3 ) page[slot] -=3;
+
+			// skip off page.
+			if ( page[slot] == 3 )
+				page[slot] = 1;
+		}
+		
+
+		last_intermissiontime = *intermissiontime;
+	} else {
+		// !(level_framenum & 31)
+		// Must allow scoreboard page to pass when !level_framenum
+		if ( show_scores == prev_showscores[slot] &&  ( page[slot] != 1 || (level_framenum & 31) ) )return;
+
+		// current page
+		if ( page[slot] != 1 || (level_framenum & 31) ) {
+			// SOFPPNIX_DEBUG("SLot == %i",slot);
+			page[slot] += 1;
+			if ( page[slot] > 3 )
+				page[slot] -= 3;
+		}
+	}
+
+	showScoreboard(ent,slot,show_scores,killer,log_file);
 }
 //dc
 void	always_gamerules_c::clientStealthAndFatigueMeter(edict_t *ent){

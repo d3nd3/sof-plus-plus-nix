@@ -308,6 +308,12 @@ int countPlayersInGame(void)
 	return player_count;
 }
 
+// edict_t size = 0x464
+// sof_sdk edict_t size = 0x450
+unsigned int slot_from_ent(edict_t * ent)
+{
+	return (unsigned int)((unsigned int)ent - (unsigned int)stget(stget(base_addr+0x002ACB08,0),0)-0x464) / 0x464;
+}
 int getPlayerSlot(void * in_client)
 {
 	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);

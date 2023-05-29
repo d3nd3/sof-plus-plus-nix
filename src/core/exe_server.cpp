@@ -3,6 +3,10 @@
 std::array<char [1024],32> strip_layouts;
 std::array<int,32> strip_layout_size = {0};
 
+/*
+called by my_Cbuf_AddLateCommands.
+Guaranteed to be before game.dll is loaded. (dedicated_start).
+*/
 void serverInit(void)
 {
 	if ( dedicated->value == 1.0f ) {
@@ -44,6 +48,10 @@ void serverInit(void)
 
 char saved_map_arg1[MAX_STRING_CHARS];
 bool map_saving = false;
+
+/*
+	Calls SV_Map_f again.
+*/
 void map_continue(void)
 {
 	// DOWNLOAD DONE.
@@ -69,6 +77,8 @@ void my_SV_Map_f(void)
 				*cmd_argc = 2;
 				map_saving = false;
 
+				// Surely by this the cmd_argv are not preserved.
+				// Have to save the mapname parameter instead.
 				orig_SV_Map_f();
 				return;
 			}
@@ -86,6 +96,8 @@ void my_SV_Map_f(void)
 		return;
 	}
 	// empty mapname bug ruins cmd_argc count. Used double quotes in ExecuteString
+
+	// SOFPPNIX_DEBUG("saved mapname == %s",orig_Cmd_Argv(1));
 	strcpy(saved_map_arg1,orig_Cmd_Argv(1));
 	// http map start here
 	map_saving = true;
@@ -200,7 +212,7 @@ void public_rcon_command(void)
 	std::smatch m;
 	if (std::regex_search(s, m, r)) {
 		// print the match
-		std::cout << "MATCH : " << m.str() << std::endl;
+		// std::cout << "MATCH : " << m.str() << std::endl;
 		// check if cmd_argv(1) is a key into cmd_map, if it is, execute the function
 
 		// SOFPPNIX_PRINT("before : %s",orig_Cmd_Args());

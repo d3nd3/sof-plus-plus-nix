@@ -218,8 +218,11 @@ extern void list_print(list_t *list);
 // sof specific
 extern int countPlayersInGame(void);
 extern bool isServerEmpty(void);
+
 extern int getPlayerSlot(void * in_client);
 extern void * getClientX(int slot);
+
+extern unsigned int slot_from_ent(edict_t * ent);
 
 // math
 extern void my_itoa(int i, char * out_str);
@@ -435,7 +438,8 @@ extern void fixupClassesForLinux(void);
 -----------------------------dm_always.cpp---------------------------------
 ---------------------------------------------------------------------------
 */
-extern bool connected;
+#define STAT_LAYOUTS 9
 extern bool prev_showscores[32];
 extern int page[32];
 extern std::vector<std::string> chatVectors;
+extern void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0);

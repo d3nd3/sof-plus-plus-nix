@@ -2,7 +2,7 @@
 
 game_export_t * game_exports = NULL;
 
-
+static void my_die_Cmd_Score_f (edict_t *ent);
 /*
 Calls GetRefAPI from ref_gl.so
 also passes in pointers for ref_gl library. ri
@@ -272,6 +272,7 @@ also passes in pointers for ref_gl library. ri
 void *base_addr = NULL;
 game_export_t * my_Sys_GetGameAPI (void *params) {
 
+	SOFPPNIX_DEBUG("--------------Sys_GetGameAPI------------");
 	/*
 		This function will call dlopen and pass params to GetGameAPI.
 		Its some functions that the game library imports.
@@ -324,16 +325,19 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// orig_itemArmorTouch = createDetour((int)base_addr + 0x001BE828,my_itemArmorTouch,5);
 	orig_PB_AddArmor = createDetour((int)base_addr + 0x00237658,my_PB_AddArmor,5);
 	orig_GetSequenceForGoreZoneDeath = createDetour((int)base_addr + 0x000EF278 , my_GetSequenceForGoreZoneDeath,6);
+
+	orig_G_SetStats = createDetour((int)base_addr + 0x0023D324 , my_G_SetStats,6);
+
 	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
 	
 
 	applyDeathmatchHooks(base_addr);
 
-	// ---------------------------WP EDIT---------------------------------
+	// ---------------------------WP EDIT disable spam-------------------------
 	memoryAdjust(base_addr + 0x14964E,5,0x90);
 	memoryAdjust(base_addr + 0x1496D0,5,0x90);
 
-	//----------------------------SCOREBOARD ALWAYS PRINT (unlocks layout)-----------------------------
+	//------------------------call dm->clientScoreboardMessage every frame. (unlocks layout)-----------------------------
 	memoryAdjust(base_addr + 0xa9bdc,1,0x00); //ClientEndServerFrame
 	memoryAdjust(base_addr + 0xA9BD2,2,0x90);
 
@@ -351,19 +355,27 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	memoryAdjust(base_addr + 0x001BE16B,2,0x90);
 
 
-	// -----------------------DISABLE SCOREBOARD CLEARS-------------------------
+	// --------DISABLE SCOREBOARD CLEARS IN ORIGINAL FUNCS SO WE HANDLE CLEAR-------------
 	memoryAdjust(base_addr + 0x0015CF14,2,0x90);
 	memoryAdjust(base_addr + 0x00163286,2,0x90);
 	memoryAdjust(base_addr + 0x001625D3,2,0x90);
 	memoryAdjust(base_addr + 0x00164FA9,2,0x90);
 	memoryAdjust(base_addr + 0x001673F9,2,0x90);
 
-	// Decorators registered. .py files loaded. Interpreter Reset.
-	pythonInit();
+	//-----------------------player_die Cmd_Score_f() hook-------------------------
+	callE8Patch(base_addr + 0x00237F17,&my_die_Cmd_Score_f);
+
+	//----------------------NOP dm->clientScoreboardMessage in clientEndServerFrame--------------
+	// We now call this in G_SetStats hook because it allows control during intermission
+	memoryAdjust(base_addr + 0x000A9BFC,2,0x90);
 
 	return game_exports;
 }
 
+/*
+	Only called when map command issued.
+	End of level loads do not trigger this.
+*/
 void my_ShutdownGame(void)
 {
 	SOFPPNIX_DEBUG("Shutting down game.so\n");
@@ -373,7 +385,6 @@ void my_ShutdownGame(void)
 	/*
 		free all detour mallocs
 	*/
-
 	
 	free(orig_SpawnEntities);
 	free(orig_ShutdownGame);
@@ -388,11 +399,7 @@ void my_ShutdownGame(void)
 
 	freeDeathmatchHooks();
 
-
-	// Clear Python callbacks.
-	removeDecoratorCallbacks();
-
-	chatVectors.clear();
+	// chatVectors.clear();
 
 	base_addr = NULL;
 }
@@ -571,44 +578,17 @@ PutClientInServer
 Called when a player connects to a server or respawns in
 a deathmatch.
 ============
+
+client is set to 0 inhere and re-initialised.
+Thus everytime you die, you re-initialised.
+memset (client, 0, sizeof(*client));
 */
 void my_PutClientInServer (edict_t *ent)
 {
+	// careful using ent->s.skinnum here, ojnly set in PutClientInServer
 	orig_PutClientInServer(ent);
 	int slot = ent->s.skinnum;
-	if ( connected ) {
-		connected = false;
-		// ON CONNECT.
 
-		const char * name = "connect";
-		PyObject * connecting_player = createEntDict(ent);
-		if ( !connecting_player ) return;
-		// Py_INCREF(connecting_player);
-		
-		for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
-			PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
-			// returns None
-			Py_XDECREF(result);
-		}
-		Py_XDECREF(connecting_player);
-
-		
-
-		// sets build number bottom right
-		nix_draw_clear(ent);
-		// Send them the watermark
-		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-
-		prev_showscores[slot] = 0;
-		page[slot] = 1;
-
-		stats_headShots[slot] = 0;
-		stats_throatShots[slot] = 0;
-		stats_nutShots[slot] = 0;
-		stats_armorsPicked[slot] = 0;
-	}
-
-	
 	return;
 	detect_max_pitch[slot] = 0;
 	detect_max_yaw[slot] = 0;
@@ -659,14 +639,23 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	}
 	*/
 	int i,first;
+	int chars_spoken = 0;
 	if ( arg0 ) {
+		// concatenate argv(0) with cmd_args
 		// command line sent as argv parts
 		// SOFPPNIX_DEBUG("ARG0");
 		first = 0;
+		chars_spoken += strlen(orig_Cmd_Argv(0));
+		chars_spoken += strlen(orig_Cmd_Args());
+		if ( chars_spoken <= 0 ) return;
 	} else {
+		// Just use cmd_Args here
 		//text here its sent all in say "argv[1]"
 		first = 1;
+		chars_spoken += strlen(orig_Cmd_Args());
+		if ( chars_spoken <= 2 ) return;
 	}
+	// SOFPPNIX_DEBUG("Chars spoken : %i",chars_spoken);
 	i = first;
 	// Create an empty list
 	PyObject* pyList = PyList_New(0);
@@ -761,9 +750,9 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 			edict_t * ent = stget(client,CLIENT_ENT);
 			refreshScreen(ent);
 		}
-		// orig_Cmd_Say_f(ent,team,arg0);
+		orig_Cmd_Say_f(ent,team,arg0);
 		// orig_cprintf(NULL,PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
-		orig_bprintf(PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
+		// orig_bprintf(PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
 	}
 }
 
@@ -814,4 +803,27 @@ int my_PB_AddArmor(edict_t *ent, int amount)
 		stats_armorsPicked[ent->s.skinnum] +=1;
 	}
 	return ret;
+}
+
+static void my_die_Cmd_Score_f (edict_t *ent)
+{
+
+}
+
+
+void my_G_SetStats(edict_t * ent)
+{
+	orig_G_SetStats(ent);
+
+	int slot = slot_from_ent(ent);
+	void * client = getClientX(slot);
+	// SOFPPNIX_DEBUG("cclient : %08X",client);
+	if ( stget(client,0) == cs_spawned && strip_layouts[slot][0] ) {
+
+		// force layouts ON.
+		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
+	}
+
+	// only way to influence scoreboard during intermission.
+	dm_always.clientScoreboardMessage(ent,ent->enemy,false);
 }

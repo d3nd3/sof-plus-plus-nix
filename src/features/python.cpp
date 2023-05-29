@@ -104,6 +104,8 @@ void pythonInit(void)
 		
 // ----------------------------------------------------------------
 
+	// Clear Python callbacks.
+	removeDecoratorCallbacks();
 	pythonLoadUserScripts();
 }
 static int functionExists(const char* functionName, PyObject* pGlobals) {
