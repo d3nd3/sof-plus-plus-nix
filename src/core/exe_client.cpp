@@ -55,7 +55,7 @@ void my_CL_Precache_f(void)
 	// configstrings ALTERNATE = *(unsigned int*)(0x0829D480) + 0x2844
 
 	char * mapname = *(unsigned int*)(0x0829D480) + 0x2844;
-	SOFPPNIX_DEBUG("MAPNAME: %s",mapname);
+	// SOFPPNIX_DEBUG("MAPNAME: %s",mapname);
 	// this contains ".bsp"
 
 	std::string sMapname(mapname);

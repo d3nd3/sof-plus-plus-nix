@@ -114,7 +114,7 @@ void my_Qcommon_Init(int one , char ** two) {
 
 	// This cvar is set by dedicated_start dedicated.cfg
 	// ------------------------ GAMESPY BROADCASTING -----------------------
-	if ( sv_public->value ) {
+	if ( sv_public && sv_public->value ) {
 		SOFPPNIX_PRINT("Server is public.");
 		
 		// Bind to port
