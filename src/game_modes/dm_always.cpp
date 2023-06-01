@@ -475,7 +475,10 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
  		DM->ClientRespawn
 */
 void	always_gamerules_c::clientRespawn(edict_t *ent) {
-
+	// client struct is cleared before this. So showscores is always 0.
+	// align prev_scores with it.
+	int slot = slot_from_ent(ent);
+	prev_showscores[slot] = 0;
 	currentGameMode->clientRespawn(ent);
 	PyObject* who = NULL;	
 	who = createEntDict(ent);
@@ -620,6 +623,11 @@ bool prev_showscores[32] = {0};
 int page[32] = {1};
 std::vector<std::string> chatVectors;
 
+/*
+	1 = scoreboard
+	2 = chat
+	3 = off
+*/
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
 	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);

@@ -396,6 +396,7 @@ void my_ShutdownGame(void)
 	free(orig_PutClientInServer);
 	free(orig_PB_AddArmor);
 	free(orig_GetSequenceForGoreZoneDeath);
+	free(orig_G_SetStats);
 
 	freeDeathmatchHooks();
 
@@ -647,7 +648,13 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		first = 0;
 		chars_spoken += strlen(orig_Cmd_Argv(0));
 		chars_spoken += strlen(orig_Cmd_Args());
-		if ( chars_spoken <= 0 ) return;
+
+		int slot = slot_from_ent(ent);
+		void * client_t = getClientX(slot);
+		int state = *(int*)(client_t);
+			
+		if ( state != cs_spawned || chars_spoken <= 0 ) return;
+
 	} else {
 		// Just use cmd_Args here
 		//text here its sent all in say "argv[1]"
@@ -667,11 +674,12 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	// SOFPPNIX_DEBUG("argc == %i\n",orig_Cmd_Argc());
 	while(i < orig_Cmd_Argc()) {
 		// Create a new string object
-		PyObject* pyString = PyUnicode_FromString(orig_Cmd_Argv(i));
-		// Append the string to the list
-		PyList_Append(pyList, pyString);
-		Py_DECREF(pyString);
-
+		PyObject* pyString = PyUnicode_DecodeFSDefault(orig_Cmd_Argv(i));
+		if (  pyString != NULL ) {
+			// Append the string to the list
+			PyList_Append(pyList, pyString);
+			Py_DECREF(pyString);
+		}
 		char * use;
 		char * empty = "";
 		char * space = " ";
