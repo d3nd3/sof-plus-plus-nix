@@ -19,12 +19,14 @@ static PyObject * py_player_draw_centered(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_credit(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_lower(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args);
-static PyObject * py_player_clear_text(PyObject * self, PyObject * args);
+static PyObject * py_player_clear_layout(PyObject * self, PyObject * args);
+static PyObject * py_player_refresh_layout(PyObject * self, PyObject * args);
 static PyObject * py_player_con_print(PyObject * self, PyObject * args);
 static PyObject * py_player_get_stats(PyObject * self, PyObject * args);
 static PyObject * py_player_raw_sp(PyObject * self, PyObject * args);
 static PyObject * py_player_get_layout(PyObject * self, PyObject * args);
 static PyObject * py_ppnix_orig_scoreboard(PyObject * self, PyObject * args);
+
 
 
 //name,c_func,flags,docstring
@@ -38,7 +40,8 @@ static PyMethodDef PlayerMethods[] = {
 	{"draw_centered", py_player_draw_centered, METH_VARARGS,"Draw centered text on player screen"},
 	{"draw_lower", py_player_draw_lower, METH_VARARGS,"Draw centered lower text on player screen"},
 	{"draw_typeamatic", py_player_draw_typeamatic, METH_VARARGS,"Draw cinematic text on player screen"},
-	{"clear_text", py_player_clear_text, METH_VARARGS,"Clear the text that is drawn on player screen"},
+	{"clear_layout", py_player_clear_layout, METH_VARARGS,"Clear the text that is drawn on player screen"},
+	{"refresh_layout", py_player_refresh_layout, METH_VARARGS,"Refresh the text that is drawn on player screen"},
 	{"con_print", py_player_con_print, METH_VARARGS,"Print console text on player screen"},
 	{"get_stats",py_player_get_stats,METH_VARARGS,"Get stats for this player"},
 	{"raw_sp_print",py_player_raw_sp,METH_VARARGS,"Send stringpackage packet to player"},
@@ -77,7 +80,7 @@ static PyObject * py_player_get_layout(PyObject * self, PyObject * args)
 {
 	EntDict * who;
 	if (!PyArg_ParseTuple(args,"O",&who)) {
-		error_exit("Python: Failed to parse args for raw_sp_print");
+		error_exit("Python: Failed to parse args for py_player_get_layout");
 	}
 	int slot = slot_from_ent(who->c_ent);
 	// Copied buffer. New reference created.
@@ -123,7 +126,7 @@ static PyObject * py_player_set_page(PyObject * self, PyObject * args)
 	char input[256];
 	snprintf(input,256,"%.*s",(int)length,msg);
 
-	current_page[slot] = msg;
+	current_page[slot] = input;
 
 	Py_RETURN_NONE;
 }
@@ -446,13 +449,33 @@ static PyObject * py_player_draw_direct(PyObject * self, PyObject * args)
 }
 
 
-static PyObject * py_player_clear_text(PyObject * self, PyObject * args)
+static PyObject * py_player_refresh_layout(PyObject * self, PyObject * args)
 {
 
 	EntDict * who;
 	// Not null-terminated.
 	if (!PyArg_ParseTuple(args,"O",&who)) {
-		error_exit("Python: Failed to parse args in py_player_clear_text");
+		error_exit("Python: Failed to parse args in py_player_refresh_layout");
+	}
+	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
+
+	edict_t * ent;
+	if ( (PyObject*)who == Py_None )
+		// broadcast.
+		ent = NULL;
+	else
+		ent = who->c_ent;
+
+	refreshScreen(ent);
+	Py_RETURN_NONE;
+}
+static PyObject * py_player_clear_layout(PyObject * self, PyObject * args)
+{
+
+	EntDict * who;
+	// Not null-terminated.
+	if (!PyArg_ParseTuple(args,"O",&who)) {
+		error_exit("Python: Failed to parse args in py_player_clear_layout");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 

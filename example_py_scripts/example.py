@@ -1,3 +1,8 @@
+import ppnix
+import player
+import ent
+import event
+
 # player.draw_text_at(100,100,"Edit!")
 # player.draw_typeamatic(text)
 # player.draw_centered(text)
@@ -11,10 +16,10 @@
 # Use correct Parameters
 @event.map_spawn
 def mapspawn():
-	ppnix.print("Just an Example!!")
+	ppnix.print("Just an Example")
 
 
 @event.connect
 def connect(ent):
 	# player.draw_text_at(100,100,"Edit!")
-	ppnix.print("On Connect!")
+	ppnix.print("On Connect")

@@ -6,12 +6,15 @@ ppnix.print("Hello World")
 
 static PyObject * py_ppnix_print(PyObject * self, PyObject * args);
 static PyObject * py_ppnix_get_time(PyObject * self, PyObject * args);
+static PyObject * py_ppnix_get_chat_vectors(PyObject * self, PyObject * args);
+
 
 
 //name,c_func,flags,docstring
 static PyMethodDef PpnixMethods[] = {
 	{"print", py_ppnix_print, METH_VARARGS,"Print to console."},
 	{"get_time", py_ppnix_get_time, METH_VARARGS,"Get level time."},
+	{"get_chat_vectors",py_ppnix_get_chat_vectors,METH_VARARGS,"Get chat vectors."},
 	{NULL, NULL, 0, NULL} //sentinel
 };
 
@@ -25,8 +28,30 @@ PyMODINIT_FUNC PyInit_ppnix(void) {
 
 	return PyModule_Create(&PpnixModule);
 }
+/*
+	x - how many recent chat vectors.
+*/
 
+static PyObject * py_ppnix_get_chat_vectors(PyObject * self, PyObject * args)
+{
+	unsigned int x;
+	if (!PyArg_ParseTuple(args,"I",&x)) {
+		error_exit("Python: Failed to parse args for py_ppnix_get_chat_vectors");
+	}
 
+	PyObject* pyList = PyList_New(0);
+	int startIndex = chatVectors.size() - x;
+	if (startIndex < 0 ) startIndex = 0;
+	// SOFPPNIX_DEBUG("startIndex = %i",startIndex);
+	for (int i = startIndex; i < chatVectors.size(); ++i) {
+		// SOFPPNIX_DEBUG(" i= %i",i);
+		PyObject* pyString = PyUnicode_DecodeFSDefault(chatVectors[i].c_str());
+		PyList_Append(pyList, pyString);
+		Py_DECREF(pyString);
+	}
+
+	return pyList;
+}
 /*
 	Where should this 'timer' callback be called from?
 	After entity game processing?

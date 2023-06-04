@@ -24,9 +24,9 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 	// int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
 	// SOFPPNIX_DEBUG("Scoreboard :: Page %i , SHowscores %i, Prevscores %i",page[slot],showscores,prev_showscores[slot]);	
 
-	if ( !showscores ) {
-		page_none(ent,killer);
-	} else {
+	orig_SP_Print(ent,0x0700,"*");
+
+	if ( showscores) {
 		// Does the routine exist in the map, is it registered by python?
 		// Draw the page that is currently set, with timeout.
 		// If sticky set, make permanant.
@@ -50,29 +50,27 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 		}
 
 	}
+	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
+	layout_clear(ent);
 	// will only be true
+
 	prev_showscores[slot] = showscores;
 }
 bool page_should_refresh[32] = {false};
 void refreshScreen(edict_t * ent)
 {
+	// SOFPPNIX_DEBUG("Screen REFRESH!");
 	int slot = slot_from_ent(ent);
 	page_should_refresh[slot] = true;
 
 }
-void append_watermark(int slot)
+void empty_reset_layout(int slot)
 {
 	strip_layouts[slot][0] = 0x00;
 	sprintf(strip_layouts[slot],"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
 	strip_layout_size[slot] = strlen(strip_layouts[slot]);
 }
-void page_none(edict_t * ent, edict_t * killer)
-{
-	int slot = slot_from_ent(ent);
-	//off
-	orig_SP_Print(ent,0x0700,"*");
-	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-}
+
 void page_scoreboard(edict_t * ent, edict_t * killer)
 {
 	SOFPPNIX_DEBUG("Drawing normal scoreboard");
@@ -166,18 +164,16 @@ void layout_clear(edict_t * ent)
 			if (state != cs_spawned )
 				continue;
 
-			append_watermark(i);
+			empty_reset_layout(i);
 
 			edict_t * ent = stget(client,CLIENT_ENT);
-			refreshScreen(ent);
 		}
 
 		// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
 
 		return;
 	}
-	append_watermark(slot_from_ent(ent));
-	refreshScreen(ent);
+	empty_reset_layout(slot_from_ent(ent));
 }
 
 void append_layout_image(edict_t * ent,int offsetx, int offsety, char * img_path)
@@ -202,7 +198,7 @@ void append_layout_image(edict_t * ent,int offsetx, int offsety, char * img_path
 				SOFPPNIX_PRINT("Cant draw this , run out of space");
 			}
 			edict_t * ent = stget(client,CLIENT_ENT);
-			refreshScreen(ent);
+			// refreshScreen(ent);
 		}
 		return;
 	}
@@ -216,7 +212,7 @@ void append_layout_image(edict_t * ent,int offsetx, int offsety, char * img_path
 	} else {
 		SOFPPNIX_PRINT("Cant draw this , run out of space");
 	}
-	refreshScreen(ent);
+	// refreshScreen(ent);
 }
 
 /*
@@ -267,7 +263,7 @@ void append_layout_string(edict_t * ent,int offsetx, int offsety, char * message
 				SOFPPNIX_PRINT("Cant draw this , run out of space");
 			}
 			edict_t * ent = stget(client,CLIENT_ENT);
-			refreshScreen(ent);
+			// refreshScreen(ent);
 		}
 		
 		return;
@@ -280,7 +276,7 @@ void append_layout_string(edict_t * ent,int offsetx, int offsety, char * message
 	} else {
 		SOFPPNIX_PRINT("Cant draw this , run out of space");
 	}
-	refreshScreen(ent);
+	// refreshScreen(ent);
 }
 /*
 more direct version of above.
@@ -324,7 +320,7 @@ void append_layout_direct(edict_t * ent,char * message)
 				SOFPPNIX_PRINT("Cant draw this , run out of space");
 			}
 			edict_t * ent = stget(client,CLIENT_ENT);
-			refreshScreen(ent);
+			// refreshScreen(ent);
 		}
 		
 		return;
@@ -336,7 +332,7 @@ void append_layout_direct(edict_t * ent,char * message)
 	} else {
 		SOFPPNIX_PRINT("Cant draw this , run out of space");
 	}
-	refreshScreen(ent);
+	// refreshScreen(ent);
 }
 
 // 32kb

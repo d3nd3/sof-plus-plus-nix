@@ -398,7 +398,8 @@ void my_ShutdownGame(void)
 	free(orig_PB_AddArmor);
 	free(orig_GetSequenceForGoreZoneDeath);
 	free(orig_G_SetStats);
-
+	free(orig_ClientCommand);
+	
 	freeDeathmatchHooks();
 
 	// chatVectors.clear();

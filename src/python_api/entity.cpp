@@ -55,6 +55,10 @@ static PyObject * py_ent_from_slot(PyObject * self, PyObject * args)
 	// Py_RETURN_NONE;
 }
 
+/*
+	ent
+	return int
+*/
 static PyObject * py_ent_get_slot(PyObject * self, PyObject * args)
 {
 	

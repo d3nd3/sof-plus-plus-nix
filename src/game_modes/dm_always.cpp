@@ -521,6 +521,15 @@ G_RunFrame
 	  if (ent->client->showscores && !(level.framenum & 31))
 		dm->clientScoreboardMessage(ent,ent->enemy,false);
 	  dm->clientEndFrame(ent); OVERRIDE G_SETSTATS here.
+
+
+	refreshScreen() in features/pages.cpp , sets page_should_refresh[slot] = true
+	all draw_append functions and layout_clear calls refreshScreen().
+
+	ISSUE: Draw into buffer, vs Draw for refresh. 2 different concepts.
+
+	Should it draw into buffer every frame? I think it has to, it has to be prepared.
+	So layout string has to be cleared every frame too.
 */
 
 //d8
@@ -551,14 +560,21 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 		// !(level_framenum & 31)
 		// Must allow scoreboard page to pass when !level_framenum
 
+
 		// No change to toggle except for 31st game-frame.
-		if ( !page_should_refresh[slot] && show_scores == prev_showscores[slot] && ( !show_scores || (level_framenum & 31) ) ) 
+		if ( !page_should_refresh[slot] && show_scores == prev_showscores[slot] && ( current_page[slot] != std::string("scoreboard") || (level_framenum & 31) ) ) 
 			return;
+
+		// SOFPPNIX_DEBUG("%02X",current_page[slot] != std::string("scoreboard"));
+		// SOFPPNIX_DEBUG("Page == %s", current_page[slot].c_str());
+		// SOFPPNIX_DEBUG("page_should_refresh[slot] = %i",page_should_refresh[slot]);
+		// SOFPPNIX_DEBUG("show_scores %i :: prev_showscores[slot] %i",show_scores,prev_showscores[slot]);
 	}
 
 	if ( page_should_refresh[slot] )
 		page_should_refresh[slot] = false;
 
+	// SOFPPNIX_DEBUG("ShouldRefresh %01X , showscore %i : %i",page_should_refresh[slot],show_scores,prev_showscores[slot]);
 	showScoreboard(ent,slot,show_scores,killer,log_file);
 }
 //dc

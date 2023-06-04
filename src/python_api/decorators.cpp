@@ -13,7 +13,7 @@
 	@event.say
 	@event.frame_early
 	@event.map_spawn
-	@event.page("pagename")
+	@event.draw_page("pagename")
 */
 
 static PyObject* py_on_player_die(PyObject* self,PyObject* args);
@@ -134,7 +134,6 @@ static PyObject* py_on_draw_page_deco(PyObject* self,PyObject* args) {
 
 	if (!PyArg_ParseTuple(args,"O",&callback)) {
 		error_exit("Python: Failed to parse args for page decorator");
-		return NULL;
 	}
 
 	// Only one routine per page. Overwrites.

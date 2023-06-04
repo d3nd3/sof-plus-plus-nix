@@ -263,9 +263,22 @@ void public_rcon_command(void)
 	}
 }
 
-
+/*
+	SV_Frame
+		SV_RunGameFrame
+			ge->RunFrame
+*/
 void my_SV_RunGameFrame(void)
 {
+	for ( int i = 0 ; i < maxclients->value;i++ ) {
+		void * client_t = getClientX(i);
+		int state = *(int*)(client_t);
+		if (state != cs_spawned )
+			continue;
+		edict_t * ent = stget(client_t,CLIENT_ENT);
+		layout_clear(ent);
+	}
+	
 	// Trying to use this for events that run every frame.
 	// Although quake probably wanted you to use `think` callbacks.
 	for ( int i = 0; i < frame_early_callbacks.size(); i++ ) {
