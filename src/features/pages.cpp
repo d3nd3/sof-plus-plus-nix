@@ -1,20 +1,12 @@
 #include "common.h"
-std::unordered_map<std::string,void (*)(edict_t * ent, edict_t * killer)> pages;
+std::unordered_map<std::string,PyObject*> py_page_draw_routines;
 std::string current_page[32];
+
 
 void page_none(edict_t * ent, edict_t * killer);
 void page_scoreboard(edict_t * ent, edict_t * killer);
 void page_chat(edict_t * ent, edict_t * killer);
 
-void init_pages(void)
-{
-	for ( int i = 0; i < 32 ; i ++ ) {
-		current_page[i] = "scoreboard";
-	}
-	
-	pages["scoreboard"] = page_scoreboard;
-	pages["chat"] = page_chat;
-}
 
 /*
 	Different views of scoreboard.
@@ -35,12 +27,26 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 	if ( !showscores ) {
 		page_none(ent,killer);
 	} else {
-	
+		// Does the routine exist in the map, is it registered by python?
 		// Draw the page that is currently set, with timeout.
 		// If sticky set, make permanant.
-		if ( pages.count(current_page[slot]) ) {
+		if ( py_page_draw_routines.count(current_page[slot]) ) {
 			// Draw.
-			pages[current_page[slot]](ent,killer);
+			PyObject * who = createEntDict(ent);
+			if ( who == NULL ) {
+				error_exit("killer pointer invalid");
+			}
+			PyObject * who_killer = createEntDict(killer);
+			if ( who_killer == NULL ) {
+				error_exit("killer pointer invalid");
+			} 
+
+			PyObject* result = PyObject_CallFunction(py_page_draw_routines[current_page[slot]],"OO",who,who_killer);
+			// returns None
+			Py_XDECREF(result);
+
+			Py_XDECREF(who);
+			Py_XDECREF(who_killer);
 		}
 
 	}
@@ -477,23 +483,8 @@ Register a string package
 
 ensures ID in file is equal to next_available_ID.
 */
-void spackage_register(void)
+void spackage_register(char * one)
 {
-	int c = orig_Cmd_Argc() - 1;
-	char * one = orig_Cmd_Argv(1);
-	if ( !strcmp(one,"-h" ) ) {
-		SOFPPNIX_PRINT(
-			"Register a .sp string package file that the client will download\n"
-			"----------------------------\n"
-			"arg1 -> name of file including .sp extension\n"
-			"eg. ++nix_spackage_register mystringpackage.sp\n"
-		);
-		return;
-	}
-	if ( c != 1 ) {
-		SOFPPNIX_PRINT("++nix_spackage_register -h");
-		return;
-	}
 
 	std::string in_file_path = std::string("strip/") + one;
 	if ( orig_FS_LoadFile(in_file_path.c_str(),NULL,false) == -1 ) {
@@ -506,7 +497,7 @@ void spackage_register(void)
 	if ( !IN_FILE ) {
 		char * shorten= strchr(one,'.');
 		if ( shorten ) {
-			*shorten = 0x00;	
+			*shorten = 0x00;
 		}
 		orig_SP_Register(one);
 		return;

@@ -75,6 +75,20 @@ void pythonInit(void)
 
 	// clean up previous.
 	Py_Finalize();
+
+	// Register the module
+	if ( PyImport_AppendInittab("ppnix", PyInit_ppnix) == -1 )
+		error_exit("Couldnt extend table for ppnix");
+
+	if ( PyImport_AppendInittab("ent", PyInit_ent) == -1 )
+		error_exit("Couldnt extend table for ent");
+
+	if ( PyImport_AppendInittab("player", PyInit_player) == -1 )
+		error_exit("Couldnt extend table for player");
+
+	if ( PyImport_AppendInittab("event", PyInit_event) == -1 )
+		error_exit("Couldnt extend table for event");
+
 	Py_Initialize();
 
 	// Add the current directory to script load path
@@ -85,22 +99,18 @@ void pythonInit(void)
 
 	initEntDictType();
 	MemoryItem::initMemoryItems();
-	
-	PyObject* mod_ppnix = PyModule_Create(&PpnixModule);
-	PyObject* mod_event = PyModule_Create(&EventModule);
-
-	PyObject* mod_ent = PyModule_Create(&EntModule);
-	PyObject* mod_player = PyModule_Create(&PlayerModule);
 
 
 // ----------------------------------------------------------------
 
 	pGlobals = PyDict_New();//n
-	PyDict_SetItemString(pGlobals, "ppnix", mod_ppnix);
-	PyDict_SetItemString(pGlobals, "event", mod_event);
+	// PyDict_SetItemString(pGlobals, "ppnix", mod_ppnix);
+	// PyDict_SetItemString(pGlobals, "event", mod_event);
 
-	PyDict_SetItemString(pGlobals, "ent", mod_ent);
-	PyDict_SetItemString(pGlobals, "player", mod_player);
+	// PyDict_SetItemString(pGlobals, "ent", mod_ent);
+	// PyDict_SetItemString(pGlobals, "player", mod_player);
+
+
 		
 // ----------------------------------------------------------------
 

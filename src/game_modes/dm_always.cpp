@@ -112,11 +112,7 @@ void	always_gamerules_c::levelInit(void){
 		orig_Z_Free(buffer);
 	}
 
-	std::string cmd = "++nix_spackage_register " + sp_name + ".sp\n";
-	// spackage_register handles crc and ID correction.
-	orig_Cmd_ExecuteString(cmd.c_str());
-
-	
+	spackage_register(std::string(sp_name + ".sp").c_str());
 
 	for ( int i = 0; i < map_spawn_callbacks.size(); i++ ) {
 		PyObject* result = PyObject_CallFunction(map_spawn_callbacks[i],"");

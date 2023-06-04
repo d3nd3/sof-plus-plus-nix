@@ -28,9 +28,26 @@ void serverInit(void)
 	if ( dedicated->value == 1.0f ) {
 
 		// Scoreboard page draw callbacks
-		init_pages();
+		// init_pages();
 		// Weapon Select command strings ( unordered_map lookup.)
 		init_inv_cmd_list();
+
+		// Get the current PYTHONPATH value
+		const char* current_path = getenv("PYTHONPATH");
+
+		std::string ppnix_py_path = orig_FS_Userdir() + std::string("/python");
+		// Create a new string with the updated PYTHONPATH value
+		std::string updated_path;
+		if (current_path) {
+			// Append the new path to the current PYTHONPATH value
+			updated_path = current_path + std::string(":") + ppnix_py_path;
+		} else {
+			// If PYTHONPATH is not set, use the new path as is
+			updated_path = ppnix_py_path;
+		}
+
+		// Set the updated PYTHONPATH value, 1 == overwrite.
+		setenv("PYTHONPATH", updated_path.c_str(), 1);
 
 		Py_Initialize();
 

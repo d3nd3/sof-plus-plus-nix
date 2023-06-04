@@ -10,6 +10,7 @@
 # player.equip_armor(ent,100)
 */
 static PyObject * py_player_equip_armor(PyObject * self, PyObject * args);
+static PyObject * py_player_set_page(PyObject * self, PyObject * args);
 
 static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args);
 static PyObject * py_player_draw_img_at(PyObject * self, PyObject * args);
@@ -21,10 +22,14 @@ static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args);
 static PyObject * py_player_clear_text(PyObject * self, PyObject * args);
 static PyObject * py_player_con_print(PyObject * self, PyObject * args);
 static PyObject * py_player_get_stats(PyObject * self, PyObject * args);
+static PyObject * py_player_raw_sp(PyObject * self, PyObject * args);
+static PyObject * py_player_get_layout(PyObject * self, PyObject * args);
+static PyObject * py_ppnix_orig_scoreboard(PyObject * self, PyObject * args);
 
 
 //name,c_func,flags,docstring
 static PyMethodDef PlayerMethods[] = {
+	{"set_page", py_player_set_page, METH_VARARGS,"Set current layout page"},
 	{"equip_armor", py_player_equip_armor, METH_VARARGS,"Give a player armor"},
 	{"draw_text_at", py_player_draw_text_at, METH_VARARGS,"Draw text at pos on player screen"},
 	{"draw_img_at", py_player_draw_img_at, METH_VARARGS,"Draw img at pos on player screen"},
@@ -36,6 +41,9 @@ static PyMethodDef PlayerMethods[] = {
 	{"clear_text", py_player_clear_text, METH_VARARGS,"Clear the text that is drawn on player screen"},
 	{"con_print", py_player_con_print, METH_VARARGS,"Print console text on player screen"},
 	{"get_stats",py_player_get_stats,METH_VARARGS,"Get stats for this player"},
+	{"raw_sp_print",py_player_raw_sp,METH_VARARGS,"Send stringpackage packet to player"},
+	{"get_layout",py_player_get_layout,METH_VARARGS,"Get the custom layout string for player"},
+	{"orig_scoreboard", py_ppnix_orig_scoreboard, METH_VARARGS,"Print orig scoreboard for player."},
 
 	{NULL, NULL, 0, NULL} //sentinel
 };
@@ -45,6 +53,80 @@ PyModuleDef PlayerModule = {
 	PyModuleDef_HEAD_INIT, "player", "a module for interacting with clients.", -1, PlayerMethods,
 	NULL, NULL, NULL, NULL //sentinel
 };
+PyMODINIT_FUNC PyInit_player(void) {
+
+	return PyModule_Create(&PlayerModule);
+}
+
+
+static PyObject * py_ppnix_orig_scoreboard(PyObject * self, PyObject * args)
+{
+	EntDict * who;
+	EntDict * who_killer;
+	// Not null-terminated.
+	if (!PyArg_ParseTuple(args,"OO",&who,&who_killer)) {
+		error_exit("Python: Failed to parse args in py_ppnix_orig_scoreboard");
+	}
+	currentGameMode->clientScoreboardMessage(who->c_ent,who_killer->c_ent,0);
+	Py_RETURN_NONE;
+}
+/*
+	ent
+*/
+static PyObject * py_player_get_layout(PyObject * self, PyObject * args)
+{
+	EntDict * who;
+	if (!PyArg_ParseTuple(args,"O",&who)) {
+		error_exit("Python: Failed to parse args for raw_sp_print");
+	}
+	int slot = slot_from_ent(who->c_ent);
+	// Copied buffer. New reference created.
+	return Py_BuildValue("s", strip_layouts[slot]);
+}
+/*
+ent
+id
+msg
+*/
+static PyObject * py_player_raw_sp(PyObject * self, PyObject * args)
+{
+	// SOFPPNIX_DEBUG("Setting page...");
+	char * msg;
+	Py_ssize_t length;
+	unsigned int SP_ID;
+	EntDict * who;
+	if (!PyArg_ParseTuple(args,"OIs#",&who,&SP_ID,&msg,&length)) {
+		error_exit("Python: Failed to parse args for raw_sp_print");
+	}
+	char input[256];
+	snprintf(input,256,"%.*s",(int)length,msg);
+
+	orig_SP_Print(who->c_ent,SP_ID,input);
+
+	Py_RETURN_NONE;
+}
+
+/*
+	str - name
+
+	Take a slot, instead of an entity.
+*/
+static PyObject * py_player_set_page(PyObject * self, PyObject * args)
+{
+	// SOFPPNIX_DEBUG("Setting page...");
+	char * msg;
+	Py_ssize_t length;
+	unsigned int slot;
+	if (!PyArg_ParseTuple(args,"Is#",&slot,&msg,&length)) {
+		error_exit("Python: Failed to parse args for set_page");
+	}
+	char input[256];
+	snprintf(input,256,"%.*s",(int)length,msg);
+
+	current_page[slot] = msg;
+
+	Py_RETURN_NONE;
+}
 
 static PyObject * py_player_get_stats(PyObject * self, PyObject * args)
 {
@@ -54,7 +136,7 @@ static PyObject * py_player_get_stats(PyObject * self, PyObject * args)
 	}
 
 	edict_t * ent = who->c_ent;
-	int slot = ent->s.skinnum;
+	int slot = slot_from_ent(ent);
 	PyObject* pyDict = PyDict_New();
 	PyObject* stats_armor = PyLong_FromLong(stats_armorsPicked[slot]);
 	PyObject* stats_head = PyLong_FromLong(stats_headShots[slot]);

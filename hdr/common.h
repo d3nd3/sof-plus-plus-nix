@@ -326,6 +326,8 @@ extern std::vector<PyObject*> frame_early_callbacks;
 extern std::vector<PyObject*> map_spawn_callbacks;
 
 extern void removeDecoratorCallbacks(void);
+extern PyModuleDef EventModule;
+PyMODINIT_FUNC PyInit_event(void);
 
 /*---------------------------------------------------------------------
 --------------------------py_api/entity.cpp------------------------
@@ -341,11 +343,14 @@ typedef struct {
 } EntDict;
 
 void initEntDictType(void);
+extern PyModuleDef EntModule;
+PyMODINIT_FUNC PyInit_ent(void);
 /*---------------------------------------------------------------------
 --------------------------py_api/ppnix.cpp------------------------
  ---------------------------------------------------------------------
 */
 extern std::vector<PyObject*> ppnix_delayedRun_callbacks;
+PyMODINIT_FUNC PyInit_ppnix(void);
 
 
 
@@ -354,7 +359,8 @@ extern std::vector<PyObject*> ppnix_delayedRun_callbacks;
  ---------------------------------------------------------------------
 */
 
-
+extern PyModuleDef PlayerModule;
+PyMODINIT_FUNC PyInit_player(void);
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------
@@ -441,13 +447,12 @@ extern std::vector<std::string> chatVectors;
 ---------------------------------------------------------------------------
 */
 extern std::string current_page[32];
-extern std::unordered_map<std::string,void (*)(edict_t * ent, edict_t * killer)> pages;
+extern std::unordered_map<std::string,PyObject*> py_page_draw_routines;
 extern void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0);
 extern void page_scoreboard(void);
 extern void page_chat(void);
 extern void refreshScreen(edict_t * ent);
 extern void append_watermark(int slot);
-extern void init_pages(void);
 extern bool page_should_refresh[32];
 
 extern void spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...);
@@ -455,5 +460,5 @@ extern void spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref
 extern void append_layout_direct(edict_t * ent,char * message);
 extern void append_layout_string(edict_t * ent,int offsetx, int offsety, char * message, qboolean gray);
 extern void layout_clear(edict_t * ent);
-extern void spackage_register(void);
+extern void spackage_register(char * one);
 extern void append_layout_image(edict_t * ent,int offsetx, int offsety, char * img_path);
