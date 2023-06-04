@@ -346,12 +346,10 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 	void * gclient = stget(ent, EDICT_GCLIENT);
 	stset(gclient, GCLIENT_SHOWSCORES,0);
 	prev_showscores[slot] = 0;
-	page[slot] = 3;
+	current_page[slot] = "scoreboard";
+	page_should_refresh[slot] = false;
 
-	// sets build number bottom right
-	nix_draw_clear(ent);
-	// Send them the watermark
-	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
+	layout_clear(ent);
 
 	stats_headShots[slot] = 0;
 	stats_throatShots[slot] = 0;
@@ -527,151 +525,43 @@ G_RunFrame
 	  if (ent->client->showscores && !(level.framenum & 31))
 		dm->clientScoreboardMessage(ent,ent->enemy,false);
 	  dm->clientEndFrame(ent); OVERRIDE G_SETSTATS here.
-
-
 */
-void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0)
-{
-	
-	// SOFPPNIX_DEBUG("Scoreboard :: Page %i , SHowscores %i, Prevscores %i",page[slot],showscores,prev_showscores[slot]);	
-	if ( page[slot] == 3 ) {
 
-		//off
-		orig_SP_Print(ent,0x0700,"*");
-		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-
-	} else 
-	if ( page[slot] == 1 ) {
-		//page1 - scoreboard
-		// every 32 server frames = 3.2 seconds
-		// Draw Official Scoreboard ( contains a clear ).
-		orig_SP_Print(ent,0x0700,"*");
-		
-		currentGameMode->clientScoreboardMessage(ent,killer,logfile);
-		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-
-	} else
-	if ( page[slot] == 2 ) {
-		
-		//page2 - chat
-		orig_SP_Print(ent,0x0700,"*");
-		orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-
-		int chatLines = 7;
-		int gapY = 32;
-		int widthX = 60;
-		// 4 lines for console print, 16 pixel alignment away from crosshair
-		int startY = -120+32+16;
-		// int startY = 112-4*gapY-12 - 2*gapY;
-		// startY+=4;
-		// int startX = -160;
-		int widthPixels = widthX*8;
-		int startX = -160 + (640 - 512)*0.5;
-		// startX+=4;
-		// 80 characters per line.
-
-
-		char tmp[128];
-		snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX,startY,"c/c");
-		orig_SP_Print(ent,0x0700,tmp);
-		snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX+256,startY,"c/c");
-		orig_SP_Print(ent,0x0700,tmp);
-
-
-		// snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX,startY+256,"c");
-		// orig_SP_Print(ent,0x0700,tmp);
-		// snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX+256,startY+256,"c");
-		// orig_SP_Print(ent,0x0700,tmp);
-
-		
-		// 512 background
-		
-		//32 * 8 = 256
-		// 24 pixel gap at bottom
-		startY += 12;
-		char chat_sp[256];
-		// draw help here.
-		snprintf(chat_sp,256,"xv %i yv %i string \"%s\"",startX,startY,".help .p=prev .r=restore .n=next VVV");
-		orig_SP_Print(ent,0x700,chat_sp);
-
-		startY += 32;
-		// line len can't be greater than 64 or escapes backgrnd.
-		// startX += (512 - line_len*8)*0.5;
-		startX += 4; //border
-		// Colored names consume space in buffer
-		int startIndex = chatVectors.size() - chatLines;
-		if (startIndex < 0 ) startIndex = 0;
-		for (int i = startIndex; i < chatVectors.size(); ++i) {
-			
-			// offsetx+157,offsety+114
-			//23 byte overhead per line
-			//8 lines.
-			// (60 + 23) * 8 = 664
-			// SOFPPNIX_DEBUG("Len = %i",strlen(chatVectors[i].c_str()));
-			snprintf(chat_sp,256,"xv %i yv %i string \"%s\"",startX,startY,chatVectors[i].c_str());
-			// SOFPPNIX_DEBUG("Chat == %s",chatVectors[i].c_str());
-			orig_SP_Print(ent,0x700,chat_sp);
-			startY += 32;
-		}
-	}
-
-	// will only be true
-	prev_showscores[slot] = showscores;
-}
 //d8
 bool prev_showscores[32] = {0};
-int page[32] = {1};
 std::vector<std::string> chatVectors;
 
-/*
-	1 = scoreboard
-	2 = chat
-	3 = off
-*/
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
 	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
-
 	void * gclient = stget(ent, EDICT_GCLIENT);
 	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
-	// SOFPPNIX_DEBUG("show_scores is : %i",show_scores);
+
 	int slot = slot_from_ent(ent);
-	// SOFPPNIX_DEBUG("clientScoreboard page : %i show_scores %i prev_scores %i",page[slot],show_scores,prev_showscores[slot]);
 
-	// SOFPPNIX_DEBUG("clientSCoreboardMessage %i",slot);
-
-	// Number of seconds the game lasted?
 	float* intermissiontime = stget(base_addr+0x002ACB1C,0) + 0x4F0;
 	if ( *intermissiontime > 0 ) {
+		// INTERMISSION ACTIVE
 		if ( last_intermissiontime == 0 ) {
-			// guarantee set correct page when entering intermission
-			page[slot] = 1;
-		} else {
-			if ( show_scores == prev_showscores[slot] ) return;
-
-			page[slot] += 1;
-			if ( page[slot] > 3 ) page[slot] -=3;
-
-			// skip off page.
-			if ( page[slot] == 3 )
-				page[slot] = 1;
+			// First frame entering intermission.
+			current_page[slot] = "scoreboard";
 		}
-		
+		// Scoreboard doesn't redraw in intermission. (Only redraw on toggle)
+		if ( !page_should_refresh[slot] && show_scores == prev_showscores[slot] ) return;
 
 		last_intermissiontime = *intermissiontime;
 	} else {
+		// INTERMISSION NOT ACTIVE
 		// !(level_framenum & 31)
 		// Must allow scoreboard page to pass when !level_framenum
-		if ( show_scores == prev_showscores[slot] &&  ( page[slot] != 1 || (level_framenum & 31) ) )return;
 
-		// current page
-		if ( page[slot] != 1 || (level_framenum & 31) ) {
-			// SOFPPNIX_DEBUG("SLot == %i",slot);
-			page[slot] += 1;
-			if ( page[slot] > 3 )
-				page[slot] -= 3;
-		}
+		// No change to toggle except for 31st game-frame.
+		if ( !page_should_refresh[slot] && show_scores == prev_showscores[slot] && ( !show_scores || (level_framenum & 31) ) ) 
+			return;
 	}
+
+	if ( page_should_refresh[slot] )
+		page_should_refresh[slot] = false;
 
 	showScoreboard(ent,slot,show_scores,killer,log_file);
 }

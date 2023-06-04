@@ -2,7 +2,23 @@
 
 std::array<char [1024],32> strip_layouts;
 std::array<int,32> strip_layout_size = {0};
+std::unordered_map<std::string,bool> inv_cmd_exist;
 
+void init_inv_cmd_list(void)
+{
+	inv_cmd_exist["reload"] = true;
+	inv_cmd_exist["weapnext"] = true;
+	inv_cmd_exist["weapprev"] = true;
+	inv_cmd_exist["weaponselect"] = true;
+	inv_cmd_exist["weapondrop"] = true;
+	inv_cmd_exist["weaponlose"] = true;
+	inv_cmd_exist["weaponbestsafe"] = true;
+	inv_cmd_exist["weaponbestunsafe"] = true;
+	inv_cmd_exist["itemuse"] = true;
+	inv_cmd_exist["itemnext"] = true;
+	inv_cmd_exist["itemprev"] = true;
+	inv_cmd_exist["itemdrop"] = true;
+}
 /*
 called by my_Cbuf_AddLateCommands.
 Guaranteed to be before game.dll is loaded. (dedicated_start).
@@ -10,6 +26,12 @@ Guaranteed to be before game.dll is loaded. (dedicated_start).
 void serverInit(void)
 {
 	if ( dedicated->value == 1.0f ) {
+
+		// Scoreboard page draw callbacks
+		init_pages();
+		// Weapon Select command strings ( unordered_map lookup.)
+		init_inv_cmd_list();
+
 		Py_Initialize();
 
 		createServerCvars();
@@ -236,4 +258,10 @@ void my_SV_RunGameFrame(void)
 	}
 
 	orig_SV_RunGameFrame();
+}
+
+void my_SV_ExecuteUserCommand (char *s)
+{
+	SOFPPNIX_DEBUG("Command : %s",s);
+	orig_SV_ExecuteUserCommand(s);
 }

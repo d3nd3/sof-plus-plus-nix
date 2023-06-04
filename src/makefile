@@ -23,6 +23,7 @@ OBJS= \
 ../obj/serverlist.o \
 ../obj/httpdl.o \
 ../obj/detect.o \
+../obj/pages.o \
 ../obj/python.o \
 ../obj/entity.o \
 ../obj/ppnix.o \
@@ -100,6 +101,8 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 ../obj/httpdl.o : ./features/httpdl.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/python.o : ./features/python.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/pages.o : ./features/pages.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 

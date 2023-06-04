@@ -236,6 +236,13 @@ void __attribute__ ((constructor)) begin() {
 //--------------------------SILENCE CMD_REMOVECOMMAND DONT CARE-------------------------------
 	memoryAdjust(0x081195E9,5,NOP);
 
+
+
+
+//---------------------------DISABLE OVERFLOW RELIABLE---------------------------------
+	memoryAdjust(0x080AFDA3,5,NOP);
+	memoryAdjust(0x080AFDB1,5,NOP);
+
 ////////////////////////////////////////////////////
 
 
@@ -303,6 +310,8 @@ void __attribute__ ((constructor)) begin() {
 	// callE8Patch(0x080A736F,&my_Sys_GetGameAPI);
 
 	orig_SV_RunGameFrame = createDetour(orig_SV_RunGameFrame,&my_SV_RunGameFrame,5);
+
+	orig_SV_ExecuteUserCommand = createDetour(orig_SV_ExecuteUserCommand,&my_SV_ExecuteUserCommand,5);
 }
 
 // __builtin_return_address(0)

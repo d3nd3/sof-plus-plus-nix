@@ -41,6 +41,8 @@ void (*orig_SV_RunGameFrame) (void) = 0x080AB8F8;
 
 int (*orig_SV_GhoulFileIndex) (char *name) = 0x080A9534;
 
+void (*orig_SV_ExecuteUserCommand) (char *s) = 0x080B1D40;
+
 
 // ----SHARED-----
 
@@ -134,3 +136,5 @@ void	(*orig_cprintf) (edict_t *ent, int printlevel, char *fmt, ...);
 void	(*orig_bprintf) (int printlevel, char *fmt, ...);
 
 void (*orig_G_SetStats)(edict_t * ent) = NULL;
+
+void (*orig_ClientCommand) (edict_t *ent) = NULL;

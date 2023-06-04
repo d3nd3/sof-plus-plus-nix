@@ -23,6 +23,9 @@ extern void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0);
 
 extern int (*orig_SV_GhoulFileIndex) (char *name);
 
+extern void (*orig_SV_ExecuteUserCommand) (char *s);
+void my_SV_ExecuteUserCommand (char *s);
+
 // -------------------Client------------------
 extern void (*orig_CL_Init) (void);
 extern void my_CL_Init (void);
@@ -203,3 +206,6 @@ extern mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, ed
 
 extern void (*orig_G_SetStats)(edict_t * ent);
 extern void my_G_SetStats(edict_t * ent);
+
+extern void (*orig_ClientCommand) (edict_t *ent);
+extern void my_ClientCommand (edict_t *ent);

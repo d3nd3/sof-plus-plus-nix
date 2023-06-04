@@ -144,6 +144,7 @@ extern void rcon_deathmatch(void);
 
 extern std::array<char [1024],32> strip_layouts;
 extern std::array<int,32> strip_layout_size;
+extern std::unordered_map<std::string,bool> inv_cmd_exist;
 
 
 /*---------------------------------------------------------------------
@@ -353,16 +354,7 @@ extern std::vector<PyObject*> ppnix_delayedRun_callbacks;
  ---------------------------------------------------------------------
 */
 
-extern void player_spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...);
-extern void player_spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, ...);
 
-extern void nix_draw_string_direct(edict_t * ent,char * message);
-extern void nix_draw_string(edict_t * ent,int offsetx, int offsety, char * message, qboolean gray);
-
-extern void nix_draw_clear(edict_t * ent);
-extern void refreshScreen(edict_t * ent);
-
-extern void nix_spackage_register(void);
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------
@@ -440,6 +432,28 @@ extern void fixupClassesForLinux(void);
 */
 #define STAT_LAYOUTS 9
 extern bool prev_showscores[32];
-extern int page[32];
 extern std::vector<std::string> chatVectors;
+
+
+/*
+---------------------------------------------------------------------------
+-----------------------------pages.cpp---------------------------------
+---------------------------------------------------------------------------
+*/
+extern std::string current_page[32];
+extern std::unordered_map<std::string,void (*)(edict_t * ent, edict_t * killer)> pages;
 extern void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0);
+extern void page_scoreboard(void);
+extern void page_chat(void);
+extern void refreshScreen(edict_t * ent);
+extern void append_watermark(int slot);
+extern void init_pages(void);
+extern bool page_should_refresh[32];
+
+extern void spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...);
+extern void spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, ...);
+extern void append_layout_direct(edict_t * ent,char * message);
+extern void append_layout_string(edict_t * ent,int offsetx, int offsety, char * message, qboolean gray);
+extern void layout_clear(edict_t * ent);
+extern void spackage_register(void);
+extern void append_layout_image(edict_t * ent,int offsetx, int offsety, char * img_path);

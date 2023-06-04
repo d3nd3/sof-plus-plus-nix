@@ -327,6 +327,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	orig_GetSequenceForGoreZoneDeath = createDetour((int)base_addr + 0x000EF278 , my_GetSequenceForGoreZoneDeath,6);
 
 	orig_G_SetStats = createDetour((int)base_addr + 0x0023D324 , my_G_SetStats,6);
+	orig_ClientCommand = createDetour(game_exports->ClientCommand , my_ClientCommand,5);
 
 	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
 	
@@ -627,7 +628,9 @@ float my_G_RunFrame (int serverframe)
 	return ret;
 }
 
-
+/*
+TOOD: Filter weaponselect etc?
+*/
 void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 {
 	// char	text[151];
@@ -654,13 +657,16 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		int state = *(int*)(client_t);
 			
 		if ( state != cs_spawned || chars_spoken <= 0 ) return;
-
 	} else {
 		// Just use cmd_Args here
 		//text here its sent all in say "argv[1]"
 		first = 1;
 		chars_spoken += strlen(orig_Cmd_Args());
-		if ( chars_spoken <= 2 ) return;
+		if ( chars_spoken == 0 || (chars_spoken == 2 && !strcmp(orig_Cmd_Args(),"\"\"") ) ) 
+			return;
+
+		if ( orig_Cmd_Args()[0] == '"' && orig_Cmd_Args()[chars_spoken-1] == '"' )
+			chars_spoken -=2;
 	}
 	// SOFPPNIX_DEBUG("Chars spoken : %i",chars_spoken);
 	i = first;
@@ -697,6 +703,7 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		// strcat(chatline,orig_Cmd_Argv(i));
 		i++;
 	}
+
 	void * gcl = stget(ent,EDICT_GCLIENT);
 	unsigned char * name = gcl + GCLIENT_PERS_NETNAME;
 
@@ -748,20 +755,22 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		return;
 	}
 #endif
-	if ( orig_Cmd_Argv(first)[0] != '.' ) {
-		chatVectors.push_back(std::string(final));
-		for ( int i = 0 ; i < maxclients->value;i++ ) {
-			void * client = getClientX(i);
-			int state = *(int*)(client);
-			if (state != cs_spawned )
-				continue;
-			edict_t * ent = stget(client,CLIENT_ENT);
-			refreshScreen(ent);
-		}
-		orig_Cmd_Say_f(ent,team,arg0);
-		// orig_cprintf(NULL,PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
-		// orig_bprintf(PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
+	// Don't "say" commands. 
+	if ( chatline[0] == '.'  )
+		return;
+	
+	chatVectors.push_back(std::string(final));
+	for ( int i = 0 ; i < maxclients->value;i++ ) {
+		void * client = getClientX(i);
+		int state = *(int*)(client);
+		if (state != cs_spawned )
+			continue;
+		edict_t * ent = stget(client,CLIENT_ENT);
+		refreshScreen(ent);
 	}
+	orig_Cmd_Say_f(ent,team,arg0);
+	// orig_cprintf(NULL,PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
+	// orig_bprintf(PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
 }
 
 
@@ -834,4 +843,29 @@ void my_G_SetStats(edict_t * ent)
 
 	// only way to influence scoreboard during intermission.
 	dm_always.clientScoreboardMessage(ent,ent->enemy,false);
+}
+
+
+
+/*
+This function by default will not allow any command to become say,
+because it returns if intermission_time is active, half-way through.
+*/
+void my_ClientCommand (edict_t *ent)
+{
+	
+	char * cmd = orig_Cmd_Argv(0);
+// SOFPPNIX_DEBUG("Command issued! %s %i",cmd,orig_Cmd_Argc());
+	if ( cmd[0] == '.' ) {
+		my_Cmd_Say_f(ent,false,true);
+		return;
+	}
+	gclient_t * gclient = stget(ent,EDICT_GCLIENT);
+	int spectator = stget(gclient,GCLIENT_RESP_SPECTATOR);
+	// SOFPPNIX_DEBUG("Spectator : %i",spectator);
+	if ( spectator && inv_cmd_exist.count(cmd) ) {
+		// Spectator should not output this command as text.
+		return;
+	}
+	orig_ClientCommand(ent);
 }

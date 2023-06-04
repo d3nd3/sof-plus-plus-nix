@@ -151,7 +151,7 @@ public:
 			in_str = "";
 		}
 		// value = PyUnicode_FromString(in_str);
-		value = PyUnicode_DecodeFSDefault(in_str, NULL);
+		value = PyUnicode_DecodeFSDefault(in_str);
 	}
 	void get(void* baseAddress, std::string &value) {
 		value = (char*)(baseAddress + offset);

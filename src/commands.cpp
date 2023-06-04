@@ -11,7 +11,7 @@ void CreateCommands(void)
 	// command to output checksum
 	my_Cmd_AddCommand("++nix_checksum",&cmd_nix_checksum);
 
-	orig_Cmd_AddCommand("++nix_spackage_register",(void*)nix_spackage_register);
+	orig_Cmd_AddCommand("++nix_spackage_register",(void*)spackage_register);
 	
 }
 
