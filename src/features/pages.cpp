@@ -72,6 +72,8 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 
 			Py_XDECREF(who);
 			Py_XDECREF(who_killer);
+		} else {
+			currentGameMode->clientScoreboardMessage(ent,killer,0);
 		}
 	}
 	// SOFPPNIX_DEBUG("%s",strip_layouts[slot]);
