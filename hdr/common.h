@@ -472,3 +472,14 @@ extern void append_layout_string(LayoutMode mode,edict_t * ent,int offsetx, int 
 extern void layout_clear(LayoutMode mode,edict_t * ent);
 extern void spackage_register(char * one);
 extern void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * img_path);
+
+
+/*
+---------------------------------------------------------------------------
+-----------------------------killfeed.cpp---------------------------------
+---------------------------------------------------------------------------
+*/
+extern PyObject * py_killfeed_func;
+extern void drawKillFeed(void);
+void submitDeath(int mod,edict_t * killer,edict_t * victim);
+void killFeedExpiration(void);

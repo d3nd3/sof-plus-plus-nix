@@ -27,6 +27,7 @@ static PyObject* py_on_frame_early(PyObject* self,PyObject* args);
 static PyObject* py_on_map_spawn(PyObject* self,PyObject* args);
 
 static PyObject* py_on_draw_page(PyObject* self,PyObject* args);
+static PyObject* py_on_draw_killfeed(PyObject* self,PyObject* args);
 
 
 
@@ -41,6 +42,7 @@ static PyMethodDef EventMethods[] = {
 		{"frame_early", py_on_frame_early, METH_VARARGS, "early game frame event decorator."},
 		{"map_spawn", py_on_map_spawn, METH_VARARGS, "map spawned event decorator."},
 		{"draw_page",py_on_draw_page,METH_VARARGS,"page displayed event decorator."},
+		{"draw_killfeed",py_on_draw_killfeed,METH_VARARGS,"killfeed to be drawn event decorator"},
 		{NULL, NULL, 0, NULL} //sentinel
 };
 //base,name,doc,size,methods
@@ -162,8 +164,24 @@ static PyMethodDef my_module_methods[] = {
 	{"py_on_draw_page_deco", py_on_draw_page_deco, METH_VARARGS, "py_on_draw_page_deco"},
 	{NULL, NULL, 0, NULL}  // Sentinel indicating the end of the method list
 };
+
+
+static PyObject* py_on_draw_killfeed(PyObject* self,PyObject* args) {
+	SOFPPNIX_DEBUG("Python: Registering draw_killfeed callback");
+	PyObject * callback = NULL;
+
+	if (!PyArg_ParseTuple(args,"O",&callback)) {
+		error_exit("Python: Failed to parse args for page decorator");
+	}
+
+	// Only one routine per page. Overwrites.
+	py_killfeed_func = callback;
+
+	Py_INCREF(callback);
+	return callback;
+}
 static PyObject* py_on_draw_page(PyObject* self,PyObject* args) {
-	
+	SOFPPNIX_DEBUG("Python: Registering draw_page callback");
 	// SOFPPNIX_DEBUG("DrawPageDeco1");
 	char * msg;
 	Py_ssize_t length;

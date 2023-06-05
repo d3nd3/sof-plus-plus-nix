@@ -121,6 +121,7 @@ void	always_gamerules_c::levelInit(void){
 	}
 
 	orig_SV_GhoulFileIndex("c/c.m32");
+	orig_SV_GhoulFileIndex("c/k.m32");
 
 	// For detecting first frame into intermission.
 	last_intermissiontime = 0;
@@ -449,8 +450,20 @@ void	always_gamerules_c::clientHelpMessage(edict_t *ent){
 	currentGameMode->clientHelpMessage(ent);
 }
 //d0
+/*
+	The function deals with self-harm first.
+*/
 void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker){
-	currentGameMode->clientObituary(self,inflictor,attacker);
+
+	int meansOfDeath = stget(stget(base_addr + 0x002AD298,0),0);
+
+	int mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
+
+	submitDeath(mod,attacker,self);
+
+	// No python kill-feed func defined, use default.
+	if ( py_killfeed_func == NULL )
+		currentGameMode->clientObituary(self,inflictor,attacker);
 }
 //d4
 /*
@@ -538,6 +551,32 @@ G_RunFrame
 bool prev_showscores[32] = {0};
 std::vector<std::string> chatVectors;
 
+static void runRefreshLayout(edict_t * ent,int slot, int show_scores, edict_t * killer,qboolean log_file)
+{
+
+	// SOFPPNIX_DEBUG("%02X",current_page[slot] != std::string("scoreboard"));
+	// SOFPPNIX_DEBUG("Page == %s", current_page[slot].c_str());
+	// SOFPPNIX_DEBUG("page_should_refresh[slot] = %i",page_should_refresh[slot]);
+	// SOFPPNIX_DEBUG("show_scores %i :: prev_showscores[slot] %i",showscores,prev_showscores[slot]);	
+
+	orig_SP_Print(ent,0x0700,"*");
+
+	showScoreboard(ent,slot,show_scores,killer,log_file);
+	drawKillFeed();
+
+
+	char total_layout[1024];
+	int req_size = snprintf(total_layout,sizeof(total_layout),"%s%s",hud_layout[slot],page_layout[slot]);
+
+	if ( req_size >= 1024 ) {
+		SOFPPNIX_PRINT("Warning: Truncation occur when drawing.");
+	}
+	orig_SP_Print(ent,0x0700,total_layout);
+
+	SOFPPNIX_DEBUG("Layout size : %i",strip_layout_size);
+	layout_clear(LayoutMode::hud,ent);
+	layout_clear(LayoutMode::page,ent);
+}
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
 	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
@@ -560,10 +599,11 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 			page_should_refresh[slot] = false;
 
 		// General reason to show Scoreboard
-		showScoreboard(ent,slot,show_scores,killer,log_file);
+		runRefreshLayout(ent,slot,show_scores,killer,log_file);
+
 	} else if ( *intermissiontime == 0 && show_scores && current_page[slot] == std::string("scoreboard") && !(level_framenum & 31)) {
 		// Hard Exception case.
-		showScoreboard(ent,slot,show_scores,killer,log_file);
+		runRefreshLayout(ent,slot,show_scores,killer,log_file);
 	}
 	
 }

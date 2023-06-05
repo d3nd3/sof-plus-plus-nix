@@ -43,13 +43,6 @@ void page_chat(edict_t * ent, edict_t * killer);
 
 void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0)
 {
-
-	// SOFPPNIX_DEBUG("%02X",current_page[slot] != std::string("scoreboard"));
-	// SOFPPNIX_DEBUG("Page == %s", current_page[slot].c_str());
-	// SOFPPNIX_DEBUG("page_should_refresh[slot] = %i",page_should_refresh[slot]);
-	// SOFPPNIX_DEBUG("show_scores %i :: prev_showscores[slot] %i",showscores,prev_showscores[slot]);	
-
-	orig_SP_Print(ent,0x0700,"*");
 	
 	if ( showscores) {
 		// Does the routine exist in the map, is it registered by python?
@@ -75,20 +68,7 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 		}
 	}
 	// SOFPPNIX_DEBUG("%s",strip_layouts[slot]);
-	char total_layout[1024];
-	int req_size = snprintf(total_layout,sizeof(total_layout),"%s%s",hud_layout[slot],page_layout[slot]);
-
-	if ( req_size >= 1024 ) {
-		SOFPPNIX_PRINT("Warning: Truncation occur when drawing.");
-	}
-	orig_SP_Print(ent,0x0700,total_layout);
-
-	SOFPPNIX_DEBUG("Layout size : %i",strip_layout_size);
-	layout_clear(LayoutMode::hud,ent);
-	layout_clear(LayoutMode::page,ent);
-	// Not required: because called every frame.
-	// layout_clear(ent);
-	// will only be true
+	
 
 }
 bool page_should_refresh[32] = {false};
@@ -100,10 +80,24 @@ bool page_should_refresh[32] = {false};
 */
 void refreshScreen(edict_t * ent)
 {
-	// SOFPPNIX_DEBUG("Screen REFRESH!");
-	int slot = slot_from_ent(ent);
-	page_should_refresh[slot] = true;
+	if ( ent == NULL ) {
+		for ( int i = 0 ; i < maxclients->value;i++ ) {
+			void * client = getClientX(i);
+			int state = *(int*)(client);
+			if (state != cs_spawned )
+				continue;
 
+			page_should_refresh[i] = true;
+		}
+		return;
+	}
+	int slot = slot_from_ent(ent);
+	void * client = getClientX(slot);
+	int state = *(int*)(client);
+	if (state != cs_spawned )
+		return;
+	
+	page_should_refresh[slot] = true;
 }
 /*
 	ctf_team_sb enables anti-aliasing.
@@ -171,6 +165,10 @@ void layout_clear(LayoutMode mode,edict_t * ent)
 		return;
 	}
 	int i = slot_from_ent(ent);
+	void * client = getClientX(i);
+	int state = *(int*)(client);
+	if (state != cs_spawned )
+		return;
 	switch (mode) {
 		case hud:
 			empty_reset_hud_layout(i);
@@ -249,6 +247,10 @@ void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety,
 
 	// individual client
 	int i = slot_from_ent(ent);
+	void * client = getClientX(i);
+	int state = *(int*)(client);
+	if (state != cs_spawned )
+		return;
 	append_to_buffer(i,mode,newstring);
 }
 
@@ -302,6 +304,10 @@ void append_layout_string(LayoutMode mode,edict_t * ent,int offsetx, int offsety
 	}
 
 	int i = slot_from_ent(ent);
+	void * client = getClientX(i);
+	int state = *(int*)(client);
+	if (state != cs_spawned )
+		return;
 	append_to_buffer(i,mode,newstring);
 }
 /*
@@ -338,12 +344,19 @@ void append_layout_direct(LayoutMode mode,edict_t * ent,char * message)
 			int state = *(int*)(client);
 			if (state != cs_spawned )
 				continue;
+			// hexdump(newstring,newstring+strlen(newstring));
 			append_to_buffer(i,mode,newstring);
 		}
 		
 		return;
 	}
 	int i = slot_from_ent(ent);
+	void * client = getClientX(i);
+	int state = *(int*)(client);
+	if (state != cs_spawned )
+		return;
+
+	// hexdump(newstring,newstring+strlen(newstring));
 	append_to_buffer(i,mode,newstring);
 }
 
