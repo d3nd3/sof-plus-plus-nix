@@ -2,10 +2,15 @@
 std::unordered_map<std::string,PyObject*> py_page_draw_routines;
 std::string current_page[32];
 
+std::array<char [1024],32> page_layout;
+std::array<char [1024],32> hud_layout;
+std::array<int,32> strip_layout_size = {0};
 
 void page_none(edict_t * ent, edict_t * killer);
 void page_scoreboard(edict_t * ent, edict_t * killer);
 void page_chat(edict_t * ent, edict_t * killer);
+
+
 
 
 /*
@@ -16,16 +21,36 @@ void page_chat(edict_t * ent, edict_t * killer);
 		.stats * == show stats sticky
 		.players * == show country code
 		.chat * == show chat history
+
+
+
+	If any the layout buffer changes, a refresh of screen is required, if want to see the changes instantly.
+	Else has to wait until natural refresh occurs. ( toggle of scoreboard ).
+
+	There is a draw function for each page. They only are called on 'refresh' frames.
+
+	The layout data is emptied every server frame, so its built up every frame too. This makes sense because the data is dynamic. Perhaps one could separate fixed data from dynamic data to save some processing.
+
+	Or it could be one function that is called after the draw, instead of every frame. But then the data is not fed live information, could only work for the static part.  Idea of discarding what you've just drawn because its stale.
+
+	The bold test was solved by using a sb_client string offscreen, it enables antialiased text client-side.
+
+	The buffers are cleared after each 'refresh'. And also drawn each 'refresh' technically, too.
+
+	Thus draw routines should only exist inside the draw hooks which are called in sync with the refreshes.
+
 */
 
 void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0)
 {
-	// void * gclient = stget(ent, EDICT_GCLIENT);
-	// int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
-	// SOFPPNIX_DEBUG("Scoreboard :: Page %i , SHowscores %i, Prevscores %i",page[slot],showscores,prev_showscores[slot]);	
+
+	// SOFPPNIX_DEBUG("%02X",current_page[slot] != std::string("scoreboard"));
+	// SOFPPNIX_DEBUG("Page == %s", current_page[slot].c_str());
+	// SOFPPNIX_DEBUG("page_should_refresh[slot] = %i",page_should_refresh[slot]);
+	// SOFPPNIX_DEBUG("show_scores %i :: prev_showscores[slot] %i",showscores,prev_showscores[slot]);	
 
 	orig_SP_Print(ent,0x0700,"*");
-
+	
 	if ( showscores) {
 		// Does the routine exist in the map, is it registered by python?
 		// Draw the page that is currently set, with timeout.
@@ -48,15 +73,31 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 			Py_XDECREF(who);
 			Py_XDECREF(who_killer);
 		}
-
 	}
-	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-	layout_clear(ent);
+	// SOFPPNIX_DEBUG("%s",strip_layouts[slot]);
+	char total_layout[1024];
+	int req_size = snprintf(total_layout,sizeof(total_layout),"%s%s",hud_layout[slot],page_layout[slot]);
+
+	if ( req_size >= 1024 ) {
+		SOFPPNIX_PRINT("Warning: Truncation occur when drawing.");
+	}
+	orig_SP_Print(ent,0x0700,total_layout);
+
+	SOFPPNIX_DEBUG("Layout size : %i",strip_layout_size);
+	layout_clear(LayoutMode::hud,ent);
+	layout_clear(LayoutMode::page,ent);
+	// Not required: because called every frame.
+	// layout_clear(ent);
 	// will only be true
 
-	prev_showscores[slot] = showscores;
 }
 bool page_should_refresh[32] = {false};
+/*
+	called by:
+		my_Cmd_Say_f
+		py_player_refresh_layout
+		clientConnect
+*/
 void refreshScreen(edict_t * ent)
 {
 	// SOFPPNIX_DEBUG("Screen REFRESH!");
@@ -64,81 +105,20 @@ void refreshScreen(edict_t * ent)
 	page_should_refresh[slot] = true;
 
 }
-void empty_reset_layout(int slot)
+/*
+	ctf_team_sb enables anti-aliasing.
+*/
+void empty_reset_hud_layout(int slot)
 {
-	strip_layouts[slot][0] = 0x00;
-	sprintf(strip_layouts[slot],"xr %i yb -16 string \"%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
-	strip_layout_size[slot] = strlen(strip_layouts[slot]);
+	hud_layout[slot][0] = 0x00;
+	sprintf(hud_layout[slot],"ctf_team_sb 0 -9000 0 0 0 0 xr %i yb -16 string \"\x07%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
+	strip_layout_size[slot] = strlen(hud_layout[slot]) + strlen(page_layout[slot]);
 }
-
-void page_scoreboard(edict_t * ent, edict_t * killer)
+void empty_reset_page_layout(int slot)
 {
-	SOFPPNIX_DEBUG("Drawing normal scoreboard");
-	int slot = slot_from_ent(ent);
-	//page1 - scoreboard
-	// every 32 server frames = 3.2 seconds
-	// Draw Official Scoreboard
-	orig_SP_Print(ent,0x0700,"*");
-	
-	currentGameMode->clientScoreboardMessage(ent,killer,0);
-	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-}
+	page_layout[slot][0] = 0x00;
 
-void page_chat(edict_t * ent, edict_t * killer)
-{
-	int slot = slot_from_ent(ent);
-	//page2 - chat
-	orig_SP_Print(ent,0x0700,"*");
-	orig_SP_Print(ent,0x0700,strip_layouts[slot]);
-
-	int chatLines = 7;
-	int gapY = 32;
-	int widthX = 60;
-	// 4 lines for console print, 16 pixel alignment away from crosshair
-	int startY = -120+32+16;
-	// int startY = 112-4*gapY-12 - 2*gapY;
-	// startY+=4;
-	// int startX = -160;
-	int widthPixels = widthX*8;
-	int startX = -160 + (640 - 512)*0.5;
-	// startX+=4;
-	// 80 characters per line.
-
-	// 256x256 next to each other.
-	char tmp[128];
-	snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX,startY,"c/c");
-	orig_SP_Print(ent,0x0700,tmp);
-	snprintf(tmp,sizeof(tmp),"xv %i yv %i picn %s",startX+256,startY,"c/c");
-	orig_SP_Print(ent,0x0700,tmp);
-
-	// horizontal - 512 background
-	// vertical - 32 * 8 = 256
-
-	// 24 pixel gap at bottom
-	startY += 12;
-	char chat_sp[256];
-	// draw help here.
-	snprintf(chat_sp,256,"xv %i yv %i string \"%s\"",startX,startY,".help .p=prev .r=restore .n=next VVV");
-	orig_SP_Print(ent,0x700,chat_sp);
-
-	startY += 32;
-	// line len can't be greater than 64 or escapes backgrnd.
-	// startX += (512 - line_len*8)*0.5;
-	startX += 4; //border
-	// Colored names consume space in buffer
-	int startIndex = chatVectors.size() - chatLines;
-	if (startIndex < 0 ) startIndex = 0;
-	for (int i = startIndex; i < chatVectors.size(); ++i) {	
-		// offsetx+157,offsety+114
-		//23 byte overhead per line
-		//8 lines.
-		// (60 + 23) * 8 = 664
-		// SOFPPNIX_DEBUG("Len = %i",strlen(chatVectors[i].c_str()));
-		snprintf(chat_sp,256,"xv %i yv %i string \"%s\"",startX,startY,chatVectors[i].c_str());
-		// SOFPPNIX_DEBUG("Chat == %s",chatVectors[i].c_str());
-		orig_SP_Print(ent,0x700,chat_sp);
-		startY += 32;
-	}
+	strip_layout_size[slot] = strlen(hud_layout[slot]) + strlen(page_layout[slot]);
 }
 
 /*
@@ -152,8 +132,18 @@ void page_chat(edict_t * ent, edict_t * killer)
 	dm->checkEvents - NotActive.
 	clientScorebordMessage - Clear if toggle off.
 	dm->clientEndFrame - overrides G_SetStats. To force Layout on.
+
+	called by:
+		xxxx showScoreboard (removed) (no longer true).xxxx
+
+		1)clientConnect
+		2)SV_RunGameFrame (early).
+		3)py_player_clear_layout
+	LATEST:
+		I only want this called after a resfresh occured.
+
 */
-void layout_clear(edict_t * ent)
+void layout_clear(LayoutMode mode,edict_t * ent)
 {
 	if ( ent == NULL ) {
 		// SOFPPNIX_DEBUG("Clearing screen");
@@ -164,55 +154,102 @@ void layout_clear(edict_t * ent)
 			if (state != cs_spawned )
 				continue;
 
-			empty_reset_layout(i);
-
-			edict_t * ent = stget(client,CLIENT_ENT);
+			switch (mode) {
+				case hud:
+					empty_reset_hud_layout(i);
+					break;
+				case page:
+					empty_reset_page_layout(i);
+					break;
+				default:
+					error_exit("Bad layout mode");
+			}
 		}
 
 		// orig_Com_Printf("Layoutstring is : %s\n",layoutstring);
 
 		return;
 	}
-	empty_reset_layout(slot_from_ent(ent));
+	int i = slot_from_ent(ent);
+	switch (mode) {
+		case hud:
+			empty_reset_hud_layout(i);
+			break;
+		case page:
+			empty_reset_page_layout(i);
+			break;
+		default:
+			error_exit("Bad layout mode");
+	}
+
 }
 
-void append_layout_image(edict_t * ent,int offsetx, int offsety, char * img_path)
+static void append_to_buffer(int slot,LayoutMode mode, char * newstring)
+{
+	char * append_to;
+	char * count_this;
+	switch (mode) {
+		case hud:
+			append_to = hud_layout[slot];
+			count_this = page_layout[slot];
+			break;
+		case page:
+			append_to = page_layout[slot];
+			count_this = hud_layout[slot];
+			break;
+		default:
+			error_exit("Bad layout mode");
+	}
+
+#if 0
+	char * tmp = strdup(append_to);
+	int req_size = snprintf( append_to,sizeof(hud_layout),"%s%s",tmp,newstring);
+	
+	if ( req_size < sizeof(hud_layout) ) {
+		// Fits.
+		strip_layout_size[slot] += req_size;
+	} else {
+		SOFPPNIX_PRINT("Warning some drawing was truncated.");
+		// total is now 1024.
+		strip_layout_size[slot] = strlen(count_this) + 1024; 
+	}
+#else
+	int new_item_len = strlen(newstring);
+	int freespace = 1023-strlen(append_to);
+	if ( freespace < 0 ) freespace = 0;
+	strncat(append_to,newstring,freespace);
+	if ( new_item_len > freespace ) {
+		SOFPPNIX_PRINT("Warning some drawing was truncated.");
+		// total is now 1024.
+		strip_layout_size[slot] = strlen(count_this) + 1024;
+	} else
+	{
+		// Fits.
+		strip_layout_size[slot] += new_item_len;
+	}
+#endif
+}
+void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * img_path)
 {
 	char newstring[256];
 	snprintf(newstring,256,"xv %i yv %i picn \"%s\" ",offsetx+160,offsety+120,img_path);
 	
-	int newlen = strlen(newstring);
 	// broadcast
 	if ( ent == NULL ) {
 		for ( int i = 0 ; i < maxclients->value;i++ ) {
+
 			void * client = getClientX(i);
 			int state = *(int*)(client);
 			if (state != cs_spawned )
 				continue;
-
-			if ( strip_layout_size[i] + newlen <= 1024 ) {
-				// append.
-				strcat(strip_layouts[i], newstring);
-				strip_layout_size[i]+=newlen;
-			} else {
-				SOFPPNIX_PRINT("Cant draw this , run out of space");
-			}
-			edict_t * ent = stget(client,CLIENT_ENT);
-			// refreshScreen(ent);
+			append_to_buffer(i,mode,newstring);
 		}
 		return;
 	}
 
 	// individual client
-	int i = ent->s.skinnum;
-	if ( strip_layout_size[i] + newlen <= 1024 ) {
-		// append.
-		strcat(strip_layouts[i], newstring);
-		strip_layout_size[i]+=newlen;
-	} else {
-		SOFPPNIX_PRINT("Cant draw this , run out of space");
-	}
-	// refreshScreen(ent);
+	int i = slot_from_ent(ent);
+	append_to_buffer(i,mode,newstring);
 }
 
 /*
@@ -228,24 +265,26 @@ xv centered
 
 3 arguments - x y msg
 */
-void append_layout_string(edict_t * ent,int offsetx, int offsety, char * message, qboolean gray)
+void append_layout_string(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * message)
 {
 
+#if 0
 	int len = strlen(message);
 	if ( gray ) {
 		for (int i = 0; i < len; i++ ) {
 			*(message+i) = *(message+i) | 0x80;
 		}
 	}
-
+#endif
 	char newstring[256];
+	snprintf(newstring,256,"xv %i yv %i string \"%s\" ",offsetx+160,offsety+112,message);
+	#if 0
 	if ( ! gray ) {
 		snprintf(newstring,256,"xv %i yv %i string \"%s\" ",offsetx+160,offsety+112,message);
 	} else {
 		snprintf(newstring,256,"xv %i yv %i altstring \"%s\" ",offsetx+160,offsety+112,message);
 	}
-	
-	int newlen = strlen(newstring);
+	#endif
 
 	// broadcast
 	if ( ent == NULL ) {
@@ -256,27 +295,14 @@ void append_layout_string(edict_t * ent,int offsetx, int offsety, char * message
 			if (state != cs_spawned )
 				continue;
 
-			if ( strip_layout_size[i] + newlen <= 1024 ) {
-				strcat(strip_layouts[i], newstring);
-				strip_layout_size[i]+=newlen;
-			} else {
-				SOFPPNIX_PRINT("Cant draw this , run out of space");
-			}
-			edict_t * ent = stget(client,CLIENT_ENT);
-			// refreshScreen(ent);
+			append_to_buffer(i,mode,newstring);
 		}
 		
 		return;
 	}
 
-	int i = ent->s.skinnum;
-	if ( strip_layout_size[i] + newlen <= 1024 ) {
-		strcat(strip_layouts[i], newstring);
-		strip_layout_size[i]+=newlen;
-	} else {
-		SOFPPNIX_PRINT("Cant draw this , run out of space");
-	}
-	// refreshScreen(ent);
+	int i = slot_from_ent(ent);
+	append_to_buffer(i,mode,newstring);
 }
 /*
 more direct version of above.
@@ -299,13 +325,12 @@ more direct version of above.
 //tc
 //ac
 */
-void append_layout_direct(edict_t * ent,char * message)
+void append_layout_direct(LayoutMode mode,edict_t * ent,char * message)
 {
 	int len = strlen(message);
 
 	char newstring[256];
 	snprintf(newstring,256,"%s ",message);
-	int newlen = strlen(newstring);
 
 	if ( ent == NULL ) {
 		for ( int i = 0 ; i < maxclients->value;i++ ) {
@@ -313,26 +338,13 @@ void append_layout_direct(edict_t * ent,char * message)
 			int state = *(int*)(client);
 			if (state != cs_spawned )
 				continue;
-			if ( strip_layout_size[i] + newlen <= 1024 ) {
-				strcat(strip_layouts[i], newstring);
-				strip_layout_size[i]+=newlen;
-			} else {
-				SOFPPNIX_PRINT("Cant draw this , run out of space");
-			}
-			edict_t * ent = stget(client,CLIENT_ENT);
-			// refreshScreen(ent);
+			append_to_buffer(i,mode,newstring);
 		}
 		
 		return;
 	}
-	int i = ent->s.skinnum;
-	if ( strip_layout_size[i] + newlen <= 1024 ) {
-		strcat(strip_layouts[i], newstring);
-		strip_layout_size[i]+=newlen;
-	} else {
-		SOFPPNIX_PRINT("Cant draw this , run out of space");
-	}
-	// refreshScreen(ent);
+	int i = slot_from_ent(ent);
+	append_to_buffer(i,mode,newstring);
 }
 
 // 32kb

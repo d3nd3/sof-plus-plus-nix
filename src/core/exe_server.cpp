@@ -1,7 +1,6 @@
 #include "common.h"
 
-std::array<char [1024],32> strip_layouts;
-std::array<int,32> strip_layout_size = {0};
+
 std::unordered_map<std::string,bool> inv_cmd_exist;
 
 void init_inv_cmd_list(void)
@@ -276,7 +275,7 @@ void my_SV_RunGameFrame(void)
 		if (state != cs_spawned )
 			continue;
 		edict_t * ent = stget(client_t,CLIENT_ENT);
-		layout_clear(ent);
+		// layout_clear(ent);
 	}
 	
 	// Trying to use this for events that run every frame.

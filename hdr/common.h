@@ -142,8 +142,7 @@ extern void rcon_fraglimit(void);
 extern void rcon_timelimit(void);
 extern void rcon_deathmatch(void);
 
-extern std::array<char [1024],32> strip_layouts;
-extern std::array<int,32> strip_layout_size;
+
 extern std::unordered_map<std::string,bool> inv_cmd_exist;
 
 
@@ -446,19 +445,30 @@ extern std::vector<std::string> chatVectors;
 -----------------------------pages.cpp---------------------------------
 ---------------------------------------------------------------------------
 */
+enum LayoutMode {
+	hud,
+	page
+};
 extern std::string current_page[32];
 extern std::unordered_map<std::string,PyObject*> py_page_draw_routines;
+
+extern std::array<char [1024],32> page_layout;
+extern std::array<char [1024],32> hud_layout;
+extern std::array<int,32> strip_layout_size;
+extern bool page_should_refresh[32];
+
 extern void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0);
 extern void page_scoreboard(void);
 extern void page_chat(void);
 extern void refreshScreen(edict_t * ent);
-extern void append_watermark(int slot);
-extern bool page_should_refresh[32];
+extern void empty_reset_hud_layout(int slot);
+extern void empty_reset_page_layout(int slot);
+
 
 extern void spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...);
 extern void spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, ...);
-extern void append_layout_direct(edict_t * ent,char * message);
-extern void append_layout_string(edict_t * ent,int offsetx, int offsety, char * message, qboolean gray);
-extern void layout_clear(edict_t * ent);
+extern void append_layout_direct(LayoutMode mode,edict_t * ent,char * message);
+extern void append_layout_string(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * message);
+extern void layout_clear(LayoutMode mode,edict_t * ent);
 extern void spackage_register(char * one);
-extern void append_layout_image(edict_t * ent,int offsetx, int offsety, char * img_path);
+extern void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * img_path);

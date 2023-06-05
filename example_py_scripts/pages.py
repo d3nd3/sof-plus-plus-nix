@@ -3,7 +3,8 @@ import player
 import ent
 import event
 
-
+LAYOUT_HUD = 0
+LAYOUT_PAGE = 1
 # protects the @event from being fired when imported.
 if __name__ == "builtins":
 	@event.map_spawn
@@ -24,8 +25,7 @@ if __name__ == "builtins":
 		# ppnix.print("Scoreboard!")
 
 		info = "\x07---> Hotswitches type: .c .p <---"
-		print(len(info))
-		player.draw_text_at(who,0-len(info)*8//2,-180,info,False)
+		player.draw_text_at(LAYOUT_PAGE,who,0-len(info)*8//2,-180,info)
 		player.orig_scoreboard(who,killer);
 
 
@@ -35,27 +35,26 @@ if __name__ == "builtins":
 		# ppnix.print("Chat!")
 
 		chatLines = 7
-		gapY = 32
 		widthX = 60
 		# 4 lines for console print(4x8), 16 pixel alignment away from crosshair
-		startY = -232 + 32+16-8
+		startY = -240 + 32+16
 
 		# center text
 		widthPixels = widthX*8
 		startX = -320 + ((640 - 512) // 2)
 		# 80 characters per line.
 
-		player.draw_img_at(who,startX,startY,"c/c")
-		player.draw_img_at(who,startX+256,startY,"c/c")
+		player.draw_img_at(LAYOUT_PAGE,who,startX,startY,"c/c")
+		player.draw_img_at(LAYOUT_PAGE,who,startX+256,startY,"c/c")
 
 		# horizontal - 512 background
 		# vertical - 32 * 8 = 256
 
-		# 24 pixel gap at bottom
-		startY += 12
+		startY += 20
+
 		# draw help here.
 		info = "\x07---> Hotswitches type: .s .p <---"
-		player.draw_text_at(who,startX+widthPixels//2-len(info)*8//2,startY,info,False)
+		player.draw_text_at(LAYOUT_PAGE,who,startX+widthPixels//2-len(info)*8//2,startY,info)
 
 		startY += 32
 		# line len can't be greater than 64 or escapes backgrnd.
@@ -69,7 +68,7 @@ if __name__ == "builtins":
 			# 23 byte overhead per line
 			# 8 lines.
 			# (60 + 23) * 8 = 664
-			player.draw_text_at(who,startX,startY,line,False)
+			player.draw_text_at(LAYOUT_PAGE,who,startX,startY,line)
 			startY += 32
 
 

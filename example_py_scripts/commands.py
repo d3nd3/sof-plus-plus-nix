@@ -19,9 +19,9 @@ def VectorLength(v):
 
 def cmd_clear_text(who):
 	player.clear_text(who)
-def cmd_draw_text_at(who,msg,x,y,gray):
-	player.draw_text_at(who,int(x),int(y),msg,True if int(gray) else False)
-def cmd_draw_img_at(who,img_path,x,y):
+def cmd_draw_text_at(who,x,y,msg):
+	player.draw_text_at(who,int(x),int(y),msg)
+def cmd_draw_img_at(who,x,y,img_path):
 	player.draw_img_at(who,int(x),int(y),img_path)
 def cmd_draw_direct(who,msg):
 	player.draw_direct(who,msg)
@@ -51,6 +51,9 @@ def cmd_players(who):
 
 def cmd_get_time(who):
 	player.con_print( who , f"Time: {ppnix.get_time()}" )
+
+def cmd_refresh(who):
+	player.refresh_layout(who)
 
 # Speed show
 speed_toggle = [False] * 32
@@ -91,7 +94,7 @@ def msg(who,msg):
 		except KeyError:
 			pass
 	
-	# player.draw_text_at(None,50,50,"test",False)
+	# player.draw_text_at(None,50,50,"test")
 
 
 cmd_dict = {
@@ -107,6 +110,7 @@ cmd_dict = {
 	".con_print" : cmd_con_print,
 	".speed" : cmd_show_speed,
 	".get_time" :  cmd_get_time,
+	".refresh" : cmd_refresh,
 	".c" : cmd_page_chat,
 	".s" : cmd_page_scoreboard
 }

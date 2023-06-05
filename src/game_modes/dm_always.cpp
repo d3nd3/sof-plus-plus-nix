@@ -345,7 +345,9 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 	current_page[slot] = "scoreboard";
 	page_should_refresh[slot] = false;
 
-	layout_clear(ent);
+	layout_clear(LayoutMode::hud,ent);
+	layout_clear(LayoutMode::page,ent);
+	refreshScreen(ent);
 
 	stats_headShots[slot] = 0;
 	stats_throatShots[slot] = 0;
@@ -543,39 +545,27 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
 
 	int slot = slot_from_ent(ent);
-
 	float* intermissiontime = stget(base_addr+0x002ACB1C,0) + 0x4F0;
-	if ( *intermissiontime > 0 ) {
-		// INTERMISSION ACTIVE
-		if ( last_intermissiontime == 0 ) {
+
+	if ( *intermissiontime == 0 && show_scores != prev_showscores[slot] || page_should_refresh[slot] ) {
+		prev_showscores[slot] = show_scores;
+
+		if ( *intermissiontime > 0 && last_intermissiontime == 0 ) {
 			// First frame entering intermission.
 			current_page[slot] = "scoreboard";
 		}
-		// Scoreboard doesn't redraw in intermission. (Only redraw on toggle)
-		if ( !page_should_refresh[slot] && show_scores == prev_showscores[slot] ) return;
-
 		last_intermissiontime = *intermissiontime;
-	} else {
-		// INTERMISSION NOT ACTIVE
-		// !(level_framenum & 31)
-		// Must allow scoreboard page to pass when !level_framenum
 
+		if ( page_should_refresh[slot] )
+			page_should_refresh[slot] = false;
 
-		// No change to toggle except for 31st game-frame.
-		if ( !page_should_refresh[slot] && show_scores == prev_showscores[slot] && ( current_page[slot] != std::string("scoreboard") || (level_framenum & 31) ) ) 
-			return;
-
-		// SOFPPNIX_DEBUG("%02X",current_page[slot] != std::string("scoreboard"));
-		// SOFPPNIX_DEBUG("Page == %s", current_page[slot].c_str());
-		// SOFPPNIX_DEBUG("page_should_refresh[slot] = %i",page_should_refresh[slot]);
-		// SOFPPNIX_DEBUG("show_scores %i :: prev_showscores[slot] %i",show_scores,prev_showscores[slot]);
+		// General reason to show Scoreboard
+		showScoreboard(ent,slot,show_scores,killer,log_file);
+	} else if ( *intermissiontime == 0 && show_scores && current_page[slot] == std::string("scoreboard") && !(level_framenum & 31)) {
+		// Hard Exception case.
+		showScoreboard(ent,slot,show_scores,killer,log_file);
 	}
-
-	if ( page_should_refresh[slot] )
-		page_should_refresh[slot] = false;
-
-	// SOFPPNIX_DEBUG("ShouldRefresh %01X , showscore %i : %i",page_should_refresh[slot],show_scores,prev_showscores[slot]);
-	showScoreboard(ent,slot,show_scores,killer,log_file);
+	
 }
 //dc
 void	always_gamerules_c::clientStealthAndFatigueMeter(edict_t *ent){

@@ -83,8 +83,11 @@ static PyObject * py_player_get_layout(PyObject * self, PyObject * args)
 		error_exit("Python: Failed to parse args for py_player_get_layout");
 	}
 	int slot = slot_from_ent(who->c_ent);
+
+	char total_layout[1024];
+	int req_size = snprintf(total_layout,sizeof(total_layout),"%s%s",hud_layout[slot],page_layout[slot]);
 	// Copied buffer. New reference created.
-	return Py_BuildValue("s", strip_layouts[slot]);
+	return Py_BuildValue("s", total_layout);
 }
 /*
 ent
@@ -196,8 +199,8 @@ static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args)
 	unsigned int x,y;
 	// Not null-terminated.
 	EntDict * who;
-	qboolean gray;
-	if (!PyArg_ParseTuple(args,"OIIs#p",&who,&x,&y,&msg,&length,&gray)) {
+	unsigned int mode;
+	if (!PyArg_ParseTuple(args,"IOIIs#",&mode,&who,&x,&y,&msg,&length)) {
 		error_exit("Python: Failed to parse args in py_player_draw_text");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -212,7 +215,7 @@ static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args)
 		ent = NULL;
 	else
 		ent = who->c_ent;
-	append_layout_string(ent,x,y,input,gray);
+	append_layout_string(mode,ent,x,y,input);
 
 	Py_RETURN_NONE;
 }
@@ -230,7 +233,8 @@ static PyObject * py_player_draw_img_at(PyObject * self, PyObject * args)
 	unsigned int x,y;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"OIIs#",&who,&x,&y,&msg,&length)) {
+	unsigned int mode;
+	if (!PyArg_ParseTuple(args,"IOIIs#",&mode,&who,&x,&y,&msg,&length)) {
 		error_exit("Python: Failed to parse args in py_player_draw_img_at");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -246,7 +250,7 @@ static PyObject * py_player_draw_img_at(PyObject * self, PyObject * args)
 	else
 		ent = who->c_ent;
 
-	append_layout_image(ent,x,y,input);
+	append_layout_image(mode,ent,x,y,input);
 
 	Py_RETURN_NONE;
 }
@@ -431,8 +435,9 @@ static PyObject * py_player_draw_direct(PyObject * self, PyObject * args)
 	char * msg;
 	Py_ssize_t length;
 	EntDict * who;
+	unsigned int mode;
 	// Not null-terminated.
-	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"IOs#",&mode,&who,&msg,&length)) {
 		error_exit("Python: Failed to parse args in py_player_con_print");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -444,7 +449,7 @@ static PyObject * py_player_draw_direct(PyObject * self, PyObject * args)
 	else
 		ent = who->c_ent;
 
-	append_layout_direct(ent,msg);
+	append_layout_direct(mode,ent,msg);
 	Py_RETURN_NONE;
 }
 
@@ -474,7 +479,8 @@ static PyObject * py_player_clear_layout(PyObject * self, PyObject * args)
 
 	EntDict * who;
 	// Not null-terminated.
-	if (!PyArg_ParseTuple(args,"O",&who)) {
+	unsigned int mode;
+	if (!PyArg_ParseTuple(args,"IO",&mode,&who)) {
 		error_exit("Python: Failed to parse args in py_player_clear_layout");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -487,6 +493,6 @@ static PyObject * py_player_clear_layout(PyObject * self, PyObject * args)
 		ent = who->c_ent;
 
 
-	layout_clear(ent);
+	layout_clear(mode,ent);
 	Py_RETURN_NONE;
 }

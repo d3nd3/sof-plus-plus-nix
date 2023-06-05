@@ -836,7 +836,7 @@ void my_G_SetStats(edict_t * ent)
 	int slot = slot_from_ent(ent);
 	void * client = getClientX(slot);
 	// SOFPPNIX_DEBUG("cclient : %08X",client);
-	if ( stget(client,0) == cs_spawned && strip_layouts[slot][0] ) {
+	if ( stget(client,0) == cs_spawned ) {
 
 		// force layouts ON.
 		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
