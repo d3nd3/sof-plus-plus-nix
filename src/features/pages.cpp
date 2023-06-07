@@ -106,9 +106,14 @@ void refreshScreen(edict_t * ent)
 */
 void empty_reset_hud_layout(int slot)
 {
+
 	hud_layout[slot][0] = 0x00;
-	sprintf(hud_layout[slot],"ctf_team_sb 0 -9000 0 0 0 0 xr %i yb -16 string \"\x07%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
+	sprintf(hud_layout[slot],"ctf_team_sb 0 -4000 0 0 0 0 xr %i yb -16 string \"\x07%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
+	// sprintf(hud_layout[slot],"xr %i yb -16 string \"\x07%s\" ",0 - (sofreebuild_len*8+8),sofreebuildstring);
 	strip_layout_size[slot] = strlen(hud_layout[slot]) + strlen(page_layout[slot]);
+
+	// SOFPPNIX_DEBUG("Clearing hud layout for slot %i. lengths = %i + %i = %i",slot,strlen(hud_layout[slot]),strlen(page_layout[slot]),strip_layout_size[slot]);
+
 }
 void empty_reset_page_layout(int slot)
 {
@@ -167,10 +172,12 @@ void layout_clear(LayoutMode mode,edict_t * ent)
 		return;
 	}
 	int i = slot_from_ent(ent);
+	// SOFPPNIX_DEBUG("Reset for slot %i",i);
 	void * client = getClientX(i);
 	int state = *(int*)(client);
 	if (state != cs_spawned )
 		return;
+
 	switch (mode) {
 		case hud:
 			empty_reset_hud_layout(i);
@@ -186,8 +193,10 @@ void layout_clear(LayoutMode mode,edict_t * ent)
 
 static void append_to_buffer(int slot,LayoutMode mode, char * newstring)
 {
+	// SOFPPNIX_DEBUG("pages.cpp @Append_to_buffer : slot %i",slot);
 	char * append_to;
 	char * count_this;
+	int * incr_this;
 	switch (mode) {
 		case hud:
 			append_to = hud_layout[slot];
@@ -218,12 +227,14 @@ static void append_to_buffer(int slot,LayoutMode mode, char * newstring)
 	int freespace = 1023-strlen(append_to);
 	if ( freespace < 0 ) freespace = 0;
 	strncat(append_to,newstring,freespace);
+	// SOFPPNIX_DEBUG("buffer now contains\n%s",append_to);
 	if ( new_item_len > freespace ) {
-		SOFPPNIX_PRINT("Warning some drawing was truncated.");
+		// SOFPPNIX_PRINT("Warning some drawing was truncated.");
 		// total is now 1024.
-		strip_layout_size[slot] = strlen(count_this) + 1024;
+		strip_layout_size[slot] = strlen(count_this) + 1023 + 1;
 	} else
 	{
+		// SOFPPNIX_DEBUG("Added %i bytes to %i buffer",new_item_len,slot);
 		// Fits.
 		strip_layout_size[slot] += new_item_len;
 	}
@@ -231,6 +242,7 @@ static void append_to_buffer(int slot,LayoutMode mode, char * newstring)
 }
 void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * img_path)
 {
+
 	char newstring[256];
 	snprintf(newstring,256,"xv %i yv %i picn \"%s\" ",offsetx+160,offsety+120,img_path);
 	
@@ -242,6 +254,8 @@ void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety,
 			int state = *(int*)(client);
 			if (state != cs_spawned )
 				continue;
+
+
 			append_to_buffer(i,mode,newstring);
 		}
 		return;

@@ -42,6 +42,7 @@ typedef struct killfeed_s
 	int means_of_death;
 	edict_t * killer;
 	edict_t * victim;
+	bool headshot;
 } killfeed_t;
 
 std::list<killfeed_t> killFeedList;
@@ -62,8 +63,8 @@ void killFeedExpiration(void)
 	auto it = killFeedList.begin();
 	while (it != killFeedList.end()) {
 		// Timer expired.
-		if ( *time_now - it->time_of_death > 10.0f ) {
-			SOFPPNIX_DEBUG("A death card expired.");
+		if ( *time_now - it->time_of_death > _nix_obit_timeout->value ) {
+			// SOFPPNIX_DEBUG("A death card expired.");
 			it = killFeedList.erase(it);
 			refreshScreen(NULL);
 		} else {
@@ -73,12 +74,22 @@ void killFeedExpiration(void)
 }
 
 /*
+g_combat.cpp
+		T_Damage
+			void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+				void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+					void gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict_t *attacker)
+
 	Called by clientObituary hook.
 	refresh is triggered.
+
+
+	Killed - line 482.
+	PB_Damage - line 390. (headshot stats set here) t_damage_was_heashot = true
 */
 void submitDeath(int mod,edict_t * killer,edict_t * victim)
 {
-	SOFPPNIX_DEBUG("SubmitDeath");
+	// SOFPPNIX_DEBUG("SubmitDeath");
 	void * level = stget(base_addr + 0x002ACB1C,0);
 	float * time_now = level+4;
 
@@ -87,6 +98,7 @@ void submitDeath(int mod,edict_t * killer,edict_t * victim)
 	newKill.means_of_death = mod;
 	newKill.killer = killer;
 	newKill.victim = victim;
+	newKill.headshot = t_damage_was_heashot;
 
 	// Save the time the death occured.
 	killFeedList.push_back(newKill);
@@ -94,7 +106,7 @@ void submitDeath(int mod,edict_t * killer,edict_t * victim)
 }
 
 
-void drawKillFeed(void)
+void drawKillFeed(edict_t * ent)
 {
 	// A list of dicts sent to the python callback.
 	if ( py_killfeed_func != NULL ) {
@@ -112,24 +124,28 @@ void drawKillFeed(void)
 			}
 			PyObject* t = PyFloat_FromDouble( death_card.time_of_death);
 			PyObject * m = PyLong_FromLong( death_card.means_of_death);
+			PyObject * h = PyBool_FromLong(death_card.headshot);
 			PyDict_SetItemString(deathDict, "death_time",t);
 			PyDict_SetItemString(deathDict, "mod",m);
 			PyDict_SetItemString(deathDict, "killer",killer);
 			PyDict_SetItemString(deathDict, "victim",victim);
+			PyDict_SetItemString(deathDict, "headshot",h);
 
 			// Add dict to the list.
 			PyList_Append(deathList, deathDict);
 
 			Py_DECREF(t);
 			Py_DECREF(m);
+			Py_DECREF(h);
 			Py_DECREF(killer);
 			Py_DECREF(victim);
 
 			Py_DECREF(deathDict);
 		}
 		
-
-		PyObject* result = PyObject_CallFunction(py_killfeed_func,"O",deathList);
+		PyObject * scoreboard_for_player = createEntDict(ent);
+		if ( !scoreboard_for_player ) error_exit("Failed creating ent in drawKillFeed");
+		PyObject* result = PyObject_CallFunction(py_killfeed_func,"OO",scoreboard_for_player,deathList);
 
 		// returns None
 		Py_XDECREF(result);

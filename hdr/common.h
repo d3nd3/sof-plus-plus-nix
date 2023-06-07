@@ -78,6 +78,7 @@ extern int stats_armorsPicked[32];
 extern int stats_headShots[32];
 extern int stats_throatShots[32];
 extern int stats_nutShots[32];
+extern bool t_damage_was_heashot;
 
 
 /*---------------------------------------------------------------------
@@ -190,6 +191,8 @@ extern void* fast_realloc(void * buffer,int size);
 extern std::string toLowercase(const std::string& str);
 extern bool strcasestr(const std::string& str, const std::string& substr);
 extern void LoadTextFile(const char *fileName, char **text);
+
+extern void print_backtrace(void);
 
 // linked lists
 
@@ -402,6 +405,7 @@ extern cvar_t * _nix_violence;
 extern cvar_t ** p_nix_violence;
 
 extern cvar_t * _nix_slidefix;
+extern cvar_t * _nix_obit_timeout;
 
 extern cvar_t * findCvar(char * cvarname);
 extern void setCvarUnsignedInt(cvar_t * which,unsigned int val);
@@ -454,6 +458,8 @@ extern std::unordered_map<std::string,PyObject*> py_page_draw_routines;
 
 extern std::array<char [1024],32> page_layout;
 extern std::array<char [1024],32> hud_layout;
+
+// Size of buffer including null terminator.
 extern std::array<int,32> strip_layout_size;
 extern bool page_should_refresh[32];
 
@@ -480,6 +486,6 @@ extern void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int o
 ---------------------------------------------------------------------------
 */
 extern PyObject * py_killfeed_func;
-extern void drawKillFeed(void);
+extern void drawKillFeed(edict_t * ent);
 void submitDeath(int mod,edict_t * killer,edict_t * victim);
 void killFeedExpiration(void);

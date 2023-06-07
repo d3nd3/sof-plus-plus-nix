@@ -209,3 +209,7 @@ extern void my_G_SetStats(edict_t * ent);
 
 extern void (*orig_ClientCommand) (edict_t *ent);
 extern void my_ClientCommand (edict_t *ent);
+
+
+extern void (*orig_T_Damage) (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb);
+extern void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb);

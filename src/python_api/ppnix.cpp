@@ -45,9 +45,14 @@ static PyObject * py_ppnix_get_chat_vectors(PyObject * self, PyObject * args)
 	// SOFPPNIX_DEBUG("startIndex = %i",startIndex);
 	for (int i = startIndex; i < chatVectors.size(); ++i) {
 		// SOFPPNIX_DEBUG(" i= %i",i);
-		PyObject* pyString = PyUnicode_DecodeFSDefault(chatVectors[i].c_str());
-		PyList_Append(pyList, pyString);
-		Py_DECREF(pyString);
+		// PyObject* line = PyUnicode_DecodeFSDefault(chatVectors[i].c_str());
+		PyObject * line = PyUnicode_Decode(chatVectors[i].c_str(),chatVectors[i].length(),"latin1","strict");
+		// PyObject* line = Py_BuildValue("y", chatVectors[i].c_str());
+		// if ( line == NULL ) {
+		// 	error_exit("Unable to build string in get_chat_vectors");
+		// }
+		PyList_Append(pyList, line);
+		Py_DECREF(line);
 	}
 
 	return pyList;

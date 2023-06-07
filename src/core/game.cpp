@@ -328,6 +328,8 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 
 	orig_G_SetStats = createDetour((int)base_addr + 0x0023D324 , my_G_SetStats,6);
 	orig_ClientCommand = createDetour(game_exports->ClientCommand , my_ClientCommand,5);
+	orig_T_Damage = createDetour(base_addr + 0x0018B460,my_T_Damage,6);
+
 
 	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
 	
@@ -399,6 +401,7 @@ void my_ShutdownGame(void)
 	free(orig_GetSequenceForGoreZoneDeath);
 	free(orig_G_SetStats);
 	free(orig_ClientCommand);
+	free(orig_T_Damage);
 	
 	freeDeathmatchHooks();
 
@@ -714,7 +717,7 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	for ( int i = 0; i < 16; i++ ) {
 		// SOFPPNIX_DEBUG("NAME : %02X",name[i]);
 		if ( name[i] == 0x00 ) break;
-		if (name[i] < 31) color_count++;
+		if (name[i] < 32) color_count++;
 	}
 	// colr-less name
 	// Need to give more buffer space to colored tags, so pads evenly
@@ -784,6 +787,13 @@ void my_itemArmorTouch(edict_t *self, edict_t *other, cplane_t *plane, mtexinfo_
 int stats_headShots[32];
 int stats_throatShots[32];
 int stats_nutShots[32];
+/*
+	T_Damage() @g_combat.cpp
+		PB_Damage() @p_body.cpp
+			PB_PlaySequenceForDeath() @p_body.cpp
+				GetSequenceForDeath() @ai_bodyhuman.cpp
+
+*/
 mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags)
 {
 	void * level = stget(base_addr + 0x002ACB1C,0);
@@ -805,6 +815,7 @@ mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *
 		stats_nutShots[attacker->s.skinnum] +=1;
 	}
 	if ( headshots_after > headshots_before ) {
+		t_damage_was_heashot = true;
 		stats_headShots[attacker->s.skinnum] +=1;
 	}
 
@@ -842,6 +853,7 @@ void my_G_SetStats(edict_t * ent)
 		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
 	}
 
+	
 	// only way to influence scoreboard during intermission.
 	dm_always.clientScoreboardMessage(ent,ent->enemy,false);
 }
@@ -869,4 +881,26 @@ void my_ClientCommand (edict_t *ent)
 		return;
 	}
 	orig_ClientCommand(ent);
+}
+
+/*
+============
+T_Damage
+
+targ		entity that is being damaged, e.g. monster.
+inflictor	entity that is causing the damage, e.g. rocket.
+attacker	entity that caused the inflictor to damage, e.g. player.
+dir			direction of the attack.
+point		point at which the damage is being inflicted.
+damage		amount of damage being inflicted.
+knockback	force to be applied against targ as a result of the damage.
+dflags		these flags are used to control how T_Damage works.
+mod			the means of death (should the target of the damage happen to die).
+============
+*/
+bool t_damage_was_heashot = false;
+void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb)
+{
+	t_damage_was_heashot = false;
+	orig_T_Damage(targ,inflictor,attacker,dir,point,origin,damage,knockback,dflags,mod,penetrate,absorb);
 }

@@ -95,7 +95,7 @@ void (*orig_PAK_ReadDeltaUsercmd) (void *in_packet, usercmd_t *from, usercmd_t *
 
 
 void (*orig_PM_StepSlideMove) (int num) = 0x0812D9BC;
-void my_PM_StepSlideMove (int num);
+
 /*
 ---------------------Ref Library---------------------
 */
@@ -138,3 +138,5 @@ void	(*orig_bprintf) (int printlevel, char *fmt, ...);
 void (*orig_G_SetStats)(edict_t * ent) = NULL;
 
 void (*orig_ClientCommand) (edict_t *ent) = NULL;
+
+void (*orig_T_Damage) (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb) = NULL;

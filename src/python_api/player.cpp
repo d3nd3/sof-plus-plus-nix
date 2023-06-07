@@ -23,6 +23,7 @@ static PyObject * py_player_clear_layout(PyObject * self, PyObject * args);
 static PyObject * py_player_refresh_layout(PyObject * self, PyObject * args);
 static PyObject * py_player_con_print(PyObject * self, PyObject * args);
 static PyObject * py_player_get_stats(PyObject * self, PyObject * args);
+static PyObject * py_player_get_name(PyObject * self, PyObject * args);
 static PyObject * py_player_raw_sp(PyObject * self, PyObject * args);
 static PyObject * py_player_get_layout(PyObject * self, PyObject * args);
 static PyObject * py_ppnix_orig_scoreboard(PyObject * self, PyObject * args);
@@ -44,6 +45,7 @@ static PyMethodDef PlayerMethods[] = {
 	{"refresh_layout", py_player_refresh_layout, METH_VARARGS,"Refresh the text that is drawn on player screen"},
 	{"con_print", py_player_con_print, METH_VARARGS,"Print console text on player screen"},
 	{"get_stats",py_player_get_stats,METH_VARARGS,"Get stats for this player"},
+	{"get_name",py_player_get_name,METH_VARARGS,"Get name of this player"},
 	{"raw_sp_print",py_player_raw_sp,METH_VARARGS,"Send stringpackage packet to player"},
 	{"get_layout",py_player_get_layout,METH_VARARGS,"Get the custom layout string for player"},
 	{"orig_scoreboard", py_ppnix_orig_scoreboard, METH_VARARGS,"Print orig scoreboard for player."},
@@ -133,12 +135,27 @@ static PyObject * py_player_set_page(PyObject * self, PyObject * args)
 
 	Py_RETURN_NONE;
 }
+static PyObject * py_player_get_name(PyObject * self, PyObject * args)
+{
+	EntDict * who;
+	if (!PyArg_ParseTuple(args,"O",&who)) {
+		error_exit("Python: Failed to parse args in py_player_get_stats");
+	}
 
+	// PyObject* pyString = PyUnicode_DecodeFSDefault(chatVectors[i].c_str());
+
+	void * gcl = stget(who->c_ent,EDICT_GCLIENT);
+	unsigned char * name = gcl + GCLIENT_PERS_NETNAME;
+
+	// return Py_BuildValue("y", name);
+	// return PyUnicode_DecodeFSDefault(name);
+	return PyUnicode_Decode(name,strlen(name),"latin1","strict");
+}
 static PyObject * py_player_get_stats(PyObject * self, PyObject * args)
 {
 	EntDict * who;
 	if (!PyArg_ParseTuple(args,"O",&who)) {
-		error_exit("Python: Failed to parse args in py_player_equip_armor");
+		error_exit("Python: Failed to parse args in py_player_get_stats");
 	}
 
 	edict_t * ent = who->c_ent;
@@ -200,14 +217,14 @@ static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args)
 	// Not null-terminated.
 	EntDict * who;
 	unsigned int mode;
-	if (!PyArg_ParseTuple(args,"IOIIs#",&mode,&who,&x,&y,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"IOIIes",&mode,&who,&x,&y,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_draw_text");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
 	// 256 upper, although the function can discard remaining.
-	char input[256];
-	snprintf(input,256,"%.*s",(int)length,msg);
+	// char input[256];
+	// snprintf(input,256,"%.*s",(int)length,msg);
 	// orig_Cmd_ExecuteString(input);
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
@@ -215,8 +232,9 @@ static PyObject * py_player_draw_text_at(PyObject * self, PyObject * args)
 		ent = NULL;
 	else
 		ent = who->c_ent;
-	append_layout_string(mode,ent,x,y,input);
+	append_layout_string(mode,ent,x,y,msg);
 
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 /*
@@ -229,20 +247,19 @@ static PyObject * py_player_draw_img_at(PyObject * self, PyObject * args)
 {
 	
 	char * msg;
-	Py_ssize_t length;
 	unsigned int x,y;
 	// Not null-terminated.
 	EntDict * who;
 	unsigned int mode;
-	if (!PyArg_ParseTuple(args,"IOIIs#",&mode,&who,&x,&y,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"IOIIes",&mode,&who,&x,&y,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_draw_img_at");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
 	// 256 upper, although the function can discard remaining.
-	char input[256];
-	snprintf(input,256,"%.*s",(int)length,msg);
-	// orig_Cmd_ExecuteString(input);
+	// char input[256];
+	// snprintf(input,256,"%.*s",(int)length,msg);
+
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
 		// broadcast.
@@ -250,8 +267,9 @@ static PyObject * py_player_draw_img_at(PyObject * self, PyObject * args)
 	else
 		ent = who->c_ent;
 
-	append_layout_image(mode,ent,x,y,input);
+	append_layout_image(mode,ent,x,y,msg);
 
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 /*
@@ -265,14 +283,14 @@ static PyObject * py_player_draw_centered(PyObject * self, PyObject * args)
 	Py_ssize_t length;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Oes",&who,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_draw_centered");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
 	// 256 upper, although the function can discard remaining.
-	char input[256];
-	snprintf(input,256,"%.*s",(int)length,msg);
+	// char input[256];
+	// snprintf(input,256,"%.*s",(int)length,msg);
 
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
@@ -282,8 +300,9 @@ static PyObject * py_player_draw_centered(PyObject * self, PyObject * args)
 		ent = who->c_ent;
 
 
-	spackage_print_ref(ent,"++NIX","CENTER_CUSTOM",input,NULL);
+	spackage_print_ref(ent,"++NIX","CENTER_CUSTOM",msg,NULL);
 
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 
@@ -293,14 +312,14 @@ static PyObject * py_player_draw_credit(PyObject * self, PyObject * args)
 	Py_ssize_t length;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Oes",&who,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_draw_credit");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
 	// 256 upper, although the function can discard remaining.
-	char input[256];
-	snprintf(input,256,"%.*s",(int)length,msg);
+	// char input[256];
+	// snprintf(input,256,"%.*s",(int)length,msg);
 
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
@@ -310,8 +329,9 @@ static PyObject * py_player_draw_credit(PyObject * self, PyObject * args)
 		ent = who->c_ent;
 
 
-	spackage_print_ref(ent,"++NIX","CREDIT_CUSTOM",input,NULL);
+	spackage_print_ref(ent,"++NIX","CREDIT_CUSTOM",msg,NULL);
 
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 /*
@@ -325,14 +345,14 @@ static PyObject * py_player_draw_lower(PyObject * self, PyObject * args)
 	Py_ssize_t length;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Oes",&who,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_draw_centered_lower");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
 	// 256 upper, although the function can discard remaining.
-	char input[256];
-	snprintf(input,256,"%.*s",(int)length,msg);
+	// char input[256];
+	// snprintf(input,256,"%.*s",(int)length,msg);
 
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
@@ -340,8 +360,9 @@ static PyObject * py_player_draw_lower(PyObject * self, PyObject * args)
 		ent = NULL;
 	else
 		ent = who->c_ent;
-	spackage_print_ref(ent,"++NIX","CENTER_LOWER_CUSTOM",input,NULL);
+	spackage_print_ref(ent,"++NIX","CENTER_LOWER_CUSTOM",msg,NULL);
 
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 /*
@@ -355,14 +376,14 @@ static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args)
 	Py_ssize_t length;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Oes",&who,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_draw_typeamatic");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
 	// 256 upper, although the function can discard remaining.
-	char input[256];
-	snprintf(input,256,"%.*s",(int)length,msg);
+	// char input[256];
+	// snprintf(input,256,"%.*s",(int)length,msg);
 
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
@@ -370,8 +391,9 @@ static PyObject * py_player_draw_typeamatic(PyObject * self, PyObject * args)
 		ent = NULL;
 	else
 		ent = who->c_ent;
-	spackage_print_ref(ent,"++NIX","CINEMATIC_CUSTOM",input,NULL);
+	spackage_print_ref(ent,"++NIX","CINEMATIC_CUSTOM",msg,NULL);
 
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 /*
@@ -385,14 +407,14 @@ static PyObject * py_player_draw_original(PyObject * self, PyObject * args)
 	Py_ssize_t length;
 	// Not null-terminated.
 	EntDict * who;
-	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Oes",&who,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_draw_typeamatic");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
 
 	// 256 upper, although the function can discard remaining.
-	char input[256];
-	snprintf(input,256,"%.*s",(int)length,msg);
+	// char input[256];
+	// snprintf(input,256,"%.*s",(int)length,msg);
 
 	edict_t * ent;
 	if ( (PyObject*)who == Py_None )
@@ -400,8 +422,9 @@ static PyObject * py_player_draw_original(PyObject * self, PyObject * args)
 		ent = NULL;
 	else
 		ent = who->c_ent;
-	spackage_print_ref(ent,"++NIX","ORIGINAL_CUSTOM",input,NULL);
+	spackage_print_ref(ent,"++NIX","ORIGINAL_CUSTOM",msg,NULL);
 
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 /*
@@ -415,7 +438,7 @@ static PyObject * py_player_con_print(PyObject * self, PyObject * args)
 	Py_ssize_t length;
 	EntDict * who;
 	// Not null-terminated.
-	if (!PyArg_ParseTuple(args,"Os#",&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"Oes",&who,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_con_print");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -427,7 +450,8 @@ static PyObject * py_player_con_print(PyObject * self, PyObject * args)
 	else
 		ent = who->c_ent;
 
-	orig_cprintf(ent,PRINT_HIGH,"%.*s\n",(int)length,msg);
+	orig_cprintf(ent,PRINT_HIGH,"%s\n",msg);
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 static PyObject * py_player_draw_direct(PyObject * self, PyObject * args)
@@ -437,7 +461,7 @@ static PyObject * py_player_draw_direct(PyObject * self, PyObject * args)
 	EntDict * who;
 	unsigned int mode;
 	// Not null-terminated.
-	if (!PyArg_ParseTuple(args,"IOs#",&mode,&who,&msg,&length)) {
+	if (!PyArg_ParseTuple(args,"IOes",&mode,&who,"latin1",&msg)) {
 		error_exit("Python: Failed to parse args in py_player_con_print");
 	}
 	// SOFPPNIX_DEBUG("Int : %i, Int : %i, str : %.*s",x,y,length,msg);
@@ -450,6 +474,8 @@ static PyObject * py_player_draw_direct(PyObject * self, PyObject * args)
 		ent = who->c_ent;
 
 	append_layout_direct(mode,ent,msg);
+
+	PyMem_Free(msg);
 	Py_RETURN_NONE;
 }
 
