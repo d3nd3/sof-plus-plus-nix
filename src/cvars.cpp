@@ -24,6 +24,8 @@ cvar_t ** p_nix_violence = &_nix_violence;
 
 cvar_t * _nix_slidefix = NULL;
 cvar_t * _nix_obit_timeout = NULL;
+cvar_t * _nix_obit_len_max = NULL;
+cvar_t * _nix_fall_dmg_scale = NULL;
 
 
 /*
@@ -65,6 +67,8 @@ void createServerCvars(void)
 		_nix_slidefix = orig_Cvar_Get( "_++nix_slidefix","1",NULL,NULL);
 
 		_nix_obit_timeout = orig_Cvar_Get("_++nix_obit_timeout","5",NULL,NULL);
+		_nix_obit_len_max = orig_Cvar_Get("_++nix_obit_len_max","5",NULL,NULL);
+		_nix_fall_dmg_scale = orig_Cvar_Get("_++nix_fall_dmg_scale","1",NULL,NULL);
 
 		// repond pretending to be low violence.
 	    int offset = (int)&p_nix_violence - 0x829CCC8;

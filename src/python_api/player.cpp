@@ -72,6 +72,7 @@ static PyObject * py_ppnix_orig_scoreboard(PyObject * self, PyObject * args)
 	if (!PyArg_ParseTuple(args,"OO",&who,&who_killer)) {
 		error_exit("Python: Failed to parse args in py_ppnix_orig_scoreboard");
 	}
+
 	currentGameMode->clientScoreboardMessage(who->c_ent,who_killer->c_ent,0);
 	Py_RETURN_NONE;
 }

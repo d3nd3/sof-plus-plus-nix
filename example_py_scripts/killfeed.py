@@ -47,22 +47,38 @@ def custom_killfeed(forClient,killStack):
 		# img
 		# player.draw_direct(LAYOUT_HUD,None,f"xr -256 yv {startY} picn c/k ")
 
-		# RIGHT TO LEFT.
-		# headshot icon
-		spaceBetweenNames = 11
-		if death["headshot"]:
-			headshotSpace = 24
-			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - headshotSpace+4} yv {startY+4} picn c/hs ")
-			spaceBetweenNames += headshotSpace//8
 
-		# gun icon
-		player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - spaceBetweenNames*8 - 8} yv {startY+4} picn c/sg ")
+		gunSpace = 88
+		if victimSlot == killerSlot:
+			# print("Self kill")
+			# Self Kill.
+			# [Skull] [victim]
+			suicideSpace = 24
+			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - suicideSpace+4} yv {startY+4} picn c/sb ")
 
-		# name max width = 16 * 8 = 128
-		# Draw names with spaces between them ( for images )
-		killLine = killerName + " "*spaceBetweenNames + victimName
-		player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - lenIgnoreColor(killerName)*8 - spaceBetweenNames*8} yv {startY+8} string \"\x01{killLine}\"")
-		
+			# Draw name
+			killLine = victimName
+			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8} yv {startY+8} string \"{killLine}\"")
+		else:
+			# print("Enemy kill")
+			# RIGHT TO LEFT.
+			# headshot icon
+			spaceCharsBetweenNames = gunSpace // 8
+			if death["headshot"]:
+				# [killer] [GUN] [HEADSHOT] [victim]
+				# its a 16x16 img, but gave it extra space. 8px , 4 each side?
+				headshotSpace = 24
+				player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - headshotSpace+4} yv {startY+4} picn c/hs ")
+				spaceCharsBetweenNames += headshotSpace//8
+
+			# gun icon
+			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - spaceCharsBetweenNames*8 } yv {startY-8} picn c/s1 ")
+
+			# name max width = 16 * 8 = 128
+			# Draw names with spaces between them ( for images )
+			killLine = killerName + " "*spaceCharsBetweenNames + victimName
+			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - lenIgnoreColor(killerName)*8 - spaceCharsBetweenNames*8} yv {startY+8} string \"{killLine}\"")
+			
 		startY += 24 + 8
 	
 	# player.draw_img_at(LAYOUT_PAGE,who,startX+256,startY,"c/c")

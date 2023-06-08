@@ -262,11 +262,14 @@ also passes in pointers for ref_gl library. ri
 	//SV_ImageIndex
 	int		(*imageindex) (const char *name); = 18C
 	//SV_EffectIndex
-	int		(*effectindex) (const char *name);fectIndex = 190
+	int		(*effectindex) (const char *name); = 190
 	//SV_SoundIndex
 	int		(*soundindex) (const char *name); = 194
 	//SV_ModelIndex
 	int		(*modelindex) (const char *name); = 198
+
+
+	//These numbers are back to front. 0x198-Above to get.
 */
 
 void *base_addr = NULL;
@@ -329,10 +332,12 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	orig_G_SetStats = createDetour((int)base_addr + 0x0023D324 , my_G_SetStats,6);
 	orig_ClientCommand = createDetour(game_exports->ClientCommand , my_ClientCommand,5);
 	orig_T_Damage = createDetour(base_addr + 0x0018B460,my_T_Damage,6);
-
+	orig_fireSpas = createDetour(base_addr + 0x0009CEDC,my_fireSpas,9);
 
 	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
-	
+	orig_CFXSender_exec = base_addr + 0x001822F4;
+	// memfxRunner = stget(stget(base_addr + 0x002ACB34,0),0);
+	memfxRunner = stget(base_addr + 0x002ACB34,0);
 
 	applyDeathmatchHooks(base_addr);
 
@@ -372,6 +377,20 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// We now call this in G_SetStats hook because it allows control during intermission
 	memoryAdjust(base_addr + 0x000A9BFC,2,0x90);
 
+
+	//-----------------------REMOVE SEXIST FEMALE DAMAGE-----------------------------
+	memoryAdjust(base_addr + 0x00237355,4,0x90);
+	memoryAdjust(base_addr + 0x00237355,1,0xdd);
+	memoryAdjust(base_addr + 0x00237356,1,0xdf);
+
+	// ----------------------ATTEMPT REMOVE DM RANKING HUD----------------------------
+	memoryAdjust(base_addr + 0x0023D663,7,0x90);
+
+	// -------------(fireSpas() w_fire.cpp) Get OLDDIR for Shotgun Gore restoration----------------------
+	callE8Patch(base_addr + 0x0009D10B,&fake_SV_Trace);
+	memoryAdjust(base_addr + 0x009D110,3,0x90);
+	
+
 	return game_exports;
 }
 
@@ -402,7 +421,8 @@ void my_ShutdownGame(void)
 	free(orig_G_SetStats);
 	free(orig_ClientCommand);
 	free(orig_T_Damage);
-	
+	free(orig_fireSpas);
+
 	freeDeathmatchHooks();
 
 	// chatVectors.clear();
@@ -902,5 +922,15 @@ bool t_damage_was_heashot = false;
 void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb)
 {
 	t_damage_was_heashot = false;
+
+	// Not sure why fall has seemingly random damage. ( network packets? )
+	if (dflags & DT_FALL) {
+		damage *= _nix_fall_dmg_scale->value;
+	}
+
+	if ( shotgunStudy && damage != 12 ) {
+		// Apply shotgun gore here.
+		applyShotgunGore(targ);
+	}
 	orig_T_Damage(targ,inflictor,attacker,dir,point,origin,damage,knockback,dflags,mod,penetrate,absorb);
 }

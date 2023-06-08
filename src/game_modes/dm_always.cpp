@@ -67,7 +67,7 @@ Are saved and unloaded when a client connects.
 
 Use Cbuf_ExecuteString here if you don't want deffered commands.
 */
-float last_intermissiontime = 0;
+bool intermission_active[32] = {false};
 void	always_gamerules_c::levelInit(void){
 
 	next_available_ID = 0;
@@ -120,13 +120,24 @@ void	always_gamerules_c::levelInit(void){
 		Py_XDECREF(result);
 	}
 
+	// chat background
 	orig_SV_GhoulFileIndex("c/c.m32");
+	// killfeed background
 	// orig_SV_GhoulFileIndex("c/k.m32");
+	// shotgun
 	orig_SV_GhoulFileIndex("c/s1.m32");
+	// headshot icon
 	orig_SV_GhoulFileIndex("c/hs.m32");
+	// skull and cross bones
+	orig_SV_GhoulFileIndex("c/sb.m32");
 
 	// For detecting first frame into intermission.
-	last_intermissiontime = 0;
+	for ( int i = 0 ; i < 32 ; i ++ ) {
+		intermission_active[i] = false;
+	}
+
+	killFeedList.clear();
+	killFeedLength = 0;
 
 	// dm specific levelinit fallback func
 	currentGameMode->levelInit();
@@ -462,6 +473,7 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 	int mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
 
 	if ( py_killfeed_func ) {
+		// SOFPPNIX_DEBUG("MOD : %i" , mod);
 		bool generate_death_card = false;
 		bool use_default_obit = true;
 		switch (mod)
@@ -479,9 +491,13 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 			break;
 
 			case MOD_SUICIDE:
+				// kill//swap_team
+				// SOFPPNIX_DEBUG("SUICIDE");
 			break;
 															
 			case MOD_EXPLOSIVE:
+				// Mb barrel explodes?
+				// SOFPPNIX_DEBUG("EXPLOSIVE");
 			break;
 
 			case MOD_FIRE:
@@ -502,6 +518,8 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 			break;
 		};
 		if(attacker == self) {
+			generate_death_card = true;
+			use_default_obit = false;
 			switch (mod)
 			{
 				case MOD_PHOS_GRENADE:
@@ -511,6 +529,8 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 				break;
 
 				case MOD_C4:
+					// Works.
+					// SOFPPNIX_DEBUG("C4");
 				break;
 
 				case MOD_CLAYMORE:
@@ -518,7 +538,10 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 
 				case MOD_NEURAL_GRENADE:
 				break;
-					
+				case MOD_STAR_THROWN:
+					// This is grenade
+					// SOFPPNIX_DEBUG("NADE");
+				break;
 				case MOD_GRENADE:
 				break;
 
@@ -608,6 +631,11 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 				
 				case MOD_TELEFRAG:
 					
+				break;
+
+				case MOD_STAR_THROWN:
+					// This is grenade
+					// SOFPPNIX_DEBUG("NADE");
 				break;
 
 				case MOD_GRENADE:
@@ -755,8 +783,14 @@ static void runRefreshLayout(edict_t * ent,int slot, int show_scores, edict_t * 
 	// Why is this function getting called by python/inbetween complete draws?
 	layout_clear(LayoutMode::hud,ent);
 	layout_clear(LayoutMode::page,ent);
+
+	prev_showscores[slot] = show_scores;
 }
 
+/*
+	The intermission scoreboard shows because of G_SetStats - ent->client->ps.stats[STAT_LAYOUTS] |= 1;
+	But because we set that variable directly immediately after, G_SetStats has lost control of the toggle.
+*/
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
 	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
@@ -767,15 +801,21 @@ void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, 
 
 	float* intermissiontime = stget(base_addr+0x002ACB1C,0) + 0x4F0;
 
-	if ( *intermissiontime == 0 && show_scores != prev_showscores[slot] || page_should_refresh[slot] ) {
-		prev_showscores[slot] = show_scores;
+	if ( (*intermissiontime > 0 && !intermission_active[slot]) || page_should_refresh[slot] || (*intermissiontime == 0 && show_scores != prev_showscores[slot])  ) {
+		
+		// First frame entering intermission.
+		if ( *intermissiontime > 0  && !intermission_active[slot] ) {
+			// Show them the scoreboard.
+			stset(gclient, GCLIENT_SHOWSCORES,1);
+			show_scores = stget(gclient, GCLIENT_SHOWSCORES);
 
-		if ( *intermissiontime > 0 && last_intermissiontime == 0 ) {
-			// First frame entering intermission.
 			current_page[slot] = "scoreboard";
-		}
-		last_intermissiontime = *intermissiontime;
 
+			// now last_intermissiontime is intermission.
+			// gets reset on levelInit.
+			intermission_active[slot] = true;
+		}
+		
 		// General reason to show Scoreboard
 		// print_backtrace();
 		runRefreshLayout(ent,slot,show_scores,killer,log_file);

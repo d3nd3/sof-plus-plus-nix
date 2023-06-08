@@ -25,6 +25,7 @@ OBJS= \
 ../obj/detect.o \
 ../obj/pages.o \
 ../obj/killfeed.o \
+../obj/weapon_balance.o \
 ../obj/python.o \
 ../obj/entity.o \
 ../obj/ppnix.o \
@@ -106,6 +107,8 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 ../obj/pages.o : ./features/pages.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/killfeed.o : ./features/killfeed.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/weapon_balance.o : ./features/weapon_balance.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 

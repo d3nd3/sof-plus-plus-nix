@@ -406,6 +406,8 @@ extern cvar_t ** p_nix_violence;
 
 extern cvar_t * _nix_slidefix;
 extern cvar_t * _nix_obit_timeout;
+extern cvar_t * _nix_obit_len_max;
+extern cvar_t * _nix_fall_dmg_scale;
 
 extern cvar_t * findCvar(char * cvarname);
 extern void setCvarUnsignedInt(cvar_t * which,unsigned int val);
@@ -489,3 +491,23 @@ extern PyObject * py_killfeed_func;
 extern void drawKillFeed(edict_t * ent);
 void submitDeath(int mod,edict_t * killer,edict_t * victim);
 void killFeedExpiration(void);
+typedef struct killfeed_s
+{
+	float time_of_death;
+	int means_of_death;
+	edict_t * killer;
+	edict_t * victim;
+	bool headshot;
+} killfeed_t;
+extern std::list<killfeed_t> killFeedList;
+extern int killFeedLength;
+/*
+---------------------------------------------------------------------------
+-----------------------------weapon_balance.cpp---------------------------------
+---------------------------------------------------------------------------
+*/
+extern qboolean fake_SV_Trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask, trace_t *trace);
+
+extern bool shotgunStudy;
+extern void applyShotgunGore(edict_t * ent);
+extern void * memfxRunner;

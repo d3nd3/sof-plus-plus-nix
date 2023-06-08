@@ -48,7 +48,9 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 		// Does the routine exist in the map, is it registered by python?
 		// Draw the page that is currently set, with timeout.
 		// If sticky set, make permanant.
+		
 		if ( py_page_draw_routines.count(current_page[slot]) ) {
+			
 			// Draw.
 			PyObject * who = createEntDict(ent);
 			if ( who == NULL ) {
@@ -58,7 +60,7 @@ void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * k
 			if ( who_killer == NULL ) {
 				error_exit("killer pointer invalid");
 			} 
-
+			// Draw the current page.
 			PyObject* result = PyObject_CallFunction(py_page_draw_routines[current_page[slot]],"OO",who,who_killer);
 			// returns None
 			Py_XDECREF(result);

@@ -36,16 +36,10 @@
 
 */
 
-typedef struct killfeed_s
-{
-	float time_of_death;
-	int means_of_death;
-	edict_t * killer;
-	edict_t * victim;
-	bool headshot;
-} killfeed_t;
+
 
 std::list<killfeed_t> killFeedList;
+int killFeedLength = 0;
 
 PyObject * py_killfeed_func = NULL;
 
@@ -53,6 +47,8 @@ PyObject * py_killfeed_func = NULL;
 	Resizes list based on expiration.
 	Should be called every frame.
 	If list is changed, refresh has to be triggered.
+
+	Expiration code called by : my_SV_RunGameFrame()
 */
 void killFeedExpiration(void)
 {
@@ -66,6 +62,7 @@ void killFeedExpiration(void)
 		if ( *time_now - it->time_of_death > _nix_obit_timeout->value ) {
 			// SOFPPNIX_DEBUG("A death card expired.");
 			it = killFeedList.erase(it);
+			killFeedLength--;
 			refreshScreen(NULL);
 		} else {
 			++it;
@@ -89,6 +86,14 @@ g_combat.cpp
 */
 void submitDeath(int mod,edict_t * killer,edict_t * victim)
 {
+	if ( killFeedLength >= _nix_obit_len_max->value )
+	{
+		// >= _nix_obit_len_max
+		// remove the oldest one to make room.
+		killFeedList.erase(killFeedList.begin());
+
+		killFeedLength--;
+	}
 	// SOFPPNIX_DEBUG("SubmitDeath");
 	void * level = stget(base_addr + 0x002ACB1C,0);
 	float * time_now = level+4;
@@ -100,8 +105,12 @@ void submitDeath(int mod,edict_t * killer,edict_t * victim)
 	newKill.victim = victim;
 	newKill.headshot = t_damage_was_heashot;
 
+
+
+	killFeedLength++;
 	// Save the time the death occured.
 	killFeedList.push_back(newKill);
+
 	refreshScreen(NULL);
 }
 

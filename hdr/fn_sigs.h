@@ -26,6 +26,9 @@ extern int (*orig_SV_GhoulFileIndex) (char *name);
 extern void (*orig_SV_ExecuteUserCommand) (char *s);
 void my_SV_ExecuteUserCommand (char *s);
 
+
+extern int (*orig_SV_EffectIndex)( char * name);
+
 // -------------------Client------------------
 extern void (*orig_CL_Init) (void);
 extern void my_CL_Init (void);
@@ -59,6 +62,9 @@ extern void (*orig_CL_Disconnect)(short unknown);
 extern void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd);
 extern void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd);
 extern void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_t *cmd);
+
+
+extern qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask, trace_t *trace);
 
 
 // --Shared--
@@ -213,3 +219,8 @@ extern void my_ClientCommand (edict_t *ent);
 
 extern void (*orig_T_Damage) (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb);
 extern void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb);
+
+extern void (*orig_fireSpas)(weaponFireInfo_t &wf);
+extern void my_fireSpas(weaponFireInfo_t &wf);
+
+extern void (*orig_CFXSender_exec)(void * self,int, edict_t *, multicast_t, edict_t *);

@@ -44,6 +44,12 @@ int (*orig_SV_GhoulFileIndex) (char *name) = 0x080A9534;
 void (*orig_SV_ExecuteUserCommand) (char *s) = 0x080B1D40;
 
 
+int (*orig_SV_EffectIndex)( char * name) = 0x080A94BC;
+
+
+qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask, trace_t *trace) = 0x080B37BC;
+
+
 // ----SHARED-----
 
 char *(*orig_CopyString) (char *in) = 0x08120C3C;
@@ -140,3 +146,6 @@ void (*orig_G_SetStats)(edict_t * ent) = NULL;
 void (*orig_ClientCommand) (edict_t *ent) = NULL;
 
 void (*orig_T_Damage) (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb) = NULL;
+
+void (*orig_fireSpas)(weaponFireInfo_t &wf) = NULL;
+void (*orig_CFXSender_exec)(void * self,int, edict_t *, multicast_t, edict_t *) = NULL;
