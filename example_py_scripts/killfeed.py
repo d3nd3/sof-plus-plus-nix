@@ -6,6 +6,9 @@ import event
 LAYOUT_HUD = 0
 LAYOUT_PAGE = 1
 
+MOD_C4 = 17
+MOD_SHOTGUN = 9
+
 def lenIgnoreColor(name):
 	count = 0
 	for x in range(len(name)):
@@ -21,6 +24,7 @@ def stripColor(name):
 			nonColorName += char
 	return nonColorName
 
+# TODO: color name by ctf team.
 @event.draw_killfeed
 def custom_killfeed(forClient,killStack):
 	# print("Trying to draw kill-feed")
@@ -32,7 +36,8 @@ def custom_killfeed(forClient,killStack):
 	# -320 -> 320
 	# -240 -> 240
 	
-	startY = 120 - 32*len(killStack)//2;
+	# startY = 120 - 32*len(killStack)//2;
+	startY = 32
 	# deathcard = 128x24 ... 8px centered text ... 24x24 mini-logos
 	for death in killStack:
 		victimSlot = ent.get_slot(death["victim"])
@@ -42,42 +47,68 @@ def custom_killfeed(forClient,killStack):
 		victimName = "\x1F" + stripColor(player.get_name(death["victim"]))
 
 		mod = death["mod"]
-		# print(f" MOD = {mod} // victim = {victimSlot} // killer = {victimSlot}" )
+		print(f" MOD = {mod} // victim = {victimSlot} // killer = {victimSlot}" )
 
 		# img
 		# player.draw_direct(LAYOUT_HUD,None,f"xr -256 yv {startY} picn c/k ")
 
-
-		gunSpace = 88
+		# Draw from right to left.
+		
 		if victimSlot == killerSlot:
 			# print("Self kill")
 			# Self Kill.
-			# [Skull] [victim]
-			suicideSpace = 24
-			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - suicideSpace+4} yv {startY+4} picn c/sb ")
+			# [Skull] [HOW] [victim]
 
+			rightOffset = 0 - lenIgnoreColor(victimName)*8
 			# Draw name
 			killLine = victimName
-			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8} yv {startY+8} string \"{killLine}\"")
+			player.draw_direct(LAYOUT_HUD,forClient,f"xr {rightOffset} yt {startY+8} string \"{killLine}\"")
+			
+			if mod == MOD_C4:
+				c4Space = 24
+				rightOffset -= c4Space
+
+				player.draw_direct(LAYOUT_HUD,forClient,f"xr {rightOffset+4} yt {startY+4} picn c/c4 ")
+				
+			# Skull & Crossbones
+			suicideSpace = 24
+			rightOffset -= suicideSpace
+			player.draw_direct(LAYOUT_HUD,forClient,f"xr {rightOffset + 4} yt {startY+4} picn c/sb ")
+
+
+			
 		else:
+			spaceCharsBetweenNames = 0
+			# [killer] [GUN] [HOWSPECIAL] [victim]
 			# print("Enemy kill")
 			# RIGHT TO LEFT.
 			# headshot icon
-			spaceCharsBetweenNames = gunSpace // 8
+			rightOffset = 0 - lenIgnoreColor(victimName)*8
+			
 			if death["headshot"]:
 				# [killer] [GUN] [HEADSHOT] [victim]
 				# its a 16x16 img, but gave it extra space. 8px , 4 each side?
 				headshotSpace = 24
-				player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - headshotSpace+4} yv {startY+4} picn c/hs ")
+				rightOffset -= headshotSpace
+				player.draw_direct(LAYOUT_HUD,forClient,f"xr {rightOffset+4} yt {startY+4} picn c/hs ")
 				spaceCharsBetweenNames += headshotSpace//8
-
-			# gun icon
-			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - spaceCharsBetweenNames*8 } yv {startY-8} picn c/s1 ")
+				
+			if mod == MOD_SHOTGUN:
+				gunSpace = 88
+				spaceCharsBetweenNames += gunSpace // 8
+				rightOffset -= gunSpace
+				# gun icon
+				player.draw_direct(LAYOUT_HUD,forClient,f"xr {rightOffset } yt {startY-8} picn c/s1 ")
+			elif mod == MOD_C4:
+				c4Space = 24
+				spaceCharsBetweenNames += c4Space // 8
+				rightOffset -= c4Space
+				player.draw_direct(LAYOUT_HUD,forClient,f"xr {rightOffset+4} yt {startY+4} picn c/c4 ")
 
 			# name max width = 16 * 8 = 128
 			# Draw names with spaces between them ( for images )
 			killLine = killerName + " "*spaceCharsBetweenNames + victimName
-			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - lenIgnoreColor(killerName)*8 - spaceCharsBetweenNames*8} yv {startY+8} string \"{killLine}\"")
+			player.draw_direct(LAYOUT_HUD,forClient,f"xr {0 - lenIgnoreColor(victimName)*8 - lenIgnoreColor(killerName)*8 - spaceCharsBetweenNames*8} yt {startY+8} string \"{killLine}\"")
 			
 		startY += 24 + 8
 	

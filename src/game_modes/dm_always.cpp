@@ -130,6 +130,8 @@ void	always_gamerules_c::levelInit(void){
 	orig_SV_GhoulFileIndex("c/hs.m32");
 	// skull and cross bones
 	orig_SV_GhoulFileIndex("c/sb.m32");
+	// C4
+	orig_SV_GhoulFileIndex("c/c4.m32");
 
 	// For detecting first frame into intermission.
 	for ( int i = 0 ; i < 32 ; i ++ ) {
@@ -618,7 +620,8 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 				break;
 
 				case MOD_C4:
-					
+					generate_death_card = true;
+					use_default_obit = false;
 				break;
 
 				case MOD_CLAYMORE:

@@ -391,6 +391,10 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	memoryAdjust(base_addr + 0x009D110,3,0x90);
 	
 
+	// -----------------DISABLE PLAYERS COMMAND LEAKS IP----------------------------
+	memoryAdjust(base_addr + 0x00189F7B,5,0x90);
+
+	
 	return game_exports;
 }
 
