@@ -410,3 +410,48 @@ void my_PM_StepSlideMove(int num)
 	slideFix();
 	orig_PM_StepSlideMove(num);
 }
+
+/*
+This is a server specific hook of Netchan_Transmit, needed primarily for saving data for demo.
+*/
+void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
+{
+	if ( recordingStatus ) {
+
+		//netchan_t->reliable_length
+ 		int rel_len = stget(chan,0x404c);
+ 		//netchan_t->message.cursize
+		int cur_size = stget(chan,0x54);
+		//netchan_t->message_buf;
+		unsigned char * relBuff = (void*)chan+0x5C;
+
+		int relLen = 0;
+		if ( !rel_len && cur_size ) {
+			// new reliable sent this frame.
+			relLen = cur_size;
+		}
+
+		storeDemoData(chan, relLen, relBuff, length, data); 
+	}
+
+	orig_Netchan_Transmit(chan,length,data);
+}
+
+/*
+This is a server specific hook of Netchan_Transmit, needed primarily for playback of demo, routing demo data into the network buffer to be sent out to the clients.
+*/
+void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
+{
+	int serverstate = stget(0x082AF680,0);
+	SOFPPNIX_DEBUG("Serverstate is %i",serverstate);
+
+	//Grab the data here.
+	//Rather unload the relData into the rel buffer and unrel data into data etc.
+
+	
+	sizebuf_t * unrelSZ = restoreNetworkBuffers(chan);
+
+	orig_Netchan_Transmit(chan,unrelSZ->cursize,unrelSZ->data);
+
+	if ( currentDemoFrame > finalDemoFrame ) orig_SV_Nextserver();
+}

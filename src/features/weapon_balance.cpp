@@ -425,5 +425,5 @@ qboolean fake_SV_Trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edic
 void patchShotgun(void)
 {
 
-	memoryAdjust(base_addr +  , )
+	//memoryAdjust(base_addr +  , )
 }

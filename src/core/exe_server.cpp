@@ -300,3 +300,13 @@ void my_SV_ExecuteUserCommand (char *s)
 	SOFPPNIX_DEBUG("Command : %s",s);
 	orig_SV_ExecuteUserCommand(s);
 }
+
+/*
+	Redirect ss_demo server_state_t 3 to ss_thickdemo server_state_t 9
+	This should disable the old demo playback method.
+*/
+void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame)
+{
+	if (serverstate == 3 && thickdemo) serverstate = 9;
+	orig_SV_SpawnServer(server,spawnpoint,serverstate,attractloop,loadgame);
+}

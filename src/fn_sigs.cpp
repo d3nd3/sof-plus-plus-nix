@@ -46,12 +46,18 @@ void (*orig_SV_ExecuteUserCommand) (char *s) = 0x080B1D40;
 
 int (*orig_SV_EffectIndex)( char * name) = 0x080A94BC;
 
+void (*orig_SV_Map) (qboolean attractloop, char *levelstring, qboolean loadgame) = 0x080A8DA0;
+
+void (*orig_SV_SpawnServer) (char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame) = 0x080A8298;
 
 qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask, trace_t *trace) = 0x080B37BC;
+
+void (*orig_SV_Nextserver) (void) = 0x080B13A4;
 
 
 // ----SHARED-----
 
+void (*orig_SZ_Write) (sizebuf_t *buf, void *data, int length) = 0x0812061C;
 char *(*orig_CopyString) (char *in) = 0x08120C3C;
 void (*orig_Z_FreeTags) (int tag) = 0x08120DB4;
 void (*orig_Z_Free) (void *ptr) = 0x08120CBC;
@@ -101,6 +107,8 @@ void (*orig_PAK_ReadDeltaUsercmd) (void *in_packet, usercmd_t *from, usercmd_t *
 
 
 void (*orig_PM_StepSlideMove) (int num) = 0x0812D9BC;
+
+void (*orig_Netchan_Transmit) (netchan_t *chan, int length, byte *data) = 0x0812AFCC;
 
 /*
 ---------------------Ref Library---------------------

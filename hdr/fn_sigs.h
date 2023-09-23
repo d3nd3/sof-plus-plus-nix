@@ -10,6 +10,8 @@ extern char * (*orig_SV_StatusString)(void);
 extern void (*orig_SV_Map_f)(void);
 extern void my_SV_Map_f(void);
 
+extern void (*orig_SV_Map) (qboolean attractloop, char *levelstring, qboolean loadgame);
+
 extern void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd);
 extern void my_SV_ClientThink(void *cl, usercmd_t *cmd);
 
@@ -25,6 +27,9 @@ extern int (*orig_SV_GhoulFileIndex) (char *name);
 
 extern void (*orig_SV_ExecuteUserCommand) (char *s);
 void my_SV_ExecuteUserCommand (char *s);
+
+extern void (*orig_SV_SpawnServer) (char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame);
+void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame);
 
 
 extern int (*orig_SV_EffectIndex)( char * name);
@@ -68,6 +73,8 @@ extern qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
 
 
 // --Shared--
+extern void (*orig_SV_Nextserver) (void);
+extern void (*orig_SZ_Write) (sizebuf_t *buf, void *data, int length);
 extern int (*orig_FS_LoadFile) (char *name, void **buf, bool OverridePak = false);
 extern char *(*orig_CopyString) (char *in);
 extern void (*orig_Z_FreeTags) (int tag);
@@ -148,6 +155,10 @@ extern void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *
 
 extern void (*orig_PM_StepSlideMove) (int num);
 extern void my_PM_StepSlideMove(int num);
+
+extern void (*orig_Netchan_Transmit) (netchan_t *chan, int length, byte *data);
+void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data);
+void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data);
 
 
 /*

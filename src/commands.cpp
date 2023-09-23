@@ -7,6 +7,9 @@ void CreateCommands(void)
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
 	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
 
+	my_Cmd_AddCommand("++nix_demomap",&cmd_nix_demomap);
+	my_Cmd_AddCommand("++nix_record",&cmd_nix_record);
+	my_Cmd_AddCommand("++nix_stoprecord",&cmd_nix_stoprecord);
 
 	// command to output checksum
 	my_Cmd_AddCommand("++nix_checksum",&cmd_nix_checksum);
@@ -243,4 +246,60 @@ void cmd_nix_test(void)
 	int out = orig_SP_GetStringID(orig_Cmd_Argv(1) );
 
 	SOFPPNIX_DEBUG("%04X",out);
+}
+
+
+
+void cmd_nix_demomap(void)
+{
+
+	if ( recordingStatus ) {
+		SOFPPNIX_PRINT("Stop your recording first.");
+		return;
+	}
+
+	
+	//get lowest frame
+	startDemoFrame = demoFrames.begin()->first;
+	currentDemoFrame = startDemoFrame;
+	finalDemoFrame = demoFrames.rbegin()->first;
+	SOFPPNIX_DEBUG("Starting demo on frame : %i / %i",currentDemoFrame, finalDemoFrame);
+
+	//causes server_state_t to use value of 9 instead of usual ss_demo 3.
+	//disabling all ss_demo like features.
+	thickdemo = true;
+	SOFPPNIX_DEBUG("Preparing to launch last recorded demo : %s!",recordingName);
+
+
+	orig_SV_Map(true, recordingName , false );
+
+	//Disable demofile
+
+	thickdemo = false;
+}
+
+void cmd_nix_record(void)
+{
+	if ( recordingStatus ) {
+		SOFPPNIX_PRINT("You are already recording.");
+		return;
+	}
+
+	clearDemoData();
+	snprintf(recordingName,MAX_TOKEN_CHARS,"%s.dm2",orig_Cmd_Argv(1));
+	recordingStatus = true;
+
+	SOFPPNIX_DEBUG("Recording demoname : %s!",recordingName);
+}
+
+void cmd_nix_stoprecord(void)
+{
+	if ( !recordingStatus ) {
+		SOFPPNIX_PRINT("You are already not recording.");
+		return;
+	}
+	SOFPPNIX_DEBUG("Recording ended!");
+
+	recordingStatus = false;
+	//recordingName[0] = 0x00;
 }

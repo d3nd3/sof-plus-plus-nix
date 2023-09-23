@@ -243,6 +243,9 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x080AFDA3,5,NOP);
 	memoryAdjust(0x080AFDB1,5,NOP);
 
+//---------------------------CALL NETCHAN DEMO PLAYBACK IF >= 3 instead of == 3---------------------
+	memoryAdjust(0x080AFDC2,1,0x7C);
+
 ////////////////////////////////////////////////////
 
 
@@ -304,14 +307,23 @@ void __attribute__ ((constructor)) begin() {
 
 	// orig_PF_Configstring = createDetour( orig_PF_Configstring, &my_PF_Configstring, 5);
 
+	orig_SV_RunGameFrame = createDetour(orig_SV_RunGameFrame,&my_SV_RunGameFrame,5);
+	orig_SV_ExecuteUserCommand = createDetour(orig_SV_ExecuteUserCommand,&my_SV_ExecuteUserCommand,5);
+
+	// orig_Netchan_Transmit = createDetour(orig_Netchan_Transmit,&my_Netchan_Transmit,6);
+	callE8Patch(0x080AFBF4,&my_Netchan_Transmit_Save); //Outgoing
+	callE8Patch(0x080AFEAE,&my_Netchan_Transmit_Save); //Connecting client, relay reliable.
+
+	callE8Patch(0x080AFDD8,&my_Netchan_Transmit_Playback); //DemoPlayback.
+
+	orig_SV_SpawnServer = createDetour(orig_SV_SpawnServer,&my_SV_SpawnServer,5);
 
 //-----------------------------------------GAME------------------------------------------
+	// GameDetours applied in getgameapi using relative address.
 	orig_Sys_GetGameAPI = createDetour(0x08209C50,&my_Sys_GetGameAPI,9);
 	// callE8Patch(0x080A736F,&my_Sys_GetGameAPI);
 
-	orig_SV_RunGameFrame = createDetour(orig_SV_RunGameFrame,&my_SV_RunGameFrame,5);
-
-	orig_SV_ExecuteUserCommand = createDetour(orig_SV_ExecuteUserCommand,&my_SV_ExecuteUserCommand,5);
+	
 }
 
 // __builtin_return_address(0)

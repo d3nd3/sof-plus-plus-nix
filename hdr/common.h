@@ -374,6 +374,11 @@ extern void cmd_nix_client_map(void);
 extern void cmd_nix_checksum(void);
 extern void nix_draw_clear(edict_t * ent);
 
+extern void cmd_nix_demomap(void);
+extern void cmd_nix_record(void);
+extern void cmd_nix_stoprecord(void);
+
+
 
 /*---------------------------------------------------------------------
 -----------------------------cvars.cpp----------------------------
@@ -511,3 +516,32 @@ extern qboolean fake_SV_Trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t en
 extern bool shotgunStudy;
 extern void applyShotgunGore(edict_t * ent);
 extern void * memfxRunner;
+
+/*
+---------------------------------------------------------------------------
+-----------------------------demos.cpp---------------------------------
+---------------------------------------------------------------------------
+*/
+typedef struct fighter_slice_s {
+	sizebuf_t* relSZ;
+	sizebuf_t* unrelSZ;
+} fighter_slice_t;
+
+//contains fighter slices
+typedef struct demo_frame_s {
+	int frameNum;
+	std::map<int,fighter_slice_t*> fighters; //indexed by slot
+} demo_frame_t;
+
+extern void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
+extern void constructDemo();
+extern void clearDemoData(void);
+extern sizebuf_t * restoreNetworkBuffers(netchan_t* chan);
+extern bool thickdemo;
+extern bool recordingStatus;
+extern char recordingName[MAX_TOKEN_CHARS];
+extern int startDemoFrame;
+extern int currentDemoFrame;
+extern int finalDemoFrame;
+extern std::map<int,demo_frame_t*> demoFrames;
+extern int prefferedFighter;

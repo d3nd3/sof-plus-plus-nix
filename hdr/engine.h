@@ -12,6 +12,16 @@ extern unsigned int * objinst;
 #include "../src/Game/gamecpp/q_shared.h"
 
 
+#define	MAX_STRING_CHARS	1024	// max length of a string passed to Cmd_TokenizeString
+#define	MAX_STRING_TOKENS	80		// max tokens resulting from Cmd_TokenizeString
+#define	MAX_TOKEN_CHARS		128		// max length of an individual token
+
+typedef enum {
+	ss_dead,			// no map loaded
+	ss_loading,			// spawning level edicts
+	ss_game,			// actively running
+	ss_demo
+} server_state_t;
 
 typedef void client_t;
 
