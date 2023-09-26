@@ -258,6 +258,8 @@ void cmd_nix_demomap(void)
 		return;
 	}
 
+	//toggled by SV_New_f
+	demoPlaybackInitiate = false;
 	
 	//get lowest frame
 	startDemoFrame = demoFrames.begin()->first;
@@ -284,11 +286,12 @@ void cmd_nix_record(void)
 		SOFPPNIX_PRINT("You are already recording.");
 		return;
 	}
-
+	demoWaiting = true;
 	clearDemoData();
 	snprintf(recordingName,MAX_TOKEN_CHARS,"%s.dm2",orig_Cmd_Argv(1));
 	recordingStatus = true;
 
+	storeServerData();
 	SOFPPNIX_DEBUG("Recording demoname : %s!",recordingName);
 }
 

@@ -244,7 +244,18 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x080AFDB1,5,NOP);
 
 //---------------------------CALL NETCHAN DEMO PLAYBACK IF >= 3 instead of == 3---------------------
-	memoryAdjust(0x080AFDC2,1,0x7C);
+	memoryAdjust(0x080AFDC2,1,0x7C); // JL
+
+//----------------------------SIMILAR PATCH FOR SV_PRECACHE_F TO INCLUDE STATE==9-------------------------
+	memoryAdjust(0x080B0DF9,1,0x7D); // JGE
+
+
+//---------------------------ALLOW CONNECT TO ATTRACTLOOP---------------------------------
+	memoryAdjust(0x080AA87F,1,0xEB);
+
+//---------------------------SERVER SIDE DEMO--------------------------
+	callE8Patch(0x080AFBF4,&my_Netchan_Transmit_Save); //Outgoing
+	callE8Patch(0x080AFDD8,&my_Netchan_Transmit_Playback); //DemoPlayback.
 
 ////////////////////////////////////////////////////
 
@@ -311,12 +322,13 @@ void __attribute__ ((constructor)) begin() {
 	orig_SV_ExecuteUserCommand = createDetour(orig_SV_ExecuteUserCommand,&my_SV_ExecuteUserCommand,5);
 
 	// orig_Netchan_Transmit = createDetour(orig_Netchan_Transmit,&my_Netchan_Transmit,6);
-	callE8Patch(0x080AFBF4,&my_Netchan_Transmit_Save); //Outgoing
-	callE8Patch(0x080AFEAE,&my_Netchan_Transmit_Save); //Connecting client, relay reliable.
-
-	callE8Patch(0x080AFDD8,&my_Netchan_Transmit_Playback); //DemoPlayback.
+	
 
 	orig_SV_SpawnServer = createDetour(orig_SV_SpawnServer,&my_SV_SpawnServer,5);
+
+	orig_SV_WriteFrameToClient = createDetour(orig_SV_WriteFrameToClient,&my_SV_WriteFrameToClient,5);
+
+	orig_SV_New_f = createDetour(orig_SV_New_f,&my_SV_New_f,6);
 
 //-----------------------------------------GAME------------------------------------------
 	// GameDetours applied in getgameapi using relative address.

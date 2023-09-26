@@ -29,7 +29,8 @@ void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *
 void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd) = 0x080BA99C;
 
 // ---SERVER-----
-
+void (*orig_SV_WriteFrameToClient) (client_t *client, sizebuf_t *msg) = 0x080A58AC;
+void (*orig_SV_New_f) (void) = 0x080B0234;
 void (*orig_SV_Map_f)(void) = 0x080AE3E8;
 
 void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd) = 0x080B1470;
@@ -52,10 +53,20 @@ void (*orig_SV_SpawnServer) (char *server, char *spawnpoint, server_state_t serv
 
 qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask, trace_t *trace) = 0x080B37BC;
 
-void (*orig_SV_Nextserver) (void) = 0x080B13A4;
+void (*orig_SV_Nextserver) (void) = 0x080B1C9C;
 
 
 // ----SHARED-----
+
+
+char *(*orig_Cvar_VariableString) (char *var_name) = 0x081229A4;
+void (*orig_MSG_WriteByte) (sizebuf_t *sb, int c) = 0x0811F5CC;
+void (*orig_MSG_WriteLong) (sizebuf_t *sb, int c) = 0x0811F674;
+void (*orig_MSG_WriteString) (sizebuf_t *sb, char *s) = 0x0811F760;
+void (*orig_MSG_WriteShort) (sizebuf_t *sb, int c) = 0x0811F5FC;
+void (*orig_WriteConfigString)(sizebuf_t *sb, char *s) = 0x080A928C;
+void (*orig_MSG_WriteDeltaEntity)(struct entity_state_s *from, struct entity_state_s *to
+						   , sizebuf_t *msg, qboolean force) = 0x0811D0E8;
 
 void (*orig_SZ_Write) (sizebuf_t *buf, void *data, int length) = 0x0812061C;
 char *(*orig_CopyString) (char *in) = 0x08120C3C;

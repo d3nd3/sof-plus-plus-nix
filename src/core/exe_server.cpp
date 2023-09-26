@@ -310,3 +310,28 @@ void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstat
 	if (serverstate == 3 && thickdemo) serverstate = 9;
 	orig_SV_SpawnServer(server,spawnpoint,serverstate,attractloop,loadgame);
 }
+
+/*
+	Start sending data here. For demo initiation.
+*/
+void my_SV_New_f(void)
+{
+	//TODO: Support multiple clients. This becomes array.
+	SOFPPNIX_DEBUG("SV_New_f");
+	demoPlaybackInitiate = true;
+	orig_SV_New_f();
+}
+
+/*
+	Record 1 non-compressed frame for demos.
+*/
+void my_SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
+{
+	int lastframe = stget(client,0x204);
+	//force server to dispatch 1 uncompressed frame.
+	if ( demoWaiting ) {
+		*(int*)((void*)client+0x204) = -1;
+		demoWaiting = false;
+	}
+	orig_SV_WriteFrameToClient(client,msg);
+}

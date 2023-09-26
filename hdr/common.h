@@ -534,8 +534,11 @@ typedef struct demo_frame_s {
 } demo_frame_t;
 
 extern void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
+extern void storeServerData();
 extern void constructDemo();
 extern void clearDemoData(void);
+extern int netchanToSlot(void * inChan);
+extern void demos_handlePlayback(netchan_t *chan, int length, byte *data);
 extern sizebuf_t * restoreNetworkBuffers(netchan_t* chan);
 extern bool thickdemo;
 extern bool recordingStatus;
@@ -545,3 +548,5 @@ extern int currentDemoFrame;
 extern int finalDemoFrame;
 extern std::map<int,demo_frame_t*> demoFrames;
 extern int prefferedFighter;
+extern bool demoPlaybackInitiate;
+extern bool demoWaiting;

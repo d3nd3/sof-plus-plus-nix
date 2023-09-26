@@ -439,19 +439,20 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 
 /*
 This is a server specific hook of Netchan_Transmit, needed primarily for playback of demo, routing demo data into the network buffer to be sent out to the clients.
+
+client state is still cs_zombie after disconnect.
 */
 void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 {
 	int serverstate = stget(0x082AF680,0);
-	SOFPPNIX_DEBUG("Serverstate is %i",serverstate);
+	//sv.state = serverstate; inside SV_SpawnServer.
+	if ( serverstate != 9 ) {
+		//if its not 9, it will be 3. So this is normal cl_record_f behaviour.
+		return orig_Netchan_Transmit(chan,length,data);
+	}
 
-	//Grab the data here.
-	//Rather unload the relData into the rel buffer and unrel data into data etc.
+	//serverstate == 9 demoInitiatePlayback == true, toggled by SV_New_f
+	if ( !demoPlaybackInitiate ) return;
+	demos_handlePlayback(chan,length,data);
 
-	
-	sizebuf_t * unrelSZ = restoreNetworkBuffers(chan);
-
-	orig_Netchan_Transmit(chan,unrelSZ->cursize,unrelSZ->data);
-
-	if ( currentDemoFrame > finalDemoFrame ) orig_SV_Nextserver();
 }

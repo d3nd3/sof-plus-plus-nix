@@ -424,29 +424,29 @@ typedef struct aEffectInfo_s
 
 typedef struct entity_state_s
 {
-	int			number;			// edict index
+	int			number;			// edict index 0
 
-	vec3_t		origin;
-	vec3_t		angles;
-	vec_t		angle_diff;
-	int			modelindex;
-	int			renderindex;
-	int			frame;
-	int			skinnum;
-	int			effects;
-	int			renderfx;
-	int			solid;			// For client side prediction, (bits 0-7) is x/y radius
+	vec3_t		origin;// 4
+	vec3_t		angles;//0x10
+	vec_t		angle_diff;//0x1C
+	int			modelindex;//0x20
+	int			renderindex;//0x24
+	int			frame;//0x28
+	int			skinnum;//0x2C
+	int			effects;//0x30
+	int			renderfx;//0x34
+	int			solid;			// 0x38 For client side prediction, (bits 0-7) is x/y radius
 								// (bits 8-15) is z down distance, (bits16-23) is z up.
 								// The msb is unused (and unsent).
 								// gi.linkentity sets this properly
-	int			sound;			// for looping sounds, to guarantee shutoff
-	int			sound_data;		// data for volume on looping sound, as well as attenuation
-	int			event;			// impulse events -- muzzle flashes, footsteps, etc
-	int			event2;			// events only go out for a single frame, they
-	int			event3;			// are automatically cleared each frame - 3 just in case...
-	int			data;			// data for the event FX
-	int			data2;			// most of the time, these are
-	int			data3;			// empty
+	int			sound;			// 0x3C for looping sounds, to guarantee shutoff
+	int			sound_data;		// 0x40 data for volume on looping sound, as well as attenuation
+	int			event;			// 0x44 impulse events -- muzzle flashes, footsteps, etc
+	int			event2;			// 0x48 events only go out for a single frame, they
+	int			event3;			// 0x4C are automatically cleared each frame - 3 just in case...
+	int			data;			// 0x50 data for the event FX
+	int			data2;			// 0x54 most of the time, these are
+	int			data3;			// 0x58 empty
 
 	aEffectInfo_t	effectData[NUM_EFFECTS];
 } entity_state_t;

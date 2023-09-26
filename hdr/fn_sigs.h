@@ -3,6 +3,13 @@
 */
 
 // -------------------Server-----------------
+
+extern void (*orig_SV_WriteFrameToClient) (client_t *client, sizebuf_t *msg);
+extern void my_SV_WriteFrameToClient (client_t *client, sizebuf_t *msg);
+
+extern void (*orig_SV_New_f) (void);
+extern void my_SV_New_f(void);
+
 // Builds the string that is sent as heartbeats and status replies
 // {E8 DIRECT OVERRIDE}
 extern char * (*orig_SV_StatusString)(void);
@@ -73,6 +80,17 @@ extern qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t
 
 
 // --Shared--
+
+extern char *(*orig_Cvar_VariableString) (char *var_name);
+
+extern void (*orig_MSG_WriteByte) (sizebuf_t *sb, int c);
+extern void (*orig_MSG_WriteLong) (sizebuf_t *sb, int c);
+extern void (*orig_MSG_WriteString) (sizebuf_t *sb, char *s);
+extern void (*orig_MSG_WriteShort) (sizebuf_t *sb, int c);
+extern void (*orig_WriteConfigString)(sizebuf_t *sb, char *s);
+extern void (*orig_MSG_WriteDeltaEntity)(struct entity_state_s *from, struct entity_state_s *to
+						   , sizebuf_t *msg, qboolean force);
+
 extern void (*orig_SV_Nextserver) (void);
 extern void (*orig_SZ_Write) (sizebuf_t *buf, void *data, int length);
 extern int (*orig_FS_LoadFile) (char *name, void **buf, bool OverridePak = false);

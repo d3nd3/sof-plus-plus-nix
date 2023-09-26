@@ -104,8 +104,9 @@ PROTOCOL
 */
 
 // protocol.h -- communications protocols
+// changed to 33 for 1.07f.
 
-#define	PROTOCOL_VERSION	32
+#define	PROTOCOL_VERSION	33
 
 /*
 ---------------------------------------------
