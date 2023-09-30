@@ -141,6 +141,10 @@ void	always_gamerules_c::levelInit(void){
 	killFeedList.clear();
 	killFeedLength = 0;
 
+
+	for ( int i = 0; i < 16; i++ ) 
+		demoResetVars(i);
+
 	// dm specific levelinit fallback func
 	currentGameMode->levelInit();
 }
@@ -419,6 +423,10 @@ void	always_gamerules_c::clientDisconnect(edict_t *ent){
 		Py_XDECREF(result);
 	}
 	Py_XDECREF(who);
+
+	int slot = slot_from_ent(ent);
+	demoResetVarsWeak(slot);
+
 
 	currentGameMode->clientDisconnect(ent);
 

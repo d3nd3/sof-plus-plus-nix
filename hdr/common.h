@@ -533,6 +533,11 @@ typedef struct demo_frame_s {
 	std::map<int,fighter_slice_t*> fighters; //indexed by slot
 } demo_frame_t;
 
+typedef struct initChunk_s {
+	char * data;
+	int len;
+} initChunk_t;
+
 extern void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
 extern void storeServerData();
 extern void constructDemo();
@@ -540,6 +545,10 @@ extern void clearDemoData(void);
 extern int netchanToSlot(void * inChan);
 extern void demos_handlePlayback(netchan_t *chan, int length, byte *data);
 extern sizebuf_t * restoreNetworkBuffers(netchan_t* chan);
+
+extern void demoResetVars(int slot);
+extern void demoResetVarsWeak(int slot);
+
 extern bool thickdemo;
 extern bool recordingStatus;
 extern char recordingName[MAX_TOKEN_CHARS];
@@ -550,3 +559,17 @@ extern std::map<int,demo_frame_t*> demoFrames;
 extern int prefferedFighter;
 extern bool demoPlaybackInitiate;
 extern bool demoWaiting;
+extern sizebuf_t relAccumulate;
+extern char accum_buf[1400-16];
+
+//Recording reset on each level
+extern bool ghoulChunksSaved[16];
+extern std::vector<initChunk_t> ghoulChunks[16];
+//Recording: actual replay data saved.
+extern std::vector<initChunk_t> ghoulChunksReplay[16];
+extern bool ghoulChunksSavedReplay[16];
+//Playback
+extern int ghoulChunkIndex[16];
+extern bool ghoulLoaded[16];
+
+extern bool disableDefaultRelBuffer;

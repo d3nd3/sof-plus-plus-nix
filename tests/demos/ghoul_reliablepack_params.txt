@@ -1,0 +1,148 @@
+[sof++nix_Debug] : SpawnServer2
+[sof++nix_Debug] : SV_New_f
+[sof++nix_Debug] : Slot == 0, FrameNum == 145, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 146, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 147, FreeSpace = 707
+[sof++nix_Debug] : Written == 698, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 148, FreeSpace = 707
+[sof++nix_Debug] : Written == 696, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 149, FreeSpace = 707
+[sof++nix_Debug] : Written == 699, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 150, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 151, FreeSpace = 707
+[sof++nix_Debug] : Written == 686, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 152, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 153, FreeSpace = 707
+[sof++nix_Debug] : Written == 693, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 154, FreeSpace = 707
+[sof++nix_Debug] : Written == 699, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 155, FreeSpace = 707
+[sof++nix_Debug] : Written == 663, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 156, FreeSpace = 707
+[sof++nix_Debug] : Written == 698, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 157, FreeSpace = 707
+[sof++nix_Debug] : Written == 666, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 158, FreeSpace = 707
+[sof++nix_Debug] : Written == 609, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 159, FreeSpace = 707
+[sof++nix_Debug] : Written == 610, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 160, FreeSpace = 707
+[sof++nix_Debug] : Written == 608, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 161, FreeSpace = 707
+[sof++nix_Debug] : Written == 629, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 162, FreeSpace = 707
+[sof++nix_Debug] : Written == 636, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 163, FreeSpace = 707
+[sof++nix_Debug] : Written == 628, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 164, FreeSpace = 707
+[sof++nix_Debug] : Written == 584, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 165, FreeSpace = 707
+[sof++nix_Debug] : Written == 695, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 166, FreeSpace = 707
+[sof++nix_Debug] : Written == 670, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 167, FreeSpace = 707
+[sof++nix_Debug] : Written == 625, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 168, FreeSpace = 707
+[sof++nix_Debug] : Written == 650, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 169, FreeSpace = 707
+[sof++nix_Debug] : Written == 500, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 170, FreeSpace = 707
+[sof++nix_Debug] : Written == 674, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 171, FreeSpace = 707
+[sof++nix_Debug] : Written == 680, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 172, FreeSpace = 707
+[sof++nix_Debug] : Written == 645, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 173, FreeSpace = 707
+[sof++nix_Debug] : Written == 624, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 174, FreeSpace = 707
+[sof++nix_Debug] : Written == 691, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 175, FreeSpace = 707
+[sof++nix_Debug] : Written == 608, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 176, FreeSpace = 707
+[sof++nix_Debug] : Written == 600, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 177, FreeSpace = 707
+[sof++nix_Debug] : Written == 692, ret == 0
+[sof++nix_Debug] : Slot == 0, FrameNum == 178, FreeSpace = 707
+[sof++nix_Debug] : Written == 565, ret == 1
+[Python] On Connect
+Unable to exec hidebot.cfg
+execing bot/mapcfgs/default.cfg
+DEFAULT BOT FILE LOADED YEEEE 
+[sof++nix_Debug] : SV_New_f
+[sof++nix_Debug] : Slot == 1, FrameNum == 629, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 630, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 631, FreeSpace = 707
+[sof++nix_Debug] : Written == 698, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 632, FreeSpace = 707
+[sof++nix_Debug] : Written == 696, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 633, FreeSpace = 707
+[sof++nix_Debug] : Written == 699, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 634, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 635, FreeSpace = 707
+[sof++nix_Debug] : Written == 686, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 636, FreeSpace = 707
+[sof++nix_Debug] : Written == 697, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 637, FreeSpace = 707
+[sof++nix_Debug] : Written == 693, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 638, FreeSpace = 707
+[sof++nix_Debug] : Written == 699, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 639, FreeSpace = 707
+[sof++nix_Debug] : Written == 663, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 640, FreeSpace = 707
+[sof++nix_Debug] : Written == 698, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 641, FreeSpace = 707
+[sof++nix_Debug] : Written == 666, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 642, FreeSpace = 707
+[sof++nix_Debug] : Written == 609, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 643, FreeSpace = 707
+[sof++nix_Debug] : Written == 610, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 644, FreeSpace = 707
+[sof++nix_Debug] : Written == 608, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 645, FreeSpace = 707
+[sof++nix_Debug] : Written == 629, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 646, FreeSpace = 707
+[sof++nix_Debug] : Written == 636, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 648, FreeSpace = 707
+[sof++nix_Debug] : Written == 628, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 650, FreeSpace = 707
+[sof++nix_Debug] : Written == 584, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 651, FreeSpace = 707
+[sof++nix_Debug] : Written == 695, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 652, FreeSpace = 707
+[sof++nix_Debug] : Written == 670, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 653, FreeSpace = 707
+[sof++nix_Debug] : Written == 625, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 654, FreeSpace = 707
+[sof++nix_Debug] : Written == 650, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 655, FreeSpace = 707
+[sof++nix_Debug] : Written == 500, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 656, FreeSpace = 707
+[sof++nix_Debug] : Written == 674, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 657, FreeSpace = 707
+[sof++nix_Debug] : Written == 680, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 658, FreeSpace = 707
+[sof++nix_Debug] : Written == 645, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 659, FreeSpace = 707
+[sof++nix_Debug] : Written == 624, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 660, FreeSpace = 707
+[sof++nix_Debug] : Written == 691, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 661, FreeSpace = 707
+[sof++nix_Debug] : Written == 608, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 662, FreeSpace = 707
+[sof++nix_Debug] : Written == 600, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 663, FreeSpace = 707
+[sof++nix_Debug] : Written == 692, ret == 0
+[sof++nix_Debug] : Slot == 1, FrameNum == 664, FreeSpace = 707
+[sof++nix_Debug] : Written == 565, ret == 1
+34.
+[Python] On Connect
+1 disconnected
+[sof++nix_Debug] : Slot == 0, FrameNum == 906, FreeSpace = 684
+[sof++nix_Debug] : Written == 6, ret == 1

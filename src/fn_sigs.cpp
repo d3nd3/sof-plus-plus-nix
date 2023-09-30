@@ -29,6 +29,9 @@ void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *
 void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd) = 0x080BA99C;
 
 // ---SERVER-----
+void (*orig_GhoulServerFlushClients)(void) = 0x081A6428;
+void (*orig_GhoulReliableHitwire)(int slot, int frameNum) = 0x081A6350;
+int (*orig_GhoulPackReliable)(int slot,int frameNum, char * packInto, int freeSpace,int * written) = 0x081A5D64;
 void (*orig_SV_WriteFrameToClient) (client_t *client, sizebuf_t *msg) = 0x080A58AC;
 void (*orig_SV_New_f) (void) = 0x080B0234;
 void (*orig_SV_Map_f)(void) = 0x080AE3E8;

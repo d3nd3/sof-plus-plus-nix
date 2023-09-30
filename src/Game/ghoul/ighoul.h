@@ -383,11 +383,11 @@ public:
 	virtual void GlPrep(void *gl=0)=0; //gl is assumed to be an GhoulOpenGL *
 	virtual void PreCache(bool Specular)=0;
 	virtual void GlUnprep()=0;
-	virtual void BeginServerFrame()=0;
+	virtual void BeginServerFrame()=0;//10
 	virtual void EndServerFrame()=0;
 	virtual void DestroyAllObjects()=0;
 	virtual void FlushUnusedFiles()=0;
-	virtual void Destroy()=0;
+	virtual void Destroy()=0;//20
 
 	virtual IGhoulInst *FindClientInst(GhoulUUID key)=0;
 	virtual IGhoulObj *FindClientObj(GhoulUUID key)=0;
@@ -395,26 +395,26 @@ public:
 	virtual void SetFilenameMapper(void (*Map)(char *dest,const char *src))=0;
 
 	//server
-	virtual void AddClient(int client)=0;
-	virtual void RemoveClient(int client)=0;
+	virtual void AddClient(int client)=0;//30 - called by flushclients.
+	virtual void RemoveClient(int client)=0;// - called by flushclients.
 	virtual void FlushClients()=0;
 	virtual void RemoveAllClients()=0;
-	virtual bool PackReliable(int client,int packetID,OutPacket &op)=0;
+	virtual bool PackReliable(int client,int packetID,OutPacket &op)=0;//40
 	virtual bool NeedReliable(int client)=0;
 	virtual bool Pack(int client,int packetID,OutPacket &op,float baseTime)=0;
 	virtual void AckPack(int client,int packetID)=0;
-	virtual void ReliableHitWire(int client,int packetID)=0;
+	virtual void ReliableHitWire(int client,int packetID)=0;//50 +8 linux
 	virtual void GhoulClearClientQueue(int client,int packetID)=0;
 	virtual void AddFileForDownLoad(const char *name)=0;
 
 	//client
 	virtual void Precache()=0;
-	virtual void UnPackReliable(int packetID,InPacket &ip,bool specular)=0;
+	virtual void UnPackReliable(int packetID,InPacket &ip,bool specular)=0;//60
 	virtual void UnPack(int packetID,InPacket &ip,float now)=0;
 	virtual int GetSavedReliableSize() const=0;
 	virtual const unsigned char *GetSavedReliable()=0;
 
-	virtual int GetNumExportLights()=0;
+	virtual int GetNumExportLights()=0;//70
 	virtual void GetExportLight(int i,QuakeLight &ql)=0;
 	virtual void BeginRenderFrame()=0;
 	virtual void AddImportLight(const QuakeLight &ql)=0;

@@ -253,9 +253,22 @@ void __attribute__ ((constructor)) begin() {
 //---------------------------ALLOW CONNECT TO ATTRACTLOOP---------------------------------
 	memoryAdjust(0x080AA87F,1,0xEB);
 
+
 //---------------------------SERVER SIDE DEMO--------------------------
 	callE8Patch(0x080AFBF4,&my_Netchan_Transmit_Save); //Outgoing
 	callE8Patch(0x080AFDD8,&my_Netchan_Transmit_Playback); //DemoPlayback.
+
+//---------------------------PATCH NETCHAN_TRANSMIT (seperate rel buffer)---------------------------
+	memoryAdjust(0x0812B05A,1,0x55);
+	callE8Patch(0x0812B05B,&my_Netchan_Patch);
+	memoryAdjust(0x0812B060,1,0x83);
+	memoryAdjust(0x0812B061,1,0xc4);
+	memoryAdjust(0x0812B062,1,0x4);//cleanup stack
+	memoryUnprotect(0x0812B063);
+	unsigned char * p = 0x0812B063;
+	p[0] = 0xE9;
+	*(int*)(p+1) = 0x0812B090 - (int)0x0812B063 - 5;
+	memoryProtect(0x0812B063);
 
 ////////////////////////////////////////////////////
 
@@ -281,6 +294,9 @@ void __attribute__ ((constructor)) begin() {
 	orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
 	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
 	// callE8Patch(0x080B1809,&my_test);
+
+	//detour doesnt work !! related to esp first line?
+	//orig_Netchan_Transmit = createDetour(0x0812AFCC, &my_Netchan_Transmit,6);
 
 
 
@@ -329,6 +345,8 @@ void __attribute__ ((constructor)) begin() {
 	orig_SV_WriteFrameToClient = createDetour(orig_SV_WriteFrameToClient,&my_SV_WriteFrameToClient,5);
 
 	orig_SV_New_f = createDetour(orig_SV_New_f,&my_SV_New_f,6);
+
+	orig_GhoulPackReliable = createDetour(orig_GhoulPackReliable,&my_GhoulPackReliable,5);
 
 //-----------------------------------------GAME------------------------------------------
 	// GameDetours applied in getgameapi using relative address.

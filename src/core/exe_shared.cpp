@@ -416,6 +416,7 @@ This is a server specific hook of Netchan_Transmit, needed primarily for saving 
 */
 void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 {
+	//SOFPPNIX_DEBUG("my_netchan_save");
 	if ( recordingStatus ) {
 
 		//netchan_t->reliable_length
@@ -430,11 +431,11 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 			// new reliable sent this frame.
 			relLen = cur_size;
 		}
-
+		// SOFPPNIX_DEBUG("About to call storeDemoData");
 		storeDemoData(chan, relLen, relBuff, length, data); 
 	}
 
-	orig_Netchan_Transmit(chan,length,data);
+	my_Netchan_Transmit(chan,length,data);
 }
 
 /*
@@ -448,11 +449,65 @@ void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 	//sv.state = serverstate; inside SV_SpawnServer.
 	if ( serverstate != 9 ) {
 		//if its not 9, it will be 3. So this is normal cl_record_f behaviour.
-		return orig_Netchan_Transmit(chan,length,data);
+		return my_Netchan_Transmit(chan,length,data);
 	}
 
 	//serverstate == 9 demoInitiatePlayback == true, toggled by SV_New_f
 	if ( !demoPlaybackInitiate ) return;
+
 	demos_handlePlayback(chan,length,data);
 
+	//SOFPPNIX_DEBUG("EndNetchan");
+
+}
+
+void my_Netchan_Transmit (netchan_t *chan, int length, byte *data)
+{
+	//SOFPPNIX_DEBUG("Netchan_Transmit...");
+	//Make Need_reliable see relAccumulate instead of chan->message
+	if ( disableDefaultRelBuffer ) stset(chan,0x54,relAccumulate.cursize);
+	orig_Netchan_Transmit(chan,length,data);
+}
+
+void my_Netchan_Patch(netchan_t *chan)
+{
+	//SOFPPNIX_DEBUG("my_Netchan_Patch");
+	#if 0
+	if ( disableDefaultRelBuffer && !stget(chan,0x404c) && relAccumulate.cursize ) {
+	
+		memcpy ((void*)chan+0x4050, accum_buf, relAccumulate.cursize);
+	
+		stset(chan,0x404c,relAccumulate.cursize);
+
+	
+		stset(chan,0x40,stget(chan,0x40)^1);
+
+		relAccumulate.cursize = 0;
+
+	} else if ( !disableDefaultRelBuffer && !stget(chan,0x404c) && stget(chan,0x54) ) {
+	
+		memcpy((void*)chan+0x4050,(void*)chan+0x5c,stget(chan,0x54));
+	
+		//reliable_length
+		stset(chan,0x404c,stget(chan,0x54));
+	
+		//reliable_sequence
+		stset(chan,0x40,stget(chan,0x40)^1);
+	
+		stset(chan,0x54,0);
+	}
+	#else
+	if ( disableDefaultRelBuffer && !chan->reliable_length && relAccumulate.cursize ) {
+		memcpy (chan->reliable_buf, accum_buf, relAccumulate.cursize);
+		chan->reliable_length = relAccumulate.cursize;
+		chan->reliable_sequence ^= 1;
+		relAccumulate.cursize = 0;
+
+	} else if ( !disableDefaultRelBuffer && !chan->reliable_length && chan->message.cursize ) {
+		memcpy (chan->reliable_buf, chan->message_buf, chan->message.cursize);
+		chan->reliable_length = chan->message.cursize;
+		chan->reliable_sequence ^= 1;
+		chan->message.cursize = 0;
+	}
+	#endif
 }

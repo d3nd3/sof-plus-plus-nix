@@ -307,8 +307,18 @@ void my_SV_ExecuteUserCommand (char *s)
 */
 void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame)
 {
-	if (serverstate == 3 && thickdemo) serverstate = 9;
+	SOFPPNIX_DEBUG("SpawnServer1");
+	disableDefaultRelBuffer = false;
+	/*
+	Ensures correct reliable buffer is used for thickdemos.
+	*/
+	if (serverstate == 3 && thickdemo) {
+		//init variables for demo playback
+		serverstate = 9;
+	}
+	
 	orig_SV_SpawnServer(server,spawnpoint,serverstate,attractloop,loadgame);
+	SOFPPNIX_DEBUG("SpawnServer2");
 }
 
 /*
@@ -318,7 +328,12 @@ void my_SV_New_f(void)
 {
 	//TODO: Support multiple clients. This becomes array.
 	SOFPPNIX_DEBUG("SV_New_f");
-	demoPlaybackInitiate = true;
+
+	int serverstate = stget(0x082AF680,0);
+	if ( serverstate == 9 ) {
+		demoPlaybackInitiate = true;
+		return;
+	}
 	orig_SV_New_f();
 }
 
@@ -334,4 +349,41 @@ void my_SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 		demoWaiting = false;
 	}
 	orig_SV_WriteFrameToClient(client,msg);
+}
+
+/*
+Save ghoul Data ALWAYS.
+*/
+int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,int * written)
+{
+
+	//packInto = data + cursize
+
+	int ret = 0;
+	SOFPPNIX_DEBUG("Slot == %i, FrameNum == %i, FreeSpace = %i",slot,frameNum,freeSpace);
+	ret =  orig_GhoulPackReliable(slot,frameNum,packInto,freeSpace,written);
+	SOFPPNIX_DEBUG("Written == %i, ret == %i",*written,ret);
+
+	if ( !ghoulChunksSaved[slot] ) {
+		initChunk_t newchunk;
+		newchunk.data = malloc(*written+10);
+		newchunk.len = *written+10;
+
+		//Pointless stufftext to force client to send back faster than every second.
+		*(unsigned char*)(newchunk.data) = svc_stufftext;
+		strlcpy(newchunk.data+1,"cmd a\n",6);
+		*(unsigned char*)(newchunk.data+7) = svc_ghoulreliable;
+		*(short*)(newchunk.data+8) = *written;
+
+		memcpy(newchunk.data+10,packInto,*written);
+		ghoulChunks[slot].push_back(newchunk);
+
+		SOFPPNIX_DEBUG("Saving ghoul chunk.. from slot : %i",slot);
+	}
+
+	if ( ret == 1 ) {
+		ghoulChunksSaved[slot] = true;
+		SOFPPNIX_DEBUG("Slot : %i --> Ghoul chunks fully saved.",slot);
+	}
+	return ret;
 }

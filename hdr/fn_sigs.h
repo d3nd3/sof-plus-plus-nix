@@ -4,6 +4,13 @@
 
 // -------------------Server-----------------
 
+extern void (*orig_GhoulReliableHitwire)(int slot, int frameNum);
+
+extern int (*orig_GhoulPackReliable)(int slot,int frameNum, char * packInto, int freeSpace,int * written);
+extern int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,int * written);
+
+extern void (*orig_GhoulServerFlushClients)(void);
+
 extern void (*orig_SV_WriteFrameToClient) (client_t *client, sizebuf_t *msg);
 extern void my_SV_WriteFrameToClient (client_t *client, sizebuf_t *msg);
 
@@ -175,8 +182,10 @@ extern void (*orig_PM_StepSlideMove) (int num);
 extern void my_PM_StepSlideMove(int num);
 
 extern void (*orig_Netchan_Transmit) (netchan_t *chan, int length, byte *data);
+void my_Netchan_Transmit (netchan_t *chan, int length, byte *data);
 void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data);
 void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data);
+void my_Netchan_Patch(netchan_t *chan);
 
 
 /*

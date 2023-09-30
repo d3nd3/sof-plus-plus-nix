@@ -1515,7 +1515,7 @@ dm/gicctf
  19:svc_spawnbaseline
  18:svc_spawnbaseline
  18:svc_spawnbaseline
- 35:svc_stufftext
+ 35:svc_stufftext - stufftext: precache 1804289384; reset_predn
 514:TOTAL PACKET
 Map: dm/gicctf
                                      
@@ -1530,7 +1530,7 @@ client 0
 sky
                                      
 ------------------
- 18:svc_stufftext
+ 18:svc_stufftext - stufftext: cmd begin 42 
 700:svc_ghoulreliable
 727:TOTAL PACKET *** LARGE ***
 ------------------
