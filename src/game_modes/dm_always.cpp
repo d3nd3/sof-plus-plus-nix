@@ -53,8 +53,10 @@ int		always_gamerules_c::isDM(void){
 		Called by InitDeathmatchSystem() dm.cpp
 */
 void	always_gamerules_c::preLevelInit(void){
-	// Decorators registered. .py files loaded. Interpreter Reset.
-	pythonInit();
+	#ifdef USE_PYTHON
+		// Decorators registered. .py files loaded. Interpreter Reset.
+		pythonInit();
+	#endif
 	currentGameMode->preLevelInit();
 }
 /*
@@ -114,33 +116,35 @@ void	always_gamerules_c::levelInit(void){
 
 	spackage_register(std::string(sp_name + ".sp").c_str());
 
-	for ( int i = 0; i < map_spawn_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(map_spawn_callbacks[i],"");
-		// returns None
-		Py_XDECREF(result);
-	}
+	//Python dependant code/resources.
+	#ifdef USE_PYTHON
+		for ( int i = 0; i < map_spawn_callbacks.size(); i++ ) {
+			PyObject* result = PyObject_CallFunction(map_spawn_callbacks[i],"");
+			// returns None
+			Py_XDECREF(result);
+		}
 
-	// chat background
-	orig_SV_GhoulFileIndex("c/c.m32");
-	// killfeed background
-	// orig_SV_GhoulFileIndex("c/k.m32");
-	// shotgun
-	orig_SV_GhoulFileIndex("c/s1.m32");
-	// headshot icon
-	orig_SV_GhoulFileIndex("c/hs.m32");
-	// skull and cross bones
-	orig_SV_GhoulFileIndex("c/sb.m32");
-	// C4
-	orig_SV_GhoulFileIndex("c/c4.m32");
+		// chat background
+		orig_SV_GhoulFileIndex("c/c.m32");
+		// killfeed background
+		// orig_SV_GhoulFileIndex("c/k.m32");
+		// shotgun
+		orig_SV_GhoulFileIndex("c/s1.m32");
+		// headshot icon
+		orig_SV_GhoulFileIndex("c/hs.m32");
+		// skull and cross bones
+		orig_SV_GhoulFileIndex("c/sb.m32");
+		// C4
+		orig_SV_GhoulFileIndex("c/c4.m32");
 
-	// For detecting first frame into intermission.
-	for ( int i = 0 ; i < 32 ; i ++ ) {
-		intermission_active[i] = false;
-	}
+		// For detecting first frame into intermission.
+		for ( int i = 0 ; i < 32 ; i ++ ) {
+			intermission_active[i] = false;
+		}
 
-	killFeedList.clear();
-	killFeedLength = 0;
-
+		killFeedList.clear();
+		killFeedLength = 0;
+	#endif
 
 	for ( int i = 0; i < 16; i++ ) 
 		demoResetVars(i);
@@ -344,31 +348,32 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 
 	// SOFPPNIX_DEBUG("ent = %i",slot);
 	
-
-	const char * name = "connect";
-	PyObject * connecting_player = createEntDict(ent);
-	if ( !connecting_player ) return;
-	// Py_INCREF(connecting_player);
-	
-	for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
-		// returns None
-		Py_XDECREF(result);
-	}
-	Py_XDECREF(connecting_player);
-
+	#ifdef USE_PYTHON
+		const char * name = "connect";
+		PyObject * connecting_player = createEntDict(ent);
+		if ( !connecting_player ) return;
+		// Py_INCREF(connecting_player);
+		
+		for ( int i = 0; i < player_connect_callbacks.size(); i++ ) {
+			PyObject* result = PyObject_CallFunction(player_connect_callbacks[i],"O",connecting_player);
+			// returns None
+			Py_XDECREF(result);
+		}
+		Py_XDECREF(connecting_player);
+	#endif
 	currentGameMode->clientConnect(ent);
 
-	void * gclient = stget(ent, EDICT_GCLIENT);
-	stset(gclient, GCLIENT_SHOWSCORES,0);
-	prev_showscores[slot] = 0;
-	current_page[slot] = "scoreboard";
-	page_should_refresh[slot] = false;
+	#ifdef USE_PYTHON
+		void * gclient = stget(ent, EDICT_GCLIENT);
+		stset(gclient, GCLIENT_SHOWSCORES,0);
+		prev_showscores[slot] = 0;
+		current_page[slot] = "scoreboard";
+		page_should_refresh[slot] = false;
 
-	layout_clear(LayoutMode::hud,ent);
-	layout_clear(LayoutMode::page,ent);
-	refreshScreen(ent);
-
+		layout_clear(LayoutMode::hud,ent);
+		layout_clear(LayoutMode::page,ent);
+		refreshScreen(ent);
+	#endif
 	stats_headShots[slot] = 0;
 	stats_throatShots[slot] = 0;
 	stats_nutShots[slot] = 0;
@@ -383,25 +388,24 @@ void	always_gamerules_c::clientDie(edict_t *ent, edict_t *inflictor, edict_t *ki
 	
 	// SOFPPNIX_DEBUG("ent : %08X, inflictor : %08X, killer : %08X",ent,inflictor,killer);	
 
-	const char * name = "die";
+	#ifdef USE_PYTHON
+		PyObject * died = createEntDict(ent);
+		PyObject * inflicting_ent = createEntDict(ent);
+		PyObject * killer_player = createEntDict(ent);
 
-	PyObject * died = createEntDict(ent);
-	PyObject * inflicting_ent = createEntDict(ent);
-	PyObject * killer_player = createEntDict(ent);
+		if ( !died || !inflicting_ent || !killer_player ) return;
 
-	if ( !died || !inflicting_ent || !killer_player ) return;
+		for ( int i = 0; i < player_die_callbacks.size(); i++ ) {
 
-	for ( int i = 0; i < player_die_callbacks.size(); i++ ) {
+			PyObject* result = PyObject_CallFunction(player_die_callbacks[i],"OOO",died,inflicting_ent,killer_player);
+			// returns None
+			Py_XDECREF(result);
+		}
 
-		PyObject* result = PyObject_CallFunction(player_die_callbacks[i],"OOO",died,inflicting_ent,killer_player);
-		// returns None
-		Py_XDECREF(result);
-	}
-
-	Py_XDECREF(died);
-	Py_XDECREF(inflicting_ent);
-	Py_XDECREF(killer_player);
-
+		Py_XDECREF(died);
+		Py_XDECREF(inflicting_ent);
+		Py_XDECREF(killer_player);
+	#endif
 	currentGameMode->clientDie(ent,inflictor,killer);
 }
 //ac
@@ -414,22 +418,22 @@ void	always_gamerules_c::clientPreDisconnect(edict_t *ent){
 }
 //b4
 void	always_gamerules_c::clientDisconnect(edict_t *ent){
-	const char * name = "disconnect";
-	PyObject * who = createEntDict(ent);
-	if ( !who ) return;
-	for ( int i = 0; i < player_disconnect_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_disconnect_callbacks[i],"O",who);
-		// returns None
-		Py_XDECREF(result);
-	}
-	Py_XDECREF(who);
+	
+	#ifdef USE_PYTHON
+		PyObject * who = createEntDict(ent);
+		if ( !who ) return;
+		for ( int i = 0; i < player_disconnect_callbacks.size(); i++ ) {
+			PyObject* result = PyObject_CallFunction(player_disconnect_callbacks[i],"O",who);
+			// returns None
+			Py_XDECREF(result);
+		}
+		Py_XDECREF(who);
+	#endif
 
 	int slot = slot_from_ent(ent);
 	demoResetVarsWeak(slot);
 
-
 	currentGameMode->clientDisconnect(ent);
-
 
 }
 //b8
@@ -482,190 +486,194 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 
 	int mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
 
-	if ( py_killfeed_func ) {
-		// SOFPPNIX_DEBUG("MOD : %i" , mod);
-		bool generate_death_card = false;
-		bool use_default_obit = true;
-		switch (mod)
-		{
-			case MOD_WATER:
-			break;
-
-			case MOD_SLIME:
-			break;
-
-			case MOD_CRUSH:
-			break;
-
-			case MOD_FALLING:
-			break;
-
-			case MOD_SUICIDE:
-				// kill//swap_team
-				// SOFPPNIX_DEBUG("SUICIDE");
-			break;
-															
-			case MOD_EXPLOSIVE:
-				// Mb barrel explodes?
-				// SOFPPNIX_DEBUG("EXPLOSIVE");
-			break;
-
-			case MOD_FIRE:
-			break;
-
-			case MOD_LAVA:
-			break;
-
-			case MOD_EXIT:
-
-			break;
-
-			case MOD_BARBWIRE:
-
-			break;
-
-			case MOD_DOGBITE:
-			break;
-		};
-		if(attacker == self) {
-			generate_death_card = true;
-			use_default_obit = false;
+	#ifdef USE_PYTHON
+		if ( py_killfeed_func ) {
+			// SOFPPNIX_DEBUG("MOD : %i" , mod);
+			bool generate_death_card = false;
+			bool use_default_obit = true;
 			switch (mod)
 			{
-				case MOD_PHOS_GRENADE:
+				case MOD_WATER:
 				break;
 
-				case MOD_ROCKET_SPLASH:
+				case MOD_SLIME:
 				break;
 
-				case MOD_C4:
-					// Works.
-					// SOFPPNIX_DEBUG("C4");
+				case MOD_CRUSH:
 				break;
 
-				case MOD_CLAYMORE:
+				case MOD_FALLING:
 				break;
 
-				case MOD_NEURAL_GRENADE:
+				case MOD_SUICIDE:
+					// kill//swap_team
+					// SOFPPNIX_DEBUG("SUICIDE");
 				break;
-				case MOD_STAR_THROWN:
-					// This is grenade
-					// SOFPPNIX_DEBUG("NADE");
-				break;
-				case MOD_GRENADE:
+																
+				case MOD_EXPLOSIVE:
+					// Mb barrel explodes?
+					// SOFPPNIX_DEBUG("EXPLOSIVE");
 				break;
 
-				default:
-					// Generic self death.
+				case MOD_FIRE:
+				break;
+
+				case MOD_LAVA:
+				break;
+
+				case MOD_EXIT:
+
+				break;
+
+				case MOD_BARBWIRE:
+
+				break;
+
+				case MOD_DOGBITE:
 				break;
 			};
-		} else {
-			switch (mod)
-			{
-				case MOD_KNIFE_SLASH:
+			if(attacker == self) {
+				generate_death_card = true;
+				use_default_obit = false;
+				switch (mod)
+				{
+					case MOD_PHOS_GRENADE:
+					break;
+
+					case MOD_ROCKET_SPLASH:
+					break;
+
+					case MOD_C4:
+						// Works.
+						// SOFPPNIX_DEBUG("C4");
+					break;
+
+					case MOD_CLAYMORE:
+					break;
+
+					case MOD_NEURAL_GRENADE:
+					break;
+					case MOD_STAR_THROWN:
+						// This is grenade
+						// SOFPPNIX_DEBUG("NADE");
+					break;
+					case MOD_GRENADE:
+					break;
+
+					default:
+						// Generic self death.
+					break;
+				};
+			} else {
+				switch (mod)
+				{
+					case MOD_KNIFE_SLASH:
+						
+					break;
+
+					case MOD_KNIFE_THROWN:
+						
+					break;
+
+					case MOD_PISTOL1:
+						
+					break;
+
+					case MOD_PISTOL2:
+						
+					break;
+
+					case MOD_MPISTOL:
+						
+					break;
+
+					case MOD_ASSAULTRIFLE:
+						
+					break;
+
+					case MOD_SNIPERRIFLE:
+						
+					break;
+
+					case MOD_AUTOSHOTGUN:
+						
+					break;
+
+					case MOD_SHOTGUN:
+						generate_death_card = true;
+						use_default_obit = false;
+					break;
+
+					case MOD_MACHINEGUN:
+						
+					break;
+
+					case MOD_PHOS_GRENADE:
+						
+					break;
+
+					case MOD_ROCKET:
+						
+					break;
+
+					case MOD_ROCKET_SPLASH:
+						
+					break;
+
+					case MOD_MPG:
+						
+					break;
+
+					case MOD_FLAMEGUN:
+						
+					break;
+
+					case MOD_FLAMEGUN_NAPALM:
+						
+					break;
+
+					case MOD_C4:
+						generate_death_card = true;
+						use_default_obit = false;
+					break;
+
+					case MOD_CLAYMORE:
+						
+					break;
+
+					case MOD_NEURAL_GRENADE:
+						
+					break;
 					
-				break;
+					case MOD_TELEFRAG:
+						
+					break;
 
-				case MOD_KNIFE_THROWN:
-					
-				break;
+					case MOD_STAR_THROWN:
+						// This is grenade
+						// SOFPPNIX_DEBUG("NADE");
+					break;
 
-				case MOD_PISTOL1:
-					
-				break;
+					case MOD_GRENADE:
+						
+					break;
 
-				case MOD_PISTOL2:
-					
-				break;
-
-				case MOD_MPISTOL:
-					
-				break;
-
-				case MOD_ASSAULTRIFLE:
-					
-				break;
-
-				case MOD_SNIPERRIFLE:
-					
-				break;
-
-				case MOD_AUTOSHOTGUN:
-					
-				break;
-
-				case MOD_SHOTGUN:
-					generate_death_card = true;
-					use_default_obit = false;
-				break;
-
-				case MOD_MACHINEGUN:
-					
-				break;
-
-				case MOD_PHOS_GRENADE:
-					
-				break;
-
-				case MOD_ROCKET:
-					
-				break;
-
-				case MOD_ROCKET_SPLASH:
-					
-				break;
-
-				case MOD_MPG:
-					
-				break;
-
-				case MOD_FLAMEGUN:
-					
-				break;
-
-				case MOD_FLAMEGUN_NAPALM:
-					
-				break;
-
-				case MOD_C4:
-					generate_death_card = true;
-					use_default_obit = false;
-				break;
-
-				case MOD_CLAYMORE:
-					
-				break;
-
-				case MOD_NEURAL_GRENADE:
-					
-				break;
-				
-				case MOD_TELEFRAG:
-					
-				break;
-
-				case MOD_STAR_THROWN:
-					// This is grenade
-					// SOFPPNIX_DEBUG("NADE");
-				break;
-
-				case MOD_GRENADE:
-					
-				break;
-
-				case MOD_CONC_GRENADE:
-					
-				break;
-			};
+					case MOD_CONC_GRENADE:
+						
+					break;
+				};
+			}
+			if ( generate_death_card )
+				submitDeath(mod,attacker,self);
+			if ( use_default_obit )
+				currentGameMode->clientObituary(self,inflictor,attacker);
 		}
-		if ( generate_death_card )
-			submitDeath(mod,attacker,self);
-		if ( use_default_obit )
+		else {
 			currentGameMode->clientObituary(self,inflictor,attacker);
-	}
-	else {
+		}
+	#else
 		currentGameMode->clientObituary(self,inflictor,attacker);
-	}
+	#endif
 
 }
 //d4
@@ -689,29 +697,35 @@ void	always_gamerules_c::clientObituary(edict_t *self, edict_t *inflictor, edict
 void	always_gamerules_c::clientRespawn(edict_t *ent) {
 	// client struct is cleared before this. So showscores is always 0.
 	// align prev_scores with it.
-	int slot = slot_from_ent(ent);
-	prev_showscores[slot] = 0;
-	refreshScreen(ent);
+
+	#ifdef USE_PYTHON
+		int slot = slot_from_ent(ent);
+		prev_showscores[slot] = 0;
+		refreshScreen(ent);
+	#endif
 
 	currentGameMode->clientRespawn(ent);
-	PyObject* who = NULL;	
-	who = createEntDict(ent);
-	if (!who) return;
-	// Continue with the code logic using 'who'
-	
-	for ( int i = 0; i < player_respawn_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_respawn_callbacks[i], "O", who);
-		if (result == NULL) {
-			// Error occurred during the function call
-			PyErr_Print();  // Print the error information
-			// Handle the error
-		} else {
-			// Process the result
-			// ...
-			Py_XDECREF(result);  // Release the reference to the result object
+
+	#ifdef USE_PYTHON
+		PyObject* who = NULL;	
+		who = createEntDict(ent);
+		if (!who) return;
+		// Continue with the code logic using 'who'
+		
+		for ( int i = 0; i < player_respawn_callbacks.size(); i++ ) {
+			PyObject* result = PyObject_CallFunction(player_respawn_callbacks[i], "O", who);
+			if (result == NULL) {
+				// Error occurred during the function call
+				PyErr_Print();  // Print the error information
+				// Handle the error
+			} else {
+				// Process the result
+				// ...
+				Py_XDECREF(result);  // Release the reference to the result object
+			}
 		}
-	}
-	Py_XDECREF(who);
+		Py_XDECREF(who);
+	#endif
 }
 
 /*
@@ -753,19 +767,18 @@ G_RunFrame
 */
 
 //d8
+#ifdef USE_PYTHON
 bool prev_showscores[32] = {0};
 std::vector<std::string> chatVectors;
 
 static void runRefreshLayout(edict_t * ent,int slot, int show_scores, edict_t * killer,qboolean log_file)
 {
-
 	// SOFPPNIX_DEBUG("%02X",current_page[slot] != std::string("scoreboard"));
 	// SOFPPNIX_DEBUG("Page == %s", current_page[slot].c_str());
 	// SOFPPNIX_DEBUG("page_should_refresh[slot] = %i",page_should_refresh[slot]);
 	// SOFPPNIX_DEBUG("show_scores %i :: prev_showscores[slot] %i",show_scores,prev_showscores[slot]);	
 
 	
-
 	if ( page_should_refresh[slot] )
 			page_should_refresh[slot] = false;
 
@@ -797,46 +810,50 @@ static void runRefreshLayout(edict_t * ent,int slot, int show_scores, edict_t * 
 
 	prev_showscores[slot] = show_scores;
 }
-
+#endif
 /*
 	The intermission scoreboard shows because of G_SetStats - ent->client->ps.stats[STAT_LAYOUTS] |= 1;
 	But because we set that variable directly immediately after, G_SetStats has lost control of the toggle.
 */
 void	always_gamerules_c::clientScoreboardMessage(edict_t *ent, edict_t *killer, qboolean log_file)
 {
-	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
-	void * gclient = stget(ent, EDICT_GCLIENT);
-	int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
+	#ifdef USE_PYTHON
+		unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
+		void * gclient = stget(ent, EDICT_GCLIENT);
+		int show_scores = stget(gclient, GCLIENT_SHOWSCORES);
 
-	int slot = slot_from_ent(ent);
+		int slot = slot_from_ent(ent);
 
-	float* intermissiontime = stget(base_addr+0x002ACB1C,0) + 0x4F0;
+		float* intermissiontime = stget(base_addr+0x002ACB1C,0) + 0x4F0;
 
-	if ( (*intermissiontime > 0 && !intermission_active[slot]) || page_should_refresh[slot] || (*intermissiontime == 0 && show_scores != prev_showscores[slot])  ) {
-		
-		// First frame entering intermission.
-		if ( *intermissiontime > 0  && !intermission_active[slot] ) {
-			// Show them the scoreboard.
-			stset(gclient, GCLIENT_SHOWSCORES,1);
-			show_scores = stget(gclient, GCLIENT_SHOWSCORES);
+		if ( (*intermissiontime > 0 && !intermission_active[slot]) || page_should_refresh[slot] || (*intermissiontime == 0 && show_scores != prev_showscores[slot])  ) {
+			
+			// First frame entering intermission.
+			if ( *intermissiontime > 0  && !intermission_active[slot] ) {
+				// Show them the scoreboard.
+				stset(gclient, GCLIENT_SHOWSCORES,1);
+				show_scores = stget(gclient, GCLIENT_SHOWSCORES);
 
-			current_page[slot] = "scoreboard";
+				current_page[slot] = "scoreboard";
 
-			// now last_intermissiontime is intermission.
-			// gets reset on levelInit.
-			intermission_active[slot] = true;
+				// now last_intermissiontime is intermission.
+				// gets reset on levelInit.
+				intermission_active[slot] = true;
+			}
+			
+			// General reason to show Scoreboard
+			// print_backtrace();
+			runRefreshLayout(ent,slot,show_scores,killer,log_file);
+
+		} else if ( *intermissiontime == 0 && show_scores && current_page[slot] == std::string("scoreboard") && !(level_framenum & 31)) {
+			// Hard Exception case.
+
+			// print_backtrace();
+			runRefreshLayout(ent,slot,show_scores,killer,log_file);
 		}
-		
-		// General reason to show Scoreboard
-		// print_backtrace();
-		runRefreshLayout(ent,slot,show_scores,killer,log_file);
-
-	} else if ( *intermissiontime == 0 && show_scores && current_page[slot] == std::string("scoreboard") && !(level_framenum & 31)) {
-		// Hard Exception case.
-
-		// print_backtrace();
-		runRefreshLayout(ent,slot,show_scores,killer,log_file);
-	}
+	#else
+		currentGameMode->clientScoreboardMessage(ent,killer,log_file);
+	#endif
 }
 
 //dc

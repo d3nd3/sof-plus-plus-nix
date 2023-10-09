@@ -1,0 +1,456 @@
+[sof++nix_Debug] : End of storeServerData
+[sof++nix_Debug] : Recording demoname : test.dm2!
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 454
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 455
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 457
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 459
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 462
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 465
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 472
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 473
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 480
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 483
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 484
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 485
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 486
++[sof++nix_Debug] : Ghoul Unreliable packet for frame : 487
++nix_stopreco[sof++nix_Debug] : Ghoul Unreliable packet for frame : 502
+rd
+[sof++nix_Debug] : Recording ended!
+d[sof++nix_Debug] : Ghoul Unreliable packet for frame : 509
+i[sof++nix_Debug] : Ghoul Unreliable packet for frame : 520
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 527
+[sof++nix_Debug] : Ghoul Unreliable packet for frame : 529
+
+
+
+
+
+
+
+IRONINCALLY... crashes on frame 454...
+Indicating its related to this unreliable data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------
+   frame:444  delta:-1
+ 14:svc_frame
+ 47:svc_playerinfo
+   baseline: 1
+   baseline: 44
+   baseline: 45
+   baseline: 46
+   baseline: 47
+   baseline: 48
+   baseline: 49
+   baseline: 51
+   baseline: 54
+   baseline: 55
+   baseline: 58
+   baseline: 60
+   baseline: 64
+   baseline: 65
+   baseline: 66
+   baseline: 67
+   baseline: 68
+   baseline: 69
+   baseline: 70
+   baseline: 71
+   baseline: 72
+   baseline: 101
+   baseline: 106
+   baseline: 107
+   baseline: 108
+   baseline: 109
+   baseline: 110
+   baseline: 111
+   baseline: 122
+   baseline: 123
+   baseline: 128
+429:svc_packetentities
+500:TOTAL PACKET
+------------------
+   frame:445  delta:444
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:446  delta:445
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:447  delta:446
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:448  delta:447
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:449  delta:448
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:450  delta:449
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:451  delta:450
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:452  delta:451
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:453  delta:452
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:454  delta:453
+ 14:svc_frame
+ 27:svc_playerinfo
+   delta: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  7:svc_packetentities

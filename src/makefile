@@ -6,11 +6,14 @@ SHELL := /bin/bash
 
 CC=g++
 
-INSTALL_DIR=$(HOME)/.loki/sof-runtime/
+INSTALL_DIR:=$(HOME)/.loki/sof-runtime/
 
-BINARY=test.so
+BINARY:=test.so
 
-OBJS= \
+# DEFAULT VARIABLE VALUES
+USE_PYTHON:=0
+
+OBJS:= \
 ../obj/clipboard.o \
 ../obj/commands.o \
 ../obj/cvars.o \
@@ -23,17 +26,10 @@ OBJS= \
 ../obj/serverlist.o \
 ../obj/httpdl.o \
 ../obj/detect.o \
-../obj/pages.o \
-../obj/killfeed.o \
 ../obj/weapon_balance.o \
 ../obj/demos.o \
-../obj/python.o \
-../obj/entity.o \
-../obj/ppnix.o \
-../obj/player.o \
-../obj/decorators.o \
-../obj/memory.o \
 ../obj/util.o \
+../obj/strip.o \
 ../obj/dm_always.o \
 ../obj/deathmatch.o \
 ../obj/dm_sofree.o \
@@ -41,9 +37,18 @@ OBJS= \
 ../obj/dm_ctf.o \
 ../obj/dm_realistic.o
 
-CFLAGS= -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/ `python3.9-config --cflags`
-LDFLAGS= -m32 -shared -o ../out/test.so -L /minizip/build -L ../build_python
-LINKUS= -lcurl -lX11 -Wl,-Bstatic -l:libpython3.9.a -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm
+
+CFLAGS:= -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
+LDFLAGS:= -m32 -shared -o ../out/test.so -L /minizip/build
+LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm
+
+ifeq ($(USE_PYTHON),1)
+	OBJ += ../obj/python.o ../obj/entity.o ../obj/ppnix.o ../obj/player.o ../obj/decorators.o ../obj/memory.o ../obj/pages.o ../obj/killfeed.o
+	CFLAGS += $(shell python3.9-config --cflags) -DUSE_PYTHON
+	LDFLAGS += -L ../build_python
+	LINKUS += -Wl,-Bstatic -l:libpython3.9.a
+endif
+
 
 # Name of text file containing build number.
 BUILD_NUMBER_FILE=buildnum
@@ -67,6 +72,9 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 	$(CC) $(LDFLAGS) $(BUILD_NUMBER_LDFLAGS) $(OBJS) -o ../out/test.so $(LINKUS)
 
 
+#PYTHON DEPENDENDANT PARTS
+ifeq ($(USE_PYTHON),1)
+
 # python_api
 ../obj/player.o : ./python_api/player.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -79,6 +87,14 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 ../obj/memory.o : ./python_api/memory.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
+../obj/pages.o : ./features/pages.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/killfeed.o : ./features/killfeed.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/python.o : ./features/python.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+endif
 
 # game_modes
 ../obj/deathmatch.o : ./game_modes/deathmatch.cpp
@@ -103,17 +119,10 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/httpdl.o : ./features/httpdl.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/python.o : ./features/python.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/pages.o : ./features/pages.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
-../obj/killfeed.o : ./features/killfeed.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/weapon_balance.o : ./features/weapon_balance.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/demos.o : ./features/demos.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
-
 
 
 # core
@@ -136,6 +145,8 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 ../obj/main.o : ./main.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/util.o : ./util.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/strip.o : ./strip.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 

@@ -54,10 +54,13 @@
 
 #include <bsd/string.h>
 
-#include <python3.9/Python.h>
-
+#ifdef USE_PYTHON
+	#include <python3.9/Python.h>
+#endif
 #include "engine.h"
 #include "fn_sigs.h"
+
+#define NOP 0x90
 
 #define stget(e,x) *(unsigned int*)((void*)e+x)
 #define stset(e,x,v) *(unsigned int*)((void*)e+x) = v
@@ -259,10 +262,11 @@ extern void GamespyHeartbeat(void);
 -----------------------------python.cpp----------------------------
  ---------------------------------------------------------------------
 */
-extern PyObject *pGlobals;
-extern void pythonInit(void);
-extern void list_refcount(void);
-extern PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks,PyObject* args);
+#ifdef USE_PYTHON
+	extern PyObject *pGlobals;
+	extern void pythonInit(void);
+	extern void list_refcount(void);
+	extern PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks,PyObject* args);
 
 
 /*---------------------------------------------------------------------
@@ -363,6 +367,8 @@ PyMODINIT_FUNC PyInit_ppnix(void);
 
 extern PyModuleDef PlayerModule;
 PyMODINIT_FUNC PyInit_player(void);
+
+#endif
 /*---------------------------------------------------------------------
 -----------------------------commands.cpp----------------------------
  ---------------------------------------------------------------------
@@ -413,6 +419,19 @@ extern cvar_t * _nix_slidefix;
 extern cvar_t * _nix_obit_timeout;
 extern cvar_t * _nix_obit_len_max;
 extern cvar_t * _nix_fall_dmg_scale;
+extern cvar_t * _nix_public_rcon;
+extern cvar_t * _nix_serverside_demos;
+
+extern cvar_t * _nix_snd_no_feet;
+extern cvar_t * _nix_snd_no_jump;
+extern cvar_t * _nix_snd_no_weap_touch;
+
+extern cvar_t * _nix_extra_shotgun_gore;
+extern cvar_t * _nix_py_killfeed;
+extern cvar_t * _nix_py_pages;
+
+extern void slidefix_modified(cvar_t * c);
+extern void public_rcon_modified(cvar_t * c);
 
 extern cvar_t * findCvar(char * cvarname);
 extern void setCvarUnsignedInt(cvar_t * which,unsigned int val);
@@ -456,56 +475,55 @@ extern std::vector<std::string> chatVectors;
 -----------------------------pages.cpp---------------------------------
 ---------------------------------------------------------------------------
 */
-enum LayoutMode {
-	hud,
-	page
-};
-extern std::string current_page[32];
-extern std::unordered_map<std::string,PyObject*> py_page_draw_routines;
+#ifdef USE_PYTHON
+	enum LayoutMode {
+		hud,
+		page
+	};
+	extern std::string current_page[32];
+	extern std::unordered_map<std::string,PyObject*> py_page_draw_routines;
 
-extern std::array<char [1024],32> page_layout;
-extern std::array<char [1024],32> hud_layout;
+	extern std::array<char [1024],32> page_layout;
+	extern std::array<char [1024],32> hud_layout;
 
-// Size of buffer including null terminator.
-extern std::array<int,32> strip_layout_size;
-extern bool page_should_refresh[32];
+	// Size of buffer including null terminator.
+	extern std::array<int,32> strip_layout_size;
+	extern bool page_should_refresh[32];
 
-extern void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0);
-extern void page_scoreboard(void);
-extern void page_chat(void);
-extern void refreshScreen(edict_t * ent);
-extern void empty_reset_hud_layout(int slot);
-extern void empty_reset_page_layout(int slot);
+	extern void showScoreboard(edict_t * ent, unsigned int slot, int showscores,edict_t * killer=NULL, qboolean logfile = 0);
+	extern void page_scoreboard(void);
+	extern void page_chat(void);
+	extern void refreshScreen(edict_t * ent);
+	extern void empty_reset_hud_layout(int slot);
+	extern void empty_reset_page_layout(int slot);
 
-
-extern void spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...);
-extern void spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, ...);
-extern void append_layout_direct(LayoutMode mode,edict_t * ent,char * message);
-extern void append_layout_string(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * message);
-extern void layout_clear(LayoutMode mode,edict_t * ent);
-extern void spackage_register(char * one);
-extern void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * img_path);
-
+	extern void append_layout_direct(LayoutMode mode,edict_t * ent,char * message);
+	extern void append_layout_string(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * message);
+	extern void layout_clear(LayoutMode mode,edict_t * ent);
+	extern void append_layout_image(LayoutMode mode,edict_t * ent,int offsetx, int offsety, char * img_path);
+#endif
 
 /*
 ---------------------------------------------------------------------------
 -----------------------------killfeed.cpp---------------------------------
 ---------------------------------------------------------------------------
 */
-extern PyObject * py_killfeed_func;
-extern void drawKillFeed(edict_t * ent);
-void submitDeath(int mod,edict_t * killer,edict_t * victim);
-void killFeedExpiration(void);
-typedef struct killfeed_s
-{
-	float time_of_death;
-	int means_of_death;
-	edict_t * killer;
-	edict_t * victim;
-	bool headshot;
-} killfeed_t;
-extern std::list<killfeed_t> killFeedList;
-extern int killFeedLength;
+#ifdef USE_PYTHON
+	extern PyObject * py_killfeed_func;
+	extern void drawKillFeed(edict_t * ent);
+	void submitDeath(int mod,edict_t * killer,edict_t * victim);
+	void killFeedExpiration(void);
+	typedef struct killfeed_s
+	{
+		float time_of_death;
+		int means_of_death;
+		edict_t * killer;
+		edict_t * victim;
+		bool headshot;
+	} killfeed_t;
+	extern std::list<killfeed_t> killFeedList;
+	extern int killFeedLength;
+#endif
 /*
 ---------------------------------------------------------------------------
 -----------------------------weapon_balance.cpp---------------------------------
@@ -550,6 +568,7 @@ extern void demoResetVars(int slot);
 extern void demoResetVarsWeak(int slot);
 
 extern bool thickdemo;
+extern bool serverdemo;
 extern bool recordingStatus;
 extern char recordingName[MAX_TOKEN_CHARS];
 extern int startDemoFrame;
@@ -573,3 +592,17 @@ extern int ghoulChunkIndex[16];
 extern bool ghoulLoaded[16];
 
 extern bool disableDefaultRelBuffer;
+
+extern int firstRecordFrame;
+extern int ghoulUnrelFrame;
+
+
+/*
+---------------------------------------------------------------------------
+-----------------------------strip.cpp---------------------------------
+---------------------------------------------------------------------------
+*/
+extern void spackage_list(void);
+extern void spackage_register(char * one);
+extern void spackage_print_id(edict_t * ent, unsigned char file_id,unsigned char string_index, ...);
+extern void spackage_print_ref(edict_t * ent, char * file_ref, char * string_ref, ...);

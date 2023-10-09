@@ -311,27 +311,44 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 
 	//0x38 == 0x168 , 0x168 - 0x38 = 130
 
+	// USE fixed address on reusable detours because they will be re-created after removed.
+
 	// I am not editing the return, I am detouring original, but still.
 	// Ctrl method of inline patching defeats detours. Take caution.
+
+	//Entity modification. Level load.
 	orig_SpawnEntities = createDetour(game_exports->SpawnEntities, my_SpawnEntities,5);
+	//Cleanup.
 	orig_ShutdownGame = createDetour(game_exports->Shutdown, my_ShutdownGame,5);
 	
+	//Client enters level.
 	orig_ClientBegin = createDetour(game_exports->ClientBegin, my_ClientBegin,5);
+	//Client disconnects.
 	orig_ClientDisconnect = createDetour(game_exports->ClientDisconnect, my_ClientDisconnect,5);
 	orig_ClientUserinfoChanged = createDetour(game_exports->ClientUserinfoChanged, my_ClientUserinfoChanged,9);
 	// orig_G_RunFrame = createDetour(game_exports->RunFrame, my_G_RunFrame,5);
+
+	//Used by pages and .commands
 	orig_Cmd_Say_f = createDetour((int)base_addr + 0x00188DB0,my_Cmd_Say_f,9);
 
-	// Must use fixed address on reusable detours.
+	// Client respawns
 	orig_PutClientInServer = createDetour((int)base_addr + 0x00238BE8, my_PutClientInServer,6);
 
 	// orig_itemArmorTouch = createDetour((int)base_addr + 0x001BE828,my_itemArmorTouch,5);
+
+	//Stats - armours picked.
 	orig_PB_AddArmor = createDetour((int)base_addr + 0x00237658,my_PB_AddArmor,5);
+
+	//Throatshots, nutshots, headshots, as used by singleplayer?.
 	orig_GetSequenceForGoreZoneDeath = createDetour((int)base_addr + 0x000EF278 , my_GetSequenceForGoreZoneDeath,6);
 
+	//Scoreboard Modify.
 	orig_G_SetStats = createDetour((int)base_addr + 0x0023D324 , my_G_SetStats,6);
+	//.commands
 	orig_ClientCommand = createDetour(game_exports->ClientCommand , my_ClientCommand,5);
+	//Fall Damage modify, extra gore - uses oldDir, obtained below.
 	orig_T_Damage = createDetour(base_addr + 0x0018B460,my_T_Damage,6);
+	//extra gore
 	orig_fireSpas = createDetour(base_addr + 0x0009CEDC,my_fireSpas,9);
 
 	orig_G_Spawn = (int)base_addr + 0x001E5DD0;
@@ -339,60 +356,75 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// memfxRunner = stget(stget(base_addr + 0x002ACB34,0),0);
 	memfxRunner = stget(base_addr + 0x002ACB34,0);
 
+	//my_setDMMode - allows for more game modes and access to gamemode classes.
 	applyDeathmatchHooks(base_addr);
+
+	#ifdef USE_PYTHON
+		if ( _nix_py_pages->value ) {
+			//------------------------call dm->clientScoreboardMessage every frame. (unlocks layout)-----------------------------
+			memoryAdjust(base_addr + 0xa9bdc,1,0x00); //ClientEndServerFrame
+			memoryAdjust(base_addr + 0xA9BD2,2,0x90);
+
+			// --------DISABLE SCOREBOARD CLEARS IN ORIGINAL FUNCS SO WE HANDLE CLEAR-------------
+			memoryAdjust(base_addr + 0x0015CF14,2,0x90);
+			memoryAdjust(base_addr + 0x00163286,2,0x90);
+			memoryAdjust(base_addr + 0x001625D3,2,0x90);
+			memoryAdjust(base_addr + 0x00164FA9,2,0x90);
+			memoryAdjust(base_addr + 0x001673F9,2,0x90);
+
+			//-----------------------player_die Cmd_Score_f() hook disables showing score on death-----------------
+			callE8Patch(base_addr + 0x00237F17,&my_die_Cmd_Score_f);
+
+			//----------------------NOP dm->clientScoreboardMessage in clientEndServerFrame--------------
+			// We now call this in G_SetStats hook because it allows control during intermission
+			memoryAdjust(base_addr + 0x000A9BFC,2,0x90);
+		}
+		if ( _nix_py_killfeed->value ) {
+			// Usage. Killfeed.
+			// ----------------------ATTEMPT REMOVE DM RANKING HUD----------------------------
+			memoryAdjust(base_addr + 0x0023D663,7,0x90);
+		}
+	#endif
+
+	if ( _nix_snd_no_feet->value ) {
+		//-------------------------DISABLE FOOTSTEPS--------------------------------------------
+		memoryAdjust(base_addr + 0x000E23A8,5,0x90);
+		memoryAdjust(base_addr + 0x000E250C,5,0x90);
+	}
+	
+	if ( _nix_snd_no_jump->value ) {
+		//--------------------------DISABLE JUMP SOUND--------------------------------
+		memoryAdjust(base_addr + 0x0023B6BA,2,0x90);
+	}
+
+	if ( _nix_snd_no_weap_touch->value ) {
+		//-----------------------DISABLE WEAP TOUCH SOUND------------------------------
+		memoryAdjust(base_addr + 0x001BE4ED,2,0x90);
+		memoryAdjust(base_addr + 0x001BE308,2,0x90);
+		memoryAdjust(base_addr + 0x001BE16B,2,0x90);
+	}
+
 
 	// ---------------------------WP EDIT disable spam-------------------------
 	memoryAdjust(base_addr + 0x14964E,5,0x90);
 	memoryAdjust(base_addr + 0x1496D0,5,0x90);
-
-	//------------------------call dm->clientScoreboardMessage every frame. (unlocks layout)-----------------------------
-	memoryAdjust(base_addr + 0xa9bdc,1,0x00); //ClientEndServerFrame
-	memoryAdjust(base_addr + 0xA9BD2,2,0x90);
-
-
-	//-------------------------DISABLE FOOTSTEPS--------------------------------------------
-	memoryAdjust(base_addr + 0x000E23A8,5,0x90);
-	memoryAdjust(base_addr + 0x000E250C,5,0x90);
-
-	//--------------------------DISABLE JUMP SOUND--------------------------------
-	memoryAdjust(base_addr + 0x0023B6BA,2,0x90);
-
-	//-----------------------DISABLE WEAP TOUCH SOUND------------------------------
-	memoryAdjust(base_addr + 0x001BE4ED,2,0x90);
-	memoryAdjust(base_addr + 0x001BE308,2,0x90);
-	memoryAdjust(base_addr + 0x001BE16B,2,0x90);
-
-
-	// --------DISABLE SCOREBOARD CLEARS IN ORIGINAL FUNCS SO WE HANDLE CLEAR-------------
-	memoryAdjust(base_addr + 0x0015CF14,2,0x90);
-	memoryAdjust(base_addr + 0x00163286,2,0x90);
-	memoryAdjust(base_addr + 0x001625D3,2,0x90);
-	memoryAdjust(base_addr + 0x00164FA9,2,0x90);
-	memoryAdjust(base_addr + 0x001673F9,2,0x90);
-
-	//-----------------------player_die Cmd_Score_f() hook-------------------------
-	callE8Patch(base_addr + 0x00237F17,&my_die_Cmd_Score_f);
-
-	//----------------------NOP dm->clientScoreboardMessage in clientEndServerFrame--------------
-	// We now call this in G_SetStats hook because it allows control during intermission
-	memoryAdjust(base_addr + 0x000A9BFC,2,0x90);
-
 
 	//-----------------------REMOVE SEXIST FEMALE DAMAGE-----------------------------
 	memoryAdjust(base_addr + 0x00237355,4,0x90);
 	memoryAdjust(base_addr + 0x00237355,1,0xdd);
 	memoryAdjust(base_addr + 0x00237356,1,0xdf);
 
-	// ----------------------ATTEMPT REMOVE DM RANKING HUD----------------------------
-	memoryAdjust(base_addr + 0x0023D663,7,0x90);
-
-	// -------------(fireSpas() w_fire.cpp) Get OLDDIR for Shotgun Gore restoration----------------------
-	callE8Patch(base_addr + 0x0009D10B,&fake_SV_Trace);
-	memoryAdjust(base_addr + 0x009D110,3,0x90);
-	
 
 	// -----------------DISABLE PLAYERS COMMAND LEAKS IP----------------------------
 	memoryAdjust(base_addr + 0x00189F7B,5,0x90);
+
+	if ( _nix_extra_shotgun_gore->value ) {
+		//extra gore Attempt to re-enable shotgun gore that was removed.
+		// -------------(fireSpas() w_fire.cpp) Get OLDDIR for Shotgun Gore restoration----------------------
+		callE8Patch(base_addr + 0x0009D10B,&fake_SV_Trace);
+		memoryAdjust(base_addr + 0x009D110,3,0x90);
+	}
+
 
 	
 	return game_exports;
@@ -579,10 +611,11 @@ void my_ClientBegin(edict_t * ent)
 
 	int slot = ent->s.skinnum;
 
+	#ifdef USE_PYTHON
 	prev_showscores[slot] = false;
-
+	#endif
 	// Distract.
-	spawnDistraction(ent,slot);
+	//spawnDistraction(ent,slot);
 }
 
 /*
@@ -651,6 +684,7 @@ float my_G_RunFrame (int serverframe)
 		if (state != cs_spawned )
 			continue;
 		edict_t * ent = stget(client_t,CLIENT_ENT);
+		//instead it only refreshes when it has to.
 		// orig_SP_Print(ent,0x0700,layoutstring);
 	}
 	return ret;
@@ -698,8 +732,10 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	}
 	// SOFPPNIX_DEBUG("Chars spoken : %i",chars_spoken);
 	i = first;
-	// Create an empty list
-	PyObject* pyList = PyList_New(0);
+	#ifdef USE_PYTHON
+		// Create an empty list
+		PyObject* pyList = PyList_New(0);
+	#endif
 	char chatline[64];
 	char tmp[sizeof(chatline)];
 	tmp[0] = 0x00;
@@ -707,13 +743,16 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	bool once = false;
 	// SOFPPNIX_DEBUG("argc == %i\n",orig_Cmd_Argc());
 	while(i < orig_Cmd_Argc()) {
-		// Create a new string object
-		PyObject* pyString = PyUnicode_DecodeFSDefault(orig_Cmd_Argv(i));
-		if (  pyString != NULL ) {
-			// Append the string to the list
-			PyList_Append(pyList, pyString);
-			Py_DECREF(pyString);
-		}
+
+		#ifdef USE_PYTHON
+			// Create a new string object
+			PyObject* pyString = PyUnicode_DecodeFSDefault(orig_Cmd_Argv(i));
+			if (  pyString != NULL ) {
+				// Append the string to the list
+				PyList_Append(pyList, pyString);
+				Py_DECREF(pyString);
+			}
+		#endif
 		char * use;
 		char * empty = "";
 		char * space = " ";
@@ -754,24 +793,27 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	}
 	
 	// SOFPPNIX_DEBUG("final = %i, color_count %i",strlen(final),color_count);
-	PyObject* who = NULL;	
-	who = createEntDict(ent);
-	if (!who) return;
-	// buffers are copied internally.
-	for ( int i = 0; i < player_say_callbacks.size(); i++ ) {
-		PyObject* result = PyObject_CallFunction(player_say_callbacks[i], "OO", who,pyList);
-		if (result == NULL) {
-			// Error occurred during the function call
-			PyErr_Print();  // Print the error information
-			// Handle the error
-		} else {
-			// Process the result
-			// ...
-			Py_XDECREF(result);  // Release the reference to the result object
+
+	#ifdef USE_PYTHON
+		PyObject* who = NULL;	
+		who = createEntDict(ent);
+		if (!who) return;
+		// buffers are copied internally.
+		for ( int i = 0; i < player_say_callbacks.size(); i++ ) {
+			PyObject* result = PyObject_CallFunction(player_say_callbacks[i], "OO", who,pyList);
+			if (result == NULL) {
+				// Error occurred during the function call
+				PyErr_Print();  // Print the error information
+				// Handle the error
+			} else {
+				// Process the result
+				// ...
+				Py_XDECREF(result);  // Release the reference to the result object
+			}
 		}
-	}
-	Py_XDECREF(who);
-	Py_XDECREF(pyList);
+		Py_XDECREF(who);
+		Py_XDECREF(pyList);
+	#endif
 #if 0
 	if ( text[0] == '.'' ) {
 		//Both clprintf and cprintf make beep sounds ( if PRINT_CHAT used ).
@@ -787,15 +829,18 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	if ( chatline[0] == '.'  )
 		return;
 	
-	chatVectors.push_back(std::string(final));
-	for ( int i = 0 ; i < maxclients->value;i++ ) {
-		void * client = getClientX(i);
-		int state = *(int*)(client);
-		if (state != cs_spawned )
-			continue;
-		edict_t * ent = stget(client,CLIENT_ENT);
-		refreshScreen(ent);
-	}
+	//pages requires python.
+	#ifdef USE_PYTHON
+		chatVectors.push_back(std::string(final));
+		for ( int i = 0 ; i < maxclients->value;i++ ) {
+			void * client = getClientX(i);
+			int state = *(int*)(client);
+			if (state != cs_spawned )
+				continue;
+			edict_t * ent = stget(client,CLIENT_ENT);
+			refreshScreen(ent);
+		}
+	#endif
 	orig_Cmd_Say_f(ent,team,arg0);
 	// orig_cprintf(NULL,PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
 	// orig_bprintf(PRINT_CHAT,"msg from [%i] \"%s\" ...\n",ent->s.skinnum,name);
@@ -868,18 +913,20 @@ void my_G_SetStats(edict_t * ent)
 {
 	orig_G_SetStats(ent);
 
-	int slot = slot_from_ent(ent);
-	void * client = getClientX(slot);
-	// SOFPPNIX_DEBUG("cclient : %08X",client);
-	if ( stget(client,0) == cs_spawned ) {
+	#ifdef USE_PYTHON
+		int slot = slot_from_ent(ent);
+		void * client = getClientX(slot);
+		// SOFPPNIX_DEBUG("cclient : %08X",client);
+		if ( stget(client,0) == cs_spawned ) {
 
-		// force layouts ON.
-		ent->client->ps.stats[STAT_LAYOUTS] |= 1;
-	}
+			// force layouts ON.
+			ent->client->ps.stats[STAT_LAYOUTS] |= 1;
+		}
 
-	
 	// only way to influence scoreboard during intermission.
 	dm_always.clientScoreboardMessage(ent,ent->enemy,false);
+
+	#endif
 }
 
 
@@ -932,9 +979,9 @@ void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t di
 		damage *= _nix_fall_dmg_scale->value;
 	}
 
-	if ( shotgunStudy && damage != 12 ) {
+	if ( _nix_extra_shotgun_gore->value && shotgunStudy && damage != 12 ) {
 		// Apply shotgun gore here.
-		applyShotgunGore(targ);
+		applyShotgunGore(targ); //uses oldDir.
 	}
 	orig_T_Damage(targ,inflictor,attacker,dir,point,origin,damage,knockback,dflags,mod,penetrate,absorb);
 }

@@ -1,6 +1,6 @@
 #include "common.h"
 
-#define NOP 0x90
+
 // Doesn't like tabs.
 const char * SOFREESP = "VERSION 1\n\
 ID 7\n\
@@ -226,49 +226,14 @@ void __attribute__ ((constructor)) begin() {
 	memoryAdjust(0x080A8703,1,0xEB);
 
 
-//---------------------RCON PUBLIC PASS COMMAND FILTER--------------------------------
-	callE8Patch(0x080AB1A4,&public_rcon_command);
-	memoryAdjust(0x080AAFC9,1,0xEB);
-	memoryAdjust(0x080AAF9F,1,0xEB);
-	memoryAdjust(0x080AB0B8,2,NOP);
-	memoryAdjust(0x080AB0D6,1,0xEB);
-
 //--------------------------SILENCE CMD_REMOVECOMMAND DONT CARE-------------------------------
 	memoryAdjust(0x081195E9,5,NOP);
-
-
 
 
 //---------------------------DISABLE OVERFLOW RELIABLE---------------------------------
 	memoryAdjust(0x080AFDA3,5,NOP);
 	memoryAdjust(0x080AFDB1,5,NOP);
 
-//---------------------------CALL NETCHAN DEMO PLAYBACK IF >= 3 instead of == 3---------------------
-	memoryAdjust(0x080AFDC2,1,0x7C); // JL
-
-//----------------------------SIMILAR PATCH FOR SV_PRECACHE_F TO INCLUDE STATE==9-------------------------
-	memoryAdjust(0x080B0DF9,1,0x7D); // JGE
-
-
-//---------------------------ALLOW CONNECT TO ATTRACTLOOP---------------------------------
-	memoryAdjust(0x080AA87F,1,0xEB);
-
-
-//---------------------------SERVER SIDE DEMO--------------------------
-	callE8Patch(0x080AFBF4,&my_Netchan_Transmit_Save); //Outgoing
-	callE8Patch(0x080AFDD8,&my_Netchan_Transmit_Playback); //DemoPlayback.
-
-//---------------------------PATCH NETCHAN_TRANSMIT (seperate rel buffer)---------------------------
-	memoryAdjust(0x0812B05A,1,0x55);
-	callE8Patch(0x0812B05B,&my_Netchan_Patch);
-	memoryAdjust(0x0812B060,1,0x83);
-	memoryAdjust(0x0812B061,1,0xc4);
-	memoryAdjust(0x0812B062,1,0x4);//cleanup stack
-	memoryUnprotect(0x0812B063);
-	unsigned char * p = 0x0812B063;
-	p[0] = 0xE9;
-	*(int*)(p+1) = 0x0812B090 - (int)0x0812B063 - 5;
-	memoryProtect(0x0812B063);
 
 ////////////////////////////////////////////////////
 
@@ -276,23 +241,27 @@ void __attribute__ ((constructor)) begin() {
 	
 	// --------------------------------Shared----------------------------------------
 	// printf("first deotur\n");
-	orig_Cmd_AddCommand = createDetour(orig_Cmd_AddCommand, &my_Cmd_AddCommand,5);
+	//orig_Cmd_AddCommand = createDetour(orig_Cmd_AddCommand, &my_Cmd_AddCommand,5);
 	// printf("second deotur\n");
-	orig_Cmd_RemoveCommand = createDetour( orig_Cmd_RemoveCommand, &my_Cmd_RemoveCommand, 5);
+	//orig_Cmd_RemoveCommand = createDetour( orig_Cmd_RemoveCommand, &my_Cmd_RemoveCommand, 5);
 	// orig_Com_Printf = createDetour(0x0811C8F4, &my_Com_Printf,9);
 
 	// Apply executable command creation here ( server & client )
 	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
 
+	// This is used as the reliable startup function.
 	orig_Cbuf_AddLateCommands = createDetour(orig_Cbuf_AddLateCommands,&my_Cbuf_AddLateCommands,5);
 
+	// Cleanup
 	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
 
+	// Useful per frame operations
 	orig_Qcommon_Frame = createDetour(orig_Qcommon_Frame , &my_Qcommon_Frame, 5);
 
+	// Can monitor/debug all console usage here.
+	//orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
 
-	orig_Cbuf_Execute = createDetour(orig_Cbuf_Execute , &my_Cbuf_Execute, 6);
-	// orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
+	//orig_COM_BlockSequenceCheckByte = createDetour(orig_COM_BlockSequenceCheckByte, &my_COM_BlockSequenceCheckByte, 5);
 	// callE8Patch(0x080B1809,&my_test);
 
 	//detour doesnt work !! related to esp first line?
@@ -301,25 +270,26 @@ void __attribute__ ((constructor)) begin() {
 
 
 //-------------------------------------------Client-------------------------------------
-	// orig_CL_CheckOrDownloadFile = createDetour(0x080CBA2C ,&my_CL_CheckOrDownloadFile,6);
+
+	//Used for http downloading.
 	orig_CL_Precache_f = createDetour(orig_CL_Precache_f , &my_CL_Precache_f,5);
 
-	// entered server event ( bottom of CL_RequestNextDownload ) `curl_easy_cleanup()` in both.
-	orig_CL_RegisterEffects = createDetour( orig_CL_RegisterEffects, &my_CL_RegisterEffects, 5);
-	orig_CL_Disconnect = createDetour( orig_CL_Disconnect, &my_CL_Disconnect,5);
-
+	//Used for Gamespy serverlist.
 	// Might be needed for adjusting the info return payload DM -> 0 CTF -> 4.
 	orig_menu_AddServer = createDetour(orig_menu_AddServer,&my_menu_AddServer,5);
 
-
+	//Useful per frame client.
 	orig_CL_Frame = createDetour(orig_CL_Frame , &my_CL_Frame,5);
+	//Useful per client init?
 	orig_CL_Init = createDetour(orig_CL_Init , &my_CL_Init,5);
 
-	// orig_PAK_WriteDeltaUsercmd = createDetour(orig_PAK_WriteDeltaUsercmd , &my_PAK_WriteDeltaUsercmd,5);
+	//Debugging packet data.
+	//orig_PAK_WriteDeltaUsercmd = createDetour(orig_PAK_WriteDeltaUsercmd , &my_PAK_WriteDeltaUsercmd,5);
 
 
 
 //-----------------------------------------Server------------------------------------------
+	//Server-side http download.
 	orig_SV_Map_f = createDetour( orig_SV_Map_f , &my_SV_Map_f, 6);
 	// void * addr = 0x080A3E9D;
 	// memoryUnprotect(addr);
@@ -330,30 +300,54 @@ void __attribute__ ((constructor)) begin() {
 	// p[5] = 0x90;
 	// memoryProtect(addr);
 
-	// orig_PAK_ReadDeltaUsercmd = createDetour(orig_PAK_ReadDeltaUsercmd , &my_PAK_ReadDeltaUsercmd,5);
+	//Debugging packet data.
+	//orig_PAK_ReadDeltaUsercmd = createDetour(orig_PAK_ReadDeltaUsercmd , &my_PAK_ReadDeltaUsercmd,5);
 
-	// orig_PF_Configstring = createDetour( orig_PF_Configstring, &my_PF_Configstring, 5);
+	//orig_PF_Configstring = createDetour( orig_PF_Configstring, &my_PF_Configstring, 5);
 
+	//Server frame early event. killfeed/python.
 	orig_SV_RunGameFrame = createDetour(orig_SV_RunGameFrame,&my_SV_RunGameFrame,5);
-	orig_SV_ExecuteUserCommand = createDetour(orig_SV_ExecuteUserCommand,&my_SV_ExecuteUserCommand,5);
 
-	// orig_Netchan_Transmit = createDetour(orig_Netchan_Transmit,&my_Netchan_Transmit,6);
+
+	//Debugging clc_stringcmd received from clients.
+	//orig_SV_ExecuteUserCommand = createDetour(orig_SV_ExecuteUserCommand,&my_SV_ExecuteUserCommand,5);
+
+	// Used by disableDefaultRelBuffer in serverside demos.
+	orig_Netchan_Transmit = createDetour(orig_Netchan_Transmit,&my_Netchan_Transmit,6);
 	
-
+	// Part of Serverside Demo when demomap.
 	orig_SV_SpawnServer = createDetour(orig_SV_SpawnServer,&my_SV_SpawnServer,5);
 
-	orig_SV_WriteFrameToClient = createDetour(orig_SV_WriteFrameToClient,&my_SV_WriteFrameToClient,5);
+	//orig_SV_WriteFrameToClient = createDetour(orig_SV_WriteFrameToClient,&my_SV_WriteFrameToClient,5);
+	//callE8Patch(0x080AF8F0,&my_SV_WriteFrameToClient);
 
+
+	//When serverside demo recording, this sets demoWaiting false. Because a frame is being sent to clients.
+	//orig_SV_SendClientDatagram = createDetour(orig_SV_SendClientDatagram,&my_SV_SendClientDatagram,9);
+	callE8Patch(0x080AFE74,&my_SV_SendClientDatagram);
+
+	//Used by serverside demos. Modify the received lastframe from client to -1.
+	//orig_SV_ExecuteClientMessage = createDetour(orig_SV_ExecuteClientMessage,&my_SV_ExecuteClientMessage,9);
+	callE8Patch(0x080AB677,&my_SV_ExecuteClientMessage);
+
+	//Used by serverside demos. So that netchan doesn't get overriden until new connection formed.
 	orig_SV_New_f = createDetour(orig_SV_New_f,&my_SV_New_f,6);
 
+	//Reliable ghouldata received during connect is always saved. Because Serverside demos need them.
 	orig_GhoulPackReliable = createDetour(orig_GhoulPackReliable,&my_GhoulPackReliable,5);
 
+	//Debugging ghoulpack for serverside demos (can be disabled).
+	//orig_GhoulPack = createDetour(orig_GhoulPack,&my_GhoulPack,5);
+	callE8Patch(0x080AFAE3,&my_GhoulPack);
+
+
+	//Debug purposes.
+	//orig_GhoulReliableHitwire = createDetour(orig_GhoulReliableHitwire, &my_GhoulReliableHitwire, );
+	//callE8Patch(0x080AFB3F,&my_GhoulReliableHitwire);
 //-----------------------------------------GAME------------------------------------------
-	// GameDetours applied in getgameapi using relative address.
+	// Many Game hooks here. GameDetours applied in getgameapi using relative address.
 	orig_Sys_GetGameAPI = createDetour(0x08209C50,&my_Sys_GetGameAPI,9);
 	// callE8Patch(0x080A736F,&my_Sys_GetGameAPI);
-
-	
 }
 
 // __builtin_return_address(0)

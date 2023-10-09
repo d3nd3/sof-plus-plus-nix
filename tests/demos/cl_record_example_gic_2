@@ -1,0 +1,4009 @@
+p
+                                     
+images
+                                     
+client 0
+                                     
+sky
+                                     
+]ÐèñÐé[ has entered the game!
+
+Welcome to Soldier of Fortune Multiplayer
+
+
+]record demotest
+Recording to ./user/demos/demotest.dm2.
+]stop
+Stopped demo.
+]disconnect
+Server disconnected
+]cl_shownet 3
+]echo demo begin
+demo begin 
+]demomap demotest
+Demo demotest.dm2
+------- Server Initialization -------
+-------------------------------------
+Unable to exec hidebot.cfg
+execing bot/mapcfgs/default.cfg
+
+            test+demotest.dm2+0/0/8++CTF+0+local+
+------------------
+ 41:svc_configstring
+ 41:svc_configstring
+  5:svc_configstring
+ 96:TOTAL PACKET
+------------------
+dm/gicctf
+ 24:svc_serverdata
+ 15:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 50:svc_configstring
+  7:svc_configstring
+  7:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 24:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+1358:TOTAL PACKET *** LARGE ***
+------------------
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 25:svc_configstring
+ 24:svc_configstring
+ 25:svc_configstring
+ 27:svc_configstring
+ 23:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 28:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 10:svc_configstring
+ 13:svc_configstring
+ 12:svc_configstring
+ 14:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 26:svc_configstring
+ 24:svc_configstring
+ 25:svc_configstring
+ 22:svc_configstring
+ 24:svc_configstring
+ 24:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 36:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  9:svc_configstring
+ 18:svc_configstring
+ 12:svc_configstring
+ 13:svc_configstring
+ 14:svc_configstring
+ 14:svc_configstring
+ 14:svc_configstring
+1374:TOTAL PACKET *** LARGE ***
+------------------
+ 14:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+1377:TOTAL PACKET *** LARGE ***
+------------------
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+1380:TOTAL PACKET *** LARGE ***
+------------------
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 29:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+1363:TOTAL PACKET *** LARGE ***
+------------------
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 43:svc_configstring
+ 47:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 48:svc_configstring
+ 38:svc_configstring
+ 47:svc_configstring
+ 43:svc_configstring
+ 48:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 50:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 44:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 47:svc_configstring
+  5:svc_configstring
+ 43:svc_configstring
+  5:svc_configstring
+ 43:svc_configstring
+1380:TOTAL PACKET *** LARGE ***
+------------------
+ 38:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 42:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 41:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 34:svc_configstring
+1356:TOTAL PACKET *** LARGE ***
+------------------
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 37:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 38:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 42:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+ 36:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 37:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+1382:TOTAL PACKET *** LARGE ***
+------------------
+ 38:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 42:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+ 36:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 39:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 43:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 44:svc_configstring
+ 38:svc_configstring
+1355:TOTAL PACKET *** LARGE ***
+------------------
+ 43:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 38:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+ 44:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 43:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+1380:TOTAL PACKET *** LARGE ***
+------------------
+ 43:svc_configstring
+ 36:svc_configstring
+ 41:svc_configstring
+ 45:svc_configstring
+ 39:svc_configstring
+ 39:svc_configstring
+ 43:svc_configstring
+ 39:svc_configstring
+ 34:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 46:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+ 33:svc_configstring
+ 34:svc_configstring
+ 37:svc_configstring
+ 44:svc_configstring
+ 42:svc_configstring
+ 34:svc_configstring
+ 36:svc_configstring
+ 36:svc_configstring
+ 36:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+ 47:svc_configstring
+ 45:svc_configstring
+ 39:svc_configstring
+ 39:svc_configstring
+ 44:svc_configstring
+ 51:svc_configstring
+1348:TOTAL PACKET *** LARGE ***
+------------------
+ 54:svc_configstring
+ 56:svc_configstring
+ 59:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 46:svc_configstring
+ 52:svc_configstring
+ 47:svc_configstring
+ 51:svc_configstring
+ 46:svc_configstring
+ 49:svc_configstring
+ 44:svc_configstring
+ 36:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 47:svc_configstring
+ 47:svc_configstring
+ 46:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 27:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+ 28:svc_configstring
+ 52:svc_configstring
+ 52:svc_configstring
+ 53:svc_configstring
+ 44:svc_configstring
+ 47:svc_configstring
+1346:TOTAL PACKET *** LARGE ***
+------------------
+ 49:svc_configstring
+ 49:svc_configstring
+ 49:svc_configstring
+ 49:svc_configstring
+ 52:svc_configstring
+ 48:svc_configstring
+ 48:svc_configstring
+ 43:svc_configstring
+ 44:svc_configstring
+ 43:svc_configstring
+ 46:svc_configstring
+ 43:svc_configstring
+ 49:svc_configstring
+ 44:svc_configstring
+ 47:svc_configstring
+ 45:svc_configstring
+ 45:svc_configstring
+ 47:svc_configstring
+ 46:svc_configstring
+ 46:svc_configstring
+ 48:svc_configstring
+ 46:svc_configstring
+ 44:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+1365:TOTAL PACKET *** LARGE ***
+------------------
+ 42:svc_configstring
+ 37:svc_configstring
+ 39:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 44:svc_configstring
+ 46:svc_configstring
+ 46:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 41:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 46:svc_configstring
+ 46:svc_configstring
+ 42:svc_configstring
+ 42:svc_configstring
+ 37:svc_configstring
+ 35:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+1356:TOTAL PACKET *** LARGE ***
+------------------
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 30:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 33:svc_configstring
+ 34:svc_configstring
+ 35:svc_configstring
+ 30:svc_configstring
+ 39:svc_configstring
+ 37:svc_configstring
+1357:TOTAL PACKET *** LARGE ***
+------------------
+ 31:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 30:svc_configstring
+ 34:svc_configstring
+ 32:svc_configstring
+ 37:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 38:svc_configstring
+ 45:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 43:svc_configstring
+ 42:svc_configstring
+ 43:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 42:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 42:svc_configstring
+ 38:svc_configstring
+ 39:svc_configstring
+1353:TOTAL PACKET *** LARGE ***
+------------------
+ 40:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 44:svc_configstring
+ 45:svc_configstring
+ 40:svc_configstring
+ 49:svc_configstring
+ 47:svc_configstring
+ 41:svc_configstring
+ 40:svc_configstring
+ 39:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 45:svc_configstring
+ 45:svc_configstring
+1344:TOTAL PACKET *** LARGE ***
+------------------
+ 40:svc_configstring
+ 44:svc_configstring
+ 42:svc_configstring
+ 42:svc_configstring
+ 38:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 37:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 39:svc_configstring
+ 41:svc_configstring
+ 42:svc_configstring
+ 43:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+ 40:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 44:svc_configstring
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+1357:TOTAL PACKET *** LARGE ***
+------------------
+ 30:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 27:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 29:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 28:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+ 46:svc_configstring
+ 43:svc_configstring
+ 49:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 54:svc_configstring
+ 43:svc_configstring
+ 28:svc_configstring
+ 31:svc_configstring
+ 34:svc_configstring
+ 55:svc_configstring
+ 47:svc_configstring
+ 41:svc_configstring
+ 45:svc_configstring
+ 45:svc_configstring
+ 45:svc_configstring
+ 49:svc_configstring
+1368:TOTAL PACKET *** LARGE ***
+------------------
+ 27:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+ 28:svc_configstring
+ 35:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 30:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 33:svc_configstring
+ 34:svc_configstring
+1367:TOTAL PACKET *** LARGE ***
+------------------
+ 35:svc_configstring
+ 30:svc_configstring
+ 39:svc_configstring
+ 37:svc_configstring
+ 31:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 30:svc_configstring
+ 34:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 27:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 29:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 28:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+ 28:svc_configstring
+ 31:svc_configstring
+ 34:svc_configstring
+ 43:svc_configstring
+1348:TOTAL PACKET *** LARGE ***
+------------------
+ 40:svc_configstring
+ 46:svc_configstring
+ 37:svc_configstring
+ 40:svc_configstring
+ 51:svc_configstring
+ 40:svc_configstring
+ 18:svc_spawnbaseline
+ 19:svc_spawnbaseline
+ 19:svc_spawnbaseline
+ 18:svc_spawnbaseline
+ 17:svc_spawnbaseline
+ 17:svc_spawnbaseline
+ 17:svc_spawnbaseline
+ 17:svc_spawnbaseline
+ 19:svc_spawnbaseline
+ 19:svc_spawnbaseline
+ 18:svc_spawnbaseline
+ 18:svc_spawnbaseline
+ 35:svc_stufftext
+514:TOTAL PACKET
+Map: dm/gicctf
+                                     
+pics
+                                     
+maps/dm/gicctf.bsp
+                                     
+images
+                                     
+client 0
+                                     
+sky
+                                     
+------------------
+ 19:svc_stufftext
+700:svc_ghoulreliable
+728:TOTAL PACKET *** LARGE ***
+------------------
+700:svc_ghoulreliable
+709:TOTAL PACKET *** LARGE ***
+------------------
+701:svc_ghoulreliable
+710:TOTAL PACKET *** LARGE ***
+------------------
+699:svc_ghoulreliable
+708:TOTAL PACKET *** LARGE ***
+------------------
+702:svc_ghoulreliable
+711:TOTAL PACKET *** LARGE ***
+------------------
+700:svc_ghoulreliable
+709:TOTAL PACKET *** LARGE ***
+------------------
+689:svc_ghoulreliable
+698:TOTAL PACKET *** LARGE ***
+------------------
+700:svc_ghoulreliable
+709:TOTAL PACKET *** LARGE ***
+------------------
+696:svc_ghoulreliable
+705:TOTAL PACKET *** LARGE ***
+------------------
+702:svc_ghoulreliable
+711:TOTAL PACKET *** LARGE ***
+------------------
+666:svc_ghoulreliable
+675:TOTAL PACKET *** LARGE ***
+------------------
+701:svc_ghoulreliable
+710:TOTAL PACKET *** LARGE ***
+------------------
+669:svc_ghoulreliable
+678:TOTAL PACKET *** LARGE ***
+------------------
+612:svc_ghoulreliable
+621:TOTAL PACKET *** LARGE ***
+------------------
+613:svc_ghoulreliable
+622:TOTAL PACKET *** LARGE ***
+------------------
+611:svc_ghoulreliable
+620:TOTAL PACKET *** LARGE ***
+------------------
+632:svc_ghoulreliable
+641:TOTAL PACKET *** LARGE ***
+------------------
+639:svc_ghoulreliable
+648:TOTAL PACKET *** LARGE ***
+------------------
+631:svc_ghoulreliable
+640:TOTAL PACKET *** LARGE ***
+------------------
+587:svc_ghoulreliable
+596:TOTAL PACKET
+------------------
+698:svc_ghoulreliable
+707:TOTAL PACKET *** LARGE ***
+------------------
+673:svc_ghoulreliable
+682:TOTAL PACKET *** LARGE ***
+------------------
+628:svc_ghoulreliable
+637:TOTAL PACKET *** LARGE ***
+------------------
+653:svc_ghoulreliable
+662:TOTAL PACKET *** LARGE ***
+------------------
+503:svc_ghoulreliable
+512:TOTAL PACKET
+------------------
+677:svc_ghoulreliable
+686:TOTAL PACKET *** LARGE ***
+------------------
+683:svc_ghoulreliable
+692:TOTAL PACKET *** LARGE ***
+------------------
+648:svc_ghoulreliable
+657:TOTAL PACKET *** LARGE ***
+------------------
+627:svc_ghoulreliable
+636:TOTAL PACKET *** LARGE ***
+------------------
+694:svc_ghoulreliable
+703:TOTAL PACKET *** LARGE ***
+------------------
+611:svc_ghoulreliable
+620:TOTAL PACKET *** LARGE ***
+------------------
+603:svc_ghoulreliable
+612:TOTAL PACKET *** LARGE ***
+------------------
+695:svc_ghoulreliable
+704:TOTAL PACKET *** LARGE ***
+------------------
+568:svc_ghoulreliable
+577:TOTAL PACKET
+------------------
+   frame:284  delta:-1
+ 14:svc_frame
+ 47:svc_playerinfo
+   baseline: 1
+   baseline: 44
+   baseline: 45
+   baseline: 46
+   baseline: 47
+   baseline: 48
+   baseline: 49
+   baseline: 51
+   baseline: 54
+   baseline: 55
+   baseline: 58
+   baseline: 60
+   baseline: 64
+   baseline: 65
+   baseline: 66
+   baseline: 67
+   baseline: 68
+   baseline: 69
+   baseline: 70
+   baseline: 71
+   baseline: 72
+   baseline: 101
+   baseline: 106
+   baseline: 107
+   baseline: 108
+   baseline: 109
+   baseline: 110
+   baseline: 111
+   baseline: 122
+   baseline: 123
+   baseline: 128
+429:svc_packetentities
+186:svc_ghoulunreliable
+686:TOTAL PACKET *** LARGE ***
+------------------
+ 41:svc_configstring
+   frame:285  delta:284
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+187:svc_ghoulunreliable
+264:TOTAL PACKET
+------------------
+   frame:286  delta:285
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:287  delta:286
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:288  delta:287
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 12:svc_ghoulunreliable
+ 48:TOTAL PACKET
+------------------
+   frame:289  delta:288
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 12:svc_ghoulunreliable
+ 48:TOTAL PACKET
+------------------
+   frame:290  delta:289
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:291  delta:290
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:292  delta:291
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:293  delta:292
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 10:svc_ghoulunreliable
+ 46:TOTAL PACKET
+------------------
+   frame:294  delta:293
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 11:svc_ghoulunreliable
+ 47:TOTAL PACKET
+------------------
+   frame:295  delta:294
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:296  delta:295
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:297  delta:296
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:298  delta:297
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:299  delta:298
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   baseline: 113
+   baseline: 114
+   baseline: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 62:svc_packetentities
+ 47:svc_ghoulunreliable
+166:TOTAL PACKET
+------------------
+   frame:300  delta:299
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 12:svc_packetentities
+ 69:TOTAL PACKET
+------------------
+   frame:301  delta:300
+ 14:svc_frame
+ 34:svc_playerinfo
+   delta: 1
+   baseline: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 30:svc_packetentities
+ 21:svc_ghoulunreliable
+109:TOTAL PACKET
+------------------
+   frame:302  delta:301
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:303  delta:302
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:304  delta:303
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 17:svc_ghoulunreliable
+ 88:TOTAL PACKET
+------------------
+   frame:305  delta:304
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   remove: 46
+   remove: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   remove: 55
+   unchanged: 58
+   remove: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   remove: 67
+   remove: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   remove: 108
+   remove: 109
+   unchanged: 110
+   remove: 111
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 41:svc_packetentities
+ 98:TOTAL PACKET
+------------------
+   frame:306  delta:305
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 110
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:307  delta:306
+ 14:svc_frame
+ 35:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   baseline: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 110
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 21:svc_packetentities
+ 12:svc_ghoulunreliable
+  5:svc_effect
+ 97:TOTAL PACKET
+------------------
+   frame:308  delta:307
+ 14:svc_frame
+ 34:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 110
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 72:TOTAL PACKET
+------------------
+   frame:309  delta:308
+ 14:svc_frame
+ 35:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 110
+   unchanged: 113
+   unchanged: 114
+   unchanged: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 11:svc_ghoulunreliable
+  6:svc_sound
+ 90:TOTAL PACKET
+------------------
+   frame:310  delta:309
+ 14:svc_frame
+ 34:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   baseline: 46
+   baseline: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   baseline: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   baseline: 67
+   baseline: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   baseline: 108
+   baseline: 109
+   unchanged: 110
+   baseline: 111
+   remove: 113
+   remove: 114
+   remove: 115
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+143:svc_packetentities
+201:TOTAL PACKET
+------------------
+   frame:311  delta:310
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:312  delta:311
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:313  delta:312
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:314  delta:313
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 12:svc_packetentities
+ 69:TOTAL PACKET
+------------------
+   frame:315  delta:314
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 12:svc_packetentities
+ 69:TOTAL PACKET
+------------------
+   frame:316  delta:315
+ 14:svc_frame
+ 35:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 16:svc_packetentities
+ 12:svc_ghoulunreliable
+  5:svc_effect
+ 92:TOTAL PACKET
+------------------
+   frame:317  delta:316
+ 14:svc_frame
+ 35:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 11:svc_ghoulunreliable
+  6:svc_sound
+ 90:TOTAL PACKET
+------------------
+   frame:318  delta:317
+ 14:svc_frame
+ 34:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 72:TOTAL PACKET
+------------------
+   frame:319  delta:318
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:320  delta:319
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:321  delta:320
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 13:svc_packetentities
+ 12:svc_ghoulunreliable
+ 82:TOTAL PACKET
+------------------
+   frame:322  delta:321
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 13:svc_packetentities
+ 12:svc_ghoulunreliable
+ 82:TOTAL PACKET
+------------------
+   frame:323  delta:322
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+ 14:svc_packetentities
+ 71:TOTAL PACKET
+------------------
+   frame:324  delta:323
+ 14:svc_frame
+ 35:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   remove: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   remove: 67
+   remove: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   remove: 106
+   remove: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   baseline: 119
+   unchanged: 122
+   unchanged: 123
+   baseline: 124
+   baseline: 125
+   unchanged: 128
+ 81:svc_packetentities
+ 38:svc_ghoulunreliable
+  5:svc_effect
+183:TOTAL PACKET
+------------------
+   frame:325  delta:324
+ 14:svc_frame
+ 35:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   remove: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+   unchanged: 128
+ 17:svc_packetentities
+ 11:svc_ghoulunreliable
+  6:svc_sound
+ 93:TOTAL PACKET
+------------------
+   frame:326  delta:325
+ 14:svc_frame
+ 34:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   remove: 46
+   remove: 47
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   remove: 72
+   unchanged: 101
+   remove: 108
+   remove: 109
+   unchanged: 110
+   remove: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+   remove: 128
+ 35:svc_packetentities
+ 10:svc_ghoulunreliable
+103:TOTAL PACKET
+------------------
+   frame:327  delta:326
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   baseline: 46
+   baseline: 47
+   baseline: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   baseline: 108
+   baseline: 109
+   unchanged: 110
+   baseline: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 88:svc_packetentities
+145:TOTAL PACKET
+------------------
+   frame:328  delta:327
+ 14:svc_frame
+ 33:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 13:svc_packetentities
+ 70:TOTAL PACKET
+------------------
+   frame:329  delta:328
+ 14:svc_frame
+ 27:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 11:svc_packetentities
+ 62:TOTAL PACKET
+------------------
+   frame:330  delta:329
+ 14:svc_frame
+ 27:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 11:svc_packetentities
+ 62:TOTAL PACKET
+------------------
+   frame:331  delta:330
+ 14:svc_frame
+ 27:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 11:svc_packetentities
+ 62:TOTAL PACKET
+------------------
+   frame:332  delta:331
+ 14:svc_frame
+ 29:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 14:svc_packetentities
+ 12:svc_ghoulunreliable
+  5:svc_effect
+ 84:TOTAL PACKET
+------------------
+   frame:333  delta:332
+ 14:svc_frame
+ 29:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 10:svc_packetentities
+ 63:TOTAL PACKET
+------------------
+   frame:334  delta:333
+ 14:svc_frame
+ 27:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 10:svc_packetentities
+ 61:TOTAL PACKET
+------------------
+   frame:335  delta:334
+ 14:svc_frame
+ 27:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+ 10:svc_packetentities
+ 61:TOTAL PACKET
+------------------
+   frame:336  delta:335
+ 14:svc_frame
+ 27:svc_playerinfo
+   delta: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  8:svc_packetentities
+ 18:svc_ghoulunreliable
+ 77:TOTAL PACKET
+------------------
+   frame:337  delta:336
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:338  delta:337
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:339  delta:338
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:340  delta:339
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:341  delta:340
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:342  delta:341
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:343  delta:342
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:344  delta:343
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:345  delta:344
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:346  delta:345
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:347  delta:346
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 40
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 101
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 119
+   unchanged: 122
+   unchanged: 123
+   unchanged: 124
+   unchanged: 125
+  3:svc_packetentities
+ 36:TOTAL PACKET
+Server disconnected

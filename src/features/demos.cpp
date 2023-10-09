@@ -23,6 +23,7 @@ bool playbackStatus = false;
 bool recordingStatus = false;
 char recordingName[MAX_TOKEN_CHARS];
 bool thickdemo = false;
+bool serverdemo = false;
 int startDemoFrame = 0;
 int currentDemoFrame = 0;
 int finalDemoFrame = 0;
@@ -77,7 +78,7 @@ We might have to get the client from the netchan, thats the only way. Unless we 
 */
 void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData)
 {
-	//SOFPPNIX_DEBUG("storeDemoData! relLen=%i unrelLen=%i",relLen,unrelLen);
+	
 	int slot = netchanToSlot(netchan);
 	if ( slot == -1 ) error_exit("Cannot convert netchan to slot");
 
@@ -92,6 +93,7 @@ void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unre
 
 	int frameNum = stget(0x082AF680,0x10);
 	//SOFPPNIX_DEBUG("Slot is %i\nFramenum is %i",slot,frameNum);
+	SOFPPNIX_DEBUG("storeDemoData! frame=%i relLen=%i unrelLen=%i",frameNum,relLen,unrelLen);
 
 	auto itFrames = demoFrames.find(frameNum);
 	// create frame if not exist
@@ -142,7 +144,14 @@ void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unre
 	//Write the data.
 	//SOFPPNIX_DEBUG("BEFORE UNREL WRITE : CURSIZE =%i : MAXSIZE=%i",newSlice->unrelSZ->cursize, newSlice->unrelSZ->maxsize);
 	//if ( unrelLen > 0 )
+
 	orig_SZ_Write(newSlice->unrelSZ,unrelData,unrelLen);
+
+	if ( ghoulUnrelFrame == frameNum ) {
+		SOFPPNIX_DEBUG("record: Dumping ghl unrel first chunk");
+		hexdump(newSlice->unrelSZ->data,newSlice->unrelSZ->data+newSlice->unrelSZ->cursize);
+	}
+
 	//SOFPPNIX_DEBUG("AFTER UNREL WRITE");
 	//save.
 	demoFrames[frameNum]->fighters[slot] = newSlice;
@@ -311,7 +320,7 @@ void storeServerData()
 
 	}
 
-	#if 0
+	#if 1
 	// baselines
 	entity_state_t	nullstate;
 	entity_state_t	*base;
@@ -324,11 +333,13 @@ void storeServerData()
 		//if (!base->renderindex && !((base->solid & 0xFF) & 0x40) )
 			//continue;
 		
+		if ( !base->renderindex && !base->sound_data && !base->renderfx && !orig_HasAttachedEffects(base) )
+			continue;
 		//if (stget(base,0x118) & 0x1) continue;
 
 		//base->solid & 0x40
 		//if (base->modelindex || base->solid & 0x40) {
-		if ( base->number == i ) {
+		//if ( base->number == i ) {
 			SOFPPNIX_DEBUG("Number = %i",base->number);
 			if (buf.cursize + 64 > buf.maxsize)
 			{	// write it out
@@ -345,14 +356,15 @@ void storeServerData()
 
 			orig_MSG_WriteByte (&buf, svc_spawnbaseline);		
 			orig_MSG_WriteDeltaEntity (&nullstate, base, &buf, true);
-		}
+		
 
 	}
 	#endif
 
 	orig_MSG_WriteByte (&buf, svc_stufftext);
 
-	orig_MSG_WriteString (&buf, orig_va("set allow_download 1; precache %i; reset_predn\n",spawncount));
+	//allow_download 0? dodge downloads? necessary?
+	orig_MSG_WriteString (&buf, orig_va("set allow_download 0;precache %i; reset_predn\n",spawncount));
 
 	// write it out
 	initChunk_t newchunk;
@@ -387,7 +399,49 @@ void demos_handlePlayback(netchan_t *chan, int length, byte *data)
 		return;
 	}
 
-	if ( clientState == cs_spawned ) {
+	int frameNum = stget(0x082AF680,0x10);
+	int last_sent = stget(chan,0x10);
+	int curtime = stget(0x08526624,0);
+	//do we have to something send?
+	if ( !initialChunks.empty() /*&& !(frameNum % 6)*/ ) {
+		
+		/*
+			client response rate was low whilst connecting. patched it.
+		*/
+
+			//netchan_t->reliable_length
+			int rel_len = stget(chan,0x404c);
+			//netchan_t->message.cursize
+			int cur_size = stget(chan,0x54);
+
+			//If new reliable sent now, swap buffers.
+			if ( !rel_len ) {
+
+				// new reliable can be sent this frame.
+				SOFPPNIX_DEBUG("Sending initialChunk");
+
+				auto first = initialChunks.begin();
+				
+				SOFPPNIX_DEBUG("Connect-Packet-Size = %i",first->len);
+
+				orig_SZ_Write(&relAccumulate,first->data,first->len);
+
+				initialChunks.erase(first);
+
+				disableDefaultRelBuffer = true;
+				my_Netchan_Transmit (chan, 0, NULL);
+				chan->message.cursize = 0;
+				
+			} else {
+				//attempt resend of lost packets
+				if ( curtime - last_sent > 1000 ) {
+					SOFPPNIX_DEBUG("1 Second passed...");
+					disableDefaultRelBuffer = true;
+					my_Netchan_Transmit (chan, 0, NULL);
+				}
+			}
+	}//initChunks empty
+	else {
 		//normal svc_serverdata svc_frame etc...
 		SOFPPNIX_DEBUG("SPAWNED...");
 
@@ -436,8 +490,10 @@ void demos_handlePlayback(netchan_t *chan, int length, byte *data)
 		} else { //ghouLoaded - begin Frames
 
 			if ( currentDemoFrame > finalDemoFrame ) {
-				SOFPPNIX_DEBUG("NextServer/KillServer!");
-				orig_SV_Nextserver();
+				//SOFPPNIX_DEBUG("NextServer/KillServer!");
+				//orig_SV_Nextserver();
+
+				//orig_Cmd_ExecuteString("killserver\n");
 				//No more data to send.
 				return;
 			}
@@ -449,93 +505,42 @@ void demos_handlePlayback(netchan_t *chan, int length, byte *data)
 			//For now, disable accumulation, and have potentially
 
 			//Unreliable data needs to be sent every 10 ticks...
-	
+		
 			fighter_slice_t * slice = getDemoFrameFighterSlice();
 			if (slice == nullptr) {
 				// Can't send this client any data. Because can't the slot is not saved. Change demo mode to other slot?
 				//orig_SV_Nextserver();
 				error_exit("Slice pointer missing");
 			}
-
+			#if 0
+			if ( chan->message.cursize )
+				hexdump(chan->message.data,chan->message.data + chan->message.cursize);
+			#endif
 			SOFPPNIX_DEBUG("Sending frame : %i",currentDemoFrame);
-			orig_SZ_Write(&relAccumulate,slice->relSZ->data,slice->relSZ->cursize);
 
+			#if 0
+			//skip rel on delta frame.
+			if ( currentDemoFrame != startDemoFrame )
+				orig_SZ_Write(&chan->message,slice->relSZ->data,slice->relSZ->cursize);
+			#else
+			//if ( currentDemoFrame != startDemoFrame )
+				orig_SZ_Write(&relAccumulate,slice->relSZ->data,slice->relSZ->cursize);
+			#endif
+
+			if ( ghoulUnrelFrame == currentDemoFrame ) {
+				SOFPPNIX_DEBUG("playback: Dumping ghl unrel first chunk");
+				hexdump(slice->unrelSZ->data,slice->unrelSZ->data+slice->unrelSZ->cursize);
+			}
 			currentDemoFrame +=1;
 
 			//netchan_t->reliable_length
 			int rel_len = stget(chan,0x404c);
 
+
 			disableDefaultRelBuffer = true;
 			my_Netchan_Transmit(chan,slice->unrelSZ->cursize,slice->unrelSZ->data);
 		}
-
-	} else { //not cs_spawned - initChunks!
-		//connecting...
-		int frameNum = stget(0x082AF680,0x10);
-		int last_sent = stget(chan,0x10);
-		int curtime = stget(0x08526624,0);
-		//do we have to something send?
-		if ( !initialChunks.empty() /*&& !(frameNum % 6)*/ ) {
-			
-			/*
-				because configstrings are so data intensive and use reliable buffers,
-				sending them one after another doesn't work out, because the buffer overflows too quickly.
-
-				have to emulate a server and talk to client mb, or increase time between sending.
-
-				mb its because the framerate is too low on client whilst connecting?
-			*/
-
-				//netchan_t->reliable_length
-				int rel_len = stget(chan,0x404c);
-				//netchan_t->message.cursize
-				int cur_size = stget(chan,0x54);
-
-				//If new reliable sent now, swap buffers.
-				if ( !rel_len ) {
-
-					// new reliable can be sent this frame.
-					SOFPPNIX_DEBUG("Sending initialChunk");
-
-					auto first = initialChunks.begin();
-					
-					SOFPPNIX_DEBUG("Connect-Packet-Size = %i",first->len);
-
-					orig_SZ_Write(&relAccumulate,first->data,first->len);
-
-					initialChunks.erase(first);
-
-					disableDefaultRelBuffer = true;
-					my_Netchan_Transmit (chan, 0, NULL);
-					chan->message.cursize = 0;
-					
-				} else {
-					//attempt resend of lost packets
-					if ( curtime - last_sent > 1000 ) {
-						SOFPPNIX_DEBUG("1 Second passed...");
-						disableDefaultRelBuffer = true;
-						my_Netchan_Transmit (chan, 0, NULL);
-					}
-				}
-				
-		}//initChunks empty
-		else {
-			
-			/*
-				use normal reliable responses. to try get the server to initiate begin.
-				set allow_download 0; precache %i; reset_predn
-				cl_precache_f ... sv_precache_f ... cmd begin ... sv_begin_f
-			*/
-			
-			if ( chan->message.cursize || curtime - last_sent > 1000 ) {
-				SOFPPNIX_DEBUG("WAITING...%i %i",chan->message.cursize,curtime - last_sent);
-				hexdump(chan->message.data,chan->message.data + chan->message.cursize);
-				//WAITING.
-				disableDefaultRelBuffer = false;
-				my_Netchan_Transmit (chan, 0, NULL);
-			}
-		}
-	}//not cs_spawned
+	}
 }
 
 

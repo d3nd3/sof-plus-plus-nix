@@ -26,6 +26,150 @@ cvar_t * _nix_slidefix = NULL;
 cvar_t * _nix_obit_timeout = NULL;
 cvar_t * _nix_obit_len_max = NULL;
 cvar_t * _nix_fall_dmg_scale = NULL;
+cvar_t * _nix_public_rcon = NULL;
+cvar_t * _nix_serverside_demos = NULL;
+
+cvar_t * _nix_snd_no_feet = NULL;
+cvar_t * _nix_snd_no_jump = NULL;
+cvar_t * _nix_snd_no_weap_touch = NULL;
+
+cvar_t * _nix_extra_shotgun_gore = NULL;
+
+cvar_t * _nix_py_killfeed = NULL;
+cvar_t * _nix_py_pages = NULL;
+
+
+void slidefix_modified(cvar_t * c)
+{
+	if ( c->value == 1.0f ){
+		SOFPPNIX_PRINT("Enabling slidefix feature");
+		callE8Patch(0x0812E643,&my_PM_StepSlideMove);
+	}
+	else {
+		//RESTORE.
+		SOFPPNIX_PRINT("Disabling slidefix feature");
+		char * p = 0x0812E643;
+		memoryUnprotect(p);
+		*p = 0xE8;
+		*(p+1) = 0x74;
+		*(p+2) = 0xF3;
+		*(p+3) = 0xFF;
+		*(p+4) = 0xFF;
+		memoryProtect(p);
+	}
+}
+
+void public_rcon_modified(cvar_t * c)
+{
+	if ( c->value == 1.0f ) {
+		SOFPPNIX_PRINT("Enabling public rcon feature");
+		//---------------------RCON PUBLIC PASS COMMAND FILTER--------------------------------
+		callE8Patch(0x080AB1A4,&public_rcon_command);
+		memoryAdjust(0x080AAFC9,1,0xEB);
+		memoryAdjust(0x080AAF9F,1,0xEB);
+		memoryAdjust(0x080AB0B8,2,NOP);
+		memoryAdjust(0x080AB0D6,1,0xEB);
+	}
+	else {
+		//RESTORE.
+		SOFPPNIX_PRINT("Disabling public rcon feature");
+		char * p = 0x080AB1A4;
+		memoryUnprotect(p);
+		*p = 0xE8;
+		*(p+1) = 0xDF;
+		*(p+2) = 0xD1;
+		*(p+3) = 0x06;
+		*(p+4) = 0x00;
+		memoryProtect(p);
+
+		memoryAdjust(0x080AAFC9,1,0x75);
+		memoryAdjust(0x080AAF9F,1,0x75);
+
+		memoryAdjust(0x080AB0B8,1,0x74);
+		memoryAdjust(0x080AB0B9,1,0x1E);
+
+		memoryAdjust(0x080AB0D6,1,0x74);
+	}
+	
+}
+
+void serverside_demos_modified(cvar_t * c)
+{
+	if ( c->value == 1.0f ) {
+		SOFPPNIX_PRINT("Enabling serverside demos feature");
+		//---------------------------ALLOW CONNECT TO ATTRACTLOOP---------------------------------
+			memoryAdjust(0x080AA860,1,0xEB);
+
+			memoryAdjust(0x080AFC6E,1,0x90);
+			memoryAdjust(0x080AFC6F,1,0xE9);
+
+
+		//---------------------------NETCHAN PLAYBACK / RECORD--------------------------
+			callE8Patch(0x080AFBF4,&my_Netchan_Transmit_Save); //Outgoing
+			callE8Patch(0x080AFDD8,&my_Netchan_Transmit_Playback); //DemoPlayback.
+
+		//---------------------------PATCH NETCHAN_TRANSMIT (seperate rel buffer)---------------------------
+			memoryAdjust(0x0812B05A,1,0x55);
+			callE8Patch(0x0812B05B,&my_Netchan_Patch);
+			memoryAdjust(0x0812B060,1,0x83);
+			memoryAdjust(0x0812B061,1,0xc4);
+			memoryAdjust(0x0812B062,1,0x4);//cleanup stack
+			memoryUnprotect(0x0812B063);
+			unsigned char * p = 0x0812B063;
+			p[0] = 0xE9;
+			*(int*)(p+1) = 0x0812B090 - (int)0x0812B063 - 5;
+			memoryProtect(0x0812B063);
+	}
+	else
+	{
+		//RESTORE.
+		SOFPPNIX_PRINT("Disabling serverside demos feature");
+
+		//---------------------------ALLOW CONNECT TO ATTRACTLOOP---------------------------------
+		memoryAdjust(0x080AA860,1,0x74);
+
+		memoryAdjust(0x080AFC6E,1,0x0F);
+		memoryAdjust(0x080AFC6F,1,0x85);
+
+		//---------------------------NETCHAN PLAYBACK / RECORD--------------------------
+		char * p = 0x080AFBF4;
+		memoryUnprotect(p);
+		*p = 0xE8;
+		*(p+1) = 0xD3;
+		*(p+2) = 0xB3;
+		*(p+3) = 0x07;
+		*(p+4) = 0x00;
+		memoryProtect(p);
+
+		//---------------------------PATCH NETCHAN_TRANSMIT (seperate rel buffer)---------------------------
+		memoryAdjust(0x0812B05A,1,0x85);
+		p = 0x0812B05B;
+		memoryUnprotect(p);
+		*p = 0xC0;
+		*(p+1) = 0x75;
+		*(p+2) = 0x32;
+		*(p+3) = 0x8B;
+		*(p+4) = 0x4D;
+		memoryProtect(p);
+
+		p = 0x0812B060;
+		memoryUnprotect(p);
+		*p = 0x54;
+		*(p+1) = 0x85;
+		*(p+2) = 0xC9;
+		memoryProtect(p);
+
+		p = 0x0812B063;
+		memoryUnprotect(p);
+		*p = 0x74;
+		*(p+1) = 0x2B;
+		*(p+2) = 0x8D;
+		*(p+3) = 0x95;
+		*(p+4) = 0x50;
+		memoryProtect(p);
+
+	}
+}
 
 
 /*
@@ -64,11 +208,38 @@ void createServerCvars(void)
 
 		*p_nix_violence = orig_Cvar_Get( "_++nix_violence","63",NULL,NULL);
 
-		_nix_slidefix = orig_Cvar_Get( "_++nix_slidefix","1",NULL,NULL);
+		//slidefix
+		_nix_slidefix = orig_Cvar_Get( "_++nix_slidefix","1",NULL,slidefix_modified);
 
-		_nix_obit_timeout = orig_Cvar_Get("_++nix_obit_timeout","10",NULL,NULL);
-		_nix_obit_len_max = orig_Cvar_Get("_++nix_obit_len_max","6",NULL,NULL);
+		
+
+		//fall damage.
 		_nix_fall_dmg_scale = orig_Cvar_Get("_++nix_fall_dmg_scale","1",NULL,NULL);
+
+		//shotgun gore.
+		_nix_extra_shotgun_gore = orig_Cvar_Get("_++nix_extra_shotgun_gore","0",NULL,NULL);
+
+		//rcon-access
+		_nix_public_rcon = orig_Cvar_Get("_++nix_public_rcon","0",NULL,public_rcon_modified);
+
+		_nix_serverside_demos = orig_Cvar_Get("_++nix_serverside_demos","0",NULL,serverside_demos_modified);
+
+		//disable sounds
+		_nix_snd_no_feet = orig_Cvar_Get("_++nix_snd_no_feet","0",NULL,NULL);
+		_nix_snd_no_jump = orig_Cvar_Get("_++nix_snd_no_jump","0",NULL,NULL);
+		_nix_snd_no_weap_touch = orig_Cvar_Get("_++nix_snd_no_weap_touch","0",NULL,NULL);
+
+
+		#ifdef USE_PYTHON
+			_nix_py_killfeed = orig_Cvar_Get("_++nix_py_killfeed","0",NULL,NULL);
+			//related to kill-feed.
+			_nix_obit_timeout = orig_Cvar_Get("_++nix_obit_timeout","10",NULL,NULL);
+			_nix_obit_len_max = orig_Cvar_Get("_++nix_obit_len_max","6",NULL,NULL);
+
+
+			_nix_py_pages = orig_Cvar_Get("_++nix_py_pages","0",NULL,NULL);
+		#endif
+
 
 		// repond pretending to be low violence.
 	    int offset = (int)&p_nix_violence - 0x829CCC8;

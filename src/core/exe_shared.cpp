@@ -15,11 +15,14 @@ void my_Qcommon_Frame(int msec)
 	// }
 
 	if ( dedicated->value == 1.0f ) {
-		// Check if the error indicator is set
-		if (PyErr_Occurred()) {
-			// Print the Python error message to stdout
-			PyErr_PrintEx(0);
-		}	
+
+		#ifdef USE_PYTHON
+			// Check if the error indicator is set
+			if (PyErr_Occurred()) {
+				// Print the Python error message to stdout
+				PyErr_PrintEx(0);
+			}
+		#endif	
 	}
 	
 
@@ -31,12 +34,27 @@ void my_Qcommon_Frame(int msec)
 /*
 A safer place to call init code because cvars work.
 And its before dedicated_start, thus before game init code, which is ran each level change.
+
+// add + commands from command line
+if (!Cbuf_AddLateCommands ())
+{	// if the user didn't give any commands, run default action
+	if (!dedicated->value)
+		Cbuf_AddText ("d1\n");
+	else
+		Cbuf_AddText ("dedicated_start\n"); //exec dedicated.cfg
+	Cbuf_Execute ();
+}
+else
+{	// the user asked for something explicit
+	// so drop the loading plaque
+	SCR_EndLoadingPlaque ();
+}
 */
-void my_Cbuf_AddLateCommands(void)
+qboolean my_Cbuf_AddLateCommands(void)
 {
 
-	orig_Cbuf_AddLateCommands();
-
+	qboolean ret = orig_Cbuf_AddLateCommands();
+	if ( ret ) return ret;
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
 	unsigned char * lin_chktbl = 0x08293C80;
@@ -98,8 +116,12 @@ void my_Cbuf_AddLateCommands(void)
 	fcntl(gs_select_sock, F_SETFL, flags | O_NONBLOCK);
 
 
-	// Has to be below the gs_select_sock line above.
-	serverInit();
+	if ( dedicated->value == 1.0f ) {
+		// Has to be below the gs_select_sock line above.
+		serverInit();
+	}
+
+	return ret;
 }
 /*
 	Shared Init
@@ -145,7 +167,9 @@ void my_Qcommon_Init(int one , char ** two) {
 
 void my_Qcommon_Shutdown(void)
 {
-	Py_Finalize();
+	#ifdef USE_PYTHON
+		Py_Finalize();
+	#endif
 	curl_global_cleanup();
 
 	orig_Qcommon_Shutdown();
@@ -447,7 +471,7 @@ void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 {
 	int serverstate = stget(0x082AF680,0);
 	//sv.state = serverstate; inside SV_SpawnServer.
-	if ( serverstate != 9 ) {
+	if ( !serverdemo ) {
 		//if its not 9, it will be 3. So this is normal cl_record_f behaviour.
 		return my_Netchan_Transmit(chan,length,data);
 	}

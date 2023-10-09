@@ -29,9 +29,11 @@ void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *
 void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd) = 0x080BA99C;
 
 // ---SERVER-----
+int (*orig_HasAttachedEffects)(entity_state_t *curState) = 0x081210FC;
 void (*orig_GhoulServerFlushClients)(void) = 0x081A6428;
 void (*orig_GhoulReliableHitwire)(int slot, int frameNum) = 0x081A6350;
 int (*orig_GhoulPackReliable)(int slot,int frameNum, char * packInto, int freeSpace,int * written) = 0x081A5D64;
+int (*orig_GhoulPack)(int slot, int frameNum, float baseTime, unsigned char* dest, int freeSpace) = 0x081A5E7C;
 void (*orig_SV_WriteFrameToClient) (client_t *client, sizebuf_t *msg) = 0x080A58AC;
 void (*orig_SV_New_f) (void) = 0x080B0234;
 void (*orig_SV_Map_f)(void) = 0x080AE3E8;
@@ -57,6 +59,10 @@ void (*orig_SV_SpawnServer) (char *server, char *spawnpoint, server_state_t serv
 qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask, trace_t *trace) = 0x080B37BC;
 
 void (*orig_SV_Nextserver) (void) = 0x080B1C9C;
+
+qboolean (*orig_SV_SendClientDatagram) (client_t *client) = 0x080AF858;
+
+void (*orig_SV_ExecuteClientMessage) (client_t *cl) = 0x080B157C;
 
 
 // ----SHARED-----
@@ -97,7 +103,7 @@ int     (*orig_Cmd_Argc) (void) = 0x081194B0;
 char    *(*orig_Cmd_Argv) (int i) = 0x081194C8;
 char    *(*orig_Cmd_Args) (void) = 0x081194FC;
 
-void (*orig_Cbuf_AddLateCommands)(void) = 0x08117160;
+qboolean (*orig_Cbuf_AddLateCommands)(void) = 0x08117160;
 void (*orig_Qcommon_Init)(int one, char** two) = 0x0811E6E8;
 void (*orig_Qcommon_Frame)(int msec) = 0x0811EE7C;
 void (*orig_Qcommon_Shutdown)(void) = 0x081211E0;

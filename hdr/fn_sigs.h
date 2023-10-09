@@ -5,9 +5,13 @@
 // -------------------Server-----------------
 
 extern void (*orig_GhoulReliableHitwire)(int slot, int frameNum);
+extern void my_GhoulReliableHitwire(int slot, int frameNum);
 
 extern int (*orig_GhoulPackReliable)(int slot,int frameNum, char * packInto, int freeSpace,int * written);
 extern int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,int * written);
+
+extern int (*orig_GhoulPack)(int slot, int frameNum, float baseTime, unsigned char* dest, int freeSpace);
+extern int my_GhoulPack(int slot, int frameNum, float baseTime, unsigned char* dest, int freeSpace);
 
 extern void (*orig_GhoulServerFlushClients)(void);
 
@@ -48,7 +52,15 @@ void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstat
 
 extern int (*orig_SV_EffectIndex)( char * name);
 
+extern qboolean (*orig_SV_SendClientDatagram) (client_t *client);
+extern qboolean my_SV_SendClientDatagram (client_t *client);
+
+extern void (*orig_SV_ExecuteClientMessage) (client_t *cl);
+extern void my_SV_ExecuteClientMessage (client_t *cl);
+
 // -------------------Client------------------
+
+extern int (*orig_HasAttachedEffects)(entity_state_t *curState);
 extern void (*orig_CL_Init) (void);
 extern void my_CL_Init (void);
 
@@ -131,8 +143,8 @@ extern char    *(*orig_Cmd_Args) (void);
 extern void (*orig_Qcommon_Init)(int one, char** two);
 extern void my_Qcommon_Init(int one , char ** two);
 
-extern void (*orig_Cbuf_AddLateCommands)(void);
-extern void (my_Cbuf_AddLateCommands)(void);
+extern qboolean (*orig_Cbuf_AddLateCommands)(void);
+extern qboolean (my_Cbuf_AddLateCommands)(void);
 
 extern void (*orig_Qcommon_Frame)(int msec);
 extern void my_Qcommon_Frame(int msec);

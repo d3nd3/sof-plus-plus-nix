@@ -1,0 +1,2097 @@
+]cl_shownet 3
+Creating DS buffers
+...using secondary sound buffer
+]reconnect
+reconnecting...
+Connecting to 172.22.130.228:8080...
+------------------
+dm/gicctf
+ 24:svc_serverdata
+ 15:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 50:svc_configstring
+  7:svc_configstring
+  7:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 24:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+1358:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 25:svc_configstring
+ 24:svc_configstring
+ 25:svc_configstring
+ 27:svc_configstring
+ 23:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 28:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 10:svc_configstring
+ 13:svc_configstring
+ 12:svc_configstring
+ 14:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 26:svc_configstring
+ 24:svc_configstring
+ 25:svc_configstring
+ 22:svc_configstring
+ 24:svc_configstring
+ 24:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 36:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  9:svc_configstring
+ 18:svc_configstring
+ 12:svc_configstring
+  5:svc_configstring
+ 13:svc_configstring
+ 14:svc_configstring
+ 14:svc_configstring
+1373:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 14:svc_configstring
+ 14:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+1368:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+1355:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 29:svc_configstring
+ 29:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+1373:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 31:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+  5:svc_configstring
+ 32:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 31:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 43:svc_configstring
+ 47:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 48:svc_configstring
+ 38:svc_configstring
+ 47:svc_configstring
+ 43:svc_configstring
+ 48:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 50:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 44:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 47:svc_configstring
+1354:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+  5:svc_configstring
+ 43:svc_configstring
+  5:svc_configstring
+ 43:svc_configstring
+ 38:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 42:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 41:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 35:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+1376:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 37:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 38:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 42:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+ 36:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 37:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+1381:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+ 38:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 42:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 33:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 38:svc_configstring
+ 36:svc_configstring
+ 40:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 39:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 43:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+  5:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+1374:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 44:svc_configstring
+ 38:svc_configstring
+ 43:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 38:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+ 44:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+1345:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 43:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 36:svc_configstring
+ 41:svc_configstring
+ 45:svc_configstring
+ 39:svc_configstring
+ 39:svc_configstring
+ 43:svc_configstring
+ 39:svc_configstring
+ 34:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 46:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+ 33:svc_configstring
+ 34:svc_configstring
+ 37:svc_configstring
+ 44:svc_configstring
+ 42:svc_configstring
+ 34:svc_configstring
+ 36:svc_configstring
+ 36:svc_configstring
+ 36:svc_configstring
+ 37:svc_configstring
+ 38:svc_configstring
+ 47:svc_configstring
+ 45:svc_configstring
+ 39:svc_configstring
+1347:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 39:svc_configstring
+ 44:svc_configstring
+ 51:svc_configstring
+ 54:svc_configstring
+ 56:svc_configstring
+ 59:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 46:svc_configstring
+ 52:svc_configstring
+ 47:svc_configstring
+ 51:svc_configstring
+ 46:svc_configstring
+ 49:svc_configstring
+ 44:svc_configstring
+ 36:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 47:svc_configstring
+ 47:svc_configstring
+ 46:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 27:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+ 28:svc_configstring
+ 52:svc_configstring
+ 52:svc_configstring
+1344:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 53:svc_configstring
+ 44:svc_configstring
+ 47:svc_configstring
+ 49:svc_configstring
+ 49:svc_configstring
+ 49:svc_configstring
+ 49:svc_configstring
+ 52:svc_configstring
+ 48:svc_configstring
+ 48:svc_configstring
+ 43:svc_configstring
+ 44:svc_configstring
+ 43:svc_configstring
+ 46:svc_configstring
+ 43:svc_configstring
+ 49:svc_configstring
+ 44:svc_configstring
+ 47:svc_configstring
+ 45:svc_configstring
+ 45:svc_configstring
+ 47:svc_configstring
+ 46:svc_configstring
+ 46:svc_configstring
+ 48:svc_configstring
+ 46:svc_configstring
+ 44:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+1352:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 43:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 42:svc_configstring
+ 37:svc_configstring
+ 39:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 44:svc_configstring
+ 46:svc_configstring
+ 46:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 41:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 46:svc_configstring
+ 46:svc_configstring
+ 42:svc_configstring
+1355:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 42:svc_configstring
+ 37:svc_configstring
+ 35:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 30:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 33:svc_configstring
+1364:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 34:svc_configstring
+ 35:svc_configstring
+ 30:svc_configstring
+ 39:svc_configstring
+ 37:svc_configstring
+ 31:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 30:svc_configstring
+ 34:svc_configstring
+ 32:svc_configstring
+ 37:svc_configstring
+ 42:svc_configstring
+ 41:svc_configstring
+ 38:svc_configstring
+ 45:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 43:svc_configstring
+ 42:svc_configstring
+ 43:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 42:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+1375:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 42:svc_configstring
+ 42:svc_configstring
+ 38:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 39:svc_configstring
+ 38:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 41:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 43:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 44:svc_configstring
+ 45:svc_configstring
+ 40:svc_configstring
+ 49:svc_configstring
+ 47:svc_configstring
+ 41:svc_configstring
+ 40:svc_configstring
+ 39:svc_configstring
+ 43:svc_configstring
+1380:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 43:svc_configstring
+ 45:svc_configstring
+ 45:svc_configstring
+ 40:svc_configstring
+ 44:svc_configstring
+ 42:svc_configstring
+ 42:svc_configstring
+ 38:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 40:svc_configstring
+ 39:svc_configstring
+ 40:svc_configstring
+ 37:svc_configstring
+ 40:svc_configstring
+ 42:svc_configstring
+ 42:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 44:svc_configstring
+ 41:svc_configstring
+ 43:svc_configstring
+ 39:svc_configstring
+ 41:svc_configstring
+ 42:svc_configstring
+ 43:svc_configstring
+ 38:svc_configstring
+ 38:svc_configstring
+ 40:svc_configstring
+ 38:svc_configstring
+ 41:svc_configstring
+ 44:svc_configstring
+1379:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 27:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 29:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 28:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+ 46:svc_configstring
+ 43:svc_configstring
+ 49:svc_configstring
+ 40:svc_configstring
+ 43:svc_configstring
+ 54:svc_configstring
+ 43:svc_configstring
+ 28:svc_configstring
+ 31:svc_configstring
+ 34:svc_configstring
+ 55:svc_configstring
+ 47:svc_configstring
+ 41:svc_configstring
+ 45:svc_configstring
+1356:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 45:svc_configstring
+ 45:svc_configstring
+ 49:svc_configstring
+ 27:svc_configstring
+ 32:svc_configstring
+ 31:svc_configstring
+ 28:svc_configstring
+ 35:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 30:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 31:svc_configstring
+ 29:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 31:svc_configstring
+ 31:svc_configstring
+1351:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 33:svc_configstring
+ 33:svc_configstring
+ 30:svc_configstring
+ 33:svc_configstring
+ 34:svc_configstring
+ 35:svc_configstring
+ 30:svc_configstring
+ 39:svc_configstring
+ 37:svc_configstring
+ 31:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 33:svc_configstring
+ 33:svc_configstring
+ 35:svc_configstring
+ 35:svc_configstring
+ 30:svc_configstring
+ 34:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 28:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 30:svc_configstring
+ 29:svc_configstring
+ 30:svc_configstring
+ 27:svc_configstring
+ 30:svc_configstring
+ 32:svc_configstring
+ 32:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 34:svc_configstring
+ 31:svc_configstring
+ 33:svc_configstring
+ 29:svc_configstring
+ 31:svc_configstring
+ 32:svc_configstring
+ 33:svc_configstring
+ 28:svc_configstring
+ 28:svc_configstring
+ 30:svc_configstring
+1383:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+ 28:svc_configstring
+ 31:svc_configstring
+ 34:svc_configstring
+ 43:svc_configstring
+ 40:svc_configstring
+ 46:svc_configstring
+ 37:svc_configstring
+ 40:svc_configstring
+ 51:svc_configstring
+ 40:svc_configstring
+ 
+ 35:svc_stufftext
+658:TOTAL PACKET *** LARGE ***
+Downloading maps/dm/gicctf.eal
+------------------
+File not found.
+Downloading strip/menu_maps/dm/gicctf.sp
+  4:svc_download
+ 13:TOTAL PACKET
+------------------
+File not found.
+Downloading bot/wpfiles/maps/dm/gicctf.wrs
+  4:svc_download
+ 13:TOTAL PACKET
+------------------
+File not found.
+Map: dm/gicctf
+                                     
+pics
+                                     
+maps/dm/gicctf.bsp
+                                     
+images
+                                     
+client 0
+                                     
+sky
+                                     
+  4:svc_download
+ 13:TOTAL PACKET
+------------------
+ 24:svc_stufftext
+ 33:TOTAL PACKET
+------------------
+  8:svc_stufftext
+700:svc_ghoulreliable
+717:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+700:svc_ghoulreliable
+717:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+701:svc_ghoulreliable
+718:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+699:svc_ghoulreliable
+716:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+702:svc_ghoulreliable
+719:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+700:svc_ghoulreliable
+717:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+689:svc_ghoulreliable
+706:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+700:svc_ghoulreliable
+717:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+696:svc_ghoulreliable
+713:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+702:svc_ghoulreliable
+719:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+666:svc_ghoulreliable
+683:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+701:svc_ghoulreliable
+718:TOTAL PACKET *** LARGE ***
+------------------
+  8:svc_stufftext
+669:svc_ghoulreliable
+686:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+612:svc_ghoulreliable
+629:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+613:svc_ghoulreliable
+630:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+611:svc_ghoulreliable
+628:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+632:svc_ghoulreliable
+649:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+639:svc_ghoulreliable
+656:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+631:svc_ghoulreliable
+648:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+587:svc_ghoulreliable
+604:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+698:svc_ghoulreliable
+715:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+673:svc_ghoulreliable
+690:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+628:svc_ghoulreliable
+645:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+653:svc_ghoulreliable
+670:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+503:svc_ghoulreliable
+520:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+677:svc_ghoulreliable
+694:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+683:svc_ghoulreliable
+700:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+648:svc_ghoulreliable
+665:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+627:svc_ghoulreliable
+644:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+694:svc_ghoulreliable
+711:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+611:svc_ghoulreliable
+628:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+603:svc_ghoulreliable
+620:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+695:svc_ghoulreliable
+712:TOTAL PACKET *** LARGE ***
+------------------
+  9:TOTAL PACKET
+------------------
+  9:TOTAL PACKET
+------------------
+  8:svc_stufftext
+568:svc_ghoulreliable
+585:TOTAL PACKET
+------------------
+   frame:414  delta:-1
+ 14:svc_frame
+ 47:svc_playerinfo
+   baseline: 1
+   baseline: 44
+   baseline: 45
+   baseline: 46
+   baseline: 47
+   baseline: 48
+   baseline: 49
+   baseline: 51
+   baseline: 54
+   baseline: 55
+   baseline: 58
+   baseline: 60
+   baseline: 64
+   baseline: 65
+   baseline: 66
+   baseline: 67
+   baseline: 68
+   baseline: 69
+   baseline: 70
+   baseline: 71
+   baseline: 72
+   baseline: 101
+   baseline: 106
+   baseline: 107
+   baseline: 108
+   baseline: 109
+   baseline: 110
+   baseline: 111
+   baseline: 122
+   baseline: 123
+   baseline: 128
+429:svc_packetentities
+500:TOTAL PACKET
+------------------
+   frame:415  delta:414
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:416  delta:415
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:417  delta:416
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:418  delta:417
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:419  delta:418
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:420  delta:419
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:421  delta:420
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
+ 36:TOTAL PACKET
+------------------
+   frame:422  delta:421
+ 14:svc_frame
+  9:svc_playerinfo
+   unchanged: 1
+   unchanged: 44
+   unchanged: 45
+   unchanged: 46
+   unchanged: 47
+   unchanged: 48
+   unchanged: 49
+   unchanged: 51
+   unchanged: 54
+   unchanged: 55
+   unchanged: 58
+   unchanged: 60
+   unchanged: 64
+   unchanged: 65
+   unchanged: 66
+   unchanged: 67
+   unchanged: 68
+   unchanged: 69
+   unchanged: 70
+   unchanged: 71
+   unchanged: 72
+   unchanged: 101
+   unchanged: 106
+   unchanged: 107
+   unchanged: 108
+   unchanged: 109
+   unchanged: 110
+   unchanged: 111
+   unchanged: 122
+   unchanged: 123
+   unchanged: 128
+  3:svc_packetentities
