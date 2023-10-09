@@ -540,21 +540,7 @@ extern void * memfxRunner;
 -----------------------------demos.cpp---------------------------------
 ---------------------------------------------------------------------------
 */
-typedef struct fighter_slice_s {
-	sizebuf_t* relSZ;
-	sizebuf_t* unrelSZ;
-} fighter_slice_t;
 
-//contains fighter slices
-typedef struct demo_frame_s {
-	int frameNum;
-	std::map<int,fighter_slice_t*> fighters; //indexed by slot
-} demo_frame_t;
-
-typedef struct initChunk_s {
-	char * data;
-	int len;
-} initChunk_t;
 
 extern void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
 extern void storeServerData();
@@ -574,7 +560,7 @@ extern char recordingName[MAX_TOKEN_CHARS];
 extern int startDemoFrame;
 extern int currentDemoFrame;
 extern int finalDemoFrame;
-extern std::map<int,demo_frame_t*> demoFrames;
+extern std::map<int,SlotPacketDataMap> demoFrames;
 extern int prefferedFighter;
 extern bool demoPlaybackInitiate;
 extern bool demoWaiting;
@@ -595,6 +581,46 @@ extern bool disableDefaultRelBuffer;
 
 extern int firstRecordFrame;
 extern int ghoulUnrelFrame;
+
+
+typedef struct slot_packetdata_s {
+	sizebuf_t* relSZ;
+	sizebuf_t* unrelSZ;
+} slot_packetdata_t;
+
+typedef struct chunk_s {
+	char * data;
+	int len;
+} chunk_t;
+
+
+
+//[spawncount]->[framenum]->[slot] map of map of map of packet_data
+//for each level,for each frame, is many slots, for each slot, packetdata.
+typedef std::map<int,slot_packetdata_t> SlotPacketDataMap;
+typedef std::map<int,SlotPacketDataMap> DemoFramesMap;
+typedef std::map<int,DemoData> DemosPerLevelMap;
+
+class DemoSystem {
+private:
+	std::unique_ptr<DemoRecorder> demo_recorder;
+	std::unique_ptr<DemoPlayer> demo_player;
+	DemosPerLevelMap demos;
+public:
+	//persistent outside of the classes that get 'reset' each levelload.
+	bool serverstate_trigger_play; //thickdemo
+	bool recording_status;
+
+	void DemoSystem();
+	void Initialise();
+
+	DemosPerLevel* getDemos();
+
+	//create entry into demos with svs.spawncount as key.
+	void PrepareLevel();
+
+}
+extern DemoSystem demo_sytem;
 
 
 /*

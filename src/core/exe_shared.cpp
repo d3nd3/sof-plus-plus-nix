@@ -471,13 +471,13 @@ void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 {
 	int serverstate = stget(0x082AF680,0);
 	//sv.state = serverstate; inside SV_SpawnServer.
-	if ( !serverdemo ) {
+	if ( !demo_system.demo_player->active ) {
 		//if its not 9, it will be 3. So this is normal cl_record_f behaviour.
 		return my_Netchan_Transmit(chan,length,data);
 	}
 
-	//serverstate == 9 demoInitiatePlayback == true, toggled by SV_New_f
-	if ( !demoPlaybackInitiate ) return;
+	//toggled by SV_New_f
+	if ( !demo_system.demo_player->packet_override ) return;
 
 	demos_handlePlayback(chan,length,data);
 
@@ -489,7 +489,7 @@ void my_Netchan_Transmit (netchan_t *chan, int length, byte *data)
 {
 	//SOFPPNIX_DEBUG("Netchan_Transmit...");
 	//Make Need_reliable see relAccumulate instead of chan->message
-	if ( disableDefaultRelBuffer ) stset(chan,0x54,relAccumulate.cursize);
+	if ( demo_system.demo_player->netchan_close_rel ) stset(chan,0x54,demo_system.demo_player->demo_rel.cursize);
 	orig_Netchan_Transmit(chan,length,data);
 }
 
@@ -521,13 +521,13 @@ void my_Netchan_Patch(netchan_t *chan)
 		stset(chan,0x54,0);
 	}
 	#else
-	if ( disableDefaultRelBuffer && !chan->reliable_length && relAccumulate.cursize ) {
+	if ( demo_system.demo_player->netchan_close_rel && !chan->reliable_length && relAccumulate.cursize ) {
 		memcpy (chan->reliable_buf, accum_buf, relAccumulate.cursize);
 		chan->reliable_length = relAccumulate.cursize;
 		chan->reliable_sequence ^= 1;
 		relAccumulate.cursize = 0;
 
-	} else if ( !disableDefaultRelBuffer && !chan->reliable_length && chan->message.cursize ) {
+	} else if ( !demo_system.demo_player->netchan_close_rel && !chan->reliable_length && chan->message.cursize ) {
 		memcpy (chan->reliable_buf, chan->message_buf, chan->message.cursize);
 		chan->reliable_length = chan->message.cursize;
 		chan->reliable_sequence ^= 1;

@@ -31,6 +31,7 @@ void init_server_features(void)
 	#endif
 
 
+	//RCON PUBLIC STUFF.
 	cmd_map["fraglimit"] = &rcon_fraglimit;
 	cmd_map["timelimit"] = &rcon_timelimit;
 	cmd_map["deathmatch"] = &rcon_deathmatch;
@@ -39,6 +40,9 @@ void init_server_features(void)
 	cmd_map["set_dmflags"] = 0x080A28EC;
 	cmd_map["unset_dmflags"] = 0x080A2A90;
 	cmd_map["list_dmflags"] = 0x080A25A0;
+
+
+	demo_sytem.Initialise();
 }
 /*
 called by my_Cbuf_AddLateCommands.
@@ -316,24 +320,10 @@ void my_SV_ExecuteUserCommand (char *s)
 */
 void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame)
 {
-	SOFPPNIX_DEBUG("SpawnServer1");
-	disableDefaultRelBuffer = false;
-
-	#if 0
-	/*
-	Ensures correct reliable buffer is used for thickdemos.
-	*/
-	if (serverstate == 3 && thickdemo) {
-		//init variables for demo playback
-		serverstate = 9;
-	}
-	#endif
-	if ( thickdemo ) serverdemo = true;
-	else
-		serverdemo = false;
 	
+	demo_system.PrepareLevel();
+
 	orig_SV_SpawnServer(server,spawnpoint,serverstate,attractloop,loadgame);
-	SOFPPNIX_DEBUG("SpawnServer2");
 }
 
 /*
@@ -345,8 +335,8 @@ void my_SV_New_f(void)
 	SOFPPNIX_DEBUG("SV_New_f");
 
 	int serverstate = stget(0x082AF680,0);
-	if ( serverdemo ) {
-		demoPlaybackInitiate = true;
+	if ( demo_system.demo_player->active ) {
+		demo_system.demo_player->packet_override = true;
 		return;
 	}
 	orig_SV_New_f();

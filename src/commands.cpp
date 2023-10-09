@@ -276,87 +276,46 @@ void cmd_nix_test(void)
 void cmd_nix_demomap(void)
 {
 
-	if ( recordingStatus ) {
+	if ( demo_system.recordingStatus ) {
 		SOFPPNIX_PRINT("Stop your recording first.");
 		return;
 	}
 	//use serverstate 9 for demoActive.
 	int serverstate = stget(0x082AF680,0);
-	if ( serverstate == 9 ) {
+	if ( serverstate == 3 ) {
 		SOFPPNIX_PRINT("TODO: Clear demo and load other demo whilst playback.");
 		return;
 	}
 
-	 
-
-	//sz_init
-	memset(&relAccumulate,0,sizeof(sizebuf_t));
-	//buffer
-	relAccumulate.data = accum_buf;
-	relAccumulate.maxsize = 1400-16;
-
-	relAccumulate.allowoverflow = false;
-
-	//toggled by SV_New_f
-	demoPlaybackInitiate = false;
+	/*
+		use the .dm3 extension format for files.
+		else assumed spawncount selection integer id from memdump list.
+	*/
+	if ( !demo_system.LoadDemo() ) return;
 	
-	//get lowest frame
-	startDemoFrame = demoFrames.begin()->first;
-	currentDemoFrame = startDemoFrame;
-	finalDemoFrame = demoFrames.rbegin()->first;
-	SOFPPNIX_DEBUG("Starting demo on frame : %i / %i",currentDemoFrame, finalDemoFrame);
 
-	//causes server_state_t to use value of 9 instead of usual ss_demo 3.
-	//disabling all ss_demo like features.
-	thickdemo = true;
+	demo_sytem.serverstate_trigger_play = true;
+
 	SOFPPNIX_DEBUG("Preparing to launch last recorded demo : %s!",recordingName);
 
 
 	orig_SV_Map(true, recordingName , false );
 
 	//Disable demofile
-
-	thickdemo = false;
+	demo_sytem.serverstate_trigger_play = false;
 }
 
 void cmd_nix_record(void)
 {
-	if ( orig_Cmd_Argc() != 2 ) {
-		SOFPPNIX_PRINT("Specify demo name");
-		return;
-	}
-	if ( recordingStatus ) {
-		SOFPPNIX_PRINT("You are already recording.");
-		return;
-	}
-	int serverstate = stget(0x082AF680,0);
-	if ( serverstate == 9 ) {
-		SOFPPNIX_PRINT("Cannot record during demo playback.");
-		return;
-	}
 
-	demoWaiting = true;
-	clearDemoData();
-	snprintf(recordingName,MAX_TOKEN_CHARS,"%s.dm2",orig_Cmd_Argv(1));
-	recordingStatus = true;
-
-	//saves initchunks
-	storeServerData();
-
-	//stoprecord saves ghoulchunks
-
-	//all other data saved by netchan_transmit.
-	SOFPPNIX_DEBUG("Recording demoname : %s!",recordingName);
+	demo_system.demo_recorder.begin();
+	
 }
 
 void cmd_nix_stoprecord(void)
 {
-	if ( !recordingStatus ) {
-		SOFPPNIX_PRINT("You must be recording to stop a recording.");
-		return;
-	}
-	SOFPPNIX_DEBUG("Recording ended!");
-
+	
+#if 0
 	//Copy/Save the buffer.
 	for(int i = 0; i < 16; ++i) {
 		ghoulChunksReplay[i] = ghoulChunks[i]; // Copy each vector
@@ -367,8 +326,6 @@ void cmd_nix_stoprecord(void)
 		}
 		ghoulChunksSavedReplay[i] = ghoulChunksSaved[i];
 	}
-
-	demoWaiting = false;
-	recordingStatus = false;
-	//recordingName[0] = 0x00;
+#endif
+	demo_system.demo_recorder.finish();
 }
