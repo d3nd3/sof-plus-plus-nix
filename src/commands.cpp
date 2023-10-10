@@ -276,7 +276,7 @@ void cmd_nix_test(void)
 void cmd_nix_demomap(void)
 {
 
-	if ( demo_system.recordingStatus ) {
+	if ( demo_system.recording_status ) {
 		SOFPPNIX_PRINT("Stop your recording first.");
 		return;
 	}
@@ -294,21 +294,18 @@ void cmd_nix_demomap(void)
 	if ( !demo_system.LoadDemo() ) return;
 	
 
-	demo_sytem.serverstate_trigger_play = true;
+	demo_system.serverstate_trigger_play = true;
 
-	SOFPPNIX_DEBUG("Preparing to launch last recorded demo : %s!",recordingName);
-
-
-	orig_SV_Map(true, recordingName , false );
+	orig_SV_Map(true, "serversidedemo" , false );
 
 	//Disable demofile
-	demo_sytem.serverstate_trigger_play = false;
+	demo_system.serverstate_trigger_play = false;
 }
 
 void cmd_nix_record(void)
 {
 
-	demo_system.demo_recorder.begin();
+	demo_system.demo_recorder->begin();
 	
 }
 
@@ -327,5 +324,5 @@ void cmd_nix_stoprecord(void)
 		ghoulChunksSavedReplay[i] = ghoulChunksSaved[i];
 	}
 #endif
-	demo_system.demo_recorder.finish();
+	demo_system.demo_recorder->finish();
 }

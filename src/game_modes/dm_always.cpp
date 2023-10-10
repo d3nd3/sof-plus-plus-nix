@@ -60,7 +60,12 @@ void	always_gamerules_c::preLevelInit(void){
 	currentGameMode->preLevelInit();
 }
 /*
-called by SpawnEntities
+called by:
+SV_DemoMap_f,SV_GameMap_f (console commands).
+  SV_Map()
+    SV_SpawnServer() 
+      ge->SpawnEntities()
+        dm->levelInit()
 sofplus on_map_begin is also a spawnentities hook but console code is pushed AFTER spawnentities is called so later than this.
 
 There is a strange feature. Called "Defer". In SV_Map @sv_init.c Cbuf_CopyToDefer ();
@@ -145,9 +150,6 @@ void	always_gamerules_c::levelInit(void){
 		killFeedList.clear();
 		killFeedLength = 0;
 	#endif
-
-	for ( int i = 0; i < 16; i++ ) 
-		demoResetVars(i);
 
 	// dm specific levelinit fallback func
 	currentGameMode->levelInit();

@@ -410,23 +410,23 @@ static void slideFix(void)
 	void * pm = 0x084278A0;
 	edict_t ** groundEntity = pm + 0xE4;
 	
-	if ( _nix_slidefix->value == 1.0f ) {
-		if ( !(*groundEntity) && !(*ladder) )
-    	{
-    		// Velocity here already includes the calculation:
-    		// pml.velocity[2] -= pm->s.gravity * pml.frametime
-    		// If the calculated "ORIGIN offset" would be > -0.125
-    		// new Origin change too small.
-			if (*vel_y < 0 && *vel_y * *frametime > -0.125 )
-			{
-				// SOFPPNIX_DEBUG("slideFix : %f %f",*vel_y,*frametime);
-				
-				// This will get multiplied by frametime to calculate origin_offset.
-				*vel_y = -0.125001 / *frametime;
-				// oriign_offset = frametime*frametime*sv_gravity
-			}	
-		}
+	//if ( _nix_slidefix->value == 1.0f ) {
+	if ( !(*groundEntity) && !(*ladder) )
+	{
+		// Velocity here already includes the calculation:
+		// pml.velocity[2] -= pm->s.gravity * pml.frametime
+		// If the calculated "ORIGIN offset" would be > -0.125
+		// new Origin change too small.
+		if (*vel_y < 0 && *vel_y * *frametime > -0.125 )
+		{
+			// SOFPPNIX_DEBUG("slideFix : %f %f",*vel_y,*frametime);
+			
+			// This will get multiplied by frametime to calculate origin_offset.
+			*vel_y = -0.125001 / *frametime;
+			// oriign_offset = frametime*frametime*sv_gravity
+		}	
 	}
+	//}
 }
 
 void my_PM_StepSlideMove(int num)
@@ -441,14 +441,14 @@ This is a server specific hook of Netchan_Transmit, needed primarily for saving 
 void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 {
 	//SOFPPNIX_DEBUG("my_netchan_save");
-	if ( recordingStatus ) {
+	if ( demo_system.recording_status ) {
 
 		//netchan_t->reliable_length
  		int rel_len = stget(chan,0x404c);
  		//netchan_t->message.cursize
 		int cur_size = stget(chan,0x54);
 		//netchan_t->message_buf;
-		unsigned char * relBuff = (void*)chan+0x5C;
+		unsigned char * relBuf = (void*)chan+0x5C;
 
 		int relLen = 0;
 		if ( !rel_len && cur_size ) {
@@ -456,7 +456,7 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 			relLen = cur_size;
 		}
 		// SOFPPNIX_DEBUG("About to call storeDemoData");
-		storeDemoData(chan, relLen, relBuff, length, data); 
+		demo_system.demo_recorder->record(chan,relLen,relBuf,length,data);
 	}
 
 	my_Netchan_Transmit(chan,length,data);
@@ -479,7 +479,7 @@ void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 	//toggled by SV_New_f
 	if ( !demo_system.demo_player->packet_override ) return;
 
-	demos_handlePlayback(chan,length,data);
+	demo_system.demo_player->playback(chan,length,data);
 
 	//SOFPPNIX_DEBUG("EndNetchan");
 
@@ -497,18 +497,18 @@ void my_Netchan_Patch(netchan_t *chan)
 {
 	//SOFPPNIX_DEBUG("my_Netchan_Patch");
 	#if 0
-	if ( disableDefaultRelBuffer && !stget(chan,0x404c) && relAccumulate.cursize ) {
+	if ( demo_system.demo_player->netchan_close_rel && !stget(chan,0x404c) && demo_system.demo_player->demo_rel.cursize ) {
 	
-		memcpy ((void*)chan+0x4050, accum_buf, relAccumulate.cursize);
+		memcpy ((void*)chan+0x4050, demo_system.demo_player->demo_rel_buf, demo_system.demo_player->demo_rel.cursize);
 	
-		stset(chan,0x404c,relAccumulate.cursize);
+		stset(chan,0x404c,demo_system.demo_player->demo_rel.cursize);
 
 	
 		stset(chan,0x40,stget(chan,0x40)^1);
 
-		relAccumulate.cursize = 0;
+		demo_system.demo_player->demo_rel.cursize = 0;
 
-	} else if ( !disableDefaultRelBuffer && !stget(chan,0x404c) && stget(chan,0x54) ) {
+	} else if ( !demo_system.demo_player->netchan_close_rel && !stget(chan,0x404c) && stget(chan,0x54) ) {
 	
 		memcpy((void*)chan+0x4050,(void*)chan+0x5c,stget(chan,0x54));
 	
@@ -521,11 +521,11 @@ void my_Netchan_Patch(netchan_t *chan)
 		stset(chan,0x54,0);
 	}
 	#else
-	if ( demo_system.demo_player->netchan_close_rel && !chan->reliable_length && relAccumulate.cursize ) {
-		memcpy (chan->reliable_buf, accum_buf, relAccumulate.cursize);
-		chan->reliable_length = relAccumulate.cursize;
+	if ( demo_system.demo_player->netchan_close_rel && !chan->reliable_length && demo_system.demo_player->demo_rel.cursize ) {
+		memcpy (chan->reliable_buf, demo_system.demo_player->demo_rel_buf, demo_system.demo_player->demo_rel.cursize);
+		chan->reliable_length = demo_system.demo_player->demo_rel.cursize;
 		chan->reliable_sequence ^= 1;
-		relAccumulate.cursize = 0;
+		demo_system.demo_player->demo_rel.cursize = 0;
 
 	} else if ( !demo_system.demo_player->netchan_close_rel && !chan->reliable_length && chan->message.cursize ) {
 		memcpy (chan->reliable_buf, chan->message_buf, chan->message.cursize);

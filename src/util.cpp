@@ -327,6 +327,17 @@ int getPlayerSlot(void * in_client)
 	return slot;
 }
 
+int netchanToSlot(void * inChan)
+{
+	void *one = stget(0x0829D134,0);
+	void * svs_clients = stget(one,0x10C);
+
+	int clientAddr = (inChan - CLIENT_NETCHAN) - (int)svs_clients;
+
+	if ( clientAddr % 0xd2ac ) return -1;
+	return (clientAddr / 0xd2ac);
+}
+
 bool isServerEmpty(void)
 {
 	void * svs_clients = *(unsigned int*)(*(unsigned int*)(0x0829D134) + 0x10C);

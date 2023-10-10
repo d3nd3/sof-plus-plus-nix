@@ -42,7 +42,7 @@ void init_server_features(void)
 	cmd_map["list_dmflags"] = 0x080A25A0;
 
 
-	demo_sytem.Initialise();
+	demo_system.Initialise();
 }
 /*
 called by my_Cbuf_AddLateCommands.
@@ -316,14 +316,19 @@ void my_SV_ExecuteUserCommand (char *s)
 }
 
 /*
-
+	Careful as to if your code is before or after SpawnServer().
+	As SpawnServer() will call SpawnEntities() and also increment spawncount.
 */
+int spawncount;
 void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstate, qboolean attractloop, qboolean loadgame)
 {
-	
-	demo_system.PrepareLevel();
-
 	orig_SV_SpawnServer(server,spawnpoint,serverstate,attractloop,loadgame);
+
+	//server_static_t;
+	void * svs = 0x082A2540;
+	spawncount = stget(svs,0x108);
+
+	demo_system.PrepareLevel();
 }
 
 /*
@@ -334,7 +339,6 @@ void my_SV_New_f(void)
 	//TODO: Support multiple clients. This becomes array.
 	SOFPPNIX_DEBUG("SV_New_f");
 
-	int serverstate = stget(0x082AF680,0);
 	if ( demo_system.demo_player->active ) {
 		demo_system.demo_player->packet_override = true;
 		return;
@@ -343,29 +347,13 @@ void my_SV_New_f(void)
 }
 
 
-int firstRecordFrame = 0;
 /*
+No Longer used.
 	Record 1 non-compressed frame for demos.
 */
 void my_SV_WriteFrameToClient (client_t *client, sizebuf_t *msg)
 {
 	
-	#if 0
-	int lastframe = stget(client,0x204);
-	
-	//force server to dispatch 1 uncompressed frame.
-	if ( demoWaiting ) {
-		*(int*)((void*)client+0x204) = -1;
-		demoWaiting = false;
-		int frameNum = stget(0x082AF680,0x10);
-		SOFPPNIX_DEBUG("First frame : %i",frameNum);
-		firstRecordFrame = frameNum;
-	}
-	#endif
-	#if 0
-	int frameNum = stget(0x082AF680,0x10);
-	*(int*)((void*)client+0x204) = -1;//frameNum-1;
-	#endif
 	orig_SV_WriteFrameToClient(client,msg);
 }
 
@@ -378,9 +366,9 @@ During demo flow ,this isn't reached.
 qboolean my_SV_SendClientDatagram (client_t *client)
 {
 	qboolean ret = orig_SV_SendClientDatagram(client);
-
+	int slot = getPlayerSlot(client);
 	//empty frame sent to client, we happy.
-	if ( demoWaiting ==  true ) demoWaiting = false;
+	if ( demo_system.demo_recorder->non_delta_trigger[slot] ==  true ) demo_system.demo_recorder->non_delta_trigger[slot] = false;
 	return ret;
 }
 
@@ -392,7 +380,7 @@ void my_SV_ExecuteClientMessage (client_t *cl)
 	orig_SV_ExecuteClientMessage(cl);
 
 	//cl->lastframe = -1;
-	if ( demoWaiting ) {
+	if ( demo_system.demo_recorder->non_delta_trigger[getPlayerSlot(cl)] ) {
 		*(int*)((void*)cl+0x204) = -1;
 	}
 
@@ -411,48 +399,54 @@ int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,i
 	ret =  orig_GhoulPackReliable(slot,frameNum,packInto,freeSpace,written);
 	SOFPPNIX_DEBUG("Written == %i, ret == %i",*written,ret);
 
-	if ( !ghoulChunksSaved[slot] ) {
-		initChunk_t newchunk;
-		newchunk.data = malloc(*written+11);
+
+	std::vector<chunk_t>& chunks = demo_system.demos[spawncount].ghoul_chunks[slot];
+
+
+	if ( !demo_system.demo_recorder->ghoul_rel_sealed[slot] ) {
+		
+
+		for ( auto& chunk : chunks ) {
+			//correctly free partial written chunk of previous client.
+			if ( chunk.data != NULL ) free(chunk.data);
+		}
+		chunks.clear();
+
+		//ensure to free.
+		char * p = malloc(*written+11);
+		
+		//Force client to reply instantly for rel receipts.
+		*(unsigned char*)(p) = svc_stufftext;
+		strlcpy(p+1,"cmd a\n",7);
+
+		//The data.
+		*(unsigned char*)(p+8) = svc_ghoulreliable; //tag
+		*(short*)(p+9) = *written; //length
+		memcpy(p+11,packInto,*written); //data
+
+		chunk_t newchunk;
 		newchunk.len = *written+11;
-
-		//Pointless stufftext to force client to send back faster than every second.
-		*(unsigned char*)(newchunk.data) = svc_stufftext;
-		strlcpy(newchunk.data+1,"cmd a\n",7);
-		*(unsigned char*)(newchunk.data+8) = svc_ghoulreliable;
-		*(short*)(newchunk.data+9) = *written;
-
-		memcpy(newchunk.data+11,packInto,*written);
-		ghoulChunks[slot].push_back(newchunk);
+		newchunk.data = p;
+		chunks.push_back(newchunk);
 
 		SOFPPNIX_DEBUG("Saving ghoul chunk.. from slot : %i",slot);
 	}
 
 	if ( ret == 1 ) {
-		ghoulChunksSaved[slot] = true;
+		demo_system.demo_recorder->ghoul_rel_sealed[slot] = true;
 		SOFPPNIX_DEBUG("Slot : %i --> Ghoul chunks fully saved.",slot);
 	}
 	return ret;
 }
 
-int ghoulUnrelFrame = 0;
 int my_GhoulPack(int slot, int frameNum, float baseTime, unsigned char* dest, int freeSpace)
 {
 	int size = 0;
 	size = orig_GhoulPack(slot,frameNum,baseTime,dest,freeSpace);
 	if ( size > 100 )
 		SOFPPNIX_DEBUG("my_GhoulPack frame=%i, size=%i",frameNum, size);
-	if ( !recordingStatus ) return size;
+	if ( !demo_system.recording_status ) return size;
 	
-	if ( size ) {
-		if ( ghoulUnrelFrame == 0 ) {
-			SOFPPNIX_DEBUG("Storingg ghoulUnrelFrame : %i %i",frameNum,size);
-			ghoulUnrelFrame = frameNum;
-		}
-		if ( firstRecordFrame == frameNum ) 
-			SOFPPNIX_DEBUG("Ghoul Unreliable MATCHES FIRST FRAME!");
-		SOFPPNIX_DEBUG("Ghoul Unreliable packet for frame : %i , firstFrame : %i , size : %i",frameNum,firstRecordFrame,size);
-	}
 	return size;
 }
 

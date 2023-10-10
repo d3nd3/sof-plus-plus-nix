@@ -149,6 +149,8 @@ extern void rcon_deathmatch(void);
 
 extern std::unordered_map<std::string,bool> inv_cmd_exist;
 
+extern int spawncount; //saved in sv_spawnserver.
+
 
 /*---------------------------------------------------------------------
 -----------------------------exe_shared.cpp----------------------------
@@ -227,6 +229,7 @@ extern bool isServerEmpty(void);
 
 extern int getPlayerSlot(void * in_client);
 extern void * getClientX(int slot);
+extern int netchanToSlot(void * inChan);
 
 extern unsigned int slot_from_ent(edict_t * ent);
 
@@ -542,50 +545,9 @@ extern void * memfxRunner;
 */
 
 
-extern void storeDemoData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
-extern void storeServerData();
-extern void constructDemo();
-extern void clearDemoData(void);
-extern int netchanToSlot(void * inChan);
-extern void demos_handlePlayback(netchan_t *chan, int length, byte *data);
-extern sizebuf_t * restoreNetworkBuffers(netchan_t* chan);
-
-extern void demoResetVars(int slot);
-extern void demoResetVarsWeak(int slot);
-
-extern bool thickdemo;
-extern bool serverdemo;
-extern bool recordingStatus;
-extern char recordingName[MAX_TOKEN_CHARS];
-extern int startDemoFrame;
-extern int currentDemoFrame;
-extern int finalDemoFrame;
-extern std::map<int,SlotPacketDataMap> demoFrames;
-extern int prefferedFighter;
-extern bool demoPlaybackInitiate;
-extern bool demoWaiting;
-extern sizebuf_t relAccumulate;
-extern char accum_buf[1400-16];
-
-//Recording reset on each level
-extern bool ghoulChunksSaved[16];
-extern std::vector<initChunk_t> ghoulChunks[16];
-//Recording: actual replay data saved.
-extern std::vector<initChunk_t> ghoulChunksReplay[16];
-extern bool ghoulChunksSavedReplay[16];
-//Playback
-extern int ghoulChunkIndex[16];
-extern bool ghoulLoaded[16];
-
-extern bool disableDefaultRelBuffer;
-
-extern int firstRecordFrame;
-extern int ghoulUnrelFrame;
-
-
 typedef struct slot_packetdata_s {
-	sizebuf_t* relSZ;
-	sizebuf_t* unrelSZ;
+	std::unique_ptr<sizebuf_t> relSZ;
+	std::unique_ptr<sizebuf_t> unrelSZ;
 } slot_packetdata_t;
 
 typedef struct chunk_s {
@@ -593,34 +555,117 @@ typedef struct chunk_s {
 	int len;
 } chunk_t;
 
-
-
 //[spawncount]->[framenum]->[slot] map of map of map of packet_data
 //for each level,for each frame, is many slots, for each slot, packetdata.
-typedef std::map<int,slot_packetdata_t> SlotPacketDataMap;
+typedef std::map<int,std::unique_ptr<slot_packetdata_t>> SlotPacketDataMap;
 typedef std::map<int,SlotPacketDataMap> DemoFramesMap;
+
+/*
+DemoData is created every SpawnServer. Placed into the demo_system Class indexed by spawncount.
+*/
+class DemoData {
+public:
+	//connecting. data,len
+	std::vector<chunk_t> activation_chunks[16]; //initialChunks
+
+	//svc_ghoulreliable stuff.
+	std::vector<chunk_t> ghoul_chunks[16];
+
+	//demo_frames_map : map of frames->frameData
+	//frameData : map of slots->DATA{rel,unrel}
+	DemoFramesMap demo_frames_map;
+
+	//Required for reconstruction of 'svc_serverdata' packet required during connection handshake.
+	std::string level_name;
+	int deathmatch;
+	std::string game_dir;
+
+	DemoData(std::string level_name,int deathmatch, std::string game_dir);
+	~DemoData();
+};
+
+class DemoRecorder {
+public:
+	int start_spawncount = 0;
+	bool active = false; //recordingStatus
+	char recording_name[MAX_TOKEN_CHARS];
+
+	//should trigger ALL clients to re-receive ghl unreliable packets and to get a base-frame.
+	bool non_delta_trigger[16] = {false}; //demoWaiting
+
+	// when GhoulPackReliable returns 1, sets this to true.
+	bool ghoul_rel_sealed[16] = {false};
+
+
+	DemoRecorder(int spawncount);
+
+	void begin(void);
+	void record(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
+	void finish(void);
+
+	/*
+		connection data to kick start the client into the game.
+	*/
+	void create_checkpoint(int slot);
+};
+
+class DemoPlayer {
+public:
+	int start_spawncount; //set by cmd_argc() or read from demofile
+	bool active = false; //playbackStatus
+	
+	bool packet_override = false; //demoPlaybackInitiate
+
+	int first_frame = 0; //startDemoFrame
+	int current_frame = 0; //currentDemoFrame
+	int final_frame = 0; //finalDemoFrame
+
+	int watch_slot = -1; //prefferedFighter
+
+	bool netchan_close_rel = false; //disableDefaultRelBuffer
+
+	sizebuf_t demo_rel; //relAccumulate
+	char	demo_rel_buf[1400-16]; //accum_buf
+
+	//progress for each client/viewer
+	int ghoulChunkIndex[16];
+	bool ghoulLoaded[16];
+
+
+
+	DemoPlayer();
+	void begin(void);
+
+	/*
+	demo_system.demo_player->packet_override - after New
+	*/
+	void playback(netchan_t *chan, int length, byte *data);
+};
+
+
 typedef std::map<int,DemoData> DemosPerLevelMap;
 
 class DemoSystem {
-private:
+
+public:
 	std::unique_ptr<DemoRecorder> demo_recorder;
 	std::unique_ptr<DemoPlayer> demo_player;
 	DemosPerLevelMap demos;
-public:
 	//persistent outside of the classes that get 'reset' each levelload.
 	bool serverstate_trigger_play; //thickdemo
 	bool recording_status;
 
-	void DemoSystem();
+	DemoSystem();
 	void Initialise();
 
-	DemosPerLevel* getDemos();
 
 	//create entry into demos with svs.spawncount as key.
 	void PrepareLevel();
 
-}
-extern DemoSystem demo_sytem;
+	bool LoadDemo();
+
+};
+extern DemoSystem demo_system;
 
 
 /*
