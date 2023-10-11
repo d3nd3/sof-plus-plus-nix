@@ -557,9 +557,31 @@ typedef struct chunk_s {
 
 //[spawncount]->[framenum]->[slot] map of map of map of packet_data
 //for each level,for each frame, is many slots, for each slot, packetdata.
-typedef std::map<int,std::unique_ptr<slot_packetdata_t>> SlotPacketDataMap;
-typedef std::map<int,SlotPacketDataMap> DemoFramesMap;
+typedef std::unordered_map<int,std::unique_ptr<slot_packetdata_t>> SlotPacketDataMap;
+typedef std::unordered_map<int,SlotPacketDataMap> DemoFramesMap;
 
+
+
+/*
+	How to find the nearest checkpoint to frame?
+
+	As playback occurs, the last checkpoint frame is kept track of.
+	If current frame.isCheckpoint == true:
+		save currentCheckpoint = framenum
+
+	checkpoints will be unordered_map[key==framenum].
+*/
+class DemoCheckpoint {
+public:
+	int timestamp;
+	//key is framenum, not necessary to store.
+
+	std::vector<chunk_t> configstrings_baselines;
+
+	DemoCheckpoint();
+
+	generate_svc_serverdata(std::vector<chunk_t>& resultVector);
+};
 /*
 DemoData is created every SpawnServer. Placed into the demo_system Class indexed by spawncount.
 */
@@ -574,6 +596,12 @@ public:
 	//demo_frames_map : map of frames->frameData
 	//frameData : map of slots->DATA{rel,unrel}
 	DemoFramesMap demo_frames_map;
+
+
+	//checkpoints
+	//umap[framenum].timestamp
+	//umap[framenum].configstrings_baselines
+	std::unordered_map<std::unique_ptr<DemoCheckpoint>> checkpoints;
 
 	//Required for reconstruction of 'svc_serverdata' packet required during connection handshake.
 	std::string level_name;
@@ -591,7 +619,7 @@ public:
 	char recording_name[MAX_TOKEN_CHARS];
 
 	//should trigger ALL clients to re-receive ghl unreliable packets and to get a base-frame.
-	bool non_delta_trigger[16] = {false}; //demoWaiting
+	bool trigger_checkpoint[16] = {false}; //demoWaiting
 
 	// when GhoulPackReliable returns 1, sets this to true.
 	bool ghoul_rel_sealed[16] = {false};
@@ -599,14 +627,11 @@ public:
 
 	DemoRecorder(int spawncount);
 
-	void begin(void);
-	void record(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
-	void finish(void);
+	void startRecording(void);
+	void saveNetworkData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
+	void endRecording(void);
 
-	/*
-		connection data to kick start the client into the game.
-	*/
-	void create_checkpoint(int slot);
+	void onClientFullyConnected(void);
 };
 
 class DemoPlayer {
@@ -643,7 +668,7 @@ public:
 };
 
 
-typedef std::map<int,DemoData> DemosPerLevelMap;
+typedef std::unordered_map<int,std::unique_ptr<DemoData>> DemosPerLevelMap;
 
 class DemoSystem {
 

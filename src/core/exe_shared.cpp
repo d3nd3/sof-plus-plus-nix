@@ -456,7 +456,7 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 			relLen = cur_size;
 		}
 		// SOFPPNIX_DEBUG("About to call storeDemoData");
-		demo_system.demo_recorder->record(chan,relLen,relBuf,length,data);
+		demo_system.demo_recorder->saveNetworkData(chan,relLen,relBuf,length,data);
 	}
 
 	my_Netchan_Transmit(chan,length,data);

@@ -305,7 +305,7 @@ void cmd_nix_demomap(void)
 void cmd_nix_record(void)
 {
 
-	demo_system.demo_recorder->begin();
+	demo_system.demo_recorder->startRecording();
 	
 }
 
@@ -324,5 +324,5 @@ void cmd_nix_stoprecord(void)
 		ghoulChunksSavedReplay[i] = ghoulChunksSaved[i];
 	}
 #endif
-	demo_system.demo_recorder->finish();
+	demo_system.demo_recorder->endRecording();
 }

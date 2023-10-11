@@ -67,7 +67,7 @@ bool beginHttpDL(std::string * mapname, void * callback,bool use_join=false)
 	if ( use_join ) {
 		httpdl.join();	
 	} else
-		httpdl.detach();
+	httpdl.detach();
 	return true;
 }
 
@@ -157,6 +157,7 @@ size_t httpdl_writecb(void *ptr, size_t size, size_t nmemb, void *userdata) {
 #include <zlib.h>
 
 /*
+	called by beginHttpDL()
 	url as given by configstrings.
 
 	the MAP_POOL provides a .zip bundle using the mapname/path.
@@ -382,7 +383,7 @@ size_t partial_blob_100_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
 	if ( *out_buffer != NULL ) {
 		// insert previous mem right-hand size into new mem.
 		memcpy(new_mem + total_size, *out_buffer,partial_blob_100_cb_written);
-			
+
 		free( *out_buffer );
 	}
 
@@ -456,7 +457,7 @@ bool partialHttpBlobs(char * remote_url)
 	*/
 	int file_size = partial_Header_ContentLength(remote_url);
 	if ( file_size <= 0 ) {
-		SOFPPNIX_DEBUG("Map not found\n");
+		SOFPPNIX_DEBUG("Map not found for url: %s\n",remote_url);
 		return false;
 	}
 	// SOFPPNIX_DEBUG("File Size of %s == %i\n",remote_url,file_size);
@@ -635,8 +636,19 @@ bool unZipFile(char * in_zip, char * out_root )
 			return false;
 		}
 		
-		// FULL DEST PATH CREATION
-		std::string output_file_path = out_root + std::string("/") + std::string(filename);
+		//fix for mapnames that have uppercase letters in them but the github url.zip does not.
+		std::string output_file_path;
+
+		if (std::filesystem::path(filename).extension() == ".bsp") {
+			std::string lowercase_filename;
+			std::transform(filename.begin(), filename.end(), std::back_inserter(lowercase_filename), [](unsigned char c) {
+				return std::tolower(c);
+			});
+			output_file_path = out_root + std::string("/") + lowercase_filename;
+		} else {
+			output_file_path = out_root + std::string("/") + filename;
+		}
+
 		create_file_dir_if_not_exists(output_file_path.c_str());
 
 		//----------------------OPEN WRITE FILE----------------------

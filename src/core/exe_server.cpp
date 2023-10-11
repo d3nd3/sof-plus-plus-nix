@@ -114,6 +114,8 @@ void map_continue(void)
 /*
 cmd_argv(0) = map
 cmd_argv(1) = mapname
+
+CRC list is fetched from github, then compared to local file on disk.
 */
 int * cmd_argc = 0x083F9200;
 void my_SV_Map_f(void)
@@ -122,6 +124,7 @@ void my_SV_Map_f(void)
 	if ( map_saving ) {
 		// How do know if this was called by callback or by a user.
 		if ( orig_Cmd_Argc() >= 3 ) {
+			//map_continue download done.
 			if ( !strcmp(orig_Cmd_Argv(2), "fgdd46hg") ) {
 				// DOWNLOAD ALREADY DONE.
 				// SOFPPNIX_PRINT("Calling original map_f p2\n");
@@ -368,7 +371,7 @@ qboolean my_SV_SendClientDatagram (client_t *client)
 	qboolean ret = orig_SV_SendClientDatagram(client);
 	int slot = getPlayerSlot(client);
 	//empty frame sent to client, we happy.
-	if ( demo_system.demo_recorder->non_delta_trigger[slot] ==  true ) demo_system.demo_recorder->non_delta_trigger[slot] = false;
+	if ( demo_system.demo_recorder->trigger_checkpoint[slot] ==  true ) demo_system.demo_recorder->trigger_checkpoint[slot] = false;
 	return ret;
 }
 
@@ -380,7 +383,7 @@ void my_SV_ExecuteClientMessage (client_t *cl)
 	orig_SV_ExecuteClientMessage(cl);
 
 	//cl->lastframe = -1;
-	if ( demo_system.demo_recorder->non_delta_trigger[getPlayerSlot(cl)] ) {
+	if ( demo_system.demo_recorder->trigger_checkpoint[getPlayerSlot(cl)] ) {
 		*(int*)((void*)cl+0x204) = -1;
 	}
 
