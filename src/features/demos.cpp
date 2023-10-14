@@ -24,6 +24,24 @@ cmd_nix_stoprecord - demo_system.demo_recorder.endRecording();
 cmd_nix_record - demo_system.demo_recorder.startRecording();
 
 
+Question: Can spawncount ever not match demo_recorder->start_spawncount?
+Answer: Only by the few code that exists between the line that sets spawncount in SV_SpawnServer and the return of the function, before DemoSystem::PrepareLevel() is called. So, effectively, no.
+
+Question: Is there a purpose for recording the spawncount in the recorder?
+Answer: No, because the lifetime of the record and playback classes matches the spawncount lifetime.
+
+DemoSystem::demo_system
+	DemoRecorder demo_recorder -> deleted & created by DemoSystem::PrepareLevel(), called after SV_SpawnServer
+	DemoPlayer demo_player
+	DemoData demos[spawncount]
+		DemoFramesMap demo_frames_map[framenum]
+		DemoCheckpoint checkpoints[framenum]
+		chunk_t activation_chunks[]
+		chunk_t ghoul_chunks[]
+		level_name
+		deathmatch
+		game_dir
+
 */
 
 
@@ -72,8 +90,8 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 	orig_MSG_WriteLong(&buf,PROTOCOL_VERSION);
 
 	//spawncount - this is a unique random number to detect if the client thinks its connecting to a previous map state.
-	SOFPPNIX_DEBUG("Spawn Count = %i",start_spawncount);
-	orig_MSG_WriteLong(&buf,start_spawncount);
+	SOFPPNIX_DEBUG("Spawn Count = %i",spawncount);
+	orig_MSG_WriteLong(&buf,spawncount);
 
 	//attractloop type 2 = serverdemo 1 = clientdemo
 	orig_MSG_WriteByte(&buf,1);
@@ -118,7 +136,7 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 				buf.cursize = 0;
 
 				resultVector.push_back(newchunk);
-				//demo_system.demos[start_spawncount].activation_chunks[slot].push_back(newchunk);
+				//demo_system.demos[spawncount].activation_chunks[slot].push_back(newchunk);
 
 				//Pointless stufftext to force client to send back faster than every second.
 				orig_MSG_WriteByte(&buf, svc_stufftext);
@@ -164,7 +182,7 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 
 			buf.cursize = 0;
 			resultVector.push_back(newchunk);
-			// demo_system.demos[start_spawncount].activation_chunks[slot].push_back(newchunk);
+			// demo_system.demos[spawncount].activation_chunks[slot].push_back(newchunk);
 		}
 
 		orig_MSG_WriteByte (&buf, svc_spawnbaseline);		
@@ -187,7 +205,7 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 	memcpy(newchunk.data,buf_data,buf.cursize);
 
 	buf.cursize = 0;
-	//demo_system.demos[start_spawncount].activation_chunks[slot].push_back(newchunk);
+	//demo_system.demos[spawncount].activation_chunks[slot].push_back(newchunk);
 	resultVector.push_back(newchunk);
 
 
@@ -245,7 +263,14 @@ DemoData::~DemoData() {
 -----------------------------DEMO RECORDER---------------------------------
 ---------------------------------------------------------------------------
 */
-DemoRecorder::DemoRecorder(int spawncount) : start_spawncount(spawncount){
+DemoRecorder::DemoRecorder()
+{
+
+}
+
+DemoRecorder::~DemoRecorder()
+{
+	endRecording();
 }
 
 
@@ -277,7 +302,7 @@ void DemoRecorder::startRecording(void) {
 
 	//DemoData already created by DemoSystem::PrepareLevel() (SV_SpawnServer)
 	// Assuming 'checkpoints' is your unordered_map
-	auto it = demos.find(start_spawncount);
+	auto it = demos.find(spawncount);
 	if (it == demos.end()) {
 		//Created in DemoSystem::PrepareLevel() (SV_spawnServer)
 		SOFPPNIX_DEBUG("Warning. The DemoData does not exist yet.");
@@ -286,7 +311,7 @@ void DemoRecorder::startRecording(void) {
 
 	//Checkpoint creation should be handled in sv_writeframe function. Not here.
 	//Although triggering of the checkpoint creation can work here.
-	demos[start_spawncount]->checkpoints[]
+	demos[spawncount]->checkpoints[]
 	DemoData.checkpoints[framenum] = std::make_unique<DemoCheckpoint>(/* constructor arguments */);
 	/*
 		Essentially the first checkpoint.
@@ -356,7 +381,11 @@ void DemoRecorder::saveNetworkData(void * netchan, int relLen, unsigned char * r
 
 	demo_system.demos[spawncount].demo_frames_map[framenum][slot] = std::move(packet);
 }
+/*
+Called by ++nix_stoprecording or demo_system::preloadLevel (same place recording is started).
 
+Ends the recording + writes to disk?
+*/
 void DemoRecorder::endRecording(void) {
 	if ( !demo_system.recording_status ) {
 		SOFPPNIX_PRINT("You must be recording to stop a recording.");
@@ -364,6 +393,7 @@ void DemoRecorder::endRecording(void) {
 	}
 	SOFPPNIX_DEBUG("Recording ended!");
 	
+	writeToDisk();
 	demo_system.recording_status = false;
 }
 
@@ -371,6 +401,30 @@ void DemoRecorder::onClientFullyConnected(void)
 {
 
 }
+/*
+	if end of recording mostly occurs at end of level, shouldn't be a performance issue.
+
+	I was thinking of recording names to be auto created based on level name and timestamp.
+	Perhaps it could be optional to provide a name.
+
+	Providing a record command that doesn't write to disk might also be nice for temporary recordings, where the intention is to playback the demo one time only.
+*/
+void DemoRecorder::writeToDisk(void)
+{
+	DemosPerLevelMap& demo_data = demo_system.demos[spawncount]; 
+	disk_file.open(recording_name, std::ios::binary | std::ios::out);
+	if (!disk_file.is_open()) {
+		std::cerr << "Error opening file: " << recording_name << std::endl;
+	}
+	//spawncount - 4-byte integer
+	disk_file.write(reinterpret_cast<const char*>(&value), sizeof(int));
+
+	// Write the null-terminated string
+	disk_file.write(demo_data->level_name.c_str(), demo_data->level_name.size() + 1); // Include the null character
+
+	disk_file.close();
+}
+
 
 /*
 	connection data to kick start the client into the game.

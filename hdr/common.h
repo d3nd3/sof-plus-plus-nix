@@ -613,8 +613,9 @@ public:
 };
 
 class DemoRecorder {
+private:
+	std::ofstream disk_file;
 public:
-	int start_spawncount = 0;
 	bool active = false; //recordingStatus
 	char recording_name[MAX_TOKEN_CHARS];
 
@@ -636,7 +637,8 @@ public:
 
 class DemoPlayer {
 public:
-	int start_spawncount; //set by cmd_argc() or read from demofile
+	//spawncount of the loaded demo.
+	int spawncount; //set by cmd_argc() or read from demofile
 	bool active = false; //playbackStatus
 	
 	bool packet_override = false; //demoPlaybackInitiate
