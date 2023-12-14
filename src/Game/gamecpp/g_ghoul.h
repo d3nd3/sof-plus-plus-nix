@@ -204,7 +204,7 @@ class ggObjC
 {
 private:
 	std::map<IGhoulInst *,gg_inst_c_ptr>		instances;
-	std::list<string>						registered_skins;
+	std::list<std::string>						registered_skins;
 #define GGOBJC_SAVE_START	offsetof(ggObjC, this_object)
 	IGhoulObj	*this_object;
 	bool		registration_locked;
