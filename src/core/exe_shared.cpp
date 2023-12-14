@@ -54,7 +54,8 @@ qboolean my_Cbuf_AddLateCommands(void)
 {
 
 	qboolean ret = orig_Cbuf_AddLateCommands();
-	if ( ret ) return ret;
+	// if ( ret ) return ret;
+
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
 	// memcpy(chktbl2,(void*)0x08293C80,3000);
 	unsigned char * lin_chktbl = 0x08293C80;
@@ -392,11 +393,10 @@ static void slideFix(void)
 
 		cls.frametime is frametime in seconds.
 
-		I guess because frametime is applied to gravity.
-		And also applied to origin :
-		origin = velocity * frametime.
+		delta_velocity = accel * frametime
+		delta_origin = delta_velocity * frametime
 
-		But velocity is velocity = gravity * frametime.
+		gravity is accel here.
 	*/
 
 	// void * pml = stget(0x0829DD2C,0);
@@ -415,13 +415,15 @@ static void slideFix(void)
 	{
 		// Velocity here already includes the calculation:
 		// pml.velocity[2] -= pm->s.gravity * pml.frametime
-		// If the calculated "ORIGIN offset" would be > -0.125
-		// new Origin change too small.
+		// If the calculated "ORIGIN offset" is between <0 and -0.125>
+		// Clamp it to -0.125001
+		// So sets a minimum distance of a move downwards.
 		if (*vel_y < 0 && *vel_y * *frametime > -0.125 )
 		{
 			// SOFPPNIX_DEBUG("slideFix : %f %f",*vel_y,*frametime);
 			
-			// This will get multiplied by frametime to calculate origin_offset.
+			//delta_velocity = accel * frametime
+			//delta_origin = delta_velocity * frametime
 			*vel_y = -0.125001 / *frametime;
 			// oriign_offset = frametime*frametime*sv_gravity
 		}	
@@ -441,6 +443,8 @@ This is a server specific hook of Netchan_Transmit, needed primarily for saving 
 void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 {
 	//SOFPPNIX_DEBUG("my_netchan_save");
+
+	#if 0
 	if ( demo_system.recording_status ) {
 
 		//netchan_t->reliable_length
@@ -458,6 +462,7 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 		// SOFPPNIX_DEBUG("About to call storeDemoData");
 		demo_system.demo_recorder->saveNetworkData(chan,relLen,relBuf,length,data);
 	}
+	#endif
 
 	my_Netchan_Transmit(chan,length,data);
 }
@@ -469,6 +474,7 @@ client state is still cs_zombie after disconnect.
 */
 void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 {
+	#if 0
 	int serverstate = stget(0x082AF680,0);
 	//sv.state = serverstate; inside SV_SpawnServer.
 	if ( !demo_system.demo_player->active ) {
@@ -482,19 +488,25 @@ void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 	demo_system.demo_player->playback(chan,length,data);
 
 	//SOFPPNIX_DEBUG("EndNetchan");
+	#else
+	return my_Netchan_Transmit(chan,length,data);
+	#endif
 
 }
 
 void my_Netchan_Transmit (netchan_t *chan, int length, byte *data)
 {
+	#if 0
 	//SOFPPNIX_DEBUG("Netchan_Transmit...");
 	//Make Need_reliable see relAccumulate instead of chan->message
 	if ( demo_system.demo_player->netchan_close_rel ) stset(chan,0x54,demo_system.demo_player->demo_rel.cursize);
 	orig_Netchan_Transmit(chan,length,data);
+	#endif
 }
 
 void my_Netchan_Patch(netchan_t *chan)
 {
+	#if 0
 	//SOFPPNIX_DEBUG("my_Netchan_Patch");
 	#if 0
 	if ( demo_system.demo_player->netchan_close_rel && !stget(chan,0x404c) && demo_system.demo_player->demo_rel.cursize ) {
@@ -533,5 +545,7 @@ void my_Netchan_Patch(netchan_t *chan)
 		chan->reliable_sequence ^= 1;
 		chan->message.cursize = 0;
 	}
+	#endif
+	
 	#endif
 }

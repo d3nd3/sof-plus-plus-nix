@@ -43,11 +43,16 @@ void slidefix_modified(cvar_t * c)
 {
 	if ( c->value == 1.0f ){
 		SOFPPNIX_PRINT("Enabling slidefix feature");
+		#if 0
 		callE8Patch(0x0812E643,&my_PM_StepSlideMove);
+		#else
+		memoryAdjust(0x0812E83A,1,0xEB);
+		#endif
 	}
 	else {
 		//RESTORE.
 		SOFPPNIX_PRINT("Disabling slidefix feature");
+		#if 0
 		char * p = 0x0812E643;
 		memoryUnprotect(p);
 		*p = 0xE8;
@@ -56,6 +61,9 @@ void slidefix_modified(cvar_t * c)
 		*(p+3) = 0xFF;
 		*(p+4) = 0xFF;
 		memoryProtect(p);
+		#else
+		memoryAdjust(0x0812E83A,1,0x72);
+		#endif
 	}
 }
 

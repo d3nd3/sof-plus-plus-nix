@@ -203,8 +203,8 @@ static	ggOinstC		*NewClassForCode(int code){return new ggOinstC;}
 class ggObjC
 {
 private:
-	map<IGhoulInst *,gg_inst_c_ptr>		instances;
-	list<string>						registered_skins;
+	std::map<IGhoulInst *,gg_inst_c_ptr>		instances;
+	std::list<string>						registered_skins;
 #define GGOBJC_SAVE_START	offsetof(ggObjC, this_object)
 	IGhoulObj	*this_object;
 	bool		registration_locked;
@@ -274,7 +274,7 @@ virtual void		Read();
 class gameghoul_c
 {
 private:
-	map<IGhoulObj*,gg_obj_c_ptr>		objects;
+	std::map<IGhoulObj*,gg_obj_c_ptr>		objects;
 	ggObjC *AddObject(const char* name, const char* subname, bool allSkins, const char *skinname, const char *basefile);
 	
 public:

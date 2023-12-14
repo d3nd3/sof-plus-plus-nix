@@ -168,7 +168,7 @@ void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_t *cmd)
 	SOFPPNIX_DEBUG("--------TO-----------");
 	dump_usercmd(*cmd);
 
-	vector<signed char> * v = (vector<signed char>*)(out_packet+8);
+	std::vector<signed char> * v = (std::vector<signed char>*)(out_packet+8);
 	
 
 	// Iterates the vector v and print all of its elements

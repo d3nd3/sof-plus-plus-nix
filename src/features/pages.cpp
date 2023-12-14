@@ -140,7 +140,7 @@ void empty_reset_page_layout(int slot)
 		xxxx showScoreboard (removed) (no longer true).xxxx
 
 		1)clientConnect
-		2)SV_RunGameFrame (early).
+		2)SV_RunGameFrame (early). (ClientScoreboardMessage()->runRefreshLayout())
 		3)py_player_clear_layout
 	LATEST:
 		I only want this called after a resfresh occured.

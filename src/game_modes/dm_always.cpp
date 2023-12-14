@@ -433,7 +433,7 @@ void	always_gamerules_c::clientDisconnect(edict_t *ent){
 	#endif
 
 	int slot = slot_from_ent(ent);
-	demoResetVarsWeak(slot);
+	// demoResetVarsWeak(slot);
 
 	currentGameMode->clientDisconnect(ent);
 
@@ -814,6 +814,8 @@ static void runRefreshLayout(edict_t * ent,int slot, int show_scores, edict_t * 
 }
 #endif
 /*
+	We now call this in G_SetStats hook because it allows control during intermission.
+	
 	The intermission scoreboard shows because of G_SetStats - ent->client->ps.stats[STAT_LAYOUTS] |= 1;
 	But because we set that variable directly immediately after, G_SetStats has lost control of the toggle.
 */

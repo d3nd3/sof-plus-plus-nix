@@ -233,6 +233,10 @@ void __attribute__ ((constructor)) begin() {
 //---------------------------DISABLE OVERFLOW RELIABLE---------------------------------
 	memoryAdjust(0x080AFDA3,5,NOP);
 	memoryAdjust(0x080AFDB1,5,NOP);
+	//------------------------------TEST RAMP BOOST--------------------------------
+	//memoryUnprotect(0x08262F88);
+	//*(float*)0x08262F88 = 500.0f;
+	//memoryProtect(0x08262F88);
 
 
 ////////////////////////////////////////////////////

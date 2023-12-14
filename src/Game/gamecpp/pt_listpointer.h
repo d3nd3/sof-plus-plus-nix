@@ -29,8 +29,8 @@ private:
 	int NewUUID() {return ptListTCNextUUID++;}
 	void LoadUUID(int uuid) {if (ptListTCNextUUID<=uuid) ptListTCNextUUID=uuid+1;} // prevent new thing from conflicting with loaded things.
 
-	map<T *,int> Index;
-	map<int,T *> Pointer;
+	std::map<T *,int> Index;
+	std::map<int,T *> Pointer;
 public:
 	int		GetIndexFromPointer(T *thing)
 			{

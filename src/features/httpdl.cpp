@@ -639,14 +639,15 @@ bool unZipFile(char * in_zip, char * out_root )
 		//fix for mapnames that have uppercase letters in them but the github url.zip does not.
 		std::string output_file_path;
 
-		if (std::filesystem::path(filename).extension() == ".bsp") {
+		std::string filename_str = std::string(filename);
+		if (std::filesystem::path(filename_str).extension() == ".bsp") {
 			std::string lowercase_filename;
-			std::transform(filename.begin(), filename.end(), std::back_inserter(lowercase_filename), [](unsigned char c) {
+			std::transform(filename_str.begin(), filename_str.end(), std::back_inserter(lowercase_filename), [](unsigned char c) {
 				return std::tolower(c);
 			});
 			output_file_path = out_root + std::string("/") + lowercase_filename;
 		} else {
-			output_file_path = out_root + std::string("/") + filename;
+			output_file_path = out_root + std::string("/") + filename_str;
 		}
 
 		create_file_dir_if_not_exists(output_file_path.c_str());

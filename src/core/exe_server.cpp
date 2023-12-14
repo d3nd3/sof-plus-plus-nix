@@ -42,7 +42,7 @@ void init_server_features(void)
 	cmd_map["list_dmflags"] = 0x080A25A0;
 
 
-	demo_system.Initialise();
+	// demo_system.Initialise();
 }
 /*
 called by my_Cbuf_AddLateCommands.
@@ -331,7 +331,7 @@ void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstat
 	void * svs = 0x082A2540;
 	spawncount = stget(svs,0x108);
 
-	demo_system.PrepareLevel();
+	// demo_system.PrepareLevel();
 }
 
 /*
@@ -342,11 +342,13 @@ void my_SV_New_f(void)
 	//TODO: Support multiple clients. This becomes array.
 	SOFPPNIX_DEBUG("SV_New_f");
 
+	#if 0
 	if ( demo_system.demo_player->active ) {
 		demo_system.demo_player->packet_override = true;
 		return;
 	}
 	orig_SV_New_f();
+	#endif
 }
 
 
@@ -371,7 +373,7 @@ qboolean my_SV_SendClientDatagram (client_t *client)
 	qboolean ret = orig_SV_SendClientDatagram(client);
 	int slot = getPlayerSlot(client);
 	//empty frame sent to client, we happy.
-	if ( demo_system.demo_recorder->trigger_checkpoint[slot] ==  true ) demo_system.demo_recorder->trigger_checkpoint[slot] = false;
+	// if ( demo_system.demo_recorder->trigger_checkpoint[slot] ==  true ) demo_system.demo_recorder->trigger_checkpoint[slot] = false;
 	return ret;
 }
 
@@ -382,11 +384,12 @@ void my_SV_ExecuteClientMessage (client_t *cl)
 {
 	orig_SV_ExecuteClientMessage(cl);
 
+	#if 0
 	//cl->lastframe = -1;
 	if ( demo_system.demo_recorder->trigger_checkpoint[getPlayerSlot(cl)] ) {
 		*(int*)((void*)cl+0x204) = -1;
 	}
-
+	#endif
 }
 
 /*
@@ -398,12 +401,13 @@ int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,i
 	//packInto = data + cursize
 
 	int ret = 0;
-	SOFPPNIX_DEBUG("Slot == %i, FrameNum == %i, FreeSpace = %i",slot,frameNum,freeSpace);
+	// SOFPPNIX_DEBUG("Slot == %i, FrameNum == %i, FreeSpace = %i",slot,frameNum,freeSpace);
 	ret =  orig_GhoulPackReliable(slot,frameNum,packInto,freeSpace,written);
+	#if 0
 	SOFPPNIX_DEBUG("Written == %i, ret == %i",*written,ret);
 
 
-	std::vector<chunk_t>& chunks = demo_system.demos[spawncount].ghoul_chunks[slot];
+	std::vector<chunk_t>& chunks = demo_system.demos[spawncount]->ghoul_chunks[slot];
 
 
 	if ( !demo_system.demo_recorder->ghoul_rel_sealed[slot] ) {
@@ -439,6 +443,7 @@ int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,i
 		demo_system.demo_recorder->ghoul_rel_sealed[slot] = true;
 		SOFPPNIX_DEBUG("Slot : %i --> Ghoul chunks fully saved.",slot);
 	}
+	#endif
 	return ret;
 }
 
@@ -446,10 +451,11 @@ int my_GhoulPack(int slot, int frameNum, float baseTime, unsigned char* dest, in
 {
 	int size = 0;
 	size = orig_GhoulPack(slot,frameNum,baseTime,dest,freeSpace);
+	#if 0
 	if ( size > 100 )
 		SOFPPNIX_DEBUG("my_GhoulPack frame=%i, size=%i",frameNum, size);
 	if ( !demo_system.recording_status ) return size;
-	
+	#endif
 	return size;
 }
 

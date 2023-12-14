@@ -7,9 +7,11 @@ void CreateCommands(void)
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
 	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
 
+	#if 0
 	my_Cmd_AddCommand("++nix_demomap",&cmd_nix_demomap);
 	my_Cmd_AddCommand("++nix_record",&cmd_nix_record);
 	my_Cmd_AddCommand("++nix_stoprecord",&cmd_nix_stoprecord);
+	#endif
 
 	// command to output checksum
 	my_Cmd_AddCommand("++nix_checksum",&cmd_nix_checksum);
@@ -90,7 +92,7 @@ void cmd_nix_checksum(void)
 	orig_PAK_WriteDeltaUsercmd(out_packet,(usercmd_t*)u_empty,(usercmd_t*)u_test);
 
 
-	vector<signed char> * v = (vector<signed char>*)(out_packet+8);
+	std::vector<signed char> * v = (std::vector<signed char>*)(out_packet+8);
 	
 
 	// Iterates the vector v and print all of its elements
@@ -133,7 +135,7 @@ void cmd_nix_checksum(void)
 
 	int seq = 103;
 	unsigned char buffer[1024];
-	int len = hexStringToByteArray(string("13 00 00 00 01 20 00 05 00 fa 17 c0 42 11 00 00 f0 47 00 08 40 01 80 fe 05 b0 50 04 00 00 fc 11 00 02 50 00 a0 7f 01 2c 14 01 00 00 7f"),buffer,1024);
+	int len = hexStringToByteArray(std::string("13 00 00 00 01 20 00 05 00 fa 17 c0 42 11 00 00 f0 47 00 08 40 01 80 fe 05 b0 50 04 00 00 fc 11 00 02 50 00 a0 7f 01 2c 14 01 00 00 7f"),buffer,1024);
 	// debug print seq is : input_data is :
 	// SOFPPNIX_DEBUG("seq is : %i input_data is : %s\n",seq,input_data);
 
@@ -272,7 +274,7 @@ void cmd_nix_test(void)
 }
 
 
-
+#if 0
 void cmd_nix_demomap(void)
 {
 
@@ -326,3 +328,4 @@ void cmd_nix_stoprecord(void)
 #endif
 	demo_system.demo_recorder->endRecording();
 }
+#endif

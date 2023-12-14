@@ -375,7 +375,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 			//-----------------------player_die Cmd_Score_f() hook disables showing score on death-----------------
 			callE8Patch(base_addr + 0x00237F17,&my_die_Cmd_Score_f);
 
-			//----------------------NOP dm->clientScoreboardMessage in clientEndServerFrame--------------
+			//----------------------NOP dm->clientScoreboardMessage() in clientEndServerFrame--------------
 			// We now call this in G_SetStats hook because it allows control during intermission
 			memoryAdjust(base_addr + 0x000A9BFC,2,0x90);
 		}
@@ -425,6 +425,11 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 		memoryAdjust(base_addr + 0x009D110,3,0x90);
 	}
 
+	//-----------------------Q2 player bbox-----------------------------
+	// void * pp = base_addr + 0x0027BF3C;
+	// memoryUnprotect(pp);
+	// *(float*)(pp) = 32.0f;
+	// memoryProtect(pp);
 
 	
 	return game_exports;
@@ -465,21 +470,12 @@ void my_ShutdownGame(void)
 
 	base_addr = NULL;
 }
-/*
-===========Can Replace entities here.================
-{
-"_fade" ".35"
-"color" "1.000000 1.000000 0.658824"
-"light" "200"
-"_color" "1.000000 1.000000 0.658824"
-"origin" "384.49 -487.5 248"
-"classname" "light"
-}
-*/
-void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
+//entities[classname] of vector[] of attributes[field] of value
+//vector because there is 1:many with same classname.
+void entstring_to_map(char * entstring,std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>>& outer_map)
 {
 
-	std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>> outer_map;
+	//parse entstring
 
 	std::string input(entstring);
 	std::size_t start = input.find('{');
@@ -536,47 +532,73 @@ void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
 		start = input.find('{', end + 1);
 	}
 
-	std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>> new_entries;
-	for (const auto& [classname, entries] : outer_map) {
-		if (classname == "info_player_team1" || classname == "info_player_team2") {
-			for (const auto& entry : entries) {
-				std::unordered_map<std::string, std::string> new_entry;
-				new_entry["classname"] = "info_player_deathmatch";
-				new_entry["origin"] = entry["origin"];
-				new_entries["info_player_deathmatch"].push_back(new_entry);
-			}
-		}
-	}
+}
+
+//entities[classname] of vector[] of attributes[field] of value
+//vector because there is 1:many with same classname.
+void map_to_entstring(std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>>& outer_map, std::string& out)
+{
 	
-	// Apply the modifications
-	for (const auto& [classname, entries] : new_entries) {
-		outer_map[classname].insert(outer_map[classname].end(), entries.begin(), entries.end());
-	}
-	
-	// Now convert it back into a string.
-	std::string new_entstring;
 	// The first entry will be "worldspawn"
-	new_entstring += "{\n";
+	out += "{\n";
 	// iterate the attributes in the worldspawn entry
 	for (const auto& [attr_name, attr_value] : outer_map["worldspawn"][0]) {
-		new_entstring += "\"" + attr_name + "\" \"" + attr_value + "\"\n";
+		out += "\"" + attr_name + "\" \"" + attr_value + "\"\n";
 	}
-	new_entstring += "}\n";
+	out += "}\n";
 	for (const auto& [classname, entries] : outer_map) {
 		if (classname == "worldspawn") {
 			continue;
 		}
 		for (const auto& entry : entries) {
-			new_entstring += "{\n";
+			out += "{\n";
 			for (const auto& [attr_name, attr_value] : entry) {
-				new_entstring += "\"" + attr_name + "\" \"" + attr_value + "\"\n";
+				out += "\"" + attr_name + "\" \"" + attr_value + "\"\n";
 			}
-			new_entstring += "}\n";
+			out += "}\n";
 		}
+	}
+}
+
+/*
+===========Can Replace entities here.================
+{
+"_fade" ".35"
+"color" "1.000000 1.000000 0.658824"
+"light" "200"
+"_color" "1.000000 1.000000 0.658824"
+"origin" "384.49 -487.5 248"
+"classname" "light"
+}
+*/
+//entities[classname] of vector[] of attributes[field] of value
+//vector because there is 1:many with same classname.
+void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
+{
+
+	std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>> entMap;
+
+	entstring_to_map(entstring,entMap);
+
+	//create info_player_deathmatch spawns for every red/blue spawn
+	std::unordered_map<std::string, std::vector<std::unordered_map<std::string, std::string>>> new_entries;
+	for (const auto& [classname, entries] : entMap) {
+		   if (classname == "info_player_team1" || classname == "info_player_team2") {
+				   for (const auto& entry : entries) {
+						   std::unordered_map<std::string, std::string> new_entry;
+						   new_entry["classname"] = "info_player_deathmatch";
+						   new_entry["origin"] = entry["origin"];
+						   new_entries["info_player_deathmatch"].push_back(new_entry);
+				   }
+		   }
+	}
+	// Apply the modifications
+	for (const auto& [classname, entries] : new_entries) {
+		   entMap[classname].insert(entMap[classname].end(), entries.begin(), entries.end());
 	}
 	
 	// Print the contents of the outer map
-	// for (const auto& [classname, entries] : outer_map) {
+	// for (const auto& [classname, entries] : entMap) {
 	// 	std::cout << "Classname: " << classname << '\n';
 	// 	for (const auto& entry : entries) {
 	// 		std::cout << "  Entry:\n";
@@ -590,6 +612,8 @@ void my_SpawnEntities(char *mapname, char *entstring, char *spawnpoint)
 
 	// SOFPPNIX_DEBUG("SpawnEntities!");
 	// SOFPPNIX_DEBUG("SpawnEntities! %s",entstring);
+	std::string new_entstring;
+	map_to_entstring(entMap,new_entstring);
 	orig_SpawnEntities(mapname,new_entstring.c_str(),spawnpoint);
 	// orig_SpawnEntities(mapname,entstring,spawnpoint);
 

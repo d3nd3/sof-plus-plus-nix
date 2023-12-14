@@ -404,7 +404,7 @@ class PickupInfo
 {
 private:
 	objType_t				m_objType;
-	list<PickupInstInfo*>	m_insts;
+	std::list<PickupInstInfo*>	m_insts;
 
 public:
 						PickupInfo(objType_t type);
@@ -442,7 +442,7 @@ public:
 	};
 
 private:
-	map<objType_t, PickupInfo*>	m_info;
+	std::map<objType_t, PickupInfo*>	m_info;
 	int							m_failedMsgs[event_MAXEVENTS];
 
 	// file pointer for dumping info
@@ -535,7 +535,7 @@ private:
 
 	// this is a list of entities currently using callbacks. we poll them in FrameUpdate to see if they're done
 	//with their callback, in which case we remove the callback.
-	list<PickupInst*>	m_pickupInsts;
+	std::list<PickupInst*>	m_pickupInsts;
 
 	// if pickupinfo tells us to, create a PickupInfoList in PickupList::Init()
 	PickupInfoList	*m_pickupInfoList;

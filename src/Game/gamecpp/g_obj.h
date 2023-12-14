@@ -125,7 +125,7 @@ public:
 class baseObjInfo_c
 {
 protected:
-	vector<gg_binst_c_ptr>	bolts;
+	std::vector<gg_binst_c_ptr>	bolts;
 #define BOI_SAVE_START		offsetof(baseObjInfo_c, owner)
 	edict_t					*owner;
 	boltInstInfo_c			boltInstInfo;

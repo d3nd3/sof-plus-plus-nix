@@ -10,6 +10,9 @@ INSTALL_DIR:=$(HOME)/.loki/sof-runtime/
 
 BINARY:=test.so
 
+# ensure exists obj dir
+$(info $(shell mkdir -p ../obj))
+
 # DEFAULT VARIABLE VALUES
 USE_PYTHON:=0
 
@@ -27,7 +30,6 @@ OBJS:= \
 ../obj/httpdl.o \
 ../obj/detect.o \
 ../obj/weapon_balance.o \
-../obj/demos.o \
 ../obj/util.o \
 ../obj/strip.o \
 ../obj/dm_always.o \
@@ -37,8 +39,10 @@ OBJS:= \
 ../obj/dm_ctf.o \
 ../obj/dm_realistic.o
 
+# ../obj/demos.o \
 
-CFLAGS:= -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
+
+CFLAGS:= -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
 LDFLAGS:= -m32 -shared -o ../out/test.so -L /minizip/build
 LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm
 

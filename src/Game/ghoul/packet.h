@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-using namespace std;
+//using namespace std;
 
 class InPacket;
 class OutPacket
@@ -11,7 +11,7 @@ class OutPacket
 	int InitialSize;
 	int CheckPoint;
 	friend class InPacket;
-	vector<unsigned char> Data;
+	std::vector<unsigned char> Data;
 	int BitPos;
 public:
 	OutPacket(int initialSize);
@@ -24,7 +24,7 @@ public:
 	const unsigned char *Buffer() const {return &Data[0];}
 	void PutBytes(const void *x,int NumBytes) {PutBits(x,NumBytes*8);}
 	void Concat(const OutPacket &c) {PutBits(&c.Data[0],c.BitPos);}
-	void PutString(const string &x) {PutString(x.c_str());}
+	void PutString(const std::string &x) {PutString(x.c_str());}
 	void PutString(const char *x);
 	template <class T> void Put(T &x) {PutBytes(&x,sizeof(T));}
 	template <class T> void PutVRS(const T &x)
@@ -124,7 +124,7 @@ public:
 
 class InPacket
 {
-	vector<unsigned char> Data;
+	std::vector<unsigned char> Data;
 	int BitPos;
 	bool Underflowed;
 public:
@@ -139,7 +139,7 @@ public:
 	int SizeBytes() const {return Data.size();}
 	const unsigned char *GetData() const {return &Data[0];}
 	bool GetBytes(void *x,int NumBytes) {return GetBits(x,NumBytes*8);}
-	bool GetString(string &x);
+	bool GetString(std::string &x);
 	template <class T> bool Get(T &x) {return GetBytes(&x,sizeof(T));}
 	template <class T> bool GetVRS(T &x)
 	{

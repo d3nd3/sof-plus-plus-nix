@@ -22,7 +22,7 @@ void ptListTC<T>::Write1()
 {
 	int						count;
 	classcode_t				ccode;
-	map<int, T *>::iterator	it;
+	std::map<int, T *>::iterator	it;
 
 	count = Pointer.size();
 	gi.AppendToSavegame('AICT', &count, sizeof(count));
@@ -38,7 +38,7 @@ void ptListTC<T>::Write1()
 template <class T>
 void ptListTC<T>::Write2()
 {
-	map<int,T *>::iterator it;
+	std::map<int,T *>::iterator it;
 
 	for (it = Pointer.begin(); it != Pointer.end(); it++)
 	{
@@ -52,7 +52,7 @@ void ptListTC<T>::Read1()
 {
 	int						i, count;
 	classcode_t				ccode;
-	map<int, T *>::iterator	it;
+	std::map<int, T *>::iterator	it;
 
 	//make sure the list is empty before loading
 	for (it = Pointer.begin(); it != Pointer.end(); it++)
@@ -80,7 +80,7 @@ void ptListTC<T>::Read1()
 template <class T>
 void ptListTC<T>::Read2()
 {
-	map<int,T *>::iterator	it;
+	std::map<int,T *>::iterator	it;
 
 	for (it = Pointer.begin(); it != Pointer.end(); it++)
 	{

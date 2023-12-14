@@ -39,7 +39,7 @@
 #include <vector>
 #include <list>
 #include <map>
-using namespace std;
+//using namespace std;
 
 #if defined _M_IX86 && !defined C_ONLY
 #define id386	1

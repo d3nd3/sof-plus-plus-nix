@@ -11,6 +11,8 @@
 #include <list>
 #include <algorithm>
 #include <unordered_map>
+#include <array>
+#include <filesystem>
 
 #include <regex>
 
@@ -544,7 +546,7 @@ extern void * memfxRunner;
 ---------------------------------------------------------------------------
 */
 
-
+#if 0
 typedef struct slot_packetdata_s {
 	std::unique_ptr<sizebuf_t> relSZ;
 	std::unique_ptr<sizebuf_t> unrelSZ;
@@ -616,6 +618,8 @@ class DemoRecorder {
 private:
 	std::ofstream disk_file;
 public:
+	//spawncount of the loaded demo.
+	int spawncount; //set by cmd_argc() or read from demofile
 	bool active = false; //recordingStatus
 	char recording_name[MAX_TOKEN_CHARS];
 
@@ -693,7 +697,7 @@ public:
 
 };
 extern DemoSystem demo_system;
-
+#endif
 
 /*
 ---------------------------------------------------------------------------
