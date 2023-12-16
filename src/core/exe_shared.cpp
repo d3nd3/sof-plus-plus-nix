@@ -500,8 +500,9 @@ void my_Netchan_Transmit (netchan_t *chan, int length, byte *data)
 	//SOFPPNIX_DEBUG("Netchan_Transmit...");
 	//Make Need_reliable see relAccumulate instead of chan->message
 	if ( demo_system.demo_player->netchan_close_rel ) stset(chan,0x54,demo_system.demo_player->demo_rel.cursize);
-	orig_Netchan_Transmit(chan,length,data);
 	#endif
+	orig_Netchan_Transmit(chan,length,data);
+	
 }
 
 void my_Netchan_Patch(netchan_t *chan)

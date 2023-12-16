@@ -165,7 +165,8 @@ int		always_gamerules_c::checkItemAfterSpawn(edict_t *ent,Pickup *pickup){
 }
 /*
 Ideal place to put SP clear. Before other SP commands.
-Issue: The clear clears the scoreboard, so can't have scoreboard on slow timer.
+Issue: The clear clears the scoreboard too regularly, so can't have scoreboard on slow 3s timer.
+Rather want clear to be conditional, based on whether content was drawn.
 */
 void	always_gamerules_c::checkEvents(void){
 
@@ -188,7 +189,31 @@ void	always_gamerules_c::checkEvents(void){
 	// 		continue;
 	// 	player_count +=1;
 	// }
+
+	/*
+		Timelimit by default requires a client to be connected to trigger intermission.
+		Because it measures from time = 0. If all players disconnected, it would reset the timelimit.
+	*/
 	
+	float* intermissiontime = stget(base_addr+0x002ACB1C,0) + 0x4F0;
+	float * level_time = stget(base_addr+0x002ACB1C,0) + 0x4;
+	int* exitintermission = stget(base_addr+0x002ACB1C,0) + 0x4F8;
+	// End intermission if has been 60 seconds. Should fix game-freeze issue (leak?).
+	if (*intermissiontime && *level_time > *intermissiontime + 60 )
+	{
+		*exitintermission = 1;
+	}
+
+	unsigned int level_framenum = stget(base_addr + 0x002B2500,0);
+	// Enter Intermission if timelimit reached, regardless of if player is connected.
+	if ( !*intermissiontime && level_framenum >= (timelimit->value * 600) )
+	{
+		orig_SP_Print (NULL, 0x003c, (short)timelimit->value);
+
+		void (*end_dm_level)(void) = base_addr+0x1c5328;
+		end_dm_level(); //BeginIntermission(mapname_from_maplist)
+	}
+
 	currentGameMode->checkEvents();
 }
 void	always_gamerules_c::respawnUntouchedItem(edict_t *ent) {

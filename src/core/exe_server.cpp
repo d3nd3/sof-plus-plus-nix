@@ -347,8 +347,9 @@ void my_SV_New_f(void)
 		demo_system.demo_player->packet_override = true;
 		return;
 	}
-	orig_SV_New_f();
 	#endif
+	orig_SV_New_f();
+	
 }
 
 

@@ -633,7 +633,8 @@ void my_ClientBegin(edict_t * ent)
 {
 	orig_ClientBegin(ent);
 
-	int slot = ent->s.skinnum;
+	// int slot = ent->s.skinnum;
+	int slot = slot_from_ent(ent);
 
 	#ifdef USE_PYTHON
 	prev_showscores[slot] = false;
@@ -674,7 +675,8 @@ void my_PutClientInServer (edict_t *ent)
 {
 	// careful using ent->s.skinnum here, ojnly set in PutClientInServer
 	orig_PutClientInServer(ent);
-	int slot = ent->s.skinnum;
+	// int slot = ent->s.skinnum;
+	int slot = slot_from_ent(ent);
 
 	return;
 	detect_max_pitch[slot] = 0;
@@ -719,6 +721,7 @@ TOOD: Filter weaponselect etc?
 */
 void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 {
+	int slot = slot_from_ent(ent);
 	// char	text[151];
 
 	/*
@@ -738,7 +741,6 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 		chars_spoken += strlen(orig_Cmd_Argv(0));
 		chars_spoken += strlen(orig_Cmd_Args());
 
-		int slot = slot_from_ent(ent);
 		void * client_t = getClientX(slot);
 		int state = *(int*)(client_t);
 			
@@ -811,9 +813,9 @@ void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0)
 	if ( name[0] > 31 || name[0] == 0x00 ) {
 		color_count+=1;
 		// give them cyan colour name.
-		snprintf(final,sizeof(chatline)+color_count,P_CYAN"%s [%i] %s",name,ent->s.skinnum,chatline);
+		snprintf(final,sizeof(chatline)+color_count,P_CYAN"%s [%i] %s",name,slot,chatline);
 	} else {
-		snprintf(final,sizeof(chatline)+color_count,"%s [%i] %s",name,ent->s.skinnum,chatline);
+		snprintf(final,sizeof(chatline)+color_count,"%s [%i] %s",name,slot,chatline);
 	}
 	
 	// SOFPPNIX_DEBUG("final = %i, color_count %i",strlen(final),color_count);
@@ -889,6 +891,7 @@ int stats_nutShots[32];
 */
 mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags)
 {
+	int attack_slot = slot_from_ent(attacker);
 	void * level = stget(base_addr + 0x002ACB1C,0);
 	int throatshots_before = stget(level,0x580);
 	int nutshots_before = stget(level,0x584);
@@ -902,14 +905,14 @@ mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *
 	int headshots_after = stget(level,0x588);
 
 	if ( throatshots_after > throatshots_before ) {
-		stats_throatShots[attacker->s.skinnum] +=1;
+		stats_throatShots[attack_slot] +=1;
 	}
 	if ( nutshots_after > nutshots_before ) {
-		stats_nutShots[attacker->s.skinnum] +=1;
+		stats_nutShots[attack_slot] +=1;
 	}
 	if ( headshots_after > headshots_before ) {
 		t_damage_was_heashot = true;
-		stats_headShots[attacker->s.skinnum] +=1;
+		stats_headShots[attack_slot] +=1;
 	}
 
 	// SOFPPNIX_DEBUG("Headshots before : %i, Headshots after : %i",headshots_before,headshots_after);
@@ -919,10 +922,10 @@ mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *
 int stats_armorsPicked[32];
 int my_PB_AddArmor(edict_t *ent, int amount)
 {
-	
+	int slot = slot_from_ent(ent);
 	int ret = orig_PB_AddArmor(ent,amount);
 	if (ret) {
-		stats_armorsPicked[ent->s.skinnum] +=1;
+		stats_armorsPicked[slot] +=1;
 	}
 	return ret;
 }

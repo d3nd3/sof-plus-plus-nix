@@ -197,18 +197,12 @@ void __attribute__ ((constructor)) begin() {
 
 
 
-
 // -----------------------NON-BLOCKING-SERVER-LIST-------------------------
 	callE8Patch(0x0811F183, &nonBlockingServerResponses);
 
 
 // -------------------------GAMESPY HEARTBEAT-------------------------
 	callE8Patch(0x080ABF6C,&GamespyHeartbeat);
-
-
-//-----------------------------SV_CLIENTTHINK now call--------------------------------------
-	// orig_SV_ClientThink = createDetour(orig_SV_ClientThink , &my_SV_ClientThink, 5);
-	callE8Patch(0x080B1922,&my_SV_ClientThink);
 
 
 	// useless test inside sv_executeclientmessage
@@ -240,6 +234,7 @@ void __attribute__ ((constructor)) begin() {
 
 
 ////////////////////////////////////////////////////
+
 
 
 	
@@ -319,6 +314,7 @@ void __attribute__ ((constructor)) begin() {
 	// Used by disableDefaultRelBuffer in serverside demos.
 	orig_Netchan_Transmit = createDetour(orig_Netchan_Transmit,&my_Netchan_Transmit,6);
 	
+
 	// Part of Serverside Demo when demomap.
 	orig_SV_SpawnServer = createDetour(orig_SV_SpawnServer,&my_SV_SpawnServer,5);
 
@@ -352,6 +348,10 @@ void __attribute__ ((constructor)) begin() {
 	// Many Game hooks here. GameDetours applied in getgameapi using relative address.
 	orig_Sys_GetGameAPI = createDetour(0x08209C50,&my_Sys_GetGameAPI,9);
 	// callE8Patch(0x080A736F,&my_Sys_GetGameAPI);
+
+	//-----------------------------SV_CLIENTTHINK now call--------------------------------------
+	// orig_SV_ClientThink = createDetour(orig_SV_ClientThink , &my_SV_ClientThink, 5);
+	// callE8Patch(0x080B1922,&my_SV_ClientThink);
 }
 
 // __builtin_return_address(0)
