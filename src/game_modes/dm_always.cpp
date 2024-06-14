@@ -3,6 +3,10 @@
 extern gamerules_c * currentGameMode;
 always_gamerules_c dm_always;
 
+int frame_enter_cin = 0;
+
+edict_t * script1;
+
 /*
 ------------------------------------------------------------------
 currentGameMode is within our memory
@@ -119,7 +123,23 @@ void	always_gamerules_c::levelInit(void){
 		orig_Z_Free(buffer);
 	}
 
+	#if 0
+	script1 = orig_G_Spawn();
+	char * (*ParseEdict)(char *, edict_t*)  = base_addr + 0x001DE104;
+	void (*script_spawn)(edict_t *) = base_addr + 0x16C844;
+
+
+
+	ParseEdict("\"classname\" \"script_runner\"\n"
+	"\"script\" \"tsr1/tsr1pre\"\n"
+	"\"origin\" \"-536 1048 64\"\n"
+	"}",script1);
+	script_spawn(script1);
+	#endif
+	//spackage_register(std::string("singleplr.sp").c_str());
 	spackage_register(std::string(sp_name + ".sp").c_str());
+
+
 
 	//Python dependant code/resources.
 	#ifdef USE_PYTHON
@@ -167,6 +187,8 @@ int		always_gamerules_c::checkItemAfterSpawn(edict_t *ent,Pickup *pickup){
 Ideal place to put SP clear. Before other SP commands.
 Issue: The clear clears the scoreboard too regularly, so can't have scoreboard on slow 3s timer.
 Rather want clear to be conditional, based on whether content was drawn.
+
+This can be used as a G_RunFrame callback.
 */
 void	always_gamerules_c::checkEvents(void){
 
@@ -213,6 +235,12 @@ void	always_gamerules_c::checkEvents(void){
 		void (*end_dm_level)(void) = base_addr+0x1c5328;
 		end_dm_level(); //BeginIntermission(mapname_from_maplist)
 	}
+	#if 0
+	if (level_framenum < frame_enter_cin || frame_enter_cin - level_framenum > 50) {
+		void (*enterCin)(bool) = base_addr+0x16BA44;
+		enterCin(false);
+	}
+	#endif
 
 	currentGameMode->checkEvents();
 }
@@ -366,6 +394,7 @@ skinnum is set by PutClientInServer
 ent->client not initialised here.
 */
 
+
 // DONT USE skinnum in THIS FUNCTION, ITS TOO EARLY.
 // Any function that this calls, Also cannot use skinnum.
 void	always_gamerules_c::clientConnect(edict_t *ent){
@@ -405,6 +434,64 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 	stats_throatShots[slot] = 0;
 	stats_nutShots[slot] = 0;
 	stats_armorsPicked[slot] = 0;
+
+	void (*enterCin)(bool) = base_addr+0x16BA44;
+	
+	frame_enter_cin = stget(base_addr + 0x002B2500,0);
+
+	// enterCin(true);
+
+	#if 0
+	edict_t * cin_cam = orig_G_Spawn();
+	cin_cam->classname = "func_remote_camera";
+	orig_cinprintf(ent,50,50,1,"HELLO WORLD HELLO WORLD HELLO WORLD HELLO WORLD HELLO WORLD HELLO WORLD HELLO WORLD");
+
+	void (*camSpawnFunc)(edict_t *) = base_addr + 0x00197930;
+
+	vec3_t tmp;
+	VectorCopy(tmp,ent->s.origin);
+	tmp[2] += 500;
+	VectorCopy(cin_cam->s.origin,tmp);
+
+	ent->target = "player";
+
+	camSpawnFunc(cin_cam);
+
+	#endif
+	
+	
+
+	#if 0
+	edict_t * script2 = orig_G_Spawn();
+
+	/*
+	char *ED_ParseEdict (char *data, edict_t *ent)
+	*/
+
+	char * (*ParseEdict)(char *, edict_t*)  = base_addr + 0x001DE104;
+	void (*script_spawn)(edict_t *) = base_addr + 0x16C844;
+
+	
+	ParseEdict("\"classname\" \"script_runner\"\n"
+	"\"script\" \"tsr1/nycintro\"\n"
+	"\"targetname\" \"startintro\"\n"
+	"\"origin\" \"-536 1048 64\"\n"
+	"}",script2);
+	script_spawn(script2);
+
+	void		(*use)(edict_t *self, edict_t *other, edict_t *activator) = stget(script1,EDICT_USE);
+	use(script1,script1,ent);
+	use = stget(script2,EDICT_USE);
+	use(script2,script2,ent);
+
+
+
+	
+	// script1->use(script1,script1,ent);
+	
+	// script2->use(script2,script2,ent);
+
+	#endif
 	
 }
 //a8

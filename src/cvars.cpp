@@ -6,6 +6,7 @@ cvar_t * gamespyport = NULL;
 cvar_t * hostport = NULL;
 cvar_t * hostname = NULL;
 cvar_t * deathmatch = NULL;
+cvar_t * dedicated = NULL;
 cvar_t * mapname = NULL;
 cvar_t * sv_violence = NULL;
 cvar_t * timelimit = NULL;
@@ -191,7 +192,10 @@ void createServerCvars(void)
 
 		// Already Existing
 		sv_public = orig_Cvar_Get(			"public", 				"0", 	NULL, 											NULL);
-		
+		dedicated = orig_Cvar_Get(			"dedicated", 			"0", 	CVAR_NOSET, 									NULL);
+
+
+
 		gamespyport = orig_Cvar_Get(		"gamespyport", 			"0", 	CVAR_NOSET, 									NULL);
 		hostport = orig_Cvar_Get(			"hostport", 			"0", 	CVAR_NOSET, 									NULL);
 

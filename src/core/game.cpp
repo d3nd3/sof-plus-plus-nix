@@ -303,10 +303,15 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// SOFPPNIX_DEBUG("Base address: %08X\n", base_addr);
 	dlclose(handle);
 
+
+	//reverse order.
 	// SOFPPNIX_DEBUG("AHA  : %08X",0x198 - stget(params,4) );
 	orig_clprintf = stget(params,0x198-0x15C);
 	orig_cprintf = stget(params,0x198-0x160);
 	orig_bprintf = stget(params,0x198-0x168);
+
+	orig_cinprintf = stget(params,0x198-0x150);
+	orig_welcomeprint = stget(params,0x198-0x158);
 	//0x128 == 0x70 , 0x128 - 0x70 = B8
 
 	//0x38 == 0x168 , 0x168 - 0x38 = 130

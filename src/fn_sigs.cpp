@@ -169,6 +169,11 @@ void	(*orig_clprintf) (edict_t *ent, edict_t *from, int color, char *fmt, ...) =
 void	(*orig_cprintf) (edict_t *ent, int printlevel, char *fmt, ...);
 void	(*orig_bprintf) (int printlevel, char *fmt, ...);
 
+void	(*orig_cinprintf) (edict_t *ent,int x, int y, int textspeed, char *text);
+
+void (*orig_welcomeprint) (edict_t * ent);
+
+
 void (*orig_G_SetStats)(edict_t * ent) = NULL;
 
 void (*orig_ClientCommand) (edict_t *ent) = NULL;

@@ -256,6 +256,9 @@ extern void	(*orig_clprintf) (edict_t *ent, edict_t *from, int color, char *fmt,
 extern void	(*orig_cprintf) (edict_t *ent, int printlevel, char *fmt, ...);
 extern void	(*orig_bprintf) (int printlevel, char *fmt, ...);
 
+extern void	(*orig_cinprintf) (edict_t *ent,int x, int y, int textspeed, char *text);
+extern void (*orig_welcomeprint) (edict_t * ent);
+
 extern mmove_t	* (*orig_GetSequenceForGoreZoneDeath)(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags);
 extern mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point, int dflags, bbox_preset goal_bbox, mmove_t *ideal_move, int reject_actionflags);
 
