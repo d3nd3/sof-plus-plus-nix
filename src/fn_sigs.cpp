@@ -28,6 +28,11 @@ void (*orig_CL_Disconnect)(short unknown) = 0x080C5670;
 void (*orig_MSG_WriteDeltaUsercmd) (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd) = 0x0811CD90;
 void (*orig_PAK_WriteDeltaUsercmd) (void *out_packet, usercmd_t *from, usercmd_t *cmd) = 0x080BA99C;
 
+void (*orig_CL_ClearState)(void) = 0x080C95BC;
+void (*orig_CalcFov)(void) = 0x080CF8F4;
+
+void (*orig_V_RenderView)( float stereo_separation ) = 0x080D6750;
+
 // ---SERVER-----
 int (*orig_HasAttachedEffects)(entity_state_t *curState) = 0x081210FC;
 void (*orig_GhoulServerFlushClients)(void) = 0x081A6428;
@@ -131,11 +136,13 @@ void (*orig_PM_StepSlideMove) (int num) = 0x0812D9BC;
 void (*orig_Netchan_Transmit) (netchan_t *chan, int length, byte *data) = 0x0812AFCC;
 
 /*
----------------------Ref Library---------------------
+---------------------Ref(Video) Library---------------------
 */
 void * (*orig_GetRefAPI ) (void* rimp ) = NULL;
 
+qboolean (*orig_VID_LoadRefresh)(char *name) = 0x0820D9DC;
 
+qboolean (*orig_VID_GetModeInfo)( int *width, int *height, int mode ) = 0x0820E044;
 
 /*
 ---------------------Game Library---------------------

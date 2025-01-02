@@ -6,3 +6,17 @@ sudo apt install libcurl4-openssl-dev:i386 libssl-dev:i386 libbsd-dev:i386 libx1
 
 sudo ln -s /usr/lib/i386-linux-gnu/libcrypt.so.1 /usr/lib/i386-linux-gnu/libcrypt.so
 
+
+## Provides
+* HTTP Downloads
+* Working Server List
+* Clipboard to console
+* Widescreen resolutions
+* Potential python scripting environment for server
+* Kill-feed / Server-side ui mods
+* Server-side Demos (incomplete)
+* Weapon balance modding (incomplete)
+* 1.07f compatibility.
+* Slide fix (Server)
+* Public rcon feature
+

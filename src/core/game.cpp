@@ -3,17 +3,7 @@
 game_export_t * game_exports = NULL;
 
 static void my_die_Cmd_Score_f (edict_t *ent);
-/*
-Calls GetRefAPI from ref_gl.so
-also passes in pointers for ref_gl library. ri
-*/
-/*qboolean VID_LoadRefresh(char *name){
-}
-*/
 
-/*void * GetRefAPI (void * rimp ) {
-
-}*/
 
 /*
 ------------------------------------------------------------------------------------

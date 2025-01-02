@@ -29,6 +29,7 @@ OBJS:= \
 ../obj/serverlist.o \
 ../obj/httpdl.o \
 ../obj/detect.o \
+../obj/video.o \
 ../obj/weapon_balance.o \
 ../obj/util.o \
 ../obj/strip.o \
@@ -128,7 +129,6 @@ endif
 ../obj/demos.o : ./features/demos.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-
 # core
 ../obj/exe_shared.o : ./core/exe_shared.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
@@ -137,6 +137,8 @@ endif
 ../obj/exe_client.o : ./core/exe_client.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/game.o : ./core/game.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+../obj/video.o : ./core/video.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 # normal

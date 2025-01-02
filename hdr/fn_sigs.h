@@ -97,6 +97,14 @@ extern void my_PAK_WriteDeltaUsercmd(void *out_packet, usercmd_t *from, usercmd_
 
 extern qboolean (*orig_SV_Trace) (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, edict_t *passent, int contentmask, trace_t *trace);
 
+extern void my_CL_ClearState(void);
+extern void (*orig_CL_ClearState)(void);
+
+extern void my_CalcFov(void);
+extern void (*orig_CalcFov)(void);
+
+extern void (*orig_V_RenderView)( float stereo_separation );
+extern void my_V_RenderView( float stereo_separation );
 
 // --Shared--
 
@@ -201,10 +209,17 @@ void my_Netchan_Patch(netchan_t *chan);
 
 
 /*
----------------------Ref Library---------------------
+---------------------Ref(Video) Library---------------------
 */
 extern void * (*orig_GetRefAPI ) (void* rimp );
 extern void * GetRefAPI(void* rimp);
+
+
+extern qboolean (*orig_VID_LoadRefresh)(char *name);
+extern qboolean my_VID_LoadRefresh(char *name);
+
+extern qboolean (*orig_VID_GetModeInfo)( int *width, int *height, int mode );
+extern qboolean my_VID_GetModeInfo( int *width, int *height, int mode );
 
 
 /*

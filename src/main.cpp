@@ -232,6 +232,16 @@ void __attribute__ ((constructor)) begin() {
 	//*(float*)0x08262F88 = 500.0f;
 	//memoryProtect(0x08262F88);
 
+	//----------------------DISABLE SETTING VERTICAL FOV (SoF force horiz 95.0, with dynamic Vert--------------------------
+	//@Scr_UpdateScreen() -> V_RenderView()
+	// memoryAdjust(0x080D6984,1, 0xDB);
+	// memoryAdjust(0x080D6985,1,0xE0);
+	// memoryAdjust(0x080D6986,1,0x90);
+	// memoryAdjust(0x080D6987,1,0x90);
+	// memoryAdjust(0x080D6988,1,0x90);
+	// memoryAdjust(0x080D6989,1,0x90);
+
+
 
 ////////////////////////////////////////////////////
 
@@ -286,6 +296,14 @@ void __attribute__ ((constructor)) begin() {
 	//orig_PAK_WriteDeltaUsercmd = createDetour(orig_PAK_WriteDeltaUsercmd , &my_PAK_WriteDeltaUsercmd,5);
 
 
+	//Video Library Hooking.
+	// orig_VID_LoadRefresh = createDetour(orig_VID_LoadRefresh , &my_VID_LoadRefresh, 6);
+
+	orig_VID_GetModeInfo = createDetour(orig_VID_GetModeInfo , &my_VID_GetModeInfo, 7);
+	// callE8Patch(0x080C9A85,&my_CL_ClearState);
+	// orig_CL_Disconnect = createDetour(orig_CL_Disconnect, &my_CL_Disconnect, 5);
+	callE8Patch(0x080CFCB8,&my_CalcFov); //There is special LerpFov that is gun specific.
+	orig_V_RenderView = createDetour(orig_V_RenderView, &my_V_RenderView,5);
 
 //-----------------------------------------Server------------------------------------------
 	//Server-side http download.

@@ -243,6 +243,11 @@ SOFPPNIX_DEBUG("Fake cb");
 void cmd_nix_test(void)
 {
 
+	float * fov_x = 0x8312a40;
+	float * fov_y = 0x8312a44;
+
+	SOFPPNIX_DEBUG("%f %f\n",*fov_x,*fov_y);
+	return;
 	orig_GhoulServerFlushClients();
 	return;
 	sizebuf_t buf;

@@ -91,13 +91,7 @@ void my_CL_RegisterEffects(void)
 	orig_CL_RegisterEffects();
 }
 
-void my_CL_Disconnect(short unknown)
-{
-	// SOFPPNIX_PRINT("CL_Disconnect curl_easy_cleanup()");
 
-	// if ( curl_handle != NULL ) curl_easy_cleanup(curl_handle);
-	orig_CL_Disconnect(unknown);
-}
 
 /*
 	CL_RequestNextDownload() loop will iteratively call this.
