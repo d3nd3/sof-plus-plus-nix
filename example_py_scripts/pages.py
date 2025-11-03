@@ -9,6 +9,8 @@ LAYOUT_PAGE = 1
 if __name__ == "builtins":
 	@event.map_spawn
 	def pages_begin():
+		# chat background
+		ppnix.register_file("c/c.m32");
 		ppnix.print("pages begin...")
 		for i in range(0,32):
 			player.set_page(i,"scoreboard")

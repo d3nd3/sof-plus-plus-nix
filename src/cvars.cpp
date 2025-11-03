@@ -36,9 +36,6 @@ cvar_t * _nix_snd_no_weap_touch = NULL;
 
 cvar_t * _nix_extra_shotgun_gore = NULL;
 
-cvar_t * _nix_py_killfeed = NULL;
-cvar_t * _nix_py_pages = NULL;
-
 
 void slidefix_modified(cvar_t * c)
 {
@@ -243,13 +240,9 @@ void createServerCvars(void)
 
 
 		#ifdef USE_PYTHON
-			_nix_py_killfeed = orig_Cvar_Get("_++nix_py_killfeed","0",NULL,NULL);
 			//related to kill-feed.
 			_nix_obit_timeout = orig_Cvar_Get("_++nix_obit_timeout","10",NULL,NULL);
 			_nix_obit_len_max = orig_Cvar_Get("_++nix_obit_len_max","6",NULL,NULL);
-
-
-			_nix_py_pages = orig_Cvar_Get("_++nix_py_pages","0",NULL,NULL);
 		#endif
 
 

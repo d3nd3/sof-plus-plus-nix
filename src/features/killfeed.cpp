@@ -95,6 +95,7 @@ void submitDeath(int mod,edict_t * killer,edict_t * victim)
 		killFeedLength--;
 	}
 	// SOFPPNIX_DEBUG("SubmitDeath");
+	
 	void * level = stget(base_addr + 0x002ACB1C,0);
 	float * time_now = level+4;
 

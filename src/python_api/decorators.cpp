@@ -1,6 +1,19 @@
 #include "common.h"
 
 /*
+	https://docs.python.org/3.8/c-api/arg.html?highlight=pyarg_parsetuple#c.PyArg_ParseTuple
+	Then scroll up, for ParseTuple symbols.
+	
+	It's the default assumption that the reference passed to a C function is borrowed, 
+	and if the function needs to save a reference, it will increment the refcount appropriately
+	
+	For returned objects see the docs for that API, whether it returns new reference.
+	https://docs.python.org/3.8/c-api/list.html
+
+	Always return Py_RETURN_NONE when nothing is returned.
+*/
+
+/*
 	THIS MODULE IS INSERTED INTO GLOBAL DICT DIRECTLY.
 	C REALM CALLS PYTHON FUNCTION THAT HAVE BEEN REGISTERED BECAUSE OF CALLBACKS REGISTERED HERE. ( THEY USED DECORATORS TO REGISTER THEIR CALLBACKS in python_api/decorators.cpp )
 

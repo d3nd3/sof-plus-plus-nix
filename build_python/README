@@ -1,0 +1,5 @@
+Leave libpython3.8a here. Its used for static compiling sof-plus-plus-nix.
+
+cd into build_python folder.  
+run ./grab_files.sh  
+copy the lib folder into your sof-runtime folder, the python interpreter will now use PYTHONHOME as .

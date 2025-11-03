@@ -1,5 +1,8 @@
 #include "common.h"
 
+#include <dlfcn.h>
+#include <link.h>
+
 CURL * curl_handle = NULL;
 unsigned char chktbl2[3000];
 int sofreebuild_len;
@@ -102,7 +105,7 @@ qboolean my_Cbuf_AddLateCommands(void)
 	// my_Cmd_RemoveCommand("pingservers");
 	// my_Cmd_AddCommand("pingservers",&my_CL_PingServers);
 
-	CreateCommands();
+    CreateCommands();
 
 
 	/*
@@ -444,7 +447,7 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 {
 	//SOFPPNIX_DEBUG("my_netchan_save");
 
-	#if 0
+	#if 1
 	if ( demo_system.recording_status ) {
 
 		//netchan_t->reliable_length
@@ -460,11 +463,11 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 			relLen = cur_size;
 		}
 		// SOFPPNIX_DEBUG("About to call storeDemoData");
-		demo_system.demo_recorder->saveNetworkData(chan,relLen,relBuf,length,data);
+        demo_system.demo_recorder->saveNetworkData(chan,relLen,relBuf,length,data);
 	}
 	#endif
 
-	my_Netchan_Transmit(chan,length,data);
+    my_Netchan_Transmit(chan,length,data);
 }
 
 /*
@@ -474,7 +477,7 @@ client state is still cs_zombie after disconnect.
 */
 void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 {
-	#if 0
+	#if 1
 	int serverstate = stget(0x082AF680,0);
 	//sv.state = serverstate; inside SV_SpawnServer.
 	if ( !demo_system.demo_player->active ) {
@@ -549,4 +552,209 @@ void my_Netchan_Patch(netchan_t *chan)
 	#endif
 	
 	#endif
+}
+
+void * my_Sys_GetProcAddress(void* handle, char* name)
+{
+	SOFPPNIX_DEBUG("my_Sys_GetProcAddress %s",name);
+	void * addr = orig_Sys_GetProcAddress(handle,name);
+
+	struct link_map* map;
+    if (dlinfo(handle, RTLD_DI_LINKMAP, &map) == 0) {
+    	ref_base_addr = map->l_addr;
+    	
+    	uintptr_t target_address = (uintptr_t)map->l_addr + 0x0003E038;
+
+    	SOFPPNIX_DEBUG("ref_gl.so base address : %08X",map->l_addr);
+
+    	// if (orig_GLimp_Init) free(orig_GLimp_Init);
+    	// orig_GLimp_Init = createDetour((void*)target_address,&my_GLimp_Init,5);
+    }
+	
+	
+	if ( !strncmp(name, "GetRefAPI", strlen(name)) ) {
+		SOFPPNIX_DEBUG("Detected GetRefAPI");
+		// if (orig_use_drivers_txt_load) free(orig_use_drivers_txt_load);
+	    // orig_use_drivers_txt_load = createDetour((int)handle + 0x0002C040, &my_use_drivers_txt_load,5);
+
+	    // memoryAdjust(map->l_addr + 0x030517,6,);
+	    // callE8Patch(map->l_addr + 0x030517, &confirmGlBlend);
+	    
+	}
+	
+	//caller will close the handle
+	return addr;
+}
+
+
+/*
+area_mins = mins;
+area_maxs = maxs;
+area_list = list;
+area_count = 0;
+area_maxcount = maxcount;
+area_type = areatype;
+*/
+void my_SV_AreaEdicts_r (areanode_t *node)
+{
+	link_t		*l, *next, *start;
+	void		*check;
+	int			count;
+
+	static int depth = 0;
+	count = 0;
+
+	static int * area_type = 0x8310C78;
+	// touch linked edicts
+	if (*area_type == AREA_SOLID)
+		start = &node->solid_edicts;
+	else {
+		start = &node->trigger_edicts;
+	}
+
+	//these are changing, must be reset each run.
+	float * area_maxs = stget(0x8310C68,0);
+	float * area_mins = stget(0x8310C64,0);
+
+	for (l=start->next  ; l != start ; l = next)
+	{
+		next = l->next;
+		/*
+			void * ent = (void*)l - 0x80;
+		*/
+		check = (void*)l - 0x80;
+
+		if (stget(check,EDICT_SOLID) == SOLID_NOT && stget(check,EDICT_SVFLAGS) > 0)
+			continue;// deactivated
+
+		//check == trigger
+		//area_maxs == player bounding box
+
+		#if 0
+		if ( !strcmp("func_door",stget(check,EDICT_CLASSNAME)) )
+			orig_Com_Printf("origin[0]:%f origin[1]: %f origin[2]: %f\n",*(float*)(check + EDICT_S_ORIGIN),*(float*)(check + EDICT_S_ORIGIN+4),*(float*)(check + EDICT_S_ORIGIN+8) );
+		#endif
+		// orig_Com_Printf(stget(check,EDICT_CLASSNAME));
+		
+
+		//door triggers = 51 , 49
+		#if 0
+		if ( !strcmp("trigger_multiple",stget(check,EDICT_CLASSNAME)) )
+			orig_Com_Printf("%s : %i\n",stget(check,EDICT_CLASSNAME),slot_from_ent(check));
+		#endif
+		// if ( slot_from_ent(check) == 49 ) orig_Com_Printf("origin[0]:%f origin[1]: %f origin[2]: %f\n",*(float*)(check + EDICT_S_ORIGIN),*(float*)(check + EDICT_S_ORIGIN+4),*(float*)(check + EDICT_S_ORIGIN+8) );
+
+
+		
+		/*slot_from_ent(check) != 74 && slot_from_ent(check) != 73*/ 
+		// if ( /*slot_from_ent(check) != 0 && */slot_from_ent(check) != 49 ) continue; 
+		// if ( /**area_type == AREA_TRIGGERS &&*/ strcmp("trigger_multiple",stget(check,EDICT_CLASSNAME)) ) continue;
+		// if (*area_type == AREA_SOLID && strcmp("noclass",stget(check,EDICT_CLASSNAME)) ) continue;
+		// if (*area_type == AREA_SOLID && !strcmp("player", stget(check,EDICT_CLASSNAME)) ) continue;
+
+		//player or func_door
+		// if (*area_type == AREA_SOLID) orig_Com_Printf("Wtf :%s\n",stget(check,EDICT_CLASSNAME));
+
+		#if 0
+		if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) ) {
+			orig_Com_Printf("Solid : %i\n",stget(check,EDICT_SOLID));
+		}
+		#endif
+
+		
+		
+		float check_absmins[3];
+		float check_absmaxs[3];
+		check_absmins[0] = *(float*)(check+EDICT_ABSMINS);
+		check_absmins[1] = *(float*)(check+EDICT_ABSMINS+4);
+		check_absmins[2] = *(float*)(check+EDICT_ABSMINS+8);
+		check_absmaxs[0] = *(float*)(check+EDICT_ABSMAXS);
+		check_absmaxs[1] = *(float*)(check+EDICT_ABSMAXS+4);
+		check_absmaxs[2] = *(float*)(check+EDICT_ABSMAXS+8);
+
+		if ( !strcmp("item_equip_grenade",stget(check,EDICT_CLASSNAME)) )
+			// orig_Com_Printf("minsags is %f %f %f\n",stget(,check_absmins[1],check_absmins[2]);
+			orig_Com_Printf("origin[0]:%f origin[1]: %f origin[2]: %f\n",*(float*)(check + EDICT_S_ORIGIN),*(float*)(check + EDICT_S_ORIGIN+4),*(float*)(check + EDICT_S_ORIGIN+8) );
+
+		if (check_absmins[0] > *(area_maxs+0) ) {
+			if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) )
+				orig_Com_Printf("[0] [player_mins]%f > [func_door_maxs]%f\n", check_absmins[0],*(area_maxs+0));
+			continue;
+		}
+		if (check_absmins[1] > *(area_maxs+1) ) {
+			if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) )
+				orig_Com_Printf("[1] [player_mins]%f > [func_door_maxs]%f\n", check_absmins[1],*(area_maxs+1));
+			continue;
+		}
+		if (check_absmins[2] > *(area_maxs+2) ) {
+			if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) )
+				orig_Com_Printf("[2] [player_mins]%f > [func_door_maxs]%f\n", check_absmins[2],*(area_maxs+2));
+			continue;
+		}
+		if (*(float*)(check+EDICT_ABSMAXS) < *(area_mins+0) ) {
+			if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) )
+				orig_Com_Printf("[0] [player_maxs]%f < [func_door_mins]%f\n", check_absmaxs[0],*(area_mins+0));
+			continue;
+		}
+		if ( *(float*)(check+EDICT_ABSMAXS+4) < *(area_mins+1) ) {
+			if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) )
+				orig_Com_Printf("[1] [player_maxs]%f < [func_door_mins]%f\n", check_absmaxs[1],*(area_mins+1));
+			continue;
+		}
+		if (*(float*)(check+EDICT_ABSMAXS+8) < *(area_mins+2) ) {
+			if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) )
+				orig_Com_Printf("[2] [player_maxs]%f < [func_door_mins]%f\n", check_absmaxs[2],*(area_mins+2));
+			continue;
+		}
+
+		
+		static int * area_count = 0x8310C70;
+		static int * area_maxcount = 0x8310C74;
+		if (*area_count == *area_maxcount)
+		{
+			Com_Printf ("SV_AreaEdicts: MAXCOUNT\n");
+			depth = 0;
+			return;
+		}
+		//edict_t	**area_list;
+		static void *** area_list = 0x8310C6C;
+
+		(*area_list)[*area_count] = check;
+		*area_count = *area_count + 1;
+
+
+		#if 0
+		if ( *area_type == AREA_SOLID && !strcmp("player",stget(check,EDICT_CLASSNAME)) )
+			orig_Com_Printf("THINKS WE ARE TOUCHING depth=%i count=%i\n",depth,*area_count);
+			#if 0
+			
+			orig_Com_Printf("==============\n");
+			orig_Com_Printf("[player_mins]%f <= [func_door_maxs]%f AND\n[player_mins]%f <= [func_door_maxs]%f OR\n[player_mins]%f <= [func_door_maxs]%f OR\n[player_maxs]%f >= [func_door_mins]%f OR\n[player_maxs]%f >= [func_door_mins]%f OR\n[player_maxs]%f >= [func_door_mins]%f\n",
+			    *(float*)(check+EDICT_ABSMINS), *(area_maxs+0),
+			    *(float*)(check+EDICT_ABSMINS+4), *(area_maxs+1),
+			    *(float*)(check+EDICT_ABSMINS+8), *(area_maxs+2),
+			    *(float*)(check+EDICT_ABSMAXS), *(area_mins+0),
+			    *(float*)(check+EDICT_ABSMAXS+4), *(area_mins+1),
+			    *(float*)(check+EDICT_ABSMAXS+8), *(area_mins+2));
+			#endif
+
+		#endif
+	}
+	
+	if (node->axis == -1) {
+		depth = 0;
+		return;		// terminal node
+	}
+
+	// recurse down both sides
+	if ( *(area_maxs+node->axis) > node->dist ) {
+		depth++;
+		my_SV_AreaEdicts_r ( node->children[0] );
+	}
+	if ( *(area_mins+node->axis) < node->dist ) {
+		depth++;
+		my_SV_AreaEdicts_r ( node->children[1] );
+	}
+
+	depth = 0;
 }

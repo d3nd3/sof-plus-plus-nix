@@ -7,6 +7,9 @@
 #include "common.h"
 
 
+void* ref_base_addr = NULL;
+
+
 typedef const SDL_VideoInfo* (*SDL_GetVideoInfo_t)(void);
 typedef SDL_Rect** (*SDL_ListModes_t)(SDL_PixelFormat *format, Uint32 flags);
 typedef int (*SDL_Init_t)(Uint32 flags);
@@ -21,7 +24,6 @@ Calls GetRefAPI from ref_gl.so
 also passes in pointers for ref_gl library. ri
 
 
---NOT USED--
 */
 qboolean my_VID_LoadRefresh(char *name)
 {
@@ -29,34 +31,28 @@ qboolean my_VID_LoadRefresh(char *name)
     
     qboolean ret = orig_VID_LoadRefresh(name);
 
-    //Don't need any of this for now. (fortunately)
-    return ret;
-    /*
-        acquire base address.
-    */
-    Dl_info info;
-    void *handle = dlopen(NULL, RTLD_LAZY);
-    if (handle == NULL) {
-        error_exit("Failed to load current library\n");
-    }
-    // Sample a ref export function pointer to 'taste' load address of where it lives.
-    int rc = dladdr((void*)(*(unsigned int*)(0x08646BE0+4)), &info);
-    if (rc == 0) {
-        error_exit("Failed to get current library information\n");
-    }
-    base_addr = info.dli_fbase;
-    SOFPPNIX_DEBUG("Video Base address: %08X\n", base_addr);
-    dlclose(handle);
 
-    
+    //Set vid_ref opengl CState pointers.
+    orig_glEnable = *(unsigned int*)(ref_base_addr + 0x0C8ED8);
+    SOFPPNIX_DEBUG("glEnable is %08X\n",orig_glEnable);
+
 
     return ret;
 }
 
+/*
+    Before R_Init(), after LoadLibrary(ref_gl)
+*/
+void * my_GetRefAPI (void * rimp ) {
+    SOFPPNIX_DEBUG("my_GetRefAPI");
+    void * handle = dlopen("ref_gl.so",RTLD_NOW);
+    orig_GetRefAPI = dlsym(handle,"GetRefAPI");
+    dlclose(handle);
 
-/*void * GetRefAPI (void * rimp ) {
+    orig_GetRefAPI(rimp);
 
-}*/
+    
+}
 
 
 /*
@@ -156,6 +152,7 @@ void my_CalcFov(void)
     orig_CalcFov();
 
     if ( *lerpFov == 95.0f ) {
+         // SOFPPNIX_DEBUG("Settings hFov to %f",hFOV_degrees);
         *lerpFov = hFOV_degrees;
         overrideVfov = true;
         // SOFPPNIX_DEBUG("LerpFov is : %f\n",*lerpFov);
@@ -171,6 +168,7 @@ void my_V_RenderView( float stereo_separation )
 {
     orig_V_RenderView(stereo_separation);
     if ( overrideVfov ) {
+        // SOFPPNIX_DEBUG("Settings vFov to %f",vFOV_degrees);
         *fov_y = vFOV_degrees;
         overrideVfov = false;
     }
@@ -292,4 +290,24 @@ qboolean my_VID_GetModeInfo(int *width, int *height, int mode)
 
     SOFPPNIX_DEBUG("Setting to resolution: %i %i\n", *width, *height);
     return true;
+}
+
+int my_use_drivers_txt_load(void * unknown)
+{
+    SOFPPNIX_DEBUG("Confirming my_use_drivers_txt_load!\n");
+
+    return orig_use_drivers_txt_load(unknown);
+}
+
+int my_GLimp_Init( void *hinstance, void *wndproc )
+{
+    SOFPPNIX_DEBUG("GLimp_Init\n");
+    return orig_GLimp_Init(hinstance,wndproc);
+}
+
+void confirmGlBlend(void)
+{
+    //Ensure GL_BLEND is enabled.
+    orig_glEnable(0x0BE2);
+    SOFPPNIX_DEBUG("confirmed GlBlend\n");
 }

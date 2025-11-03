@@ -15,25 +15,28 @@ RUN apt-get -y update && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo 
     libbz2-dev \
     libreadline-dev \
     libsqlite3-dev \
-    libffi-dev
+    libffi-dev \
+    libncurses5-dev \
+    libgdbm-dev \
+    libnss3-dev
 
 # Download Python source code
-RUN wget https://www.python.org/ftp/python/3.9.2/Python-3.9.2.tgz \
-    && tar -xvf Python-3.9.2.tgz
+RUN wget https://www.python.org/ftp/python/3.8.2/Python-3.8.2.tgz \
+    && tar -xvf Python-3.8.2.tgz
 
 # Copy Setup file from the context to Modules/Setup
-COPY Setup /app/Python-3.9.2/Modules/Setup
+COPY Setup /app/Python-3.8.2/Modules/Setup
 
 # Change into Python source code directory
-WORKDIR /app/Python-3.9.2
+WORKDIR /app/Python-3.8.2
 
 # Configure Python build
 # --enable-unicode=ucs4
 # --enable-optimizations
-RUN ./configure --disable-shared LDFLAGS="-static"
+RUN ./configure --disable-shared --enable-optimizations LDFLAGS="-static"
 
 # Compile Python
-RUN make LDFLAGS="-static" LINKFORSHARED=" "
+RUN make -j 4 LDFLAGS="-static" LINKFORSHARED=" "
 
 # Set the entrypoint as a placeholder
 ENTRYPOINT ["/bin/bash"]

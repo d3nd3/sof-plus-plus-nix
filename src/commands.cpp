@@ -1,23 +1,498 @@
 #include "common.h"
 
 
+static void cmd_nix_match_history(void);
+static void cmd_nix_demo_pause(void);
+static void cmd_nix_demo_resume(void);
+static void cmd_nix_demo_goto(void);
+static void cmd_nix_demo_rate(void);
+static void cmd_nix_demo_loop(void);
+static void cmd_nix_demo_seekms(void);
+static void cmd_nix_demo_nextcp(void);
+static void cmd_nix_demo_prevcp(void);
+static void cmd_nix_demo_seekpct(void);
+static void cmd_nix_demo_bmset(void);
+static void cmd_nix_demo_bmgoto(void);
+static void cmd_nix_demo_bmlist(void);
+static void cmd_nix_demo_bmdel(void);
+static void cmd_nix_demo_bmren(void);
+static void cmd_nix_demo_pov_next(void);
+static void cmd_nix_demo_pov_prev(void);
+
 void CreateCommands(void)
 {
 	my_Cmd_AddCommand("++nix_test",&cmd_nix_test);
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
 	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
 
-	#if 0
-	my_Cmd_AddCommand("++nix_demomap",&cmd_nix_demomap);
-	my_Cmd_AddCommand("++nix_record",&cmd_nix_record);
-	my_Cmd_AddCommand("++nix_stoprecord",&cmd_nix_stoprecord);
-	#endif
+    #if 1
+    my_Cmd_AddCommand("++nix_demomap",&cmd_nix_demomap);
+    my_Cmd_AddCommand("++nix_record",&cmd_nix_record);
+    my_Cmd_AddCommand("++nix_stoprecord",&cmd_nix_stoprecord);
+    my_Cmd_AddCommand("++nix_demo_pov",(void*)cmd_nix_demo_pov);
+    my_Cmd_AddCommand("++nix_match_history",(void*)cmd_nix_match_history);
+    my_Cmd_AddCommand("++nix_demo_pause",(void*)cmd_nix_demo_pause);
+    my_Cmd_AddCommand("++nix_demo_resume",(void*)cmd_nix_demo_resume);
+    my_Cmd_AddCommand("++nix_demo_goto",(void*)cmd_nix_demo_goto);
+    my_Cmd_AddCommand("++nix_demo_rate",(void*)cmd_nix_demo_rate);
+    my_Cmd_AddCommand("++nix_demo_loop",(void*)cmd_nix_demo_loop);
+    my_Cmd_AddCommand("++nix_demo_seekms",(void*)cmd_nix_demo_seekms);
+    my_Cmd_AddCommand("++nix_demo_nextcp",(void*)cmd_nix_demo_nextcp);
+    my_Cmd_AddCommand("++nix_demo_prevcp",(void*)cmd_nix_demo_prevcp);
+    my_Cmd_AddCommand("++nix_demo_seekpct",(void*)cmd_nix_demo_seekpct);
+    my_Cmd_AddCommand("++nix_demo_bmset",(void*)cmd_nix_demo_bmset);
+    my_Cmd_AddCommand("++nix_demo_bmgoto",(void*)cmd_nix_demo_bmgoto);
+    my_Cmd_AddCommand("++nix_demo_bmlist",(void*)cmd_nix_demo_bmlist);
+    my_Cmd_AddCommand("++nix_demo_bmdel",(void*)cmd_nix_demo_bmdel);
+    my_Cmd_AddCommand("++nix_demo_bmren",(void*)cmd_nix_demo_bmren);
+    my_Cmd_AddCommand("++nix_demo_pov_next",(void*)cmd_nix_demo_pov_next);
+    my_Cmd_AddCommand("++nix_demo_pov_prev",(void*)cmd_nix_demo_pov_prev);
+    my_Cmd_AddCommand("++nix_demo_freecam",(void*)cmd_nix_demo_freecam);
+    #endif
 
 	// command to output checksum
 	my_Cmd_AddCommand("++nix_checksum",&cmd_nix_checksum);
 
 	orig_Cmd_AddCommand("++nix_spackage_register",(void*)spackage_register);
 	
+}
+
+static void cmd_nix_demo_pov(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_pov <slot|-1>");
+        return;
+    }
+    int slot = atoi(orig_Cmd_Argv(1));
+    if (!demo_system.demo_player) {
+        SOFPPNIX_PRINT("demo player not active");
+        return;
+    }
+    demo_system.demo_player->watch_slot = slot;
+    SOFPPNIX_PRINT("demo pov set to %d", slot);
+}
+
+static void cmd_nix_demo_freecam(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_freecam <0|1>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    int on = atoi(orig_Cmd_Argv(1));
+    if (on != 0 && on != 1) on = 0;
+    // Experimental: global freecam switch; proper per-viewer requires netchan->slot mapping to viewer state
+    demo_system.demo_player->watch_slot = -1;
+    SOFPPNIX_PRINT("demo freecam %s (POV decoupled)", on ? "on" : "off");
+}
+
+static void cmd_nix_demo_pov_next(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    auto it = demo_system.demos.find(spawncount);
+    if (it == demo_system.demos.end() || !it->second) {
+        SOFPPNIX_PRINT("no demo data");
+        return;
+    }
+    // pick next available slot key at current frame
+    int cur = demo_system.demo_player->current_frame;
+    auto itFrame = it->second->demo_frames_map.find(cur);
+    if (itFrame == it->second->demo_frames_map.end() || itFrame->second.empty()) {
+        SOFPPNIX_PRINT("no frame data");
+        return;
+    }
+    std::vector<int> keys; keys.reserve(itFrame->second.size());
+    for (const auto &kv : itFrame->second) keys.push_back(kv.first);
+    std::sort(keys.begin(), keys.end());
+    int curWatch = demo_system.demo_player->watch_slot;
+    if (curWatch == -1) curWatch = keys.front();
+    auto pos = std::find(keys.begin(), keys.end(), curWatch);
+    if (pos == keys.end() || ++pos == keys.end()) demo_system.demo_player->watch_slot = keys.front();
+    else demo_system.demo_player->watch_slot = *pos;
+    SOFPPNIX_PRINT("demo pov set to %d", demo_system.demo_player->watch_slot);
+}
+
+static void cmd_nix_demo_pov_prev(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    auto it = demo_system.demos.find(spawncount);
+    if (it == demo_system.demos.end() || !it->second) {
+        SOFPPNIX_PRINT("no demo data");
+        return;
+    }
+    int cur = demo_system.demo_player->current_frame;
+    auto itFrame = it->second->demo_frames_map.find(cur);
+    if (itFrame == it->second->demo_frames_map.end() || itFrame->second.empty()) {
+        SOFPPNIX_PRINT("no frame data");
+        return;
+    }
+    std::vector<int> keys; keys.reserve(itFrame->second.size());
+    for (const auto &kv : itFrame->second) keys.push_back(kv.first);
+    std::sort(keys.begin(), keys.end());
+    int curWatch = demo_system.demo_player->watch_slot;
+    if (curWatch == -1) curWatch = keys.front();
+    auto pos = std::find(keys.begin(), keys.end(), curWatch);
+    if (pos == keys.begin() || pos == keys.end()) demo_system.demo_player->watch_slot = keys.back();
+    else demo_system.demo_player->watch_slot = *(pos-1);
+    SOFPPNIX_PRINT("demo pov set to %d", demo_system.demo_player->watch_slot);
+}
+
+static void cmd_nix_match_history(void)
+{
+    // List available in-memory demos (by spawncount) with minimal details
+    int count = 0;
+    for (const auto &kv : demo_system.demos) {
+        int id = kv.first;
+        const std::unique_ptr<DemoData> &d = kv.second;
+        if (!d) continue;
+        int frames = (int)d->demo_frames_map.size();
+        if (frames == 0) continue;
+        SOFPPNIX_PRINT("id %d  frames %d  map %s", id, frames, d->level_name.c_str());
+        count++;
+    }
+    if (!count) {
+        SOFPPNIX_PRINT("no in-memory demos");
+    }
+}
+
+static void cmd_nix_demo_pause(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    demo_system.demo_player->paused = true;
+    SOFPPNIX_PRINT("demo paused at frame %d", demo_system.demo_player->current_frame);
+}
+
+static void cmd_nix_demo_resume(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    demo_system.demo_player->paused = false;
+    SOFPPNIX_PRINT("demo resumed");
+}
+
+static void cmd_nix_demo_goto(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_goto <frame>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    int target = atoi(orig_Cmd_Argv(1));
+    if (target == 0 && strcmp(orig_Cmd_Argv(1), "0") != 0) {
+        SOFPPNIX_PRINT("invalid frame");
+        return;
+    }
+    if (target < demo_system.demo_player->first_frame) target = demo_system.demo_player->first_frame;
+    if (target > demo_system.demo_player->final_frame) target = demo_system.demo_player->final_frame;
+    demo_system.demo_player->current_frame = target;
+    SOFPPNIX_PRINT("demo current frame %d", demo_system.demo_player->current_frame);
+}
+
+static void cmd_nix_demo_rate(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_rate <step>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    int step = atoi(orig_Cmd_Argv(1));
+    if (step == 0) step = 1;
+    if (step < 0) step = 1;
+    if (step > 32) step = 32; // cap to prevent runaway fast-forward
+    demo_system.demo_player->frame_step = step;
+    SOFPPNIX_PRINT("demo frame step %d", step);
+}
+
+// Optional: loop toggle
+static void cmd_nix_demo_loop(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    demo_system.demo_player->loop = !demo_system.demo_player->loop;
+    SOFPPNIX_PRINT("demo loop %s", demo_system.demo_player->loop ? "on" : "off");
+}
+
+static void cmd_nix_demo_seekms(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_seekms <ms>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    int target_ms = atoi(orig_Cmd_Argv(1));
+    auto it = demo_system.demos.find(spawncount);
+    if (it == demo_system.demos.end() || !it->second) {
+        SOFPPNIX_PRINT("no demo data");
+        return;
+    }
+    std::unique_ptr<DemoData> &d = it->second;
+    int new_frame = demo_system.demo_player->first_frame;
+    if (!d->checkpoints.empty()) {
+        int best_ts = -1;
+        for (const auto &kv : d->checkpoints) {
+            int fr = kv.first;
+            DemoCheckpoint *cp = kv.second.get();
+            if (!cp) continue;
+            int ts = cp->timestamp;
+            if (ts <= target_ms && ts > best_ts) {
+                best_ts = ts;
+                new_frame = fr;
+            }
+        }
+        if (best_ts < 0) {
+            // pick earliest checkpoint
+            int min_ts = INT_MAX;
+            for (const auto &kv : d->checkpoints) {
+                DemoCheckpoint *cp = kv.second.get();
+                if (!cp) continue;
+                if (cp->timestamp < min_ts) {
+                    min_ts = cp->timestamp;
+                    new_frame = kv.first;
+                }
+            }
+        }
+        SOFPPNIX_PRINT("seek %d ms -> frame %d (checkpoint)", target_ms, new_frame);
+    } else {
+        // fallback: estimate 50ms per frame
+        int guess = demo_system.demo_player->first_frame + (target_ms / 50);
+        if (guess < demo_system.demo_player->first_frame) guess = demo_system.demo_player->first_frame;
+        if (guess > demo_system.demo_player->final_frame) guess = demo_system.demo_player->final_frame;
+        new_frame = guess;
+        SOFPPNIX_PRINT("no checkpoints; guessed frame %d", new_frame);
+    }
+    demo_system.demo_player->current_frame = new_frame;
+}
+
+static void cmd_nix_demo_nextcp(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    auto it = demo_system.demos.find(spawncount);
+    if (it == demo_system.demos.end() || !it->second) {
+        SOFPPNIX_PRINT("no demo data");
+        return;
+    }
+    std::unique_ptr<DemoData> &d = it->second;
+    if (d->checkpoints.empty()) {
+        SOFPPNIX_PRINT("no checkpoints");
+        return;
+    }
+    int cur = demo_system.demo_player->current_frame;
+    int next_frame = INT_MAX;
+    bool found = false;
+    for (const auto &kv : d->checkpoints) {
+        int fr = kv.first;
+        if (fr > cur && fr < next_frame) {
+            next_frame = fr;
+            found = true;
+        }
+    }
+    if (!found) {
+        SOFPPNIX_PRINT("no next checkpoint");
+        return;
+    }
+    demo_system.demo_player->current_frame = next_frame;
+    SOFPPNIX_PRINT("moved to checkpoint frame %d", next_frame);
+}
+
+static void cmd_nix_demo_prevcp(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    auto it = demo_system.demos.find(spawncount);
+    if (it == demo_system.demos.end() || !it->second) {
+        SOFPPNIX_PRINT("no demo data");
+        return;
+    }
+    std::unique_ptr<DemoData> &d = it->second;
+    if (d->checkpoints.empty()) {
+        SOFPPNIX_PRINT("no checkpoints");
+        return;
+    }
+    int cur = demo_system.demo_player->current_frame;
+    int prev_frame = -1;
+    bool found = false;
+    for (const auto &kv : d->checkpoints) {
+        int fr = kv.first;
+        if (fr < cur && fr > prev_frame) {
+            prev_frame = fr;
+            found = true;
+        }
+    }
+    if (!found) {
+        SOFPPNIX_PRINT("no previous checkpoint");
+        return;
+    }
+    demo_system.demo_player->current_frame = prev_frame;
+    SOFPPNIX_PRINT("moved to checkpoint frame %d", prev_frame);
+}
+
+static void cmd_nix_demo_seekpct(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_seekpct <0-100>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    int pct = atoi(orig_Cmd_Argv(1));
+    if (pct < 0) pct = 0; if (pct > 100) pct = 100;
+    int span = demo_system.demo_player->final_frame - demo_system.demo_player->first_frame;
+    int target_frame = demo_system.demo_player->first_frame + (span * pct) / 100;
+
+    // Prefer nearest checkpoint at/before target if available
+    auto it = demo_system.demos.find(spawncount);
+    if (it != demo_system.demos.end() && it->second && !it->second->checkpoints.empty()) {
+        int best = demo_system.demo_player->first_frame;
+        for (const auto &kv : it->second->checkpoints) {
+            int fr = kv.first;
+            if (fr <= target_frame && fr >= best) best = fr;
+        }
+        target_frame = best;
+        SOFPPNIX_PRINT("seek %d%% -> frame %d (checkpoint)", pct, target_frame);
+    } else {
+        SOFPPNIX_PRINT("seek %d%% -> frame %d", pct, target_frame);
+    }
+    demo_system.demo_player->current_frame = target_frame;
+}
+
+static void cmd_nix_demo_bmset(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_bmset <name>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    std::string name = orig_Cmd_Argv(1);
+    if (name.empty()) {
+        SOFPPNIX_PRINT("invalid name");
+        return;
+    }
+    demo_system.demo_player->bookmarks[name] = demo_system.demo_player->current_frame;
+    SOFPPNIX_PRINT("bookmark '%s' set at frame %d", name.c_str(), demo_system.demo_player->current_frame);
+}
+
+static void cmd_nix_demo_bmgoto(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_bmgoto <name>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    std::string name = orig_Cmd_Argv(1);
+    auto it = demo_system.demo_player->bookmarks.find(name);
+    if (it == demo_system.demo_player->bookmarks.end()) {
+        SOFPPNIX_PRINT("bookmark '%s' not found", name.c_str());
+        return;
+    }
+    int target = it->second;
+    if (target < demo_system.demo_player->first_frame) target = demo_system.demo_player->first_frame;
+    if (target > demo_system.demo_player->final_frame) target = demo_system.demo_player->final_frame;
+    demo_system.demo_player->current_frame = target;
+    SOFPPNIX_PRINT("jumped to bookmark '%s' (frame %d)", name.c_str(), target);
+}
+
+static void cmd_nix_demo_bmlist(void)
+{
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    if (demo_system.demo_player->bookmarks.empty()) {
+        SOFPPNIX_PRINT("no bookmarks");
+        return;
+    }
+    for (const auto &kv : demo_system.demo_player->bookmarks) {
+        SOFPPNIX_PRINT("%s -> %d", kv.first.c_str(), kv.second);
+    }
+}
+
+static void cmd_nix_demo_bmdel(void)
+{
+    if (orig_Cmd_Argc() != 2) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_bmdel <name>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    std::string name = orig_Cmd_Argv(1);
+    auto it = demo_system.demo_player->bookmarks.find(name);
+    if (it == demo_system.demo_player->bookmarks.end()) {
+        SOFPPNIX_PRINT("bookmark '%s' not found", name.c_str());
+        return;
+    }
+    demo_system.demo_player->bookmarks.erase(it);
+    SOFPPNIX_PRINT("deleted bookmark '%s'", name.c_str());
+}
+
+static void cmd_nix_demo_bmren(void)
+{
+    if (orig_Cmd_Argc() != 3) {
+        SOFPPNIX_PRINT("usage: ++nix_demo_bmren <old> <new>");
+        return;
+    }
+    if (!demo_system.demo_player || !demo_system.demo_player->active) {
+        SOFPPNIX_PRINT("no active demo");
+        return;
+    }
+    std::string oldn = orig_Cmd_Argv(1);
+    std::string newn = orig_Cmd_Argv(2);
+    if (newn.empty()) {
+        SOFPPNIX_PRINT("invalid new name");
+        return;
+    }
+    auto it = demo_system.demo_player->bookmarks.find(oldn);
+    if (it == demo_system.demo_player->bookmarks.end()) {
+        SOFPPNIX_PRINT("bookmark '%s' not found", oldn.c_str());
+        return;
+    }
+    if (demo_system.demo_player->bookmarks.find(newn) != demo_system.demo_player->bookmarks.end()) {
+        SOFPPNIX_PRINT("bookmark '%s' already exists", newn.c_str());
+        return;
+    }
+    int frame = it->second;
+    demo_system.demo_player->bookmarks.erase(it);
+    demo_system.demo_player->bookmarks[newn] = frame;
+    SOFPPNIX_PRINT("renamed bookmark '%s' -> '%s'", oldn.c_str(), newn.c_str());
 }
 
 std::vector<std::string> split(const std::string& str, const std::string& delimiter) {
@@ -279,7 +754,7 @@ void cmd_nix_test(void)
 }
 
 
-#if 0
+#if 1
 void cmd_nix_demomap(void)
 {
 
@@ -298,7 +773,7 @@ void cmd_nix_demomap(void)
 		use the .dm3 extension format for files.
 		else assumed spawncount selection integer id from memdump list.
 	*/
-	if ( !demo_system.LoadDemo() ) return;
+    if ( !demo_system.LoadDemo() ) return;
 	
 
 	demo_system.serverstate_trigger_play = true;

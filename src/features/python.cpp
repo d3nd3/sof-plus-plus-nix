@@ -62,6 +62,41 @@ O&: anything to object (via converter)
 static void pythonLoadUserScripts(void);
 
 
+void pythonFirstInit(void)
+{
+	// Get the current PYTHONPATH value
+	const char* current_path = getenv("PYTHONPATH");
+
+	std::string ppnix_py_path = orig_FS_Userdir() + std::string("/python");
+	// Create a new string with the updated PYTHONPATH value
+	std::string updated_path;
+	if (current_path) {
+		// Append the new path to the current PYTHONPATH value
+		updated_path = current_path + std::string(":") + ppnix_py_path;
+	} else {
+		// If PYTHONPATH is not set, use the new path as is
+		updated_path = ppnix_py_path;
+	}
+
+	// Set the updated PYTHONPATH value, 1 == overwrite.
+	setenv("PYTHONPATH", updated_path.c_str(), 1);
+
+	//For interacting with the Lib folder
+	Py_SetPythonHome(L".");
+
+	Py_Initialize();
+
+	decorators.push_back(&player_die_callbacks);
+	decorators.push_back(&player_connect_callbacks);
+	decorators.push_back(&player_disconnect_callbacks);
+	decorators.push_back(&player_respawn_callbacks);
+	decorators.push_back(&player_say_callbacks);
+	decorators.push_back(&frame_early_callbacks);
+	decorators.push_back(&map_spawn_callbacks);
+
+	SOFPPNIX_PRINT("Python version : %s", Py_GetVersion());
+}
+
 PyObject *pGlobals;
 void pythonInit(void)
 {
@@ -76,7 +111,7 @@ void pythonInit(void)
 	// clean up previous.
 	Py_Finalize();
 
-	// Register the module
+	// Register the module befor calling Py_Iniitalize()
 	if ( PyImport_AppendInittab("ppnix", PyInit_ppnix) == -1 )
 		error_exit("Couldnt extend table for ppnix");
 
@@ -89,13 +124,17 @@ void pythonInit(void)
 	if ( PyImport_AppendInittab("event", PyInit_event) == -1 )
 		error_exit("Couldnt extend table for event");
 
+	//For interacting with the Lib folder
+	Py_SetPythonHome(L".");
 	Py_Initialize();
 
+	#if 0
 	// Add the current directory to script load path
 	PyObject* sysPath = PySys_GetObject("path");//b
 	PyObject* curDir = PyUnicode_FromString(".");//n
 	PyList_Append(sysPath, curDir);//b
 	Py_DECREF(curDir);
+	#endif
 
 	initEntDictType();
 	MemoryItem::initMemoryItems();

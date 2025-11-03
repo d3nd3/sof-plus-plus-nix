@@ -640,7 +640,7 @@ bool unZipFile(char * in_zip, char * out_root )
 		std::string output_file_path;
 
 		std::string filename_str = std::string(filename);
-		if (std::filesystem::path(filename_str).extension() == ".bsp") {
+		if (std::experimental::filesystem::path(filename_str).extension() == ".bsp") {
 			std::string lowercase_filename;
 			std::transform(filename_str.begin(), filename_str.end(), std::back_inserter(lowercase_filename), [](unsigned char c) {
 				return std::tolower(c);

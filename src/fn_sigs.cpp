@@ -135,6 +135,13 @@ void (*orig_PM_StepSlideMove) (int num) = 0x0812D9BC;
 
 void (*orig_Netchan_Transmit) (netchan_t *chan, int length, byte *data) = 0x0812AFCC;
 
+
+void * (*orig_Sys_GetProcAddress)(void* handle, char * name) = 0x0820AEF0;
+void * my_Sys_GetProcAddress(void* handle, char* name);
+
+void (*orig_SV_AreaEdicts_r) (areanode_t *node) = 0x80B2E4C;
+void my_SV_AreaEdicts_r (areanode_t *node);
+
 /*
 ---------------------Ref(Video) Library---------------------
 */
@@ -143,6 +150,13 @@ void * (*orig_GetRefAPI ) (void* rimp ) = NULL;
 qboolean (*orig_VID_LoadRefresh)(char *name) = 0x0820D9DC;
 
 qboolean (*orig_VID_GetModeInfo)( int *width, int *height, int mode ) = 0x0820E044;
+
+int (*orig_use_drivers_txt_load)(void * unknown) = NULL;
+
+int (*orig_GLimp_Init)( void *hinstance, void *wndproc ) = NULL;
+int my_GLimp_Init( void *hinstance, void *wndproc );
+
+void (*orig_glEnable)(unsigned int cap) = NULL;
 
 /*
 ---------------------Game Library---------------------
@@ -189,3 +203,9 @@ void (*orig_T_Damage) (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec
 
 void (*orig_fireSpas)(weaponFireInfo_t &wf) = NULL;
 void (*orig_CFXSender_exec)(void * self,int, edict_t *, multicast_t, edict_t *) = NULL;
+
+void (*orig_Player_player_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+
+void (*orig_plat_CalcAcceleratedMove)(moveinfo_t *moveinfo);
+
+void (*orig_Move_Begin) (edict_t *ent);

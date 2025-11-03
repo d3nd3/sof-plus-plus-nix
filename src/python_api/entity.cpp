@@ -1,6 +1,19 @@
 #include "common.h"
 
 /*
+	https://docs.python.org/3.8/c-api/arg.html?highlight=pyarg_parsetuple#c.PyArg_ParseTuple
+	Then scroll up, for ParseTuple symbols.
+
+	It's the default assumption that the reference passed to a C function is borrowed, 
+	and if the function needs to save a reference, it will increment the refcount appropriately
+	
+	For returned objects see the docs for that API, whether it returns new reference.
+	https://docs.python.org/3.8/c-api/list.html
+
+	Always return Py_RETURN_NONE when nothing is returned.
+*/
+
+/*
 c4 = ent.spawn("item_c4")
 */
 static PyObject * py_ent_spawn(PyObject * self, PyObject * classname);
@@ -45,14 +58,16 @@ static PyObject * py_ent_from_slot(PyObject * self, PyObject * args)
 	}
 
 	client_t * client = getClientX(slot);
-	int state = *(int*)(client);
-	if (state != cs_spawned ) {
-		Py_RETURN_NONE;
+	if ( client ) {
+		int state = *(int*)(client);
+		if (state != cs_spawned ) {
+			Py_RETURN_NONE;
+		}
+		edict_t * ent = stget(client,CLIENT_ENT);
+		PyObject * ret = createEntDict(ent);
+		return ret;	
 	}
-	edict_t * ent = stget(client,CLIENT_ENT);
-	PyObject * ret = createEntDict(ent);
-	return ret;
-	// Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 /*
@@ -173,6 +188,11 @@ void initEntDictType(void)
 		error_exit("Failed to Type Ready");
 	}
 }
+
+/*
+	MemoryItem(name,"int",offset,info)
+	They internally have stored their memory offset.
+*/
 static void addEntProperties(PyObject* ent_dict,edict_t * c_ent)
 {
 	/*
@@ -184,14 +204,58 @@ static void addEntProperties(PyObject* ent_dict,edict_t * c_ent)
 		When the ent dict is created by converting edict_t pointer at event cb. That is the moment of synchronization.
 	*/
 	
+	// Reads Memory to sync the python variables
 	// Read from the entities memory using get() and store inside the ent dict.
 	// first = Key, second = Value
 	for( const auto &pair : MemoryItem::entityProperties ) {
 		PyObject* val = NULL;
+		//fill the PyObject using c_ent as base_offset
 		pair.second->get((void*)c_ent,val); //n
+		//transfer the same key
 		PyDict_SetItemString(ent_dict, pair.first.c_str() , val);//b
 		Py_DECREF(val);
 	}
+
+}
+
+static void addEntGclientProperties(PyObject* ent_dict, edict_t* c_ent, void * gclient)
+{
+    // Create the inner dictionary
+    PyObject *inner_dict = PyObject_CallObject((PyObject *) &EntDict_Type, NULL);
+    if (!inner_dict) {
+        // Handle error: could not create dictionary
+        return;
+    }
+
+    // Add the inner dictionary to ent_dict with a specific key, e.g., "properties"
+    // You can choose a more descriptive key if needed
+    if (PyDict_SetItemString(ent_dict, "gclient", inner_dict) == -1) {
+        // Handle error: could not set item
+        Py_DECREF(inner_dict); // Clean up
+        return;
+    }
+
+    // Reads Memory to sync the python variables
+    // Now iterate and add properties to the inner_dict
+    for (const auto& pair : MemoryItem::gclientProperties) {
+        PyObject* val = NULL;
+        // Fill the PyObject using c_ent as base_offset
+        pair.second->get(gclient, val); // n
+
+        if (val) { // Ensure val was successfully populated
+            // Transfer the same key to the inner_dict
+            PyDict_SetItemString(inner_dict, pair.first.c_str(), val); // b
+            Py_DECREF(val);
+        } else {
+            // Handle case where get() might fail or not set val
+            // Depending on your error handling strategy, you might log this
+            // or raise a Python exception.
+        }
+    }
+
+    // Decrement the reference count of the inner_dict.
+    // PyDict_SetItemString increments its reference count, so we balance it.
+    Py_DECREF(inner_dict);
 }
 
 /*
@@ -217,10 +281,15 @@ PyObject* createEntDict(edict_t * c_ent)
 
 			// Add every other ent specific object
 			addEntProperties(ent_dict,c_ent);
+			void * gclient;
+			if ( gclient = stget(c_ent,EDICT_GCLIENT) ) {
+				//It is also a player.
+				addEntGclientProperties(ent_dict,c_ent,gclient);
+			}
 			// Py_DECREF(ent_dict);
+
+			return ent_dict;
 		}
-		
-		return ent_dict;
 	}
 	Py_RETURN_NONE;
 }

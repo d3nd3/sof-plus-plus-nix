@@ -50,7 +50,7 @@ DemoSystem::demo_system
 -----------------------------DEMO CHECKPOINT-----------------------------
 -------------------------------------------------------------------------
 */
-DemoCheckPoint::DemoCheckpoint(int timestamp) :
+DemoCheckpoint::DemoCheckpoint(int timestamp) :
 timestamp(timestamp)
 {
 	/*
@@ -64,7 +64,7 @@ timestamp(timestamp)
 
 	The dynamic data (configstrings/baselines) used to generate these chunks is saved by the checkpoint system.  The checkpoint system will also ensure that every Unrel frameXX will be undelta'ed, meaning that players can easily JUMP to different frames of the demo.
 */
-void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector) {
+void DemoCheckpoint::generate_svc_serverdata(int slot, std::vector<chunk_t>& resultVector) {
 
 	sizebuf_t buf;
 	//sizebuf_t memset to 0.
@@ -77,11 +77,11 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 	buf.maxsize = 1400;
 
 	//server_t;
-	void * sv = 0x082AF680;
-	char * levelName = sv + 0x454;
+    void * sv = (void*)0x082AF680;
+    char * levelName = (char*)((unsigned char*)sv + 0x454);
 
 	int index = 0;
-	char * configstrings = sv+0x454;
+    char * configstrings = (char*)((unsigned char*)sv + 0x454);
 
 	//packet type 0x0E
 	orig_MSG_WriteByte(&buf,svc_serverdata);
@@ -127,8 +127,8 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 			{	
 				// write it out
 
-				chunk_t newchunk;
-				newchunk.data = malloc(buf.cursize);
+                chunk_t newchunk;
+                newchunk.data = (char*)malloc(buf.cursize);
 				newchunk.len = buf.cursize;
 
 				memcpy(newchunk.data,buf_data,buf.cursize);
@@ -158,7 +158,7 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 	for (int i=1; i<MAX_EDICTS ; i++)
 	{
 		//base = &sv.baselines[i];
-		base = sv + 0x37D14 + i*0x74;
+        base = (entity_state_t*)((unsigned char*)sv + 0x37D14 + i*0x74);
 		//solid, renderindex
 		//if (!base->renderindex && !((base->solid & 0xFF) & 0x40) )
 			//continue;
@@ -174,8 +174,8 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 		if (buf.cursize + 64 > buf.maxsize)
 		{	// write it out
 			
-			chunk_t newchunk;
-			newchunk.data = malloc(buf.cursize);
+    chunk_t newchunk;
+    newchunk.data = (char*)malloc(buf.cursize);
 			newchunk.len = buf.cursize;
 
 			memcpy(newchunk.data,buf_data,buf.cursize);
@@ -197,10 +197,10 @@ void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector)
 	//allow_download 0? dodge downloads? necessary?
 	orig_MSG_WriteString (&buf, orig_va("set allow_download 0;precache %i; reset_predn\n",spawncount));
 
-	// write it out
-	chunk_t newchunk;
-	newchunk.data = malloc(buf.cursize);
-	newchunk.len = buf.cursize;
+    // write it out
+    chunk_t newchunk;
+    newchunk.data = (char*)malloc(buf.cursize);
+    newchunk.len = buf.cursize;
 
 	memcpy(newchunk.data,buf_data,buf.cursize);
 
@@ -225,16 +225,16 @@ level_name(level_name),deathmatch(deathmatch),game_dir(game_dir)
 	SOFPPNIX_DEBUG("DemoData() Constructor.");
 }
 DemoData::~DemoData() {
-	for ( int i=0;i<16;i++ ) {
-		for ( auto& chunk : activation_chunks[i] ) {
+    for ( int i=0;i<16;i++ ) {
+        for ( auto& chunk : activation_chunks[i] ) {
 			//correctly free partial written chunk of previous client.
-			if ( chunk.data != NULL ) free(chunk.data);
+            if ( chunk.data != NULL ) free((void*)chunk.data);
 		}
 		activation_chunks[i].clear();
 
-		for ( auto& chunk : ghoul_chunks[i] ) {
+        for ( auto& chunk : ghoul_chunks[i] ) {
 			//correctly free partial written chunk of previous client.
-			if ( chunk.data != NULL ) free(chunk.data);
+            if ( chunk.data != NULL ) free((void*)chunk.data);
 		}
 		ghoul_chunks[i].clear();
 	}
@@ -247,12 +247,12 @@ DemoData::~DemoData() {
 		for(auto& slotIt : slotPacketMap) {
 			std::unique_ptr<slot_packetdata_t>& packet = slotIt.second;
 
-			if ( packet->relSZ != nullptr ) {
-				delete[] packet->relSZ->data;
-			}
-			if ( packet->unrelSZ != nullptr ) {
-				delete[] packet->unrelSZ->data;
-			}
+            if ( packet->relSZ != nullptr ) {
+                delete[] (packet->relSZ->data);
+            }
+            if ( packet->unrelSZ != nullptr ) {
+                delete[] (packet->unrelSZ->data);
+            }
 		}
 	}
 	demo_frames_map.clear(); //trigger unique_ptr chain cleanup.
@@ -270,7 +270,9 @@ DemoRecorder::DemoRecorder()
 
 DemoRecorder::~DemoRecorder()
 {
-	endRecording();
+	if ( demo_system.recording_status ) {
+		endRecording();
+	}
 }
 
 
@@ -299,11 +301,12 @@ void DemoRecorder::startRecording(void) {
 	demo_system.recording_status = true;
 	//all other data saved by netchan_transmit.
 	SOFPPNIX_DEBUG("Recording demoname : %s!",recording_name);
+	SOFPPNIX_PRINT("Recording started (id %d)", spawncount);
 
 	//DemoData already created by DemoSystem::PrepareLevel() (SV_SpawnServer)
 	// Assuming 'checkpoints' is your unordered_map
-	auto it = demos.find(spawncount);
-	if (it == demos.end()) {
+    auto it = demo_system.demos.find(spawncount);
+    if (it == demo_system.demos.end()) {
 		//Created in DemoSystem::PrepareLevel() (SV_spawnServer)
 		SOFPPNIX_DEBUG("Warning. The DemoData does not exist yet.");
 		return;
@@ -311,8 +314,7 @@ void DemoRecorder::startRecording(void) {
 
 	//Checkpoint creation should be handled in sv_writeframe function. Not here.
 	//Although triggering of the checkpoint creation can work here.
-	demos[spawncount]->checkpoints[]
-	DemoData.checkpoints[framenum] = std::make_unique<DemoCheckpoint>(/* constructor arguments */);
+    // First checkpoint will be created by frame writer elsewhere
 	/*
 		Essentially the first checkpoint.
 	*/
@@ -353,33 +355,35 @@ void DemoRecorder::saveNetworkData(void * netchan, int relLen, unsigned char * r
 	int framenum = stget(0x082AF680, 0x10);
 
 	#if 0
-	auto itFrames = demo_system.demos[spawncount].demo_frames_map.find(framenum);
+    auto itFrames = demo_system.demos[spawncount]->demo_frames_map.find(framenum);
 
-	if (itFrames == demo_system.demos[spawncount].demo_frames_map.end())
-		demo_system.demos[spawncount].demo_frames_map[framenum] = std::make_unique<demo_frame_t>();
+    if (itFrames == demo_system.demos[spawncount]->demo_frames_map.end())
+        demo_system.demos[spawncount]->demo_frames_map[framenum] = SlotPacketDataMap();
 	else
 		error_exit("frame already exists, why?");
 	#endif
 
 	std::unique_ptr<slot_packetdata_t> packet = std::make_unique<slot_packetdata_t>();
 
-	if (relLen) {
-		packet->relSZ = std::make_unique<sizebuf_t>();
-		packet->relSZ->data = std::make_unique<char[]>(relLen).release(); 
-		packet->relSZ->maxsize = relLen;
+    if (relLen) {
+        packet->relSZ = std::make_unique<sizebuf_t>();
+        memset(packet->relSZ.get(), 0, sizeof(sizebuf_t));
+        packet->relSZ->data = std::make_unique<char[]>(relLen).release(); 
+        packet->relSZ->maxsize = relLen;
+        packet->relSZ->cursize = 0;
+        orig_SZ_Write(packet->relSZ.get(), relData, relLen);
+    }
 
-		orig_SZ_Write(packet->relSZ.get(), packet->relSZ->data, relLen);
-	}
+    if (unrelLen) {
+        packet->unrelSZ = std::make_unique<sizebuf_t>();
+        memset(packet->unrelSZ.get(), 0, sizeof(sizebuf_t));
+        packet->unrelSZ->data = std::make_unique<char[]>(unrelLen).release();
+        packet->unrelSZ->maxsize = unrelLen;
+        packet->unrelSZ->cursize = 0;
+        orig_SZ_Write(packet->unrelSZ.get(), unrelData, unrelLen);
+    }
 
-	if (unrelLen) {
-		packet->unrelSZ = std::make_unique<sizebuf_t>();
-		packet->unrelSZ->data = std::make_unique<char[]>(unrelLen).release();
-		packet->unrelSZ->maxsize = unrelLen;
-
-		orig_SZ_Write(packet->unrelSZ.get(), packet->unrelSZ->data, unrelLen);
-	}
-
-	demo_system.demos[spawncount].demo_frames_map[framenum][slot] = std::move(packet);
+    demo_system.demos[spawncount]->demo_frames_map[framenum][slot] = std::move(packet);
 }
 /*
 Called by ++nix_stoprecording or demo_system::preloadLevel (same place recording is started).
@@ -392,6 +396,7 @@ void DemoRecorder::endRecording(void) {
 		return;
 	}
 	SOFPPNIX_DEBUG("Recording ended!");
+	SOFPPNIX_PRINT("Recording ended (id %d). Use ++nix_demomap %d to play.", spawncount, spawncount);
 	
 	writeToDisk();
 	demo_system.recording_status = false;
@@ -411,18 +416,62 @@ void DemoRecorder::onClientFullyConnected(void)
 */
 void DemoRecorder::writeToDisk(void)
 {
-	DemosPerLevelMap& demo_data = demo_system.demos[spawncount]; 
-	disk_file.open(recording_name, std::ios::binary | std::ios::out);
-	if (!disk_file.is_open()) {
-		std::cerr << "Error opening file: " << recording_name << std::endl;
-	}
-	//spawncount - 4-byte integer
-	disk_file.write(reinterpret_cast<const char*>(&value), sizeof(int));
+    auto it = demo_system.demos.find(spawncount);
+    if (it == demo_system.demos.end()) return;
+    std::unique_ptr<DemoData>& demo_data = it->second; 
 
-	// Write the null-terminated string
-	disk_file.write(demo_data->level_name.c_str(), demo_data->level_name.size() + 1); // Include the null character
+    auto write_u32 = [](std::ofstream &f, uint32_t v){ f.write((const char*)&v, sizeof(v)); };
+    auto write_str = [&](std::ofstream &f, const std::string &s){ uint32_t n=(uint32_t)s.size(); write_u32(f,n); if(n) f.write(s.data(), n); };
+    auto strip_ext = [](const std::string &name){ size_t p=name.find_last_of('.'); if(p==std::string::npos) return name; return name.substr(0,p); };
 
-	disk_file.close();
+    std::string out_path = std::string("demos/") + strip_ext(std::string(recording_name)) + ".ssdm";
+    create_file_dir_if_not_exists(out_path.c_str());
+    std::ofstream f(out_path, std::ios::binary|std::ios::out|std::ios::trunc);
+    if (!f.is_open()) {
+        SOFPPNIX_PRINT("failed to open %s", out_path.c_str());
+        return;
+    }
+
+    f.write("SSDM1",5);
+    write_str(f, demo_data->level_name);
+    write_u32(f, (uint32_t)demo_data->deathmatch);
+    write_str(f, demo_data->game_dir);
+
+    int first = 0, last = 0;
+    if (!demo_data->demo_frames_map.empty()) {
+        first = demo_data->demo_frames_map.begin()->first;
+        last  = demo_data->demo_frames_map.rbegin()->first;
+    }
+    write_u32(f, (uint32_t)first);
+    write_u32(f, (uint32_t)last);
+
+    write_u32(f, (uint32_t)demo_data->checkpoints.size());
+    for (auto &cpkv : demo_data->checkpoints) {
+        write_u32(f, (uint32_t)cpkv.first);
+        write_u32(f, (uint32_t)cpkv.second->timestamp);
+    }
+
+    write_u32(f, (uint32_t)demo_data->demo_frames_map.size());
+    for (auto &frkv : demo_data->demo_frames_map) {
+        int fr = frkv.first;
+        SlotPacketDataMap &slots = frkv.second;
+        write_u32(f, (uint32_t)fr);
+        write_u32(f, (uint32_t)slots.size());
+        for (auto &skv : slots) {
+            int slot = skv.first;
+            slot_packetdata_t *pkt = skv.second.get();
+            write_u32(f, (uint32_t)slot);
+            uint32_t rlen = (pkt->relSZ && pkt->relSZ->cursize > 0 ? (uint32_t)pkt->relSZ->cursize : 0u);
+            write_u32(f, rlen);
+            if (rlen) f.write(pkt->relSZ->data, rlen);
+            uint32_t ulen = (pkt->unrelSZ && pkt->unrelSZ->cursize > 0 ? (uint32_t)pkt->unrelSZ->cursize : 0u);
+            write_u32(f, ulen);
+            if (ulen) f.write(pkt->unrelSZ->data, ulen);
+        }
+    }
+
+    f.close();
+    SOFPPNIX_PRINT("saved demo to %s", out_path.c_str());
 }
 
 
@@ -511,11 +560,25 @@ void DemoPlayer::begin(void) {
 		A cvar can force write to disk automatically.
 	*/
 
-	//get lowest frame
-	first_frame = demo_system.demos[spawncount].demo_frames_map.begin()->first;
-	current_frame = startDemoFrame;
-	final_frame = demo_system.demos[spawncount].demo_frames_map.rbegin()->first;
+    //get lowest frame
+    if (demo_system.demos.find(spawncount) == demo_system.demos.end() || demo_system.demos[spawncount]->demo_frames_map.empty()) {
+        SOFPPNIX_DEBUG("Demo has no frames");
+        active = false;
+        return;
+    }
+    first_frame = demo_system.demos[spawncount]->demo_frames_map.begin()->first;
+    current_frame = first_frame;
+    final_frame = demo_system.demos[spawncount]->demo_frames_map.rbegin()->first;
 	SOFPPNIX_DEBUG("Starting demo on frame : %i / %i",first_frame, final_frame);
+    paused = false;
+    frame_step = 1;
+    bookmarks.clear();
+
+    // Reset per-viewer progress arrays
+    for (int i = 0; i < 16; ++i) {
+        ghoulChunkIndex[i] = 0;
+        ghoulLoaded[i] = false;
+    }
 
 }
 
@@ -524,9 +587,11 @@ demo_system.demo_player->packet_override - after New
 */
 void DemoPlayer::playback(netchan_t *chan, int length, byte *data)
 {
-	
+    
+    if (!demo_system.demos.count(spawncount) || !demo_system.demos[spawncount]) return;
 	int slot = netchanToSlot(chan);
 	if ( slot == -1 ) error_exit("Cannot convert netchan to slot");
+    if (slot < 0 || slot >= 16) return;
 
 	void * client = getClientX(slot);
 	int clientState = stget(client,0);
@@ -541,7 +606,21 @@ void DemoPlayer::playback(netchan_t *chan, int length, byte *data)
 	int curtime = stget(0x08526624,0);
 	//do we have to something send?
 	
-	std::vector<chunk_t>& start_chunks = demo_system.demos[spawncount].demo_frames_map[frameNum].activation_chunks;
+    std::vector<chunk_t>& start_chunks = demo_system.demos[spawncount]->activation_chunks[slot];
+    if ( start_chunks.empty() ) {
+        // Build activation chunks from nearest checkpoint (or synthesize from current server state)
+        auto &demoData = demo_system.demos[spawncount];
+        int cpFrame = current_frame;
+        if (!demoData->checkpoints.empty()) {
+            int best = demo_player->first_frame; // fallback
+            for (const auto &kv : demoData->checkpoints) {
+                int fr = kv.first; if (fr <= current_frame && fr >= best) best = fr;
+            }
+            cpFrame = best;
+        }
+        DemoCheckpoint cp(0);
+        cp.generate_svc_serverdata(slot, start_chunks);
+    }
 	if ( !start_chunks.empty() ) {
 		
 		/*
@@ -553,104 +632,103 @@ void DemoPlayer::playback(netchan_t *chan, int length, byte *data)
 			//netchan_t->message.cursize
 		int cur_size = stget(chan,0x54);
 
-		//If new reliable sent now, swap buffers.
-		if ( !rel_len ) {
-			// new reliable can be sent this frame.
-			SOFPPNIX_DEBUG("Sending initialChunk");
-
-			auto first = start_chunks.begin();
-
-			SOFPPNIX_DEBUG("Connect-Packet-Size = %i",first->len);
-
-			orig_SZ_Write(&demo_rel,first->data,first->len);
-
-			start_chunks.erase(first);
-
-			netchan_close_rel = true;
-			my_Netchan_Transmit (chan, 0, NULL);
-			chan->message.cursize = 0;
-
-		} else {
-				//attempt resend of lost packets
-			if ( curtime - last_sent > 1000 ) {
-				SOFPPNIX_DEBUG("1 Second passed...");
-				netchan_close_rel = true;
-				my_Netchan_Transmit (chan, 0, NULL);
-			}
-		}
+        // POC: send initial chunk as an unreliable payload
+        SOFPPNIX_DEBUG("Sending initialChunk");
+        auto first = start_chunks.begin();
+        SOFPPNIX_DEBUG("Connect-Packet-Size = %i",first->len);
+        my_Netchan_Transmit (chan, first->len, (byte*)first->data);
+        if ( first->data ) free(first->data);
+        start_chunks.erase(first);
 	}//initChunks empty
 	else {
 		//normal svc_serverdata svc_frame etc...
-		SOFPPNIX_DEBUG("SPAWNED...");
+        // SOFPPNIX_DEBUG("SPAWNED...");
 
 		if ( !ghoulLoaded[slot] ) {
-			int ghoulSlot = 0;
-
-			//Handle ghoulChunks before sending any frames.
-			bool validGhoul = false;
+			// POC: skip ghoul phase if none recorded
+			bool anyGhoul = false;
 			for ( int i = 0; i<16;i++ ){
-				if ( ghoulChunksSavedReplay[i] ) {
-					validGhoul = true;
-					ghoulSlot = i;
-					break;
+				if ( !demo_system.demos[spawncount]->ghoul_chunks[i].empty() ) { anyGhoul = true; break; }
+			}
+			if ( !anyGhoul ) {
+				ghoulLoaded[slot] = true;
+			} else {
+				//send the ghoul chunks if present
+				int ghoulSlot = 0;
+				for ( int i = 0; i<16;i++ ){
+					if ( !demo_system.demos[spawncount]->ghoul_chunks[i].empty() ) { ghoulSlot = i; break; }
+				}
+                if ( ghoulChunkIndex[slot] < (int)demo_system.demos[spawncount]->ghoul_chunks[ghoulSlot].size() ) {
+                    // POC: send ghoul chunk as an unreliable payload
+                    chunk_t& ghl = demo_system.demos[spawncount]->ghoul_chunks[ghoulSlot][ghoulChunkIndex[slot]];
+                    my_Netchan_Transmit (chan, ghl.len, (byte*)ghl.data);
+                    ghoulChunkIndex[slot]++;
+				} else {
+					ghoulLoaded[slot] = true;
 				}
 			}
-			if ( !validGhoul ) {
-				SOFPPNIX_DEBUG("This demo doesn't have ghoul data");
-				orig_SV_Nextserver();
-				return;
-			}
-			//send the ghoul chunks.
-			if ( ghoulChunkIndex[slot] < ghoulChunksReplay[ghoulSlot].size() ) {
-				//netchan_t->reliable_length
-				int rel_len = stget(chan,0x404c);
-				//netchan_t->message.cursize
-				//int cur_size = stget(chan,0x54);
 
-				//If new reliable sent now, swap buffers.
-				if ( !rel_len ) {
-
-					initChunk_t& ghl = ghoulChunksReplay[ghoulSlot][ghoulChunkIndex[slot]];
-					SOFPPNIX_DEBUG("Ghoul-Packet: %i/%i , Size = %i",ghoulChunkIndex[slot],ghoulChunksReplay[ghoulSlot].size(),ghl.len);
-					orig_SZ_Write(&demo_rel,ghl.data,ghl.len);
-
-					ghoulChunkIndex[slot]++;
-				} 
-				netchan_close_rel = true;
-				my_Netchan_Transmit (chan, 0, NULL);
-				
-			} else {
-				//all ghoul chunks sent
-				ghoulLoaded[slot] = true;
-				SOFPPNIX_DEBUG("Ghoul Sent to the viewer!");
-			}
-
-		} else { //ghouLoaded - begin Frames
+		} else { // ghouLoaded - begin Frames
 
 			if ( current_frame > final_frame ) {
-				//SOFPPNIX_DEBUG("NextServer/KillServer!");
-				//orig_SV_Nextserver();
-				//orig_Cmd_ExecuteString("killserver\n");
-				//No more data to send.
-				return;
+                if ( loop ) {
+                    current_frame = first_frame;
+                } else {
+                    // No more data to send
+                    return;
+                }
 			}
 
-			SlotPacketDataMap& slots_packetdata_map = demo_system.demos[spawncount].demo_frames_map[current_frame];
-			slot_packetdata_t* targetPerspective = nullptr;
-			//Player Perspective of this slot
-			if ( watch_slot == -1 ) targetPerspective = slots_packetdata_map.begin()->second;
-			else {
-				auto itSlots = slots_packetdata_map.find(watch_slot);
-				if (itSlots == slots_packetdata_map.end()) 
-					targetPerspective = slots_packetdata_map.begin()->second;
-				else
-					targetPerspective = itSlots->second;
-			}
+            auto itFrame = demo_system.demos[spawncount]->demo_frames_map.find(current_frame);
+            if (itFrame == demo_system.demos[spawncount]->demo_frames_map.end() || itFrame->second.empty()) {
+                // No data for this frame; advance cautiously
+                current_frame += frame_step;
+                return;
+            }
+            SlotPacketDataMap& slots_packetdata_map = itFrame->second;
+            slot_packetdata_t* targetPerspective = nullptr;
+            // Auto POV cycling per viewer if configured
+            if (demo_viewer_auto_interval_ms[slot] > 0) {
+                int curtime = stget(0x08526624,0);
+                if (demo_viewer_last_cycle_ms[slot] == 0) demo_viewer_last_cycle_ms[slot] = curtime;
+                if (curtime - demo_viewer_last_cycle_ms[slot] >= demo_viewer_auto_interval_ms[slot]) {
+                    std::vector<int> keys; keys.reserve(slots_packetdata_map.size());
+                    for (const auto &kv : slots_packetdata_map) keys.push_back(kv.first);
+                    std::sort(keys.begin(), keys.end());
+                    int curWatch = demo_viewer_watch_slot[slot];
+                    if (curWatch == -1 && !keys.empty()) curWatch = keys.front();
+                    auto pos = std::find(keys.begin(), keys.end(), curWatch);
+                    if (pos == keys.end() || ++pos == keys.end()) demo_viewer_watch_slot[slot] = keys.front();
+                    else demo_viewer_watch_slot[slot] = *pos;
+                    demo_viewer_last_cycle_ms[slot] = curtime;
+                }
+            }
+
+            // Per-viewer POV selection
+            int desiredWatch = demo_viewer_watch_slot[slot];
+            if ( desiredWatch == -1 ) {
+                int minSlot = INT_MAX;
+                for (const auto &kv : slots_packetdata_map) {
+                    if (kv.first < minSlot) minSlot = kv.first;
+                }
+                if (minSlot != INT_MAX) targetPerspective = slots_packetdata_map[minSlot].get();
+            } else {
+                auto itSlots = slots_packetdata_map.find(desiredWatch);
+                if (itSlots == slots_packetdata_map.end()) {
+                    int minSlot = INT_MAX;
+                    for (const auto &kv : slots_packetdata_map) {
+                        if (kv.first < minSlot) minSlot = kv.first;
+                    }
+                    if (minSlot != INT_MAX) targetPerspective = slots_packetdata_map[minSlot].get();
+                } else {
+                    targetPerspective = itSlots->second.get();
+                }
+            }
 
 			if (targetPerspective == nullptr) {
-				// Can't send this client any data. Because can't the slot is not saved. Change demo mode to other slot?
-				//orig_SV_Nextserver();
-				error_exit("targetPerspective pointer missing");
+				// No perspective available for this frame; skip forward
+				current_frame += frame_step;
+				return;
 			}
 
 			#if 0
@@ -658,30 +736,39 @@ void DemoPlayer::playback(netchan_t *chan, int length, byte *data)
 				hexdump(chan->message.data,chan->message.data + chan->message.cursize);
 			#endif
 
-			SOFPPNIX_DEBUG("Sending frame : %i",current_frame);	
-			orig_SZ_Write(&demo_rel,targetPerspective->relSZ->data,targetPerspective->relSZ->cursize);
+            if ( paused ) {
+                return;
+            }
+            // SOFPPNIX_DEBUG("Sending frame : %i",current_frame);
 
-			if ( ghoulUnrelFrame == current_frame ) {
-				SOFPPNIX_DEBUG("playback: Dumping ghl unrel first chunk");
-				hexdump(targetPerspective->unrelSZ->data,targetPerspective->unrelSZ->data+targetPerspective->unrelSZ->cursize);
-			}
-			current_frame +=1;
+            // Send unrel if present; otherwise fall back to rel
+            if (targetPerspective->unrelSZ && targetPerspective->unrelSZ->cursize > 0) {
+				my_Netchan_Transmit(chan,targetPerspective->unrelSZ->cursize,targetPerspective->unrelSZ->data);
+            } else if (targetPerspective->relSZ && targetPerspective->relSZ->cursize > 0) {
+				my_Netchan_Transmit(chan,targetPerspective->relSZ->cursize,targetPerspective->relSZ->data);
+            } else {
+                // No payload for this perspective; advance and try next
+                current_frame += frame_step;
+                return;
+            }
 
-			//netchan_t->reliable_length
-			int rel_len = stget(chan,0x404c);
-
-			netchan_close_rel = true;
-			my_Netchan_Transmit(chan,targetPerspective->unrelSZ->cursize,targetPerspective->unrelSZ->data);
+            // optional debug dump of first unrel chunk can be added via cvar
+            current_frame += frame_step;
 		}
 	}
 }
 
 
 DemoSystem demo_system;
+int demo_viewer_watch_slot[32] = { -1 };
+bool demo_viewer_freecam[32] = { false };
+int demo_viewer_auto_interval_ms[32] = { 0 };
+int demo_viewer_last_cycle_ms[32] = { 0 };
 DemoSystem::DemoSystem()
 : demo_recorder( std::make_unique<DemoRecorder>() ),
 demo_player( std::make_unique<DemoPlayer>() ),
-serverstate_trigger_play(false)
+serverstate_trigger_play(false),
+recording_status(false)
 {
 	SOFPPNIX_DEBUG("DemoSystem Constructor");
 }
@@ -703,26 +790,38 @@ Called by sv_spawnserver.
 void DemoSystem::PrepareLevel() {
 	SOFPPNIX_DEBUG("Summoning recorder and player controls...")
 
-	//Reset the unique_ptr's to get a clean object.
-	//Provide spawncount to them.
-	demo_recorder.reset(new DemoRecorder(spawncount));
-	demo_player.reset();
+	// Reset the unique_ptr's to get a clean object.
+	demo_recorder.reset(new DemoRecorder());
+	demo_player.reset(new DemoPlayer());
 
-	//demo playback activation. ++nix_demomap -> sv_spawnserver -> new -> initate.
-	//protects our code from being ran during ss_demo, normal demomap.
+	// demo playback activation. ++nix_demomap -> sv_spawnserver -> new -> initate.
+	// protects our code from being ran during ss_demo, normal demomap.
 	if ( serverstate_trigger_play )  {
+		// Move selected demo data (recorded or loaded) to current spawncount for playback
+        if ( selected_demo_spawncount != -1 ) {
+			auto it = demos.find(selected_demo_spawncount);
+			if ( it != demos.end() ) {
+				// Move ownership into the new spawncount key
+				demos[spawncount] = std::move(it->second);
+                // Remove the old placeholder key
+                demos.erase(it);
+			}
+			selected_demo_spawncount = -1;
+		}
+		// Begin playback if we have any data
 		demo_player->begin();
 	}
 
 	//server_t;
 	void * sv = 0x082AF680;
 	char * levelName = sv + 0x454;
-	//Load data vs Save data. Recording vs Playback.
-
-	//Data exists independently for each level. Should be enough to clear the index of the map for the deconstructors to cleanup. Because using vectors.
-	
-	//Apparently we are going to attempt record some form of the level every round despite intentions. (partly because ghoul_reliable is stored in there. plus why not.)
-	demos[spawncount] = std::make_unique<DemoData>(levelName,(int)(deathmatch->value),orig_Cvar_VariableString("gamedir"));
+	// Load data vs Save data. Recording vs Playback.
+	// Only create fresh demo storage when NOT in playback path
+	if ( !serverstate_trigger_play ) {
+		// Data exists independently for each level. Should be enough to clear the index of the map for the deconstructors to cleanup. Because using vectors.
+		// Record some form of the level every round (ghoul_reliable may be stored here)
+		demos[spawncount] = std::make_unique<DemoData>(levelName,(int)(deathmatch->value),orig_Cvar_VariableString((char*)"gamedir"));
+	}
 
 	//This unordered_map can be cleared() if memory becomes an issue.
 	//The DemoData.demo_frames_map variable does not have to be filled until actual recording begins, obviously. Just prepares DemoData.ghoul_chunks
@@ -735,14 +834,101 @@ void DemoSystem::PrepareLevel() {
 	Called by cmd_nix_demomap()
 */
 bool DemoSystem::LoadDemo() {
-	SOFPPNIX_DEBUG("LoadDemo()");
+    SOFPPNIX_DEBUG("LoadDemo()");
 
-	if ( orig_Cmd_Argc() != 2 ) {
-		SOFPPNIX_PRINT("Specify a demoname.dm3 file or an ID from ++nix_match_history");
-		return;
-	}
+    if ( orig_Cmd_Argc() != 2 ) {
+        SOFPPNIX_PRINT("usage: ++nix_demomap <id|file>");
+        return false;
+    }
 
-	char * demoID = orig_Cmd_Argv(1);
+    char * arg = orig_Cmd_Argv(1);
 
-	//Should access the demos[spawncount] or create a DemoData fresh from a file.
+    // numeric id -> pick in-memory demo
+    bool all_digits = true;
+    for ( char *p = arg; *p; ++p ) { if (*p < '0' || *p > '9') { all_digits = false; break; } }
+    if ( all_digits ) {
+        int id = atoi(arg);
+        if ( demos.find(id) == demos.end() ) {
+            SOFPPNIX_PRINT("no in-memory demo id %d", id);
+            return false;
+        }
+        selected_demo_spawncount = id;
+        return true;
+    }
+
+    // file-based load (.ssdm) - lightweight container
+    std::string path = arg;
+    if (path.find('/') == std::string::npos) path = std::string("demos/") + path;
+    if (path.find('.') == std::string::npos) path += ".ssdm";
+
+    std::ifstream f(path, std::ios::binary|std::ios::in);
+    if (!f.is_open()) {
+        SOFPPNIX_PRINT("cannot open demo file: %s", path.c_str());
+        return false;
+    }
+    char magic[5];
+    f.read(magic,5);
+    if (f.gcount()!=5 || strncmp(magic,"SSDM1",5)!=0) {
+        SOFPPNIX_PRINT("unsupported demo file: %s", path.c_str());
+        return false;
+    }
+    auto read_u32 = [](std::ifstream &fin, uint32_t &v){ fin.read((char*)&v,sizeof(v)); return (bool)fin; };
+    auto read_str = [&](std::ifstream &fin, std::string &out){ uint32_t n=0; if(!read_u32(fin,n)) return false; out.resize(n); if(n) fin.read(&out[0], n); return (bool)fin; };
+
+    std::string level_name; std::string game_dir;
+    uint32_t dm=0, first=0, last=0;
+    if (!read_str(f, level_name)) { SOFPPNIX_PRINT("malformed SSDM: level_name"); return false; }
+    if (!read_u32(f, dm)) { SOFPPNIX_PRINT("malformed SSDM: deathmatch"); return false; }
+    if (!read_str(f, game_dir)) { SOFPPNIX_PRINT("malformed SSDM: game_dir"); return false; }
+    if (!read_u32(f, first)) { SOFPPNIX_PRINT("malformed SSDM: first_frame"); return false; }
+    if (!read_u32(f, last)) { SOFPPNIX_PRINT("malformed SSDM: last_frame"); return false; }
+
+    auto data = std::make_unique<DemoData>(level_name,(int)dm,game_dir);
+
+    // checkpoints
+    uint32_t cpcount=0; if(!read_u32(f,cpcount)) { SOFPPNIX_PRINT("malformed SSDM: checkpoint_count"); return false; }
+    for (uint32_t i=0;i<cpcount;i++) {
+        uint32_t fr=0, ts=0; if(!read_u32(f,fr)) { SOFPPNIX_PRINT("malformed SSDM: checkpoint frame"); return false; } if(!read_u32(f,ts)) { SOFPPNIX_PRINT("malformed SSDM: checkpoint timestamp"); return false; }
+        auto cp = std::make_unique<DemoCheckpoint>((int)ts);
+        data->checkpoints[(int)fr] = std::move(cp);
+    }
+
+    // frames
+    uint32_t fcount=0; if(!read_u32(f,fcount)) { SOFPPNIX_PRINT("malformed SSDM: frame_count"); return false; }
+    for (uint32_t i=0;i<fcount;i++) {
+        uint32_t fr=0, slotsz=0; if(!read_u32(f,fr)) { SOFPPNIX_PRINT("malformed SSDM: frame id"); return false; } if(!read_u32(f,slotsz)) { SOFPPNIX_PRINT("malformed SSDM: slot_count"); return false; }
+        for (uint32_t s=0;s<slotsz;s++) {
+            uint32_t slot=0; if(!read_u32(f,slot)) { SOFPPNIX_PRINT("malformed SSDM: slot id"); return false; }
+            auto pkt = std::make_unique<slot_packetdata_t>();
+            // rel
+            uint32_t rlen=0; if(!read_u32(f,rlen)) { SOFPPNIX_PRINT("malformed SSDM: rel_len"); return false; }
+            if (rlen) {
+                pkt->relSZ = std::make_unique<sizebuf_t>();
+                memset(pkt->relSZ.get(), 0, sizeof(sizebuf_t));
+                pkt->relSZ->data = new char[rlen];
+                pkt->relSZ->maxsize = (int)rlen;
+                pkt->relSZ->cursize = (int)rlen;
+                f.read(pkt->relSZ->data, rlen);
+            }
+            // unrel
+            uint32_t ulen=0; if(!read_u32(f,ulen)) { SOFPPNIX_PRINT("malformed SSDM: unrel_len"); return false; }
+            if (ulen) {
+                pkt->unrelSZ = std::make_unique<sizebuf_t>();
+                memset(pkt->unrelSZ.get(), 0, sizeof(sizebuf_t));
+                pkt->unrelSZ->data = new char[ulen];
+                pkt->unrelSZ->maxsize = (int)ulen;
+                pkt->unrelSZ->cursize = (int)ulen;
+                f.read(pkt->unrelSZ->data, ulen);
+            }
+            data->demo_frames_map[(int)fr][(int)slot] = std::move(pkt);
+        }
+    }
+
+    f.close();
+
+    int temp_id = -2; // reserved key for loaded-from-disk demo
+    demos[temp_id] = std::move(data);
+    selected_demo_spawncount = temp_id;
+    SOFPPNIX_PRINT("loaded demo: %s", path.c_str());
+    return true;
 }

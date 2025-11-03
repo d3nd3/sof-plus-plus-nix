@@ -1,6 +1,19 @@
 #include "common.h"
 
 /*
+	https://docs.python.org/3.8/c-api/arg.html?highlight=pyarg_parsetuple#c.PyArg_ParseTuple
+	Then scroll up, for ParseTuple symbols.
+
+	It's the default assumption that the reference passed to a C function is borrowed, 
+	and if the function needs to save a reference, it will increment the refcount appropriately
+	
+	For returned objects see the docs for that API, whether it returns new reference.
+	https://docs.python.org/3.8/c-api/list.html
+
+	Always return Py_RETURN_NONE when nothing is returned.
+*/
+
+/*
 # player.draw_text_at(100,100,"Edit!")
 # player.draw_typeamatic(ent,text)
 # player.draw_centered(ent,text)
@@ -145,13 +158,20 @@ static PyObject * py_player_get_name(PyObject * self, PyObject * args)
 
 	// PyObject* pyString = PyUnicode_DecodeFSDefault(chatVectors[i].c_str());
 
-	void * gcl = stget(who->c_ent,EDICT_GCLIENT);
-	unsigned char * name = gcl + GCLIENT_PERS_NETNAME;
+	// void * gcl = stget(who->c_ent,EDICT_GCLIENT);
+	// unsigned char * name = gcl + GCLIENT_PERS_NETNAME;
+
+	int slot = slot_from_ent(who->c_ent);
+	void * cl = getClientX(slot);
+	unsigned char * name = cl + CLIENT_NAME;
 
 	// return Py_BuildValue("y", name);
 	// return PyUnicode_DecodeFSDefault(name);
 	return PyUnicode_Decode(name,strlen(name),"latin1","strict");
 }
+/*
+	
+*/
 static PyObject * py_player_get_stats(PyObject * self, PyObject * args)
 {
 	EntDict * who;
@@ -176,6 +196,21 @@ static PyObject * py_player_get_stats(PyObject * self, PyObject * args)
 	Py_DECREF(stats_head);
 	Py_DECREF(stats_throat);
 	Py_DECREF(stats_nut);
+	//===============================================
+	PyObject* frags = PyLong_FromLong(stats_FRAGS[slot]);
+	PyObject* deaths = PyLong_FromLong(stats_DEATHS[slot]);
+	PyObject* suicides = PyLong_FromLong(stats_SUICIDES[slot]);
+	PyObject* fps = PyLong_FromLong(stats_FPS[slot]);
+
+	PyDict_SetItemString(pyDict,"frags",frags);
+	PyDict_SetItemString(pyDict,"deaths",deaths);
+	PyDict_SetItemString(pyDict,"suicides",suicides);
+	PyDict_SetItemString(pyDict,"fps",fps);
+
+	Py_DECREF(fps);
+	Py_DECREF(frags);
+	Py_DECREF(deaths);
+	Py_DECREF(suicides);
 	
 	return pyDict;
 }

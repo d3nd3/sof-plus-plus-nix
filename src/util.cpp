@@ -144,6 +144,17 @@ void memoryProtect(void * addr)
 	}
 }
 
+/*
+	When calculating jumps use:
+	DestinationTo - (Address of JMP + SIZE_OF_JMP)
+*/
+void WriteE9Jmp(void * where, void * dest)
+{
+	memoryUnprotect(where);
+	*(unsigned char*)where = 0xE9;
+	*(int*)(where+1) = dest - (int)where - 5;
+	memoryProtect(where);
+}
 
 void callE8Patch(void * addr,void * to) {
 
@@ -310,9 +321,10 @@ int countPlayersInGame(void)
 
 // edict_t size = 0x464
 // sof_sdk edict_t size = 0x450
+//SUBTRACT IDA ADDRESS FROM 0x9A820 (start). ? To acquire rel address.
 unsigned int slot_from_ent(edict_t * ent)
 {
-	return (unsigned int)((unsigned int)ent - (unsigned int)stget(stget(base_addr+0x002ACB08,0),0)-0x464) / 0x464;
+	return (unsigned int)((unsigned int)ent - (unsigned int)stget(stget(base_addr+0x2ACB08,0),0)-0x464) / 0x464;
 }
 int getPlayerSlot(void * in_client)
 {

@@ -106,6 +106,8 @@ extern void (*orig_CalcFov)(void);
 extern void (*orig_V_RenderView)( float stereo_separation );
 extern void my_V_RenderView( float stereo_separation );
 
+
+
 // --Shared--
 
 extern char *(*orig_Cvar_VariableString) (char *var_name);
@@ -183,6 +185,8 @@ extern void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netad
 
 extern qboolean	(*orig_NET_StringToAdr) (char *s, netadr_t *a);
 
+extern void (*orig_SV_AreaEdicts_r) (areanode_t *node);
+extern void my_SV_AreaEdicts_r (areanode_t *node);
 
 //Cvar_Get
 extern cvar_t *(*orig_Cvar_Get)(const char * name, const char * value, int flags, cvarcommand_t command = NULL);
@@ -208,11 +212,14 @@ void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data);
 void my_Netchan_Patch(netchan_t *chan);
 
 
+extern void * (*orig_Sys_GetProcAddress)(void* handle, char * name);
+extern void * my_Sys_GetProcAddress(void* handle, char* name);
+
 /*
 ---------------------Ref(Video) Library---------------------
 */
 extern void * (*orig_GetRefAPI ) (void* rimp );
-extern void * GetRefAPI(void* rimp);
+extern void * my_GetRefAPI(void* rimp);
 
 
 extern qboolean (*orig_VID_LoadRefresh)(char *name);
@@ -220,6 +227,16 @@ extern qboolean my_VID_LoadRefresh(char *name);
 
 extern qboolean (*orig_VID_GetModeInfo)( int *width, int *height, int mode );
 extern qboolean my_VID_GetModeInfo( int *width, int *height, int mode );
+
+extern int (*orig_GLimp_Init)( void *hinstance, void *wndproc );
+extern int my_GLimp_Init( void *hinstance, void *wndproc );
+
+extern int (*orig_use_drivers_txt_load)(void * unknown);
+extern int my_use_drivers_txt_load(void * unknown);
+
+extern void confirmGlBlend(void);
+
+extern void (*orig_glEnable)(unsigned int cap);
 
 
 /*
@@ -292,3 +309,12 @@ extern void (*orig_fireSpas)(weaponFireInfo_t &wf);
 extern void my_fireSpas(weaponFireInfo_t &wf);
 
 extern void (*orig_CFXSender_exec)(void * self,int, edict_t *, multicast_t, edict_t *);
+
+extern void (*orig_Player_player_die) (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+extern void my_Player_player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
+
+extern void (*orig_plat_CalcAcceleratedMove)(moveinfo_t *moveinfo);
+extern void my_plat_CalcAcceleratedMove(moveinfo_t *moveinfo);
+
+extern void (*orig_Move_Begin) (edict_t *ent);
+extern void my_Move_Begin (edict_t *ent);

@@ -37,16 +37,73 @@ def cmd_draw_lower(who,msg):
 def cmd_con_print(who,msg):
 	player.con_print(who,msg)
 
+"""
+ # CC FPS Ping Score PPM FRG DIE SK FLG REC Name
+-- -- --- ---- ----- --- --- --- -- --- --- ---------------
+ 0 gb 142   19     0   0   0   0  0   0   0 Dende
+
+Seems .players was heavily inspired from:
+	CTFStats() @g_ctf.c
+	It sets frags and deaths in player_die().
+	Disconnect - reset - FRAGS/DEATHS
+	PutClientInServer - reset - FRAGS/DEATHS
+	G_RunFrame - FPS + PPM
+	CTFtouch_HOOKS - FLG REC
+	PutClientInServer DIE_CALLBACK - ent->die = player_die (PLAYERDIE_HOOK) - FRAGS/DEATHS
+
+	5df2aC matches 1004F2A8 (flag capture)
+
+There is GCLIENT->NETNAME and CLIENT->NAME. (CLIENT->NAME is larger 32 vs 16, perhaps color stripped?).
+
+"""
 def cmd_players(who):
 	# player.con_print(who,"\x02Command disabled")
+	player.con_print(who,f"\x04Players (fps max = 0; SoF-plus-plus-nix {ppnix.read_cvar('_++nix_version')})\n\x01 # CC FPS Ping Score PPM FRG DIE SK FLG REC Name\n-- -- --- ---- ----- --- --- --- -- --- --- ---------------")
+	for slot in range(0,16):
+		e = ent.from_slot(slot)
 
-	for x in range(0,16):
-		e = ent.from_slot(x)
 		if e is not None:
 			stats = player.get_stats(e)
-			# ppnix.print(stats)
-			print(stats)	
-			player.con_print(who,f'player {x}\nheadshots : {stats["headshots"]}, throatshots : {stats["throatshots"]}, nutshots : {stats["nutshots"]}, armorpickups : {stats["armorpickups"]}\n')
+			# :02 :0 means padding for some-reason, without the 0 it doens't pad with 0's but spaces?
+			player.con_print(
+				who,
+				(f'{slot:2} 00 '
+				 f'{stats["fps"]:3} 0000 00000 000 '
+				 f'{stats["frags"]:3} '
+				 f'{stats["deaths"]:3} '
+				 f'{stats["suicides"]:2} '
+				 f'000 000 '
+				 f'{e["gclient"]["name"]}')
+			)
+
+		# slot
+		# CC
+		# fps
+		# e["ping"]
+		# e["score"]
+		# ppm
+		# stats_FRAGS[slot]
+		# stats_DEATHS[slot]
+		# stats_SUICIDES[slot]
+		# flag captures
+		# flag recoveries
+		# e["name"]
+		# if e is not None:
+		"""
+		
+		# ppnix.print(stats)
+		print(stats)	
+		player.con_print(
+		    who,
+		    (f'player {x}\n'
+		     f'headshots : {stats["headshots"]}, '
+		     f'throatshots : {stats["throatshots"]}, '
+		     f'nutshots : {stats["nutshots"]}, '
+		     f'armorpickups : {stats["armorpickups"]}\n')
+		)
+		"""
+		
+
 
 
 def cmd_get_time(who):
@@ -84,13 +141,13 @@ def msg(who,msg):
 		
 		try:
 			cb = cmd_dict[msg[0]]
-			try:
-				if len(msg) == 1:
-					cb(who)
-				else:
-					cb(who,*msg[1:])
-			except:
-				player.con_print(who,"\x02Incorrect call.")
+			# try:
+			if len(msg) == 1:
+				cb(who)
+			else:
+				cb(who,*msg[1:])
+			# except:
+			# 	player.con_print(who,"\x02Incorrect call.")
 		except KeyError:
 			pass
 	

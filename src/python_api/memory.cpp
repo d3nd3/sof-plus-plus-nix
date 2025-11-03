@@ -1,5 +1,18 @@
 #include "common.h"
 
+/*
+	https://docs.python.org/3.8/c-api/arg.html?highlight=pyarg_parsetuple#c.PyArg_ParseTuple
+	Then scroll up, for ParseTuple symbols.
+
+	It's the default assumption that the reference passed to a C function is borrowed, 
+	and if the function needs to save a reference, it will increment the refcount appropriately
+	
+	For returned objects see the docs for that API, whether it returns new reference.
+	https://docs.python.org/3.8/c-api/list.html
+
+	Always return Py_RETURN_NONE when nothing is returned.
+*/
+
 std::unordered_map<std::string,void *> type_getters;
 std::unordered_map<std::string,void *> type_setters;
 
@@ -146,12 +159,14 @@ class StringMemoryItem : public MemoryItem {
 public:
 	StringMemoryItem(std::string name,unsigned int offset,std::string info) : MemoryItem(name,"string",offset,info) {}
 	void get(void* baseAddress, PyObject* &value) {
-		char * in_str = *(char**)(baseAddress + offset);
+		char * in_str = baseAddress + offset;
+		// char * in_str = stget(baseAddress, offset);
 		if ( in_str == NULL ) {
 			in_str = "";
 		}
+		value = PyUnicode_Decode(in_str, strlen(in_str), "latin-1", "ignore");
 		// value = PyUnicode_FromString(in_str);
-		value = PyUnicode_DecodeFSDefault(in_str);
+		// value = PyUnicode_DecodeFSDefault(in_str);
 	}
 	void get(void* baseAddress, std::string &value) {
 		value = (char*)(baseAddress + offset);
@@ -167,7 +182,7 @@ public:
 			This caches the UTF-8 representation of the string in the Unicode object, and subsequent calls will return a pointer to the same buffer. The caller is not responsible for deallocating the buffer. The buffer is deallocated and pointers to it become invalid when the Unicode object is garbage collected.
 			*/
 			//Write char * pointer.
-			*(char**)(baseAddress + offset) = strValue;
+			*(char*)(baseAddress + offset) = strValue;
 		}
 	}
 };
@@ -323,6 +338,10 @@ static int memory_setter(PyObject *self, PyObject * key, PyObject *value) {
 				// Key exists
 				// Writes SoF Memory.
 				MemoryItem::entityProperties[key_str]->set(ed->c_ent, value);
+			} else if ( MemoryItem::entityProperties.count(key_str) > 0 ) {
+				// Key exists
+				// Writes SoF Memory.
+				MemoryItem::gclientProperties[key_str]->set(ed->c_ent, value);
 			}
 		}
 		Py_DECREF(value);
@@ -544,8 +563,16 @@ static void generateGetterSetters(void)
 
 // -----------------------------------------------------------------------------------------------
 
+/*
+	TODO:
+	game_locals_t game;
+		gclient_t		*clients;
+			player_state_t
 
+
+*/
 static std::unordered_map<std::string, MemoryItem*> MemoryItem::entityProperties;
+static std::unordered_map<std::string, MemoryItem*> MemoryItem::gclientProperties;
 void MemoryItem::initMemoryItems(void)
 {
 	#if 0
@@ -640,16 +667,16 @@ void MemoryItem::initMemoryItems(void)
 	END OF BASIC ENT FIELDS
 	*/
 
-	std::unordered_map<std::string, MemoryItem*> gclientProperties;
+	
 	//--------------------------------------------------------------------------------------------------------
 	//.gclient->player_state_t.gun
-	gclientProperties["gunghoulinst"] = new PointerMemoryItem("gunghoulinst",108,"gunghoulinst is the ghoul object pointer for the players gun.");
+	gclientProperties["gunghoulinst"] = new PointerMemoryItem("gunghoulinst",GCLIENT_PS_GUN,"gunghoulinst is the ghoul object pointer for the players gun.");
 	//.gclient->player_state_t.viewangles
-	gclientProperties["viewangles"] = new VectorMemoryItem("viewangles",28,"viewangles is the players viewing angle. Use sf_sv_vector_set to understand this format.");
+	gclientProperties["viewangles"] = new VectorMemoryItem("viewangles",GCLIENT_PS_VIEWANGLES,"viewangles is the players viewing angle. Use sf_sv_vector_set to understand this format.");
 	// gclient_t->player_state_t.pmove_state_t.delta_angles[3]
-	gclientProperties["delta_angles"] = new ShortVector2DMemoryItem("delta_angles",20,"delta_angles is the players viewing angle. Use sf_sv_vector_set to understand this format.");
+	gclientProperties["delta_angles"] = new ShortVector2DMemoryItem("delta_angles",GCLIENT_PS_PM_DELTA,"delta_angles is the players viewing angle. Use sf_sv_vector_set to understand this format.");
 	// gclient_t->client_respawn_t.cmd_angles[3]
-	gclientProperties["cmd_angles"] = new VectorMemoryItem("cmd_angles",780,"cmd_angles is the players viewing angle. Use sf_sv_vector_set to understand this format.");
+	gclientProperties["cmd_angles"] = new VectorMemoryItem("cmd_angles",GCLIENT_RESP_CMD_ANGLES,"cmd_angles is the players viewing angle. Use sf_sv_vector_set to understand this format.");
 
 	//--------------------------------------------------------------------------------------------------------
 	// gclient_t->player_state_t.pmove_state_t.gravity
@@ -658,8 +685,13 @@ void MemoryItem::initMemoryItems(void)
 	gclientProperties["movescale"] = new FloatMemoryItem("movescale",GCLIENT_MOVESCALE,"movescale is how slowed the player's movement is.");
 	//--------------------------------------------------------------------------------------------------------
 	// gclient_t->client_respawn_t.score
-	gclientProperties["score"] = new IntMemoryItem("score",776,"score is the points the player has.");
+	gclientProperties["score"] = new IntMemoryItem("score",GCLIENT_RESP_SCORE,"score is the points the player has.");
 
+	//gclient_t->ping
+	gclientProperties["ping"] = new IntMemoryItem("ping",GCLIENT_PING,"ping is the latency to the server.");
+
+	//gclient_t.pers->netname[16]
+	gclientProperties["name"] = new StringMemoryItem("name",GCLIENT_PERS_NETNAME,"name of the player.");
 }
 
 // Dummy implementations that get overridden by Derived.

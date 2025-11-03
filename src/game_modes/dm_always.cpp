@@ -149,18 +149,8 @@ void	always_gamerules_c::levelInit(void){
 			Py_XDECREF(result);
 		}
 
-		// chat background
-		orig_SV_GhoulFileIndex("c/c.m32");
-		// killfeed background
-		// orig_SV_GhoulFileIndex("c/k.m32");
-		// shotgun
-		orig_SV_GhoulFileIndex("c/s1.m32");
-		// headshot icon
-		orig_SV_GhoulFileIndex("c/hs.m32");
-		// skull and cross bones
-		orig_SV_GhoulFileIndex("c/sb.m32");
-		// C4
-		orig_SV_GhoulFileIndex("c/c4.m32");
+
+		
 
 		// For detecting first frame into intermission.
 		for ( int i = 0 ; i < 32 ; i ++ ) {
@@ -420,15 +410,20 @@ void	always_gamerules_c::clientConnect(edict_t *ent){
 	currentGameMode->clientConnect(ent);
 
 	#ifdef USE_PYTHON
+
 		void * gclient = stget(ent, EDICT_GCLIENT);
 		stset(gclient, GCLIENT_SHOWSCORES,0);
 		prev_showscores[slot] = 0;
-		current_page[slot] = "scoreboard";
-		page_should_refresh[slot] = false;
+
+		
+			current_page[slot] = "scoreboard";
+			page_should_refresh[slot] = false;
+		
 
 		layout_clear(LayoutMode::hud,ent);
 		layout_clear(LayoutMode::page,ent);
 		refreshScreen(ent);
+
 	#endif
 	stats_headShots[slot] = 0;
 	stats_throatShots[slot] = 0;
@@ -813,9 +808,11 @@ void	always_gamerules_c::clientRespawn(edict_t *ent) {
 	// align prev_scores with it.
 
 	#ifdef USE_PYTHON
+	
 		int slot = slot_from_ent(ent);
 		prev_showscores[slot] = 0;
 		refreshScreen(ent);
+	
 	#endif
 
 	currentGameMode->clientRespawn(ent);

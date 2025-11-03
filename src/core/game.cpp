@@ -1,8 +1,39 @@
 #include "common.h"
 
 game_export_t * game_exports = NULL;
+void *base_addr = NULL;
 
 static void my_die_Cmd_Score_f (edict_t *ent);
+
+void __attribute__((stdcall)) my_CRadiusContent_Compact(int foundNum, void* CRadiusContent);
+
+
+//player stats
+int stats_headShots[32];
+int stats_throatShots[32];
+int stats_nutShots[32];
+int stats_armorsPicked[32];
+
+bool t_damage_was_heashot = false;
+
+//og sofplus-style .players stats
+int stats_CC[32];
+
+int stats_FPS[32]; //G_RunFrame
+int stats_SCORE[32];
+int stats_PPM[32]; //G_RunFrame
+
+// ent->die = player_die (PLAYERDIE_HOOK)
+int stats_FRAGS[32]; 
+int stats_DEATHS[32]; //does not include kill
+int stats_SUICIDES[32]; //does not include kill and does not increment death count
+
+//CtfTouchCallbacks
+int stats_FLAGS_CAPTURED[32];
+int stats_FLAGS_RECOVERED[32];
+//name.
+
+int stats_FRAMES_IN_TICK[32];
 
 
 /*
@@ -262,8 +293,15 @@ static void my_die_Cmd_Score_f (edict_t *ent);
 	//These numbers are back to front. 0x198-Above to get.
 */
 
-void *base_addr = NULL;
+
 game_export_t * my_Sys_GetGameAPI (void *params) {
+
+	/*
+		FOR SOME SUPER STRANGE REASON
+		WE DO NOT HAVE TO USE RELATIVE ADDRESSES AND I DON'T KNOW WHY.
+
+		LINUX BINARIES IN IDA ARE ALREADY RELATIVE, SOMEHOW.
+	*/
 
 	SOFPPNIX_DEBUG("--------------Sys_GetGameAPI------------");
 	/*
@@ -291,6 +329,8 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	}
 	base_addr = info.dli_fbase;
 	// SOFPPNIX_DEBUG("Base address: %08X\n", base_addr);
+
+	
 	dlclose(handle);
 
 
@@ -321,7 +361,7 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	//Client disconnects.
 	orig_ClientDisconnect = createDetour(game_exports->ClientDisconnect, my_ClientDisconnect,5);
 	orig_ClientUserinfoChanged = createDetour(game_exports->ClientUserinfoChanged, my_ClientUserinfoChanged,9);
-	// orig_G_RunFrame = createDetour(game_exports->RunFrame, my_G_RunFrame,5);
+	orig_G_RunFrame = createDetour(game_exports->RunFrame, my_G_RunFrame,5);
 
 	//Used by pages and .commands
 	orig_Cmd_Say_f = createDetour((int)base_addr + 0x00188DB0,my_Cmd_Say_f,9);
@@ -355,30 +395,30 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	applyDeathmatchHooks(base_addr);
 
 	#ifdef USE_PYTHON
-		if ( _nix_py_pages->value ) {
-			//------------------------call dm->clientScoreboardMessage every frame. (unlocks layout)-----------------------------
-			memoryAdjust(base_addr + 0xa9bdc,1,0x00); //ClientEndServerFrame
-			memoryAdjust(base_addr + 0xA9BD2,2,0x90);
+		
+		//------------------------call dm->clientScoreboardMessage every frame. (unlocks layout)-----------------------------
+		memoryAdjust(base_addr + 0xa9bdc,1,0x00); //ClientEndServerFrame
+		memoryAdjust(base_addr + 0xA9BD2,2,0x90);
 
-			// --------DISABLE SCOREBOARD CLEARS IN ORIGINAL FUNCS SO WE HANDLE CLEAR-------------
-			memoryAdjust(base_addr + 0x0015CF14,2,0x90);
-			memoryAdjust(base_addr + 0x00163286,2,0x90);
-			memoryAdjust(base_addr + 0x001625D3,2,0x90);
-			memoryAdjust(base_addr + 0x00164FA9,2,0x90);
-			memoryAdjust(base_addr + 0x001673F9,2,0x90);
+		// --------DISABLE SCOREBOARD CLEARS IN ORIGINAL FUNCS SO WE HANDLE CLEAR-------------
+		memoryAdjust(base_addr + 0x0015CF14,2,0x90);
+		memoryAdjust(base_addr + 0x00163286,2,0x90);
+		memoryAdjust(base_addr + 0x001625D3,2,0x90);
+		memoryAdjust(base_addr + 0x00164FA9,2,0x90);
+		memoryAdjust(base_addr + 0x001673F9,2,0x90);
 
-			//-----------------------player_die Cmd_Score_f() hook disables showing score on death-----------------
-			callE8Patch(base_addr + 0x00237F17,&my_die_Cmd_Score_f);
+		//-----------------------player_die Cmd_Score_f() hook disables showing score on death-----------------
+		callE8Patch(base_addr + 0x00237F17,&my_die_Cmd_Score_f);
 
-			//----------------------NOP dm->clientScoreboardMessage() in clientEndServerFrame--------------
-			// We now call this in G_SetStats hook because it allows control during intermission
-			memoryAdjust(base_addr + 0x000A9BFC,2,0x90);
-		}
-		if ( _nix_py_killfeed->value ) {
-			// Usage. Killfeed.
-			// ----------------------ATTEMPT REMOVE DM RANKING HUD----------------------------
-			memoryAdjust(base_addr + 0x0023D663,7,0x90);
-		}
+		//----------------------NOP dm->clientScoreboardMessage() in clientEndServerFrame--------------
+		// We now call this in G_SetStats hook because it allows control during intermission
+		memoryAdjust(base_addr + 0x000A9BFC,2,0x90);
+		
+
+		// Usage. Killfeed.
+		// ----------------------ATTEMPT REMOVE DM RANKING HUD----------------------------
+		memoryAdjust(base_addr + 0x0023D663,7,0x90);
+
 	#endif
 
 	if ( _nix_snd_no_feet->value ) {
@@ -426,7 +466,35 @@ game_export_t * my_Sys_GetGameAPI (void *params) {
 	// *(float*)(pp) = 32.0f;
 	// memoryProtect(pp);
 
+	//-------------------PLAYER DIE CALLBACK FOR PLAYERS-------------------
+	//Within PutClientInServer, sets up callback
+	//B8 EF BE AD DE == mov eax, 0xDEADBEEF
+	memoryAdjust(base_addr + 0x23917d,1,0xB8);
+	memoryUnprotect(base_addr + 0x23917e);
+	*(unsigned int*)(base_addr + 0x23917e) = &my_Player_player_die;
+	memoryProtect(base_addr + 0x23917e);
+	memoryAdjust(base_addr + 0x239182,1,0x90); 
+	//save original for use later in teh hook.
+	orig_Player_player_die = base_addr + 0x237b74;
+
+
+	//-------------------(0,0,0) CRADIUSCONTEXT BUG.------------------
+	/*
+		eax contains foundNum
+		my_CRadiusContent_Compact(eax) == made up function to fix the compact algorithm
+		at bottom of CRadiusContent constructor.
+
+		Inside
+		CRadiusContent *__cdecl CRadiusContent::CRadiusContent(CRadiusContent *, float *, float, int, int, int)
+	*/
 	
+	memoryAdjust(base_addr + 0x1E54D4, 1,0x51); //push ECX
+	memoryAdjust(base_addr + 0x1E54D5, 1,0x50); //push EAX - foundNum local variable
+	callE8Patch(base_addr + 0x1E54D6, &my_CRadiusContent_Compact);
+	WriteE9Jmp(base_addr + 0x1E54DB, base_addr + 0x1E5585); //skip to return of function.
+
+	//SUBTRACT IDA ADDRESS FROM 0x9A820 (start). ? To acquire rel address.
+
 	return game_exports;
 }
 
@@ -449,7 +517,7 @@ void my_ShutdownGame(void)
 	free(orig_ClientBegin);
 	free(orig_ClientDisconnect);
 	free(orig_ClientUserinfoChanged);
-	// free(orig_G_RunFrame);
+	free(orig_G_RunFrame);
 	free(orig_Cmd_Say_f);
 	free(orig_PutClientInServer);
 	free(orig_PB_AddArmor);
@@ -458,6 +526,7 @@ void my_ShutdownGame(void)
 	free(orig_ClientCommand);
 	free(orig_T_Damage);
 	free(orig_fireSpas);
+
 
 	freeDeathmatchHooks();
 
@@ -632,7 +701,7 @@ void my_ClientBegin(edict_t * ent)
 	int slot = slot_from_ent(ent);
 
 	#ifdef USE_PYTHON
-	prev_showscores[slot] = false;
+		prev_showscores[slot] = false;
 	#endif
 	// Distract.
 	//spawnDistraction(ent,slot);
@@ -692,22 +761,39 @@ Disabled this because it floods the clients and they overflow on vid_restart
 */
 float my_G_RunFrame (int serverframe)
 {
+
+	static int framecount = 0;
 	// SOFPPNIX_DEBUG("G_RunFrame!\n");
 	float ret = orig_G_RunFrame(serverframe);
-	/*
-		Only place after ClientEndFrames, because ClientScoreboardMessage is calling clear.
-		Lets draw layout here.
-	*/
+
 
 	for ( int i = 0 ; i < maxclients->value;i++ ) {
 		void * client_t = getClientX(i);
 		int state = *(int*)(client_t);
 		if (state != cs_spawned )
 			continue;
-		edict_t * ent = stget(client_t,CLIENT_ENT);
+
+		/*
+			Should the FPS include 'dropped packets' or signal network fps only, as to show
+			network quality. SoFPlus overrides the game->ClientThink
+			Which is called by SV_ClientThink and includes the dropped packets.
+			So SoFPlus tries to show true fps even if a udp packet is dropped.
+
+			The remote connection never knows if it missed a reliable message, the
+			local side detects that it has been dropped by seeing a sequence acknowledge
+			higher thatn the last reliable sequence, but without the correct evon/odd
+			bit for the reliable set.
+		*/
+		if ( framecount % 10 == 0 ) {
+			stats_FPS[i] = (stats_FPS[i] + stats_FRAMES_IN_TICK[i])/2;
+			stats_FRAMES_IN_TICK[i] = 0;	
+		}
+		// edict_t * ent = stget(client_t,CLIENT_ENT);
 		//instead it only refreshes when it has to.
 		// orig_SP_Print(ent,0x0700,layoutstring);
 	}
+
+	framecount++;
 	return ret;
 }
 
@@ -874,9 +960,7 @@ void my_itemArmorTouch(edict_t *self, edict_t *other, cplane_t *plane, mtexinfo_
 	orig_itemArmorTouch(self,other,plane,surf);
 }
 
-int stats_headShots[32];
-int stats_throatShots[32];
-int stats_nutShots[32];
+
 /*
 	T_Damage() @g_combat.cpp
 		PB_Damage() @p_body.cpp
@@ -914,7 +998,7 @@ mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *
 
 	return ret;
 }
-int stats_armorsPicked[32];
+
 int my_PB_AddArmor(edict_t *ent, int amount)
 {
 	int slot = slot_from_ent(ent);
@@ -973,7 +1057,62 @@ void my_ClientCommand (edict_t *ent)
 		// Spectator should not output this command as text.
 		return;
 	}
-	orig_ClientCommand(ent);
+    // Viewer-local demo commands (when demo playback is active)
+    if (demo_system.demo_player && demo_system.demo_player->active) {
+        const char* c = cmd;
+        int slot = slot_from_ent(ent);
+        if (!strcmp(c, "demo_pov") && orig_Cmd_Argc() == 2) {
+            int s = atoi(orig_Cmd_Argv(1));
+            demo_viewer_watch_slot[slot] = s;
+            return;
+        } else if (!strcmp(c, "demo_pov_next")) {
+            // advance POV at current frame based on available slots
+            auto it = demo_system.demos.find(spawncount);
+            if (it != demo_system.demos.end() && it->second) {
+                int cur = demo_system.demo_player->current_frame;
+                auto itF = it->second->demo_frames_map.find(cur);
+                if (itF != it->second->demo_frames_map.end() && !itF->second.empty()) {
+                    std::vector<int> keys; keys.reserve(itF->second.size());
+                    for (const auto &kv : itF->second) keys.push_back(kv.first);
+                    std::sort(keys.begin(), keys.end());
+                    int curWatch = demo_viewer_watch_slot[slot];
+                    if (curWatch == -1 && !keys.empty()) curWatch = keys.front();
+                    auto pos = std::find(keys.begin(), keys.end(), curWatch);
+                    if (pos == keys.end() || ++pos == keys.end()) demo_viewer_watch_slot[slot] = keys.front();
+                    else demo_viewer_watch_slot[slot] = *pos;
+                }
+            }
+            return;
+        } else if (!strcmp(c, "demo_pov_prev")) {
+            auto it = demo_system.demos.find(spawncount);
+            if (it != demo_system.demos.end() && it->second) {
+                int cur = demo_system.demo_player->current_frame;
+                auto itF = it->second->demo_frames_map.find(cur);
+                if (itF != it->second->demo_frames_map.end() && !itF->second.empty()) {
+                    std::vector<int> keys; keys.reserve(itF->second.size());
+                    for (const auto &kv : itF->second) keys.push_back(kv.first);
+                    std::sort(keys.begin(), keys.end());
+                    int curWatch = demo_viewer_watch_slot[slot];
+                    if (curWatch == -1 && !keys.empty()) curWatch = keys.front();
+                    auto pos = std::find(keys.begin(), keys.end(), curWatch);
+                    if (pos == keys.begin() || pos == keys.end()) demo_viewer_watch_slot[slot] = keys.back();
+                    else demo_viewer_watch_slot[slot] = *(pos-1);
+                }
+            }
+            return;
+        } else if (!strcmp(c, "demo_freecam") && orig_Cmd_Argc() == 2) {
+            int on = atoi(orig_Cmd_Argv(1));
+            demo_viewer_freecam[slot] = (on != 0);
+            return;
+        } else if (!strcmp(c, "demo_pov_auto") && orig_Cmd_Argc() == 2) {
+            int ms = atoi(orig_Cmd_Argv(1));
+            if (ms < 0) ms = 0;
+            demo_viewer_auto_interval_ms[slot] = ms;
+            demo_viewer_last_cycle_ms[slot] = 0;
+            return;
+        }
+    }
+    orig_ClientCommand(ent);
 }
 
 /*
@@ -991,7 +1130,7 @@ dflags		these flags are used to control how T_Damage works.
 mod			the means of death (should the target of the damage happen to die).
 ============
 */
-bool t_damage_was_heashot = false;
+
 void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t origin, int damage, int knockback, int dflags, int mod, float penetrate, float absorb)
 {
 	t_damage_was_heashot = false;
@@ -1006,4 +1145,116 @@ void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t di
 		applyShotgunGore(targ); //uses oldDir.
 	}
 	orig_T_Damage(targ,inflictor,attacker,dir,point,origin,damage,knockback,dflags,mod,penetrate,absorb);
+}
+
+void my_Player_player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+
+	int slot_attacker = slot_from_ent(attacker);
+	int slot_victim = slot_from_ent(self);
+
+	if ( self == attacker ) {
+		stats_SUICIDES[slot_victim] += 1;
+	} else {
+		stats_DEATHS[slot_victim] += 1;
+		stats_FRAGS[slot_attacker] += 1;	
+	}
+	
+	orig_Player_player_die(self,inflictor,attacker,damage,point);
+}
+
+/*
+	c4/doorStayOpen/FlagJumpPlayer fix
+*/
+void my_plat_CalcAcceleratedMove(moveinfo_t *moveinfo)
+{
+	orig_Com_Printf("plat_CalcAcceleratedMove\n");
+	orig_plat_CalcAcceleratedMove(moveinfo);
+}
+
+void my_Move_Begin (edict_t *ent)
+{
+	orig_Com_Printf("Move_Begin\n");
+	orig_Move_Begin(ent);
+}
+
+/*
+	This didn't solve the main bug as I thought it would.
+	But it still might be nice to correct that indexing bug, even if its small.
+
+	Called by door_go_down
+*/
+void __attribute__((stdcall)) my_CRadiusContent_Compact(int foundNum, void* CRadiusContent)
+{
+	// orig_Com_Printf("foundNum is %i\n",foundNum);
+
+	#if 0
+	if ( foundNum == 1 ) {
+		void * ent = *(unsigned int*)((void**)CRadiusContent);
+		if ( ent ) {
+			char * classname = stget(ent,EDICT_CLASSNAME);
+			if ( classname ) {
+				orig_Com_Printf("Classname of ent %i = %s\n",0,classname);	
+			} else {
+				orig_Com_Printf("ent's classname %i is NULL\n",0);	
+			}
+			orig_Com_Printf("gclient of ent %i = %08X\n",0,stget(ent,EDICT_GCLIENT));
+			orig_Com_Printf("solid of ent %i = %i\n",0,stget(ent,EDICT_SOLID));
+			orig_Com_Printf("svflags of ent %i = %i\n",0,stget(ent,EDICT_SVFLAGS));
+			orig_Com_Printf("absmins of ent %i = %f,%f,%f\n",0,*(float*)(ent+EDICT_ABSMINS),*(float*)(ent+EDICT_ABSMINS+4),*(float*)(ent+EDICT_ABSMINS+8));
+			orig_Com_Printf("absmaxs of ent %i = %f,%f,%f\n",0,*(float*)(ent+EDICT_ABSMAXS),*(float*)(ent+EDICT_ABSMAXS+4),*(float*)(ent+EDICT_ABSMAXS+8));
+		} else {
+			//Deleted because inuse=false or distance too high
+			orig_Com_Printf("ent %i is NULL\n",0);
+		}
+	}
+	#endif
+
+	//no need to compact if 0 or 1 entries, because it would be at index 0.
+	if (foundNum <= 1) return;
+	//touchlist array starts at beginning of CRadiusContent class.
+	void **start = CRadiusContent;
+	//above return, protects from foundNum == 0 == -1 bounds for array.
+	void **end = (void**)(CRadiusContent)+foundNum-1;
+
+	do
+	{
+		//go to first NULL result
+		while((*start)&&(start < end))
+		{
+			start++;
+		}
+		//go to first non-NULL result
+		while((!(*end))&&(end > start))
+		{
+			end--;
+		}
+
+		// this should be the first set of empty / fulls we can find
+		*start = *end;
+		start++;
+		end--;
+	}while(start < end);
+
+	#if 0
+	for (int i=0; i<foundNum;i++){
+		void * ent = *(unsigned int*)((void**)CRadiusContent+i);
+		if ( ent ) {
+			char * classname = stget(ent,EDICT_CLASSNAME);
+			if ( classname ) {
+				orig_Com_Printf("Classname of ent %i = %s\n",i,classname);	
+			} else {
+				orig_Com_Printf("ent's classname %i is NULL\n",i);	
+			}
+			orig_Com_Printf("gclient of ent %i = %08X\n",i,stget(ent,EDICT_GCLIENT));
+			orig_Com_Printf("solid of ent %i = %i\n",i,stget(ent,EDICT_SOLID));
+			orig_Com_Printf("svflags of ent %i = %i\n",i,stget(ent,EDICT_SVFLAGS));
+			orig_Com_Printf("absmins of ent %i = %f,%f,%f\n",i,*(float*)(ent+EDICT_ABSMINS),*(float*)(ent+EDICT_ABSMINS+4),*(float*)(ent+EDICT_ABSMINS+8));
+			orig_Com_Printf("absmaxs of ent %i = %f,%f,%f\n",i,*(float*)(ent+EDICT_ABSMAXS),*(float*)(ent+EDICT_ABSMAXS+4),*(float*)(ent+EDICT_ABSMAXS+8));
+		} else {
+			//Deleted because inuse=false or distance too high
+			orig_Com_Printf("ent %i is NULL\n",i);
+		}
+	}
+	#endif
 }

@@ -12,7 +12,10 @@
 #include <algorithm>
 #include <unordered_map>
 #include <array>
-#include <filesystem>
+#include <memory>
+#include <map>
+// #include <filesystem>
+#include <experimental/filesystem>
 
 #include <regex>
 
@@ -57,7 +60,7 @@
 #include <bsd/string.h>
 
 #ifdef USE_PYTHON
-	#include <python3.9/Python.h>
+	#include <Python.h>
 #endif
 #include "engine.h"
 #include "fn_sigs.h"
@@ -85,11 +88,19 @@ extern int stats_throatShots[32];
 extern int stats_nutShots[32];
 extern bool t_damage_was_heashot;
 
+extern int stats_FRAGS[32]; 
+extern int stats_DEATHS[32];
+extern int stats_SUICIDES[32];
+
+extern int stats_FPS[32];
+extern int stats_FRAMES_IN_TICK[32];
+
+
 /*---------------------------------------------------------------------
 -----------------------------video.cpp----------------------------
  ---------------------------------------------------------------------
 */
-
+extern void* ref_base_addr;
 
 
 /*---------------------------------------------------------------------
@@ -185,6 +196,7 @@ extern void SOFPPNIX_PRINT(char * msg, ... );
 extern void memoryUnprotect(void * addr);
 extern void memoryProtect(void * addr);
 extern void callE8Patch(void * addr,void * to);
+extern void WriteE9Jmp(void * where, void * dest);
 extern void * createDetour(void * orig, void * mine, int size);
 extern void memoryAdjust(void * addr, int size, unsigned char val);
 
@@ -275,6 +287,7 @@ extern void GamespyHeartbeat(void);
 */
 #ifdef USE_PYTHON
 	extern PyObject *pGlobals;
+	extern void pythonFirstInit(void);
 	extern void pythonInit(void);
 	extern void list_refcount(void);
 	extern PyObject* register_callback(const char * name ,std::vector<PyObject*> &callbacks,PyObject* args);
@@ -327,6 +340,7 @@ public:
 public:
 	static void initMemoryItems(void);
 	static std::unordered_map<std::string, MemoryItem*> entityProperties;
+	static std::unordered_map<std::string, MemoryItem*> gclientProperties;
 };
 /*---------------------------------------------------------------------
 --------------------------py_api/decorators.cpp------------------------
@@ -438,8 +452,7 @@ extern cvar_t * _nix_snd_no_jump;
 extern cvar_t * _nix_snd_no_weap_touch;
 
 extern cvar_t * _nix_extra_shotgun_gore;
-extern cvar_t * _nix_py_killfeed;
-extern cvar_t * _nix_py_pages;
+
 
 extern void slidefix_modified(cvar_t * c);
 extern void public_rcon_modified(cvar_t * c);
@@ -566,7 +579,7 @@ typedef struct chunk_s {
 //[spawncount]->[framenum]->[slot] map of map of map of packet_data
 //for each level,for each frame, is many slots, for each slot, packetdata.
 typedef std::unordered_map<int,std::unique_ptr<slot_packetdata_t>> SlotPacketDataMap;
-typedef std::unordered_map<int,SlotPacketDataMap> DemoFramesMap;
+typedef std::map<int,SlotPacketDataMap> DemoFramesMap;
 
 
 
@@ -579,7 +592,7 @@ typedef std::unordered_map<int,SlotPacketDataMap> DemoFramesMap;
 
 	checkpoints will be unordered_map[key==framenum].
 */
-class DemoCheckpoint {
+ class DemoCheckpoint {
 public:
 	int timestamp;
 	//key is framenum, not necessary to store.
@@ -588,7 +601,7 @@ public:
 
 	DemoCheckpoint();
 
-	generate_svc_serverdata(std::vector<chunk_t>& resultVector);
+  generate_svc_serverdata(int slot, std::vector<chunk_t>& resultVector);
 };
 /*
 DemoData is created every SpawnServer. Placed into the demo_system Class indexed by spawncount.
@@ -703,7 +716,116 @@ public:
 
 };
 extern DemoSystem demo_system;
+
+// Viewer-specific demo controls (indexed by client slot)
+extern int demo_viewer_watch_slot[32]; // -1 = first available
+extern bool demo_viewer_freecam[32];
+extern int demo_viewer_auto_interval_ms[32];
+extern int demo_viewer_last_cycle_ms[32];
 #endif
+
+// Enabled declarations for demos feature (POC)
+typedef struct slot_packetdata_s {
+	std::unique_ptr<sizebuf_t> relSZ;
+	std::unique_ptr<sizebuf_t> unrelSZ;
+} slot_packetdata_t;
+
+typedef struct chunk_s {
+	char * data;
+	int len;
+} chunk_t;
+
+// [framenum] -> [slot]
+typedef std::unordered_map<int,std::unique_ptr<slot_packetdata_t>> SlotPacketDataMap;
+typedef std::unordered_map<int,SlotPacketDataMap> DemoFramesMap;
+
+class DemoCheckpoint {
+public:
+	int timestamp;
+	std::vector<chunk_t> configstrings_baselines;
+
+	DemoCheckpoint(int timestamp);
+    void generate_svc_serverdata(int slot, std::vector<chunk_t>& resultVector);
+};
+
+class DemoData {
+public:
+	std::vector<chunk_t> activation_chunks[16];
+	std::vector<chunk_t> ghoul_chunks[16];
+	DemoFramesMap demo_frames_map;
+	std::unordered_map<int, std::unique_ptr<DemoCheckpoint>> checkpoints;
+	std::string level_name;
+	int deathmatch;
+	std::string game_dir;
+
+	DemoData(std::string level_name,int deathmatch, std::string game_dir);
+	~DemoData();
+};
+
+class DemoRecorder {
+private:
+	std::ofstream disk_file;
+public:
+	bool active = false;
+	char recording_name[MAX_TOKEN_CHARS];
+	bool trigger_checkpoint[16] = {false};
+	bool ghoul_rel_sealed[16] = {false};
+
+	DemoRecorder();
+	~DemoRecorder();
+
+	void startRecording(void);
+	void saveNetworkData(void * netchan, int relLen, unsigned char * relData, int unrelLen, unsigned char * unrelData);
+	void endRecording(void);
+	void onClientFullyConnected(void);
+	void writeToDisk(void);
+	void create_checkpoint(int slot);
+};
+
+class DemoPlayer {
+public:
+	bool active = false;
+	bool packet_override = false;
+	int first_frame = 0;
+	int current_frame = 0;
+	int final_frame = 0;
+	int watch_slot = -1;
+    bool paused = false;
+    int frame_step = 1;
+    bool loop = false;
+    std::unordered_map<std::string,int> bookmarks;
+	bool netchan_close_rel = false;
+	sizebuf_t demo_rel;
+	char    demo_rel_buf[1400-16];
+	int ghoulChunkIndex[16];
+	bool ghoulLoaded[16];
+  // Per-viewer viewing state
+  int viewer_watch_slot[16]; // -1 = first available
+  bool viewer_freecam[16]; // experimental, future use
+
+	DemoPlayer();
+	void begin(void);
+	void playback(netchan_t *chan, int length, byte *data);
+};
+
+typedef std::unordered_map<int,std::unique_ptr<DemoData>> DemosPerLevelMap;
+
+class DemoSystem {
+
+public:
+	std::unique_ptr<DemoRecorder> demo_recorder;
+	std::unique_ptr<DemoPlayer> demo_player;
+	DemosPerLevelMap demos;
+	bool serverstate_trigger_play; // thickdemo trigger
+	bool recording_status;
+	int selected_demo_spawncount = -1; // numeric id chosen for playback
+
+	DemoSystem();
+	void Initialise();
+	void PrepareLevel();
+	bool LoadDemo();
+};
+extern DemoSystem demo_system;
 
 /*
 ---------------------------------------------------------------------------

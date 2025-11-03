@@ -24,6 +24,20 @@ def stripColor(name):
 			nonColorName += char
 	return nonColorName
 
+@event.map_spawn
+def killfeed_mapspawn():
+
+	# killfeed background
+	# orig_SV_GhoulFileIndex("c/k.m32");
+	# shotgun
+	ppnix.register_file("c/s1.m32");
+	# headshot icon
+	ppnix.register_file("c/hs.m32");
+	# skull and cross bones
+	ppnix.register_file("c/sb.m32");
+	# C4
+	ppnix.register_file("c/c4.m32");
+
 # TODO: color name by ctf team.
 @event.draw_killfeed
 def custom_killfeed(forClient,killStack):

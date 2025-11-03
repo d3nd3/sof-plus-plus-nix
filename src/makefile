@@ -14,7 +14,8 @@ BINARY:=test.so
 $(info $(shell mkdir -p ../obj))
 
 # DEFAULT VARIABLE VALUES
-USE_PYTHON:=0
+# CAN ENABLE FEATURES HERE
+USE_PYTHON:=1
 
 OBJS:= \
 ../obj/clipboard.o \
@@ -38,20 +39,19 @@ OBJS:= \
 ../obj/dm_sofree.o \
 ../obj/dm_standard.o \
 ../obj/dm_ctf.o \
-../obj/dm_realistic.o
+../obj/dm_realistic.o \
+../obj/demos.o \
 
-# ../obj/demos.o \
 
-
-CFLAGS:= -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
-LDFLAGS:= -m32 -shared -o ../out/test.so -L /minizip/build
-LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm
+CFLAGS:= -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
+LDFLAGS:= -m32 -shared -L /minizip/build
+LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lstdc++fs -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm
 
 ifeq ($(USE_PYTHON),1)
-	OBJ += ../obj/python.o ../obj/entity.o ../obj/ppnix.o ../obj/player.o ../obj/decorators.o ../obj/memory.o ../obj/pages.o ../obj/killfeed.o
-	CFLAGS += $(shell python3.9-config --cflags) -DUSE_PYTHON
+	OBJS += ../obj/python.o ../obj/entity.o ../obj/ppnix.o ../obj/player.o ../obj/decorators.o ../obj/memory.o ../obj/pages.o ../obj/killfeed.o
+	CFLAGS += $(shell pkg-config --cflags python3) -DUSE_PYTHON
 	LDFLAGS += -L ../build_python
-	LINKUS += -Wl,-Bstatic -l:libpython3.9.a
+	LINKUS += -Wl,-Bstatic -l:libpython3.8.a -Wl,-Bdynamic
 endif
 
 

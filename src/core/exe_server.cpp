@@ -58,34 +58,7 @@ void serverInit(void)
 	init_inv_cmd_list();
 
 	#ifdef USE_PYTHON
-		// Get the current PYTHONPATH value
-		const char* current_path = getenv("PYTHONPATH");
-
-		std::string ppnix_py_path = orig_FS_Userdir() + std::string("/python");
-		// Create a new string with the updated PYTHONPATH value
-		std::string updated_path;
-		if (current_path) {
-			// Append the new path to the current PYTHONPATH value
-			updated_path = current_path + std::string(":") + ppnix_py_path;
-		} else {
-			// If PYTHONPATH is not set, use the new path as is
-			updated_path = ppnix_py_path;
-		}
-
-		// Set the updated PYTHONPATH value, 1 == overwrite.
-		setenv("PYTHONPATH", updated_path.c_str(), 1);
-
-		Py_Initialize();
-
-		decorators.push_back(&player_die_callbacks);
-		decorators.push_back(&player_connect_callbacks);
-		decorators.push_back(&player_disconnect_callbacks);
-		decorators.push_back(&player_respawn_callbacks);
-		decorators.push_back(&player_say_callbacks);
-		decorators.push_back(&frame_early_callbacks);
-		decorators.push_back(&map_spawn_callbacks);
-
-		SOFPPNIX_PRINT("Python version : %s", Py_GetVersion());
+		pythonFirstInit();
 	#endif
 
 	createServerCvars();
@@ -220,6 +193,8 @@ void my_SV_ClientThink(void *cl, usercmd_t *cmd)
 	
 	// vec_t vel = VectorLength(ent->velocity);
 	// SOFPPNIX_DEBUG("Velocity: %f",vel);
+
+	stats_FRAMES_IN_TICK[getPlayerSlot(cl)]++;
 }
 
 
@@ -299,7 +274,10 @@ void my_SV_RunGameFrame(void)
 	#endif
 
 	#ifdef USE_PYTHON
-		killFeedExpiration();
+
+		killFeedExpiration();	
+
+		
 
 		// Trying to use this for events that run every frame.
 		// Although quake probably wanted you to use `think` callbacks.
@@ -331,7 +309,8 @@ void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstat
 	void * svs = 0x082A2540;
 	spawncount = stget(svs,0x108);
 
-	// demo_system.PrepareLevel();
+    // Engage demo system lifecycle per level
+    demo_system.PrepareLevel();
 }
 
 /*
@@ -342,12 +321,13 @@ void my_SV_New_f(void)
 	//TODO: Support multiple clients. This becomes array.
 	SOFPPNIX_DEBUG("SV_New_f");
 
-	#if 0
-	if ( demo_system.demo_player->active ) {
+	if ( demo_system.demo_player && demo_system.demo_player->active ) {
+		// Let the engine run the normal connect handshake first
+		orig_SV_New_f();
+		// Then switch to demo override for subsequent packets
 		demo_system.demo_player->packet_override = true;
 		return;
 	}
-	#endif
 	orig_SV_New_f();
 	
 }
@@ -401,14 +381,14 @@ int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,i
 
 	//packInto = data + cursize
 
-	int ret = 0;
+    int ret = 0;
 	// SOFPPNIX_DEBUG("Slot == %i, FrameNum == %i, FreeSpace = %i",slot,frameNum,freeSpace);
 	ret =  orig_GhoulPackReliable(slot,frameNum,packInto,freeSpace,written);
 	#if 0
 	SOFPPNIX_DEBUG("Written == %i, ret == %i",*written,ret);
 
 
-	std::vector<chunk_t>& chunks = demo_system.demos[spawncount]->ghoul_chunks[slot];
+    std::vector<chunk_t>& chunks = demo_system.demos[spawncount]->ghoul_chunks[slot];
 
 
 	if ( !demo_system.demo_recorder->ghoul_rel_sealed[slot] ) {
@@ -421,7 +401,7 @@ int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,i
 		chunks.clear();
 
 		//ensure to free.
-		char * p = malloc(*written+11);
+        char * p = (char*)malloc(*written+11);
 		
 		//Force client to reply instantly for rel receipts.
 		*(unsigned char*)(p) = svc_stufftext;
@@ -432,9 +412,9 @@ int my_GhoulPackReliable(int slot,int frameNum, char * packInto, int freeSpace,i
 		*(short*)(p+9) = *written; //length
 		memcpy(p+11,packInto,*written); //data
 
-		chunk_t newchunk;
-		newchunk.len = *written+11;
-		newchunk.data = p;
+        chunk_t newchunk;
+        newchunk.len = *written+11;
+        newchunk.data = p;
 		chunks.push_back(newchunk);
 
 		SOFPPNIX_DEBUG("Saving ghoul chunk.. from slot : %i",slot);

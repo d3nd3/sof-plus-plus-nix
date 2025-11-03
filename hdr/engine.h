@@ -16,6 +16,8 @@ extern unsigned int * objinst;
 #define	MAX_STRING_TOKENS	80		// max tokens resulting from Cmd_TokenizeString
 #define	MAX_TOKEN_CHARS		128		// max length of an individual token
 
+
+
 typedef enum {
 	ss_dead,			// no map loaded
 	ss_loading,			// spawning level edicts
@@ -102,6 +104,7 @@ enum ScriptConditionT
 #define SIZE_OF_CLIENT 0xd2ac
 #define CLIENT_USERINFO 0x04
 #define CLIENT_ENT 0x298
+#define CLIENT_NAME 0x29C
 #define CLIENT_NETMESSAGE 0x52b5 //could be wrong i think its 0x52b4
 #define CLIENT_NETCHAN 0x526C
 #define CLIENT_NETCHAN_IP 0x5284
@@ -209,6 +212,7 @@ enum ScriptConditionT
 #define GCLIENT_PERS_CONNECTED 0x2F8
 #define GCLIENT_RESP_SPECTATOR 0x320
 #define GCLIENT_RESP_SCORE 0x308
+#define GCLIENT_RESP_CMD_ANGLES 0x30C
 #define GCLINT_RESP_ENTERFRAME 0x304
 #define GCLIENT_RESP_CTFTEAM 0x380
 #define GCLIENT_PING 0xC8
@@ -220,6 +224,8 @@ enum ScriptConditionT
 #define GCLIENT_BUTTONS 0x47C
 #define GCLIENT_PS_PM_DELTA 0x14
 #define GCLIENT_PS_PM_ORIGIN 0x4
+#define GCLIENT_PS_VIEWANGLES 0x1C
+#define GCLIENT_PS_GUN 0x6C
 
 
 #define SIZE_OF_EDICT 0x464
@@ -239,6 +245,8 @@ enum ScriptConditionT
 #define EDICT_CLIPMASK 0x15C
 #define EDICT_MINS 0x11C
 #define EDICT_MAXS 0x128
+#define EDICT_ABSMINS 0x134
+#define EDICT_ABSMAXS 0x140
 #define EDICT_MODEL 0x1A4
 #define EDICT_S_SKINNUM 0x30
 #define EDICT_ENEMY 0x3240
@@ -253,9 +261,12 @@ enum ScriptConditionT
 #define EDICT_THINK 0x2B8
 #define EDICT_NEXTTHINK 0x2B4
 #define EDICT_FLAGS 0x1A0
+#define EDICT_SVFLAGS 0x118
 #define EDICT_COUNT 0x318
 #define EDICT_DELAY 0x364
 #define EDICT_OWNER 0x160
+#define EDICT_MOVETYPE 0x19C
+
 
 
 #define CSCRIPT_SCRIPTCONDITION 0x108
@@ -264,6 +275,17 @@ enum ScriptConditionT
 
 
 // #include "../src/Game/gamecpp/g_obj.h"
+
+typedef struct areanode_s
+{
+	int		axis;		// -1 = leaf node
+	float	dist;
+	struct areanode_s	*children[2];
+	link_t	trigger_edicts;
+	link_t	solid_edicts;
+} areanode_t;
+
+
 
 extern bool GhoulGetInst(int slot);
 extern void GhoulSetTint(float r,float g,float b,float alpha);
