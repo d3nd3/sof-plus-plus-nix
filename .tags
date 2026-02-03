@@ -4,7 +4,7 @@
 !_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
 !_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
 !_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
-!_TAG_PROC_CWD	/home/dinda/git-projects/sof-plus-plus-nix/	//
+!_TAG_PROC_CWD	/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/	//
 !_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
 !_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
 !_TAG_PROGRAM_URL	https://ctags.io/	/official site/
@@ -2121,6 +2121,7 @@ BeginAction	src/Game/gamecpp/ai_actions.cpp	/^void jump_action::BeginAction(ai_c
 BeginAction	src/Game/gamecpp/ai_actions.cpp	/^void pain_action::BeginAction(ai_c &which_ai, edict_t &monster)$/;"	f	class:pain_action	typeref:typename:void
 BeginAction	src/Game/gamecpp/ai_actions.h	/^	virtual void			BeginAction(ai_c &which_ai, edict_t &monster){}$/;"	f	class:endscript_action	typeref:typename:void
 BeginIntermission	src/Game/gamecpp/p_hud.cpp	/^void BeginIntermission (edict_t *targ)$/;"	f	typeref:typename:void
+Behavioral details (current implementation)	docs/ServerSideDemos.md	/^### Behavioral details (current implementation)$/;"	S	section:Server‑Side Demos (POC)
 BeingWatched	src/Game/gamecpp/ai.h	/^	virtual qboolean		BeingWatched(void){return watchState;}$/;"	f	class:ai_c	typeref:typename:qboolean
 BeingWatched	src/Game/gamecpp/ai_public.h	/^	virtual qboolean	BeingWatched(void){return false;}$/;"	f	class:ai_public_c	typeref:typename:qboolean
 BetterTry	build_python/Lib/test/datetimetester.py	/^        class BetterTry(tzinfo):$/;"	c	member:TZInfoBase.test_bad_tzinfo_classes	file:
@@ -3130,7 +3131,7 @@ CEnvironmentVariableTests	build_python/Lib/test/test_warnings/__init__.py	/^clas
 CExcReportingTests	build_python/Lib/test/test_traceback.py	/^class CExcReportingTests(BaseExceptionReportingTests, unittest.TestCase):$/;"	c
 CExplicitConstructionTest	build_python/Lib/test/test_decimal.py	/^class CExplicitConstructionTest(ExplicitConstructionTest):$/;"	c
 CFLAG	build_python/Lib/tty.py	/^CFLAG = 2$/;"	v
-CFLAGS	src/makefile	/^CFLAGS:= -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ..\/h/;"	m
+CFLAGS	src/makefile	/^CFLAGS:= -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../;"	m
 CFUNCTYPE	build_python/Lib/ctypes/__init__.py	/^def CFUNCTYPE(restype, *argtypes, **kw):$/;"	f
 CFWSList	build_python/Lib/email/_header_value_parser.py	/^class CFWSList(WhiteSpaceTokenList):$/;"	c
 CFWS_LEADER	build_python/Lib/email/_header_value_parser.py	/^CFWS_LEADER = WSP | set('(')$/;"	v
@@ -5871,12 +5872,19 @@ DeltaVRS	src/Game/ghoul/packet.h	/^	template <class T> bool DeltaVRS(T &x) $/;"	
 DeltaVRS	src/Game/ghoul/packet.h	/^	template <class T> void DeltaVRS(const T &x,const T &old) $/;"	f	class:OutPacket	typeref:typename:void
 DeltaVRU	src/Game/ghoul/packet.h	/^	template <class T> bool DeltaVRU(T &x) $/;"	f	class:InPacket	typeref:typename:bool
 DeltaVRU	src/Game/ghoul/packet.h	/^	template <class T> void DeltaVRU(const T &x,const T &old) $/;"	f	class:OutPacket	typeref:typename:void
-DemoCheckpoint	src/features/demos.cpp	/^DemoCheckPoint::DemoCheckpoint(int timestamp) :$/;"	f	class:DemoCheckPoint
+DemoCheckpoint	hdr/common.h	/^class DemoCheckpoint {$/;"	c
+DemoCheckpoint	src/features/demos.cpp	/^DemoCheckpoint::DemoCheckpoint(int timestamp) :$/;"	f	class:DemoCheckpoint
+DemoData	hdr/common.h	/^class DemoData {$/;"	c
 DemoData	src/features/demos.cpp	/^DemoData::DemoData(std::string level_name,int deathmatch, std::string game_dir) :$/;"	f	class:DemoData
+DemoFramesMap	hdr/common.h	/^typedef std::unordered_map<int,SlotPacketDataMap> DemoFramesMap;$/;"	t	typeref:typename:std::unordered_map<int,SlotPacketDataMap>
+DemoPlayer	hdr/common.h	/^class DemoPlayer {$/;"	c
 DemoPlayer	src/features/demos.cpp	/^DemoPlayer::DemoPlayer()$/;"	f	class:DemoPlayer
+DemoRecorder	hdr/common.h	/^class DemoRecorder {$/;"	c
 DemoRecorder	src/features/demos.cpp	/^DemoRecorder::DemoRecorder()$/;"	f	class:DemoRecorder
+DemoSystem	hdr/common.h	/^class DemoSystem {$/;"	c
 DemoSystem	src/features/demos.cpp	/^DemoSystem::DemoSystem()$/;"	f	class:DemoSystem
 DemoWindow	build_python/Lib/turtledemo/__main__.py	/^class DemoWindow(object):$/;"	c
+DemosPerLevelMap	hdr/common.h	/^typedef std::unordered_map<int,std::unique_ptr<DemoData>> DemosPerLevelMap;$/;"	t	typeref:typename:std::unordered_map<int,std::unique_ptr<DemoData>>
 DepUtilTestCase	build_python/Lib/distutils/tests/test_dep_util.py	/^class DepUtilTestCase(support.TempdirManager, unittest.TestCase):$/;"	c
 DeprecationTest	build_python/Lib/test/test_urlparse.py	/^class DeprecationTest(unittest.TestCase):$/;"	c
 Deque	build_python/Lib/test/test_deque.py	/^class Deque(deque):$/;"	c
@@ -5910,6 +5918,7 @@ Descriptor	build_python/Lib/test/test_subclassinit.py	/^        class Descriptor
 Descriptor	build_python/Lib/test/test_subclassinit.py	/^        class Descriptor:$/;"	c	member:Test.test_set_name_modifying_dict	file:
 Descriptor	build_python/Lib/test/test_subclassinit.py	/^        class Descriptor:$/;"	c	member:Test.test_set_name_wrong	file:
 Descriptor	build_python/Lib/unittest/test/testmock/testhelpers.py	/^        class Descriptor(object):$/;"	c	member:SpecSignatureTest.test_autospec_data_descriptor	file:
+Design map	docs/ServerSideDemos.md	/^### Design map$/;"	S	section:Server‑Side Demos (POC)
 Designer	build_python/Lib/turtledemo/bytedesign.py	/^class Designer(Turtle):$/;"	c
 Destroy	build_python/Lib/tkinter/__init__.py	/^    Destroy = '17'$/;"	v	class:EventType
 Destroy	src/Game/gamecpp/CWeaponInfo.cpp	/^void PickupList::Destroy()$/;"	f	class:PickupList	typeref:typename:void
@@ -6245,6 +6254,8 @@ ECTO_HAT_SCALE	src/Game/gamecpp/m_ecto.cpp	/^#define ECTO_HAT_SCALE /;"	d	file:
 ECTO_OTHER_SCALE	src/Game/gamecpp/m_ecto.cpp	/^#define ECTO_OTHER_SCALE /;"	d	file:
 ECTO_POUCH_SCALE	src/Game/gamecpp/m_ecto.cpp	/^#define ECTO_POUCH_SCALE /;"	d	file:
 ECTO_WEAPON_SCALE	src/Game/gamecpp/m_ecto.cpp	/^#define ECTO_WEAPON_SCALE /;"	d	file:
+EDICT_ABSMAXS	hdr/engine.h	/^#define EDICT_ABSMAXS /;"	d
+EDICT_ABSMINS	hdr/engine.h	/^#define EDICT_ABSMINS /;"	d
 EDICT_BASE	hdr/engine.h	/^#define EDICT_BASE /;"	d
 EDICT_CLASSNAME	hdr/engine.h	/^#define EDICT_CLASSNAME /;"	d
 EDICT_CLIPMASK	hdr/engine.h	/^#define EDICT_CLIPMASK /;"	d
@@ -6262,6 +6273,7 @@ EDICT_MATERIAL	hdr/engine.h	/^#define EDICT_MATERIAL /;"	d
 EDICT_MAXS	hdr/engine.h	/^#define EDICT_MAXS /;"	d
 EDICT_MINS	hdr/engine.h	/^#define EDICT_MINS /;"	d
 EDICT_MODEL	hdr/engine.h	/^#define EDICT_MODEL /;"	d
+EDICT_MOVETYPE	hdr/engine.h	/^#define EDICT_MOVETYPE /;"	d
 EDICT_NEXTTHINK	hdr/engine.h	/^#define EDICT_NEXTTHINK /;"	d
 EDICT_OWNER	hdr/engine.h	/^#define EDICT_OWNER /;"	d
 EDICT_PAIN	hdr/engine.h	/^#define EDICT_PAIN /;"	d
@@ -6270,6 +6282,7 @@ EDICT_PS_GUN	hdr/engine.h	/^#define EDICT_PS_GUN /;"	d
 EDICT_SCRIPT	hdr/engine.h	/^#define EDICT_SCRIPT /;"	d
 EDICT_SOLID	hdr/engine.h	/^#define EDICT_SOLID /;"	d
 EDICT_SURFACETYPE	hdr/engine.h	/^#define EDICT_SURFACETYPE /;"	d
+EDICT_SVFLAGS	hdr/engine.h	/^#define EDICT_SVFLAGS /;"	d
 EDICT_S_ANGLES	hdr/engine.h	/^#define EDICT_S_ANGLES /;"	d
 EDICT_S_ORIGIN	hdr/engine.h	/^#define EDICT_S_ORIGIN /;"	d
 EDICT_S_SKINNUM	hdr/engine.h	/^#define EDICT_S_SKINNUM /;"	d
@@ -6684,6 +6697,7 @@ EndlessJSONEncoder	build_python/Lib/test/test_json/test_recursion.py	/^        c
 EndofLineCheck	src/Game/gamecpp/g_generic.cpp	/^qboolean EndofLineCheck (edict_t *self)$/;"	f	typeref:typename:qboolean
 EnemySoundPrecacheCallBack	src/Game/gamecpp/ai_bodyhuman.cpp	/^class EnemySoundPrecacheCallBack: public IGhoulCallBack$/;"	c	file:
 Enemy_Printf	src/Game/gamecpp/g_main.cpp	/^void Enemy_Printf (ai_public_c *which_ai, char *msg, ...)$/;"	f	typeref:typename:void
+Engine interception points (Quake II)	docs/ServerSideDemos.md	/^### Engine interception points (Quake II)$/;"	S	section:Server‑Side Demos (POC)
 EngineLess	build_python/Lib/test/test_descr.py	/^        class EngineLess(DayBoat): pass$/;"	c	member:ClassPropertiesAndMethods.test_monotonicity	file:
 EnsurePipTest	build_python/Lib/test/test_venv.py	/^class EnsurePipTest(BaseTest):$/;"	c
 EnsurepipMixin	build_python/Lib/test/test_ensurepip.py	/^class EnsurepipMixin:$/;"	c
@@ -10206,6 +10220,7 @@ HorizontalRule	build_python/Lib/pydoc.py	/^        class HorizontalRule:$/;"	c	m
 HorizontalRule	build_python/Lib/pydoc.py	/^        class HorizontalRule:$/;"	c	member:TextDoc.docclass	file:
 Hovertip	build_python/Lib/idlelib/tooltip.py	/^class Hovertip(OnHoverTooltipBase):$/;"	c
 HovertipTest	build_python/Lib/idlelib/idle_test/test_tooltip.py	/^class HovertipTest(unittest.TestCase):$/;"	c
+How it works	docs/ServerSideDemos.md	/^### How it works$/;"	S	section:Server‑Side Demos (POC)
 HtmlDiff	build_python/Lib/difflib.py	/^class HtmlDiff(object):$/;"	c
 HtmlTests	build_python/Lib/test/test_html.py	/^class HtmlTests(unittest.TestCase):$/;"	c
 HugeLen	build_python/Lib/test/test_builtin.py	/^        class HugeLen:$/;"	c	member:BuiltinTest.test_len	file:
@@ -15247,6 +15262,7 @@ PlayPlayerHurtSound	src/Game/gamecpp/p_body.cpp	/^void PlayPlayerHurtSound(edict
 PlaySequence	src/Game/gamecpp/g_ghoul.cpp	/^void ggBinstC::PlaySequence(GhoulID Seq,float Now,float PlayPos,bool Restart,IGhoulInst::EndCond/;"	f	class:ggBinstC	typeref:typename:void
 PlaySequence	src/Game/gamecpp/g_ghoul.cpp	/^void ggOinstC::PlaySequence(GhoulID Seq,float Now,float PlayPos,bool Restart,IGhoulInst::EndCond/;"	f	class:ggOinstC	typeref:typename:void
 PlaySoundTest	build_python/Lib/test/test_winsound.py	/^class PlaySoundTest(unittest.TestCase):$/;"	c
+Playback controls	docs/ServerSideDemos.md	/^### Playback controls$/;"	S	section:Server‑Side Demos (POC)
 PlayerMethods	src/python_api/player.cpp	/^static PyMethodDef PlayerMethods[] = {$/;"	v	typeref:typename:PyMethodDef[]	file:
 PlayerModule	src/python_api/player.cpp	/^PyModuleDef PlayerModule = {$/;"	v	typeref:typename:PyModuleDef
 PlayerNoise	src/Game/gamecpp/p_view.cpp	/^void PlayerNoise(edict_t *who, vec3_t where, ai_sensetype_e type, edict_t *focus, float rad, int/;"	f	typeref:typename:void
@@ -15722,6 +15738,7 @@ QueueManager	build_python/Lib/test/_test_multiprocessing.py	/^class QueueManager
 QueueManager2	build_python/Lib/test/_test_multiprocessing.py	/^class QueueManager2(BaseManager):$/;"	c
 QueuePutTests	build_python/Lib/test/test_asyncio/test_queues.py	/^class QueuePutTests(_QueueTestBase):$/;"	c
 QueueTest	build_python/Lib/test/test_queue.py	/^class QueueTest(BaseQueueTestMixin):$/;"	c
+Quick start	docs/ServerSideDemos.md	/^### Quick start$/;"	S	section:Server‑Side Demos (POC)
 QuietRegressionTestRunner	build_python/Lib/test/support/testresult.py	/^class QuietRegressionTestRunner:$/;"	c
 Quitter	build_python/Lib/_sitebuiltins.py	/^class Quitter(object):$/;"	c
 QuopriTestCase	build_python/Lib/test/test_quopri.py	/^class QuopriTestCase(unittest.TestCase):$/;"	c
@@ -16574,8 +16591,10 @@ RightHandWeaponReady	src/Game/gamecpp/ai_body.cpp	/^qboolean body_c::RightHandWe
 RightHandWeaponReady	src/Game/gamecpp/ai_bodyhuman.cpp	/^qboolean bodyhuman_c::RightHandWeaponReady(edict_t &monster)$/;"	f	class:bodyhuman_c	typeref:typename:qboolean
 RightStep	src/Game/gamecpp/ai_body.h	/^	virtual	void		RightStep(edict_t &monster){}$/;"	f	class:body_c	typeref:typename:void
 RightStep	src/Game/gamecpp/ai_bodyhuman.cpp	/^void bodyhuman_c::RightStep(edict_t &monster)$/;"	f	class:bodyhuman_c	typeref:typename:void
+Roadmap / Ideas	docs/ServerSideDemos.md	/^### Roadmap \/ Ideas$/;"	S	section:Server‑Side Demos (POC)
 RobotFileParser	build_python/Lib/urllib/robotparser.py	/^class RobotFileParser:$/;"	c
 RobotHandler	build_python/Lib/test/test_robotparser.py	/^class RobotHandler(BaseHTTPRequestHandler):$/;"	c
+Robustness and Dota 2‑style Live Shared Replay	docs/ServerSideDemos.md	/^### Robustness and Dota 2‑style Live Shared Replay$/;"	S	section:Server‑Side Demos (POC)
 RootLogger	build_python/Lib/logging/__init__.py	/^class RootLogger(Logger):$/;"	c
 RootedHTTPRequestHandler	build_python/Lib/test/ssl_servers.py	/^class RootedHTTPRequestHandler(SimpleHTTPRequestHandler):$/;"	c
 Rot13Test	build_python/Lib/test/test_codecs.py	/^class Rot13Test(unittest.TestCase):$/;"	c
@@ -17567,6 +17586,7 @@ SRE_FLAG_VERBOSE	build_python/Lib/sre_constants.py	/^SRE_FLAG_VERBOSE = 64 # ign
 SRE_INFO_CHARSET	build_python/Lib/sre_constants.py	/^SRE_INFO_CHARSET = 4 # pattern starts with character from given set$/;"	v
 SRE_INFO_LITERAL	build_python/Lib/sre_constants.py	/^SRE_INFO_LITERAL = 2 # entire pattern is literal (given by prefix)$/;"	v
 SRE_INFO_PREFIX	build_python/Lib/sre_constants.py	/^SRE_INFO_PREFIX = 1 # has prefix$/;"	v
+SSDM file format (version 1)	docs/ServerSideDemos.md	/^### SSDM file format (version 1)$/;"	S	section:Server‑Side Demos (POC)
 SSL	build_python/Lib/lib2to3/tests/data/infinite_recursion.py	/^SSL = ssl_st$/;"	v
 SSL2_STATE	build_python/Lib/lib2to3/tests/data/infinite_recursion.py	/^SSL2_STATE = ssl2_state_st$/;"	v
 SSL3_BUFFER	build_python/Lib/lib2to3/tests/data/infinite_recursion.py	/^SSL3_BUFFER = ssl3_buffer_st$/;"	v
@@ -18370,6 +18390,7 @@ ServerProto	build_python/Lib/test/test_asyncio/test_sslproto.py	/^        class 
 ServerProxy	build_python/Lib/xmlrpc/client.py	/^class ServerProxy:$/;"	c
 ServerProxyTestCase	build_python/Lib/test/test_xmlrpc.py	/^class ServerProxyTestCase(unittest.TestCase):$/;"	c
 ServerThread	build_python/Lib/pydoc.py	/^    class ServerThread(threading.Thread):$/;"	c	function:_start_server	file:
+Server‑Side Demos (POC)	docs/ServerSideDemos.md	/^## Server‑Side Demos (POC)$/;"	s
 ServiceControl	build_python/Lib/msilib/schema.py	/^ServiceControl = Table('ServiceControl')$/;"	v
 ServiceInstall	build_python/Lib/msilib/schema.py	/^ServiceInstall = Table('ServiceInstall')$/;"	v
 Set	build_python/Lib/_collections_abc.py	/^class Set(Collection):$/;"	c
@@ -18837,6 +18858,7 @@ SleepTests	build_python/Lib/test/test_asyncio/test_tasks.py	/^class SleepTests(t
 SliceTest	build_python/Lib/test/test_slice.py	/^class SliceTest(unittest.TestCase):$/;"	c
 SlicesTestCase	build_python/Lib/ctypes/test/test_slicing.py	/^class SlicesTestCase(unittest.TestCase):$/;"	c
 SlotList	build_python/Lib/test/pickletester.py	/^class SlotList(MyList):$/;"	c
+SlotPacketDataMap	hdr/common.h	/^typedef std::unordered_map<int,std::unique_ptr<slot_packetdata_t>> SlotPacketDataMap;$/;"	t	typeref:typename:std::unordered_map<int,std::unique_ptr<slot_packetdata_t>>
 SlotUser	build_python/Lib/test/test_inspect.py	/^class SlotUser:$/;"	c
 Slotted	build_python/Lib/test/test_inspect.py	/^        class Slotted:$/;"	c	member:TestIsDataDescriptor.test_slot	file:
 SlottedNaiveException	build_python/Lib/test/test_exceptions.py	/^class SlottedNaiveException(Exception):$/;"	c
@@ -21578,6 +21600,7 @@ Timestamp	build_python/Lib/sqlite3/dbapi2.py	/^Timestamp = datetime.datetime$/;"
 TimestampFromTicks	build_python/Lib/sqlite3/dbapi2.py	/^def TimestampFromTicks(ticks):$/;"	f
 TimingWrapper	build_python/Lib/test/_test_multiprocessing.py	/^class TimingWrapper(object):$/;"	c
 TintModel	src/Game/gamecpp/g_obj.cpp	/^void TintModel(edict_t *self)$/;"	f	typeref:typename:void
+Tips and limitations	docs/ServerSideDemos.md	/^### Tips and limitations$/;"	S	section:Server‑Side Demos (POC)
 Tit	build_python/Lib/test/inspect_fodder.py	/^Tit = MalodorousPervert$/;"	v
 TitledHelpFormatter	build_python/Lib/optparse.py	/^class TitledHelpFormatter (HelpFormatter):$/;"	c
 TixSubWidget	build_python/Lib/tkinter/tix.py	/^class TixSubWidget(TixWidget):$/;"	c
@@ -21678,6 +21701,7 @@ Triple	build_python/Lib/lib2to3/pgen2/tokenize.py	/^Triple = group(_litprefix + 
 Triple	build_python/Lib/tokenize.py	/^Triple = group(StringPrefix + "'''", StringPrefix + '"""')$/;"	v
 Trivial	build_python/Lib/test/test_urlparse.py	/^        class Trivial:$/;"	c	member:UrlParseTestCase.test_urlencode_sequences	file:
 TrivialTests	build_python/Lib/test/test_urllib2.py	/^class TrivialTests(unittest.TestCase):$/;"	c
+Troubleshooting, difficulties, limitations	docs/ServerSideDemos.md	/^### Troubleshooting, difficulties, limitations$/;"	S	section:Server‑Side Demos (POC)
 TruncReturnsBadIndex	build_python/Lib/test/test_int.py	/^        class TruncReturnsBadIndex:$/;"	c	member:IntTestCases.test_int_returns_int_subclass	file:
 TruncReturnsBadInt	build_python/Lib/test/test_int.py	/^                class TruncReturnsBadInt(base):$/;"	c	member:IntTestCases.test_intconversion	file:
 TruncReturnsBadInt	build_python/Lib/test/test_int.py	/^        class TruncReturnsBadInt:$/;"	c	member:IntTestCases.test_int_returns_int_subclass	file:
@@ -22707,6 +22731,7 @@ WriteByteSizebuf	src/Game/player/player.h	/^	void	(*WriteByteSizebuf)(sizebuf_t 
 WriteChar	src/Game/gamecpp/game.h	/^	void	(*WriteChar) (int c);$/;"	m	struct:__anonf5d358410208	typeref:typename:void (*)(int c)
 WriteDir	src/Game/gamecpp/game.h	/^	void	(*WriteDir) (vec3_t pos);		\/\/ single byte encoded, very coarse$/;"	m	struct:__anonf5d358410208	typeref:typename:void (*)(vec3_t pos)
 WriteDirExp	src/Game/gamecpp/fx_tempents.cpp	/^void WriteDirExp(vec3_t val)$/;"	f	typeref:typename:void
+WriteE9Jmp	src/util.cpp	/^void WriteE9Jmp(void * where, void * dest)$/;"	f	typeref:typename:void
 WriteEdicts	src/Game/gamecpp/g_save.cpp	/^void WriteEdicts()$/;"	f	typeref:typename:void
 WriteFloat	src/Game/gamecpp/game.h	/^	void	(*WriteFloat) (float f);$/;"	m	struct:__anonf5d358410208	typeref:typename:void (*)(float f)
 WriteGZ	src/Game/gamecpp/ai_bodyhuman.cpp	/^void bodyorganic_c::WriteGZ()$/;"	f	class:bodyorganic_c	typeref:typename:void
@@ -24501,6 +24526,11 @@ __anona356e71e0103	src/Game/qcommon/qcommon.h	/^typedef enum {NA_LOOPBACK, NA_BR
 __anona356e71e0203	src/Game/qcommon/qcommon.h	/^typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;$/;"	g
 __anona356e71e0308	src/Game/qcommon/qcommon.h	/^{$/;"	s
 __anona49e07640103	src/Game/strings/singleplr.h	/^{$/;"	g
+__anonaa5798530102	src/features/demos.cpp	/^    auto write_u32 = [](std::ofstream &f, uint32_t v){ f.write((const char*)&v, sizeof(v)); };$/;"	f	function:DemoRecorder::writeToDisk	file:
+__anonaa5798530202	src/features/demos.cpp	/^    auto write_str = [&](std::ofstream &f, const std::string &s){ uint32_t n=(uint32_t)s.size();/;"	f	function:DemoRecorder::writeToDisk	file:
+__anonaa5798530302	src/features/demos.cpp	/^    auto strip_ext = [](const std::string &name){ size_t p=name.find_last_of('.'); if(p==std::st/;"	f	function:DemoRecorder::writeToDisk	file:
+__anonaa5798530402	src/features/demos.cpp	/^    auto read_u32 = [](std::ifstream &fin, uint32_t &v){ fin.read((char*)&v,sizeof(v)); return (/;"	f	function:DemoSystem::LoadDemo	file:
+__anonaa5798530502	src/features/demos.cpp	/^    auto read_str = [&](std::ifstream &fin, std::string &out){ uint32_t n=0; if(!read_u32(fin,n)/;"	f	function:DemoSystem::LoadDemo	file:
 __anonaac153150103	src/Game/gamecpp/g_iraq.cpp	/^{$/;"	g	file:
 __anonabb793280103	src/Game/gamecpp/g_obj.h	/^{$/;"	g
 __anonaeeaba380108	src/Game/gamecpp/g_local.h	/^{$/;"	s
@@ -36066,9 +36096,12 @@ activate	build_python/Lib/tkinter/__init__.py	/^    def activate(self, index=Non
 activate_config_changes	build_python/Lib/idlelib/configdialog.py	/^    def activate_config_changes(self):$/;"	m	class:ConfigDialog
 activate_config_changes	build_python/Lib/idlelib/idle_test/test_configdialog.py	/^    def activate_config_changes(self):$/;"	m	class:ConfigDialogTest
 activate_restore	build_python/Lib/idlelib/parenmatch.py	/^    def activate_restore(self):$/;"	m	class:ParenMatch
+activation_chunks	hdr/common.h	/^	std::vector<chunk_t> activation_chunks[16];$/;"	m	class:DemoData	typeref:typename:std::vector<chunk_t>[16]
 activator	src/Game/gamecpp/ds.h	/^	edict_t				*activator;$/;"	m	class:CScript	typeref:typename:edict_t *
 activator	src/Game/gamecpp/ds.h	/^	int					activator;$/;"	m	struct:__anon9a6e7a7e0208	typeref:typename:int
 activator	src/Game/gamecpp/g_local.h	/^	edict_t		*activator;$/;"	m	struct:edict_s	typeref:typename:edict_t *
+active	hdr/common.h	/^	bool active = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
+active	hdr/common.h	/^	bool active = false;$/;"	m	class:DemoRecorder	typeref:typename:bool
 activeCount	build_python/Lib/threading.py	/^activeCount = active_count$/;"	v
 active_children	build_python/Lib/multiprocessing/context.py	/^    active_children = staticmethod(process.active_children)$/;"	v	class:BaseContext
 active_children	build_python/Lib/multiprocessing/dummy/__init__.py	/^def active_children():$/;"	f
@@ -36771,6 +36804,8 @@ area	src/Game/gamecpp/ai_bodyhuman.h	/^	blown_area	area;$/;"	m	struct:__anon8bb0
 area	src/Game/gamecpp/g_local.h	/^	link_t		area;				\/\/ linked to a division node or leaf$/;"	m	struct:edict_s	typeref:typename:link_t
 area	src/Game/gamecpp/game.h	/^	link_t		area;				\/\/ linked to a division node or leaf$/;"	m	struct:edict_s	typeref:typename:link_t
 area	src/Game/qcommon/qfiles.h	/^	short			area;$/;"	m	struct:__anon78f337e80a08	typeref:typename:short
+areanode_s	hdr/engine.h	/^typedef struct areanode_s$/;"	s
+areanode_t	hdr/engine.h	/^} areanode_t;$/;"	t	typeref:struct:areanode_s
 areanum	src/Game/gamecpp/g_local.h	/^	int			areanum, areanum2;$/;"	m	struct:edict_s	typeref:typename:int
 areanum	src/Game/gamecpp/game.h	/^	int			areanum, areanum2;$/;"	m	struct:edict_s	typeref:typename:int
 areanum2	src/Game/gamecpp/g_local.h	/^	int			areanum, areanum2;$/;"	m	struct:edict_s	typeref:typename:int
@@ -37611,6 +37646,7 @@ await_args_list	build_python/Lib/unittest/mock.py	/^    await_args_list = _deleg
 await_count	build_python/Lib/unittest/mock.py	/^    await_count = _delegating_property('await_count')$/;"	v	class:AsyncMockMixin
 awaitable	build_python/Lib/test/test_asyncgen.py	/^def awaitable(*, throw=False):$/;"	f
 aware_dt	build_python/Lib/test/test_email/test_utils.py	/^    aware_dt = datetime.datetime(*dateargs, tzinfo=tz)$/;"	v	class:DateTimeTests
+axis	hdr/engine.h	/^	int		axis;		\/\/ -1 = leaf node$/;"	m	struct:areanode_s	typeref:typename:int
 b	build_python/Lib/test/dtracedata/instance.py	/^b = new_style_class()$/;"	v
 b	build_python/Lib/test/pickletester.py	/^            b = bytes(p[j:j+20])$/;"	v
 b	build_python/Lib/test/test_coroutines.py	/^                b = wrap$/;"	v	class:CoroutineTest.test_await_9.foo.DB
@@ -38236,6 +38272,7 @@ boo	build_python/Lib/test/test_descr.py	/^            def boo(self): return "B"$
 boo	build_python/Lib/test/test_descr.py	/^            def boo(self): return "C"$/;"	m	class:ClassPropertiesAndMethods.test_diamond_inheritance.C
 booh	build_python/Lib/test/test_class.py	/^        def booh(self):$/;"	f	member:ClassTests.testForExceptionsRaisedInInstanceGetattr2	file:
 bookcase_partpain	src/Game/gamecpp/g_generic.cpp	/^void bookcase_partpain (edict_t *self,int partLost, vec3_t boltPos)$/;"	f	typeref:typename:void
+bookmarks	hdr/common.h	/^    std::unordered_map<std::string,int> bookmarks;$/;"	m	class:DemoPlayer	typeref:typename:std::unordered_map<std::string,int>
 bool_types	build_python/Lib/ctypes/test/test_numbers.py	/^bool_types = []$/;"	v
 bool_values	build_python/Lib/ctypes/test/test_numbers.py	/^bool_values = [True, False, 0, 1, -1, 5000, 'test', [], [1]]$/;"	v
 boolean	build_python/Lib/xmlrpc/client.py	/^boolean = Boolean = bool$/;"	v
@@ -39641,6 +39678,7 @@ checklinecache	build_python/Lib/idlelib/pyshell.py	/^    def checklinecache(self
 checklookbehindgroup	build_python/Lib/sre_parse.py	/^    def checklookbehindgroup(self, gid, source):$/;"	m	class:State
 checkout_hook_path	build_python/Lib/test/test_gdb.py	/^checkout_hook_path = os.path.join(os.path.dirname(sys.executable),$/;"	v
 checkoutside	build_python/Lib/test/datetimetester.py	/^    def checkoutside(self, dt, tz, utc):$/;"	m	class:TestTimezoneConversions
+checkpoints	hdr/common.h	/^	std::unordered_map<int, std::unique_ptr<DemoCheckpoint>> checkpoints;$/;"	m	class:DemoData	typeref:typename:std::unordered_map<int,std::unique_ptr<DemoCheckpoint>>
 checkraises	build_python/Lib/test/string_tests.py	/^    def checkraises(self, exc, obj, methodname, *args):$/;"	m	class:BaseTest
 checkraises	build_python/Lib/test/test_userstring.py	/^    def checkraises(self, exc, obj, methodname, *args):$/;"	m	class:UserStringTest
 checksig	build_python/Lib/unittest/mock.py	/^    def checksig(*args, **kwargs):$/;"	f	function:_set_signature	file:
@@ -39665,6 +39703,7 @@ child_coro	build_python/Lib/test/test_asyncio/test_tasks.py	/^        def child_
 child_index	src/Game/gamecpp/ai_bodyhuman.h	/^	blown_index	child_index;$/;"	m	struct:__anon8bb02e170808	typeref:typename:blown_index
 children	build_python/Lib/importlib/metadata.py	/^    def children(self):$/;"	m	class:FastPath
 children	build_python/Lib/lib2to3/pytree.py	/^    children = ()  # Tuple of subnodes$/;"	v	class:Base
+children	hdr/engine.h	/^	struct areanode_s	*children[2];$/;"	m	struct:areanode_s	typeref:struct:areanode_s * [2]
 children	src/Game/qcommon/qfiles.h	/^	int			children[2];	\/\/ negative numbers are -(leafs+1), not nodes$/;"	m	struct:__anon78f337e80608	typeref:typename:int[2]
 childzone	src/Game/gamecpp/ai_bodyhuman.h	/^	gz_code	childzone;$/;"	m	struct:gz_info_s	typeref:typename:gz_code
 chktbl2	src/core/exe_shared.cpp	/^unsigned char chktbl2[3000];$/;"	v	typeref:typename:unsigned char[3000]
@@ -39681,9 +39720,11 @@ chop_size	src/Game/qcommon/qfiles.h	/^			float			chop_size;$/;"	m	struct:__anon7
 chown	build_python/Lib/shutil.py	/^def chown(path, user=None, group=None):$/;"	f
 chown	build_python/Lib/tarfile.py	/^    def chown(self, tarinfo, targetpath, numeric_owner):$/;"	m	class:TarFile
 chunk_extension	build_python/Lib/test/test_httplib.py	/^chunk_extension = ";foo=bar"$/;"	v
+chunk_s	hdr/common.h	/^typedef struct chunk_s {$/;"	s
 chunk_size	build_python/Lib/test/test_asynchat.py	/^    chunk_size = 1$/;"	v	class:echo_server
 chunk_spewer_think	src/Game/gamecpp/g_environ.cpp	/^void chunk_spewer_think(edict_t *self)$/;"	f	typeref:typename:void
 chunk_spewer_use	src/Game/gamecpp/g_environ.cpp	/^void chunk_spewer_use(edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
+chunk_t	hdr/common.h	/^} chunk_t;$/;"	t	typeref:struct:chunk_s
 chunked_end	build_python/Lib/test/test_httplib.py	/^chunked_end = "\\r\\n"$/;"	v
 chunked_expected	build_python/Lib/test/test_httplib.py	/^chunked_expected = b'hello world! and now for something completely different'$/;"	v
 chunked_start	build_python/Lib/test/test_httplib.py	/^chunked_start = ($/;"	v
@@ -40539,6 +40580,28 @@ cmd_mlsd	build_python/Lib/test/test_ftplib.py	/^    def cmd_mlsd(self, arg):$/;"
 cmd_nix_checksum	src/commands.cpp	/^void cmd_nix_checksum(void)$/;"	f	typeref:typename:void
 cmd_nix_client_map	src/commands.cpp	/^void cmd_nix_client_map(void)$/;"	f	typeref:typename:void
 cmd_nix_client_state	src/commands.cpp	/^void cmd_nix_client_state(void)$/;"	f	typeref:typename:void
+cmd_nix_demo_bmdel	src/commands.cpp	/^static void cmd_nix_demo_bmdel(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmgoto	src/commands.cpp	/^static void cmd_nix_demo_bmgoto(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmlist	src/commands.cpp	/^static void cmd_nix_demo_bmlist(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmren	src/commands.cpp	/^static void cmd_nix_demo_bmren(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmset	src/commands.cpp	/^static void cmd_nix_demo_bmset(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_freecam	src/commands.cpp	/^static void cmd_nix_demo_freecam(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_goto	src/commands.cpp	/^static void cmd_nix_demo_goto(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_loop	src/commands.cpp	/^static void cmd_nix_demo_loop(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_nextcp	src/commands.cpp	/^static void cmd_nix_demo_nextcp(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pause	src/commands.cpp	/^static void cmd_nix_demo_pause(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pov	src/commands.cpp	/^static void cmd_nix_demo_pov(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pov_next	src/commands.cpp	/^static void cmd_nix_demo_pov_next(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pov_prev	src/commands.cpp	/^static void cmd_nix_demo_pov_prev(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_prevcp	src/commands.cpp	/^static void cmd_nix_demo_prevcp(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_rate	src/commands.cpp	/^static void cmd_nix_demo_rate(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_resume	src/commands.cpp	/^static void cmd_nix_demo_resume(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_seekms	src/commands.cpp	/^static void cmd_nix_demo_seekms(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_seekpct	src/commands.cpp	/^static void cmd_nix_demo_seekpct(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demomap	src/commands.cpp	/^void cmd_nix_demomap(void)$/;"	f	typeref:typename:void
+cmd_nix_match_history	src/commands.cpp	/^static void cmd_nix_match_history(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_record	src/commands.cpp	/^void cmd_nix_record(void)$/;"	f	typeref:typename:void
+cmd_nix_stoprecord	src/commands.cpp	/^void cmd_nix_stoprecord(void)$/;"	f	typeref:typename:void
 cmd_nix_test	src/commands.cpp	/^void cmd_nix_test(void)$/;"	f	typeref:typename:void
 cmd_nlst	build_python/Lib/test/test_ftplib.py	/^    def cmd_nlst(self, arg):$/;"	m	class:DummyFTPHandler
 cmd_noop	build_python/Lib/test/test_ftplib.py	/^    def cmd_noop(self, arg):$/;"	m	class:DummyFTPHandler
@@ -41186,6 +41249,7 @@ config_dialog	build_python/Lib/idlelib/editor.py	/^    def config_dialog(self, e
 config_dialog	build_python/Lib/idlelib/macosx.py	/^    def config_dialog(event=None):$/;"	f	function:overrideRootMenu	file:
 config_dict	build_python/Lib/turtle.py	/^def config_dict(filename):$/;"	f
 configstring	src/Game/gamecpp/game.h	/^	void	(*configstring) (int num, char *string);$/;"	m	struct:__anonf5d358410208	typeref:typename:void (*)(int num,char * string)
+configstrings_baselines	hdr/common.h	/^	std::vector<chunk_t> configstrings_baselines;$/;"	m	class:DemoCheckpoint	typeref:typename:std::vector<chunk_t>
 configure	build_python/Lib/logging/config.py	/^    def configure(self):$/;"	m	class:DictConfigurator
 configure	build_python/Lib/tkinter/__init__.py	/^    def configure(self, **kw):$/;"	m	class:Image
 configure	build_python/Lib/tkinter/__init__.py	/^    def configure(self, cnf=None, **kw):$/;"	m	class:Misc
@@ -42009,6 +42073,7 @@ current_bbox	src/Game/gamecpp/ai.h	/^	bbox_preset		current_bbox;$/;"	m	class:ai_
 current_client	src/Game/gamecpp/p_view.cpp	/^static	gclient_t	*current_client;$/;"	v	typeref:typename:gclient_t *	file:
 current_colors_and_keys	build_python/Lib/idlelib/config.py	/^    def current_colors_and_keys(self, section):$/;"	m	class:IdleConf
 current_entity	src/Game/gamecpp/g_local.h	/^	edict_t		*current_entity;	\/\/ entity running from G_RunFrame$/;"	m	struct:__anonaeeaba380608	typeref:typename:edict_t *
+current_frame	hdr/common.h	/^	int current_frame = 0;$/;"	m	class:DemoPlayer	typeref:typename:int
 current_page	src/features/pages.cpp	/^std::string current_page[32];$/;"	v	typeref:typename:std::string[32]
 current_player	src/Game/gamecpp/p_view.cpp	/^static	edict_t		*current_player;$/;"	v	typeref:typename:edict_t *	file:
 current_point	src/Game/gamecpp/ai_decisions.h	/^	int		current_point;$/;"	m	class:pointcombat_decision	typeref:typename:int
@@ -42213,6 +42278,7 @@ data	build_python/Lib/xml/dom/minidom.py	/^    data = nodeValue = property(_get_
 data	build_python/Lib/xml/etree/ElementTree.py	/^    def data(self, data):$/;"	m	class:C14NWriterTarget
 data	build_python/Lib/xml/etree/ElementTree.py	/^    def data(self, data):$/;"	m	class:TreeBuilder
 data	build_python/Lib/xmlrpc/client.py	/^    def data(self, text):$/;"	m	class:Unmarshaller
+data	hdr/common.h	/^	char * data;$/;"	m	struct:chunk_s	typeref:typename:char *
 data	hdr/common.h	/^    void *data;$/;"	m	struct:list_node	typeref:typename:void *
 data	src/Game/gamecpp/q_shared.h	/^	byte	*data;$/;"	m	struct:sizebuf_s	typeref:typename:byte *
 data	src/Game/gamecpp/q_shared.h	/^	int			data;			\/\/ 0x50 data for the event FX$/;"	m	struct:entity_state_s	typeref:typename:int
@@ -42318,6 +42384,7 @@ deathcorpse_action	src/Game/gamecpp/ai_actions.cpp	/^deathcorpse_action::deathco
 deathcorpse_action	src/Game/gamecpp/ai_actions.cpp	/^deathcorpse_action::deathcorpse_action(decision_c *od, action_c *oa, mmove_t *newanim1, mmove_t /;"	f	class:deathcorpse_action
 deathcorpse_action	src/Game/gamecpp/ai_actions.h	/^	deathcorpse_action(void):death_action(){}$/;"	f	class:deathcorpse_action
 deathcorpse_action	src/Game/gamecpp/ai_actions.h	/^class deathcorpse_action : public death_action$/;"	c
+deathmatch	hdr/common.h	/^	int deathmatch;$/;"	m	class:DemoData	typeref:typename:int
 deathmatch	src/Game/gamecpp/g_main.cpp	/^cvar_t	*deathmatch;$/;"	v	typeref:typename:cvar_t *
 deathmatch	src/cvars.cpp	/^cvar_t * deathmatch = NULL;$/;"	v	typeref:typename:cvar_t *
 deathtarget	src/Game/gamecpp/g_local.h	/^	char		*deathtarget;$/;"	m	struct:edict_s	typeref:typename:char *
@@ -43047,7 +43114,17 @@ demo1	build_python/Lib/turtle.py	/^    def demo1():$/;"	f
 demo2	build_python/Lib/turtle.py	/^    def demo2():$/;"	f
 demo_app	build_python/Lib/wsgiref/simple_server.py	/^def demo_app(environ,start_response):$/;"	f
 demo_dir	build_python/Lib/turtledemo/__main__.py	/^demo_dir = os.path.dirname(os.path.abspath(__file__))$/;"	v
+demo_frames_map	hdr/common.h	/^	DemoFramesMap demo_frames_map;$/;"	m	class:DemoData	typeref:typename:DemoFramesMap
+demo_player	hdr/common.h	/^	std::unique_ptr<DemoPlayer> demo_player;$/;"	m	class:DemoSystem	typeref:typename:std::unique_ptr<DemoPlayer>
+demo_recorder	hdr/common.h	/^	std::unique_ptr<DemoRecorder> demo_recorder;$/;"	m	class:DemoSystem	typeref:typename:std::unique_ptr<DemoRecorder>
+demo_rel	hdr/common.h	/^	sizebuf_t demo_rel;$/;"	m	class:DemoPlayer	typeref:typename:sizebuf_t
+demo_rel_buf	hdr/common.h	/^	char    demo_rel_buf[1400-16];$/;"	m	class:DemoPlayer	typeref:typename:char[]
 demo_system	src/features/demos.cpp	/^DemoSystem demo_system;$/;"	v	typeref:typename:DemoSystem
+demo_viewer_auto_interval_ms	src/features/demos.cpp	/^int demo_viewer_auto_interval_ms[32] = { 0 };$/;"	v	typeref:typename:int[32]
+demo_viewer_freecam	src/features/demos.cpp	/^bool demo_viewer_freecam[32] = { false };$/;"	v	typeref:typename:bool[32]
+demo_viewer_last_cycle_ms	src/features/demos.cpp	/^int demo_viewer_last_cycle_ms[32] = { 0 };$/;"	v	typeref:typename:int[32]
+demo_viewer_watch_slot	src/features/demos.cpp	/^int demo_viewer_watch_slot[32] = { -1 };$/;"	v	typeref:typename:int[32]
+demos	hdr/common.h	/^	DemosPerLevelMap demos;$/;"	m	class:DemoSystem	typeref:typename:DemosPerLevelMap
 den	build_python/Lib/test/test_binop.py	/^    den = property(_get_den, None)$/;"	v	class:Rat
 denominator	build_python/Lib/fractions.py	/^    def denominator(a):$/;"	m	class:Fraction
 denominator	build_python/Lib/numbers.py	/^    def denominator(self):$/;"	m	class:Integral
@@ -43332,6 +43409,7 @@ discover	build_python/Lib/unittest/test/test_discovery.py	/^            def disc
 discover	build_python/Lib/unittest/test/test_discovery.py	/^            def discover(self, start_dir, pattern, top_level_dir):$/;"	m	class:TestDiscovery.test_command_line_handling_do_discovery_uses_default_loader.Loader
 disguised	src/Game/player/w_weapons.h	/^	int			disguised(void){return inDisguise;}$/;"	f	class:wAnim_c	typeref:typename:int
 diskNumberStart	src/features/httpdl.cpp	/^  uint16_t diskNumberStart;$/;"	m	struct:CDFileHeader	typeref:typename:uint16_t	file:
+disk_file	hdr/common.h	/^	std::ofstream disk_file;$/;"	m	class:DemoRecorder	typeref:typename:std::ofstream
 disk_usage	build_python/Lib/shutil.py	/^    def disk_usage(path):$/;"	f
 dispatch	build_python/Lib/functools.py	/^    def dispatch(cls):$/;"	f	function:singledispatch	file:
 dispatch	build_python/Lib/idlelib/debugobj.py	/^dispatch = {$/;"	v
@@ -43386,6 +43464,7 @@ displayhook	build_python/Lib/test/test_doctest.py	/^    def displayhook(): r"""$
 disposition	build_python/Lib/cgi.py	/^    disposition = None$/;"	v	class:MiniFieldStorage
 disposition_options	build_python/Lib/cgi.py	/^    disposition_options = {}$/;"	v	class:MiniFieldStorage
 dissect_can_frame	build_python/Lib/test/test_socket.py	/^    def dissect_can_frame(cls, frame):$/;"	m	class:CANTest
+dist	hdr/engine.h	/^	float	dist;$/;"	m	struct:areanode_s	typeref:typename:float
 dist	src/Game/gamecpp/ai_path_pre.h	/^	float			dist;$/;"	m	class:CAIConnect	typeref:typename:float
 dist	src/Game/gamecpp/ai_pathfinding.h	/^	float			dist;$/;"	m	class:CAIPathLink	typeref:typename:float
 dist	src/Game/gamecpp/g_ghoul.h	/^	float	dist;$/;"	m	struct:__anon1e978bac0108	typeref:typename:float
@@ -46369,6 +46448,7 @@ filterwarnings	build_python/Lib/warnings.py	/^def filterwarnings(action, message
 fin	build_python/Lib/test/test_weakref.py	/^        def fin(*args, **kwargs):$/;"	f	member:FinalizeTestCase.test_arg_errors	file:
 final	build_python/Lib/typing.py	/^def final(f):$/;"	f
 finalNode	src/Game/gamecpp/ai.h	/^	int			finalNode;		\/\/ node that is ultimately our destination$/;"	m	struct:nodeData_s	typeref:typename:int
+final_frame	hdr/common.h	/^	int final_frame = 0;$/;"	m	class:DemoPlayer	typeref:typename:int
 final_key_selected	build_python/Lib/idlelib/config_key.py	/^    def final_key_selected(self, event=None):$/;"	m	class:GetKeysDialog
 finalize	build_python/Lib/sqlite3/test/dbapi.py	/^            def finalize(self):$/;"	m	class:ClosedConTests.CheckClosedCreateAggregate.Agg
 finalize	build_python/Lib/sqlite3/test/userfunctions.py	/^    def finalize(self):$/;"	m	class:AggrCheckType
@@ -46682,6 +46762,7 @@ firstToOneHit	src/Game/gamecpp/dm_private.h	/^	int		firstToOneHit;$/;"	m	class:d
 first_cb	build_python/Lib/test/test_asyncio/test_futures.py	/^def first_cb():$/;"	f
 first_element_handler	build_python/Lib/xml/dom/expatbuilder.py	/^    def first_element_handler(self, name, attributes):$/;"	m	class:ExpatBuilder
 first_elts	build_python/Lib/test/test_cgi.py	/^def first_elts(list):$/;"	f
+first_frame	hdr/common.h	/^	int first_frame = 0;$/;"	m	class:DemoPlayer	typeref:typename:int
 first_func	build_python/Lib/test/test_funcattrs.py	/^        def first_func(a, b):$/;"	f	member:FunctionPropertiesTest.test_func_default_args	file:
 first_handler	build_python/Lib/test/test_signal.py	/^        def first_handler(signum, frame):$/;"	f	member:StressTest.test_stress_delivery_dependent	file:
 first_line_re	build_python/Lib/distutils/command/build_scripts.py	/^first_line_re = re.compile(b'^#!.*python[0-9.]*([ \\t].*)?$')$/;"	v
@@ -47520,6 +47601,7 @@ frame_enter_cin	src/game_modes/dm_always.cpp	/^int frame_enter_cin = 0;$/;"	v	ty
 frame_flags	src/Game/gamecpp/ai_body.h	/^			int				frame_flags;$/;"	m	class:body_c	typeref:typename:int
 frame_globals	build_python/Lib/idlelib/debugger_r.py	/^    def frame_globals(self, fid):$/;"	m	class:IdbAdapter
 frame_locals	build_python/Lib/idlelib/debugger_r.py	/^    def frame_locals(self, fid):$/;"	m	class:IdbAdapter
+frame_step	hdr/common.h	/^    int frame_step = 1;$/;"	m	class:DemoPlayer	typeref:typename:int
 framenum	src/Game/gamecpp/g_local.h	/^	int			framenum;$/;"	m	struct:__anonaeeaba380608	typeref:typename:int
 framerate	build_python/Lib/test/test_aifc.py	/^    framerate = 11025$/;"	v	class:AifcALAWTest
 framerate	build_python/Lib/test/test_aifc.py	/^    framerate = 11025$/;"	v	class:AifcPCM16Test
@@ -48310,6 +48392,7 @@ g_msg	src/features/netchan_extend.cpp	/^sizebuf_t * g_msg;$/;"	v	typeref:typenam
 g_with	build_python/Lib/test/test_typing.py	/^async def g_with(am: AsyncContextManager[int]):$/;"	f
 gaierror	build_python/Lib/test/mock_socket.py	/^gaierror = socket_module.gaierror$/;"	v
 game	src/Game/gamecpp/g_main.cpp	/^game_locals_t	game;$/;"	v	typeref:typename:game_locals_t
+game_dir	hdr/common.h	/^	std::string game_dir;$/;"	m	class:DemoData	typeref:typename:std::string
 game_export_s	src/Game/gamecpp/game.h	/^typedef struct game_export_s {$/;"	s
 game_export_t	src/Game/gamecpp/game.h	/^} game_export_t;$/;"	t	typeref:struct:game_export_s
 game_exports	src/core/game.cpp	/^game_export_t * game_exports = NULL;$/;"	v	typeref:typename:game_export_t *
@@ -48485,7 +48568,7 @@ generate_matches	build_python/Lib/lib2to3/pytree.py	/^    def generate_matches(s
 generate_matches	build_python/Lib/lib2to3/pytree.py	/^    def generate_matches(self, nodes):$/;"	m	class:WildcardPattern
 generate_matches	build_python/Lib/lib2to3/pytree.py	/^def generate_matches(patterns, nodes):$/;"	f
 generate_substrings	build_python/Lib/test/test_statistics.py	/^    def generate_substrings(self, first, second, tol, rel, idx):$/;"	m	class:TestNumericTestCase
-generate_svc_serverdata	src/features/demos.cpp	/^void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector) {$/;"	f	class:DemoCheckpoint	typeref:typename:void
+generate_svc_serverdata	src/features/demos.cpp	/^void DemoCheckpoint::generate_svc_serverdata(int slot, std::vector<chunk_t>& resultVector) {$/;"	f	class:DemoCheckpoint	typeref:typename:void
 generate_tokens	build_python/Lib/lib2to3/pgen2/tokenize.py	/^def generate_tokens(readline):$/;"	f
 generate_tokens	build_python/Lib/tokenize.py	/^def generate_tokens(readline):$/;"	f
 generate_trace_command	build_python/Lib/test/test_dtrace.py	/^    def generate_trace_command(self, script_file, subcommand=None):$/;"	m	class:TraceBackend
@@ -51002,10 +51085,14 @@ ghl_precache_verts	src/Game/gamecpp/g_main.cpp	/^cvar_t	*ghl_precache_verts;$/;"
 ghl_specular	src/Game/gamecpp/g_main.cpp	/^cvar_t	*ghl_specular;$/;"	v	typeref:typename:cvar_t *
 ghl_specular	src/Game/player/player.h	/^	cvar_t	*ghl_specular;$/;"	m	struct:__anon11bce8440208	typeref:typename:cvar_t *
 ghosted	src/Game/gamecpp/g_local.h	/^	qboolean					ghosted;								\/\/ Invulnerability effect$/;"	m	struct:gclient_s	typeref:typename:qboolean
+ghoulChunkIndex	hdr/common.h	/^	int ghoulChunkIndex[16];$/;"	m	class:DemoPlayer	typeref:typename:int[16]
 ghoulInst	src/Game/gamecpp/g_local.h	/^	IGhoulInst	*ghoulInst;$/;"	m	struct:edict_s	typeref:typename:IGhoulInst *
 ghoulInst	src/Game/gamecpp/game.h	/^	void		*ghoulInst;$/;"	m	struct:edict_s	typeref:typename:void *
+ghoulLoaded	hdr/common.h	/^	bool ghoulLoaded[16];$/;"	m	class:DemoPlayer	typeref:typename:bool[16]
 ghoulSeqName	src/Game/gamecpp/g_ghoul.h	/^	char		ghoulSeqName[GGHOUL_ID_NAME_LEN];$/;"	m	struct:mmove_s	typeref:typename:char[]
+ghoul_chunks	hdr/common.h	/^	std::vector<chunk_t> ghoul_chunks[16];$/;"	m	class:DemoData	typeref:typename:std::vector<chunk_t>[16]
 ghoul_model_think	src/Game/gamecpp/test.cpp	/^void ghoul_model_think (edict_t *self)$/;"	f	typeref:typename:void
+ghoul_rel_sealed	hdr/common.h	/^	bool ghoul_rel_sealed[16] = {false};$/;"	m	class:DemoRecorder	typeref:typename:bool[16]
 gi	src/Game/gamecpp/g_main.cpp	/^game_import_t	gi;$/;"	v	typeref:typename:game_import_t
 gi_code	build_python/Lib/asyncio/coroutines.py	/^    def gi_code(self):$/;"	m	class:CoroWrapper
 gi_code	build_python/Lib/types.py	/^    def gi_code(self):$/;"	m	class:_GeneratorWrapper
@@ -53898,6 +53985,7 @@ left	build_python/Lib/test/test_set.py	/^    left  = set([1])$/;"	v	class:TestSu
 left	build_python/Lib/turtle.py	/^    def left(self, angle):$/;"	m	class:TNavigator
 leftover	build_python/Lib/test/test_asyncio/test_runners.py	/^        async def leftover():$/;"	f	member:RunTests.test_asyncio_run_cancels_hanging_tasks	file:
 leftover	build_python/Lib/test/test_asyncio/test_runners.py	/^        async def leftover():$/;"	f	member:RunTests.test_asyncio_run_reports_hanging_tasks_errors	file:
+len	hdr/common.h	/^	int len;$/;"	m	struct:chunk_s	typeref:typename:int
 len	src/Game/gamecpp/q_sh_fx.h	/^	byte			len;$/;"	m	struct:eft_lightning_s	typeref:typename:byte
 lenIgnoreColor	example_py_scripts/killfeed.py	/^def lenIgnoreColor(name):$/;"	f
 len_b	build_python/Lib/email/_encoded_words.py	/^def len_b(bstring):$/;"	f
@@ -53936,6 +54024,7 @@ levelTime	src/Game/player/player.h	/^	float	*levelTime;$/;"	m	struct:__anon11bce
 levelTime	src/Game/player/player.h	/^	float	*levelTime;$/;"	m	struct:__anon11bce8440408	typeref:typename:float *
 level_ai_name	src/Game/gamecpp/g_main.cpp	/^char		level_ai_name[MAX_QPATH];		\/\/ the over-ride for the AI per-level$/;"	v	typeref:typename:char[]
 level_locals_t	src/Game/gamecpp/g_local.h	/^} level_locals_t;$/;"	t	typeref:struct:__anonaeeaba380608
+level_name	hdr/common.h	/^	std::string level_name;$/;"	m	class:DemoData	typeref:typename:std::string
 level_name	src/Game/gamecpp/g_local.h	/^	char		level_name[MAX_QPATH];	\/\/ the descriptive name (Outer Base, etc)$/;"	m	struct:__anonaeeaba380608	typeref:typename:char[]
 levelfields	src/Game/gamecpp/g_save.cpp	/^field_t levelfields[] =$/;"	v	typeref:typename:field_t[]
 lexists	build_python/Lib/ntpath.py	/^def lexists(path):$/;"	f
@@ -54553,6 +54642,7 @@ loop	build_python/Lib/asyncio/__main__.py	/^    loop = asyncio.new_event_loop()$
 loop	build_python/Lib/asyncio/proactor_events.py	/^        def loop(f=None):$/;"	f	member:BaseProactorEventLoop._start_serving	file:
 loop	build_python/Lib/asyncore.py	/^def loop(timeout=30.0, use_poll=False, map=None, count=None):$/;"	f
 loop	build_python/Lib/test/test_asyncio/utils.py	/^    def loop(environ):$/;"	f	function:_run_test_server	file:
+loop	hdr/common.h	/^    bool loop = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 loop	src/Game/gamecpp/q_sh_fx.h	/^	loop,$/;"	e	enum:animtype
 loopWaveNum	src/Game/gamecpp/g_sound.cpp	/^	unsigned short	loopWaveNum;$/;"	m	struct:ambientGroup_s	typeref:typename:unsigned short	file:
 loop_accept_pipe	build_python/Lib/asyncio/windows_events.py	/^        def loop_accept_pipe(f=None):$/;"	f	member:ProactorEventLoop.start_serving_pipe	file:
@@ -56130,6 +56220,7 @@ my_CL_Init	src/core/exe_client.cpp	/^void my_CL_Init(void)$/;"	f	typeref:typenam
 my_CL_Precache_f	src/core/exe_client.cpp	/^void my_CL_Precache_f(void)$/;"	f	typeref:typename:void
 my_CL_RegisterEffects	src/core/exe_client.cpp	/^void my_CL_RegisterEffects(void)$/;"	f	typeref:typename:void
 my_COM_BlockSequenceCheckByte	src/core/exe_shared.cpp	/^unsigned char my_COM_BlockSequenceCheckByte(unsigned char * src , int len, int out_seq_id )$/;"	f	typeref:typename:unsigned char
+my_CRadiusContent_Compact	src/core/game.cpp	/^void __attribute__((stdcall)) my_CRadiusContent_Compact(int foundNum, void* CRadiusContent)$/;"	f	typeref:typename:void
 my_CalcFov	src/core/video.cpp	/^void my_CalcFov(void)$/;"	f	typeref:typename:void
 my_Cbuf_AddLateCommands	src/core/exe_shared.cpp	/^qboolean my_Cbuf_AddLateCommands(void)$/;"	f	typeref:typename:qboolean
 my_Cbuf_Execute	src/core/exe_shared.cpp	/^void my_Cbuf_Execute(void)$/;"	f	typeref:typename:void
@@ -56153,6 +56244,7 @@ my_GhoulReliableHitwire	src/core/exe_server.cpp	/^void my_GhoulReliableHitwire(i
 my_MSG_WriteDeltaEntity	src/features/netchan_extend.cpp	/^void my_MSG_WriteDeltaEntity (struct entity_state_s *from, struct entity_state_s *to, sizebuf_t /;"	f	typeref:typename:void
 my_MSG_WriteShort	src/features/netchan_extend.cpp	/^void my_MSG_WriteShort(sizebuf_t *sb, int c)$/;"	f	typeref:typename:void
 my_MSG_WriteUnknownDelta	src/features/netchan_extend.cpp	/^void my_MSG_WriteUnknownDelta(sizebuf_t *sb, int c)$/;"	f	typeref:typename:void
+my_Move_Begin	src/core/game.cpp	/^void my_Move_Begin (edict_t *ent)$/;"	f	typeref:typename:void
 my_Netchan_Patch	src/core/exe_shared.cpp	/^void my_Netchan_Patch(netchan_t *chan)$/;"	f	typeref:typename:void
 my_Netchan_Transmit	src/core/exe_shared.cpp	/^void my_Netchan_Transmit (netchan_t *chan, int length, byte *data)$/;"	f	typeref:typename:void
 my_Netchan_Transmit	src/features/netchan_extend.cpp	/^void my_Netchan_Transmit (netchan_t *chan, int length, byte *data)$/;"	f	typeref:typename:void
@@ -56168,6 +56260,7 @@ my_PutClientInServer	src/core/game.cpp	/^void my_PutClientInServer (edict_t *ent
 my_Qcommon_Frame	src/core/exe_shared.cpp	/^void my_Qcommon_Frame(int msec)$/;"	f	typeref:typename:void
 my_Qcommon_Init	src/core/exe_shared.cpp	/^void my_Qcommon_Init(int one , char ** two) {$/;"	f	typeref:typename:void
 my_Qcommon_Shutdown	src/core/exe_shared.cpp	/^void my_Qcommon_Shutdown(void)$/;"	f	typeref:typename:void
+my_SV_AreaEdicts_r	src/core/exe_shared.cpp	/^void my_SV_AreaEdicts_r (areanode_t *node)$/;"	f	typeref:typename:void
 my_SV_ClientThink	src/core/exe_server.cpp	/^void my_SV_ClientThink(void *cl, usercmd_t *cmd)$/;"	f	typeref:typename:void
 my_SV_EmitPacketEntities	src/features/netchan_extend.cpp	/^void my_SV_EmitPacketEntities (void *from, void *to, sizebuf_t *msg)$/;"	f	typeref:typename:void
 my_SV_ExecuteClientMessage	src/core/exe_server.cpp	/^void my_SV_ExecuteClientMessage (client_t *cl)$/;"	f	typeref:typename:void
@@ -56226,6 +56319,7 @@ my_module_methods	src/python_api/decorators.cpp	/^static PyMethodDef my_module_m
 my_my_COM_BlockSequenceCRCByte	src/core/exe_shared.cpp	/^unsigned char my_my_COM_BlockSequenceCRCByte(std::vector<unsigned char> base, unsigned int seque/;"	f	typeref:typename:unsigned char
 my_netadr	src/features/serverlist.cpp	/^netadr_t my_netadr = {$/;"	v	typeref:typename:netadr_t
 my_obj	src/Game/gamecpp/g_ghoul.h	/^	gg_obj_c_ptr	my_obj;$/;"	m	class:ggOinstC	typeref:typename:gg_obj_c_ptr
+my_plat_CalcAcceleratedMove	src/core/game.cpp	/^void my_plat_CalcAcceleratedMove(moveinfo_t *moveinfo)$/;"	f	typeref:typename:void
 my_setDMMode	src/game_modes/deathmatch.cpp	/^void  my_setDMMode(void * self,int dmmode)$/;"	f	typeref:typename:void
 my_test	src/core/exe_shared.cpp	/^void my_test(void)$/;"	f	typeref:typename:void
 my_unicode	build_python/Lib/test/test_re.py	/^        class my_unicode(str): pass$/;"	c	member:ReTests.test_bug_764548	file:
@@ -56498,6 +56592,7 @@ netadr_s	src/Game/qcommon/qcommon.h	/^typedef struct netadr_s$/;"	s
 netadr_t	src/Game/qcommon/qcommon.h	/^} netadr_t;$/;"	t	typeref:struct:netadr_s
 netadrtype_t	src/Game/qcommon/qcommon.h	/^typedef enum {NA_LOOPBACK, NA_BROADCAST, NA_IP, NA_IPX, NA_BROADCAST_IPX} netadrtype_t;$/;"	t	typeref:enum:__anona356e71e0103
 netchanToSlot	src/util.cpp	/^int netchanToSlot(void * inChan)$/;"	f	typeref:typename:int
+netchan_close_rel	hdr/common.h	/^	bool netchan_close_rel = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 netchan_t	src/Game/qcommon/qcommon.h	/^} netchan_t;$/;"	t	typeref:struct:__anona356e71e0308
 netname	src/Game/gamecpp/g_local.h	/^	char		netname[16];$/;"	m	struct:__anonaeeaba380908	typeref:typename:char[16]
 netrc	build_python/Lib/netrc.py	/^class netrc:$/;"	c
@@ -57550,6 +57645,7 @@ orig_MSG_WriteDeltaUsercmd	src/fn_sigs.cpp	/^void (*orig_MSG_WriteDeltaUsercmd) 
 orig_MSG_WriteLong	src/fn_sigs.cpp	/^void (*orig_MSG_WriteLong) (sizebuf_t *sb, int c) = 0x0811F674;$/;"	v	typeref:typename:void (*)(sizebuf_t * sb,int c)
 orig_MSG_WriteShort	src/fn_sigs.cpp	/^void (*orig_MSG_WriteShort) (sizebuf_t *sb, int c) = 0x0811F5FC;$/;"	v	typeref:typename:void (*)(sizebuf_t * sb,int c)
 orig_MSG_WriteString	src/fn_sigs.cpp	/^void (*orig_MSG_WriteString) (sizebuf_t *sb, char *s) = 0x0811F760;$/;"	v	typeref:typename:void (*)(sizebuf_t * sb,char * s)
+orig_Move_Begin	src/fn_sigs.cpp	/^void (*orig_Move_Begin) (edict_t *ent);/;"	v	typeref:typename:void (*)(edict_t * ent)
 orig_NET_SendPacket	src/fn_sigs.cpp	/^void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netadr_t to) = 0x0820C940;$/;"	v	typeref:typename:void (*)(netsrc_t sock,int length,void * data,netadr_t to)
 orig_NET_StringToAdr	src/fn_sigs.cpp	/^qboolean (*orig_NET_StringToAdr) (char *s, netadr_t *a) = 0x0820D710;$/;"	v	typeref:typename:qboolean (*)(char * s,netadr_t * a)
 orig_Netchan_OutOfBandPrint	src/fn_sigs.cpp	/^void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...) = 0x0812AE/;"	v	typeref:typename:void (*)(int net_socket,netadr_t adr,char * format,...)
@@ -57570,6 +57666,7 @@ orig_SP_GetStringText	src/fn_sigs.cpp	/^const char	*(*orig_SP_GetStringText)(uns
 orig_SP_Print	src/fn_sigs.cpp	/^void (*orig_SP_Print)(edict_t *ent, unsigned short ID, ...) = 0x081328D0;$/;"	v	typeref:typename:void (*)(edict_t * ent,unsigned short ID,...)
 orig_SP_Register	src/fn_sigs.cpp	/^void (*orig_SP_Register)(const char *Package) = 0x081348A8;$/;"	v	typeref:typename:void (*)(const char * Package)
 orig_SP_SPrint	src/fn_sigs.cpp	/^int (*orig_SP_SPrint)(char *buffer, int buffer_size, unsigned short ID, ...) = 0x081331D4;$/;"	v	typeref:typename:int (*)(char * buffer,int buffer_size,unsigned short ID,...)
+orig_SV_AreaEdicts_r	src/fn_sigs.cpp	/^void (*orig_SV_AreaEdicts_r) (areanode_t *node) = 0x80B2E4C;$/;"	v	typeref:typename:void (*)(areanode_t * node)
 orig_SV_ClientThink	src/fn_sigs.cpp	/^void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd) = 0x080B1470;$/;"	v	typeref:typename:void (*)(void * cl,usercmd_t * cmd)
 orig_SV_EffectIndex	src/fn_sigs.cpp	/^int (*orig_SV_EffectIndex)( char * name) = 0x080A94BC;$/;"	v	typeref:typename:int (*)(char * name)
 orig_SV_ExecuteClientMessage	src/fn_sigs.cpp	/^void (*orig_SV_ExecuteClientMessage) (client_t *cl) = 0x080B157C;$/;"	v	typeref:typename:void (*)(client_t * cl)
@@ -57609,6 +57706,7 @@ orig_itemArmorTouch	src/fn_sigs.cpp	/^void (*orig_itemArmorTouch)(edict_t *self,
 orig_mbox	build_python/Lib/idlelib/idle_test/test_replace.py	/^orig_mbox = se.tkMessageBox$/;"	v
 orig_menu_AddServer	src/fn_sigs.cpp	/^void (*orig_menu_AddServer)(netadr_t addr,char *data) = 0x080E08B0;$/;"	v	typeref:typename:void (*)(netadr_t addr,char * data)
 orig_modes	src/game_modes/deathmatch.cpp	/^gamerules_c * orig_modes[] = {$/;"	v	typeref:typename:gamerules_c * []
+orig_plat_CalcAcceleratedMove	src/fn_sigs.cpp	/^void (*orig_plat_CalcAcceleratedMove)(moveinfo_t *moveinfo);$/;"	v	typeref:typename:void (*)(moveinfo_t * moveinfo)
 orig_platform	build_python/Lib/idlelib/idle_test/test_query.py	/^    orig_platform = query.platform  # Set in test_path_ok_file.$/;"	v	class:HelpsourcePathokTest
 orig_setDMMode	src/fn_sigs.cpp	/^void (* orig_setDMMode)(void * self,int newtype) = NULL;$/;"	v	typeref:typename:void (*)(void * self,int newtype)
 orig_stream	build_python/Lib/test/test_contextlib.py	/^    orig_stream = "stderr"$/;"	v	class:TestRedirectStderr
@@ -57763,6 +57861,7 @@ package_name	build_python/Lib/test/test_import/__init__.py	/^    package_name = 
 package_test	build_python/Lib/test/test_modulefinder.py	/^package_test = [$/;"	v
 packed	build_python/Lib/ipaddress.py	/^    def packed(self):$/;"	m	class:IPv4Address
 packed	build_python/Lib/ipaddress.py	/^    def packed(self):$/;"	m	class:IPv6Address
+packet_override	hdr/common.h	/^	bool packet_override = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 packs	build_python/Lib/test/test_audioop.py	/^packs = {w: (lambda *data, width=w: pack(width, data)) for w in (1, 2, 3, 4)}$/;"	v
 page	build_python/Lib/pydoc.py	/^        def page(self, title, contents):$/;"	m	class:_url_handler._HTMLDoc
 page	build_python/Lib/pydoc.py	/^    def page(self, title, contents):$/;"	m	class:HTMLDoc
@@ -58240,6 +58339,7 @@ pause_writing	build_python/Lib/asyncio/protocols.py	/^    def pause_writing(self
 pause_writing	build_python/Lib/asyncio/sslproto.py	/^    def pause_writing(self):$/;"	m	class:SSLProtocol
 pause_writing	build_python/Lib/asyncio/streams.py	/^    def pause_writing(self):$/;"	m	class:FlowControlMixin
 pause_writing_transport	build_python/Lib/test/test_asyncio/test_proactor_events.py	/^    def pause_writing_transport(self, high):$/;"	m	class:ProactorSocketTransportTests
+paused	hdr/common.h	/^    bool paused = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 pausetime	src/Game/gamecpp/g_local.h	/^	float		pausetime;$/;"	m	struct:__anonaeeaba380708	typeref:typename:float
 pavgusb	src/Game/client/amd3d.h	/^#define pavgusb(/;"	d
 payload_as_body	build_python/Lib/test/test_email/test_inversion.py	/^    def payload_as_body(self, payload, **kw):$/;"	m	class:TestInversion
@@ -59902,7 +60002,9 @@ record_finished	build_python/Lib/test/test_concurrent_futures.py	/^        def r
 record_original_stdout	build_python/Lib/test/support/__init__.py	/^def record_original_stdout(stdout):$/;"	f
 record_sub_info	build_python/Lib/difflib.py	/^            def record_sub_info(match_object,sub_info=sub_info):$/;"	f	function:_mdiff._make_line	file:
 recording_log_debug	build_python/Lib/lib2to3/tests/test_refactor.py	/^        def recording_log_debug(msg, *args):$/;"	f	member:TestRefactoringTool.test_refactor_file_write_unchanged_file	file:
+recording_name	hdr/common.h	/^	char recording_name[MAX_TOKEN_CHARS];$/;"	m	class:DemoRecorder	typeref:typename:char[]
 recording_reporthook	build_python/Lib/test/test_urllibnet.py	/^        def recording_reporthook(blocks, block_size, total_size):$/;"	f	member:urlretrieveNetworkTests.test_reporthook	file:
+recording_status	hdr/common.h	/^	bool recording_status;$/;"	m	class:DemoSystem	typeref:typename:bool
 recreation_check	build_python/Lib/test/test_compileall.py	/^    def recreation_check(self, metadata):$/;"	m	class:CompileallTestsBase
 rect_complex	build_python/Lib/test/test_cmath.py	/^        def rect_complex(z):$/;"	f	member:CMathTests.test_specific_values	file:
 rectangle	build_python/Lib/curses/textpad.py	/^def rectangle(win, uly, ulx, lry, lrx):$/;"	f
@@ -60116,6 +60218,7 @@ reinitialize_command	build_python/Lib/distutils/cmd.py	/^    def reinitialize_co
 reinitialize_command	build_python/Lib/distutils/dist.py	/^    def reinitialize_command(self, command, reinit_subcommands=0):$/;"	m	class:Distribution
 rejectSniper	src/Game/player/w_weapons.h	/^	int		rejectSniper;$/;"	m	struct:sharedEdict_s	typeref:typename:int
 rel	build_python/Lib/test/test_statistics.py	/^    rel = 1e-12$/;"	v	class:VarianceStdevMixin
+relSZ	hdr/common.h	/^	std::unique_ptr<sizebuf_t> relSZ;$/;"	m	struct:slot_packetdata_s	typeref:typename:std::unique_ptr<sizebuf_t>
 rel_join	build_python/Lib/test/test_pathlib.py	/^rel_join = lambda *x: os.path.join(TESTFN, *x)$/;"	f
 relativeInfo_t	src/Game/gamecpp/q_sh_fx.h	/^}relativeInfo_t;$/;"	t	typeref:enum:__anon4605400f0103
 relativeOffset	src/features/httpdl.cpp	/^  uint32_t relativeOffset; \/\/ Offset of local file header$/;"	m	struct:CDFileHeader	typeref:typename:uint32_t	file:
@@ -61853,6 +61956,7 @@ select_to	build_python/Lib/tkinter/__init__.py	/^    select_to = selection_to$/;
 selectedWeaponSlot	src/Game/player/w_weapons.h	/^	int				selectedWeaponSlot;$/;"	m	class:inven_c	typeref:typename:int
 selected_alpn_protocol	build_python/Lib/ssl.py	/^    def selected_alpn_protocol(self):$/;"	m	class:SSLObject
 selected_alpn_protocol	build_python/Lib/ssl.py	/^    def selected_alpn_protocol(self):$/;"	m	class:SSLSocket
+selected_demo_spawncount	hdr/common.h	/^	int selected_demo_spawncount = -1; \/\/ numeric id chosen for playback$/;"	m	class:DemoSystem	typeref:typename:int
 selected_npn_protocol	build_python/Lib/ssl.py	/^    def selected_npn_protocol(self):$/;"	m	class:SSLObject
 selected_npn_protocol	build_python/Lib/ssl.py	/^    def selected_npn_protocol(self):$/;"	m	class:SSLSocket
 selection	build_python/Lib/tkinter/__init__.py	/^    def selection(self, *args):$/;"	m	class:Spinbox
@@ -62172,6 +62276,7 @@ server_version	build_python/Lib/wsgiref/simple_server.py	/^server_version = "WSG
 serverflags	src/Game/gamecpp/g_local.h	/^	int				serverflags;$/;"	m	struct:__anonaeeaba380508	typeref:typename:int
 servername_cb	build_python/Lib/test/test_ssl.py	/^        def servername_cb(ssl_sock, server_name, initial_context):$/;"	f	member:ThreadedTests.test_sni_callback	file:
 serverside_demos_modified	src/cvars.cpp	/^void serverside_demos_modified(cvar_t * c)$/;"	f	typeref:typename:void
+serverstate_trigger_play	hdr/common.h	/^	bool serverstate_trigger_play; \/\/ thickdemo trigger$/;"	m	class:DemoSystem	typeref:typename:bool
 service_actions	build_python/Lib/socketserver.py	/^        def service_actions(self):$/;"	m	class:ForkingMixIn
 service_actions	build_python/Lib/socketserver.py	/^    def service_actions(self):$/;"	m	class:BaseServer
 sess_cert_st	build_python/Lib/lib2to3/tests/data/infinite_recursion.py	/^class sess_cert_st(Structure):$/;"	c
@@ -64251,6 +64356,8 @@ sliceop_test	build_python/Lib/test/test_descr.py	/^    def sliceop_test(self, a,
 slideFix	src/core/exe_shared.cpp	/^static void slideFix(void)$/;"	f	typeref:typename:void	file:
 slidefix_modified	src/cvars.cpp	/^void slidefix_modified(cvar_t * c)$/;"	f	typeref:typename:void
 slot_from_ent	src/util.cpp	/^unsigned int slot_from_ent(edict_t * ent)$/;"	f	typeref:typename:unsigned int
+slot_packetdata_s	hdr/common.h	/^typedef struct slot_packetdata_s {$/;"	s
+slot_packetdata_t	hdr/common.h	/^} slot_packetdata_t;$/;"	t	typeref:struct:slot_packetdata_s
 slots	src/Game/player/w_weapons.h	/^	itemSlot_c	slots[MAXITEMS];$/;"	m	class:item_c	typeref:typename:itemSlot_c[]
 slotsNeeded	src/Game/player/w_weapons.h	/^	int						slotsNeeded;$/;"	m	class:weaponInfo_c	typeref:typename:int
 slotsNeeded	src/Game/player/w_weapons.h	/^	int					slotsNeeded;$/;"	m	struct:weaponInfoExtra_s	typeref:typename:int
@@ -64406,6 +64513,7 @@ solid	src/Game/gamecpp/g_local.h	/^	solid_t		solid;$/;"	m	struct:edict_s	typeref
 solid	src/Game/gamecpp/g_obj.h	/^	solid_t		solid;$/;"	m	struct:modelSpawnData_s	typeref:typename:solid_t
 solid	src/Game/gamecpp/game.h	/^	solid_t		solid;$/;"	m	struct:edict_s	typeref:typename:solid_t
 solid	src/Game/gamecpp/q_shared.h	/^	int			solid;			\/\/ 0x38 For client side prediction, (bits 0-7) is x\/y radius$/;"	m	struct:entity_state_s	typeref:typename:int
+solid_edicts	hdr/engine.h	/^	link_t	solid_edicts;$/;"	m	struct:areanode_s	typeref:typename:link_t
 solid_t	src/Game/gamecpp/game.h	/^} solid_t;$/;"	t	typeref:enum:__anonf5d358410103
 solve	build_python/Lib/test/test_generators.py	/^    def solve(self):$/;"	m	class:Knights
 solve	build_python/Lib/test/test_generators.py	/^    def solve(self):$/;"	m	class:Queens
@@ -89327,6 +89435,7 @@ timespec	build_python/Lib/lib2to3/tests/data/infinite_recursion.py	/^class times
 timespec_converter	build_python/Lib/test/test_time.py	/^        def timespec_converter(ns):$/;"	f	member:TestCPyTime.test_AsTimespec	file:
 timestamp	build_python/Lib/datetime.py	/^    def timestamp(self):$/;"	m	class:datetime
 timestamp	build_python/Lib/poplib.py	/^    timestamp = re.compile(br'\\+OK.[^<]*(<.*>)')$/;"	v	class:POP3
+timestamp	hdr/common.h	/^	int timestamp;$/;"	m	class:DemoCheckpoint	typeref:typename:int
 timestamp	src/Game/gamecpp/g_local.h	/^	float		timestamp;$/;"	m	struct:edict_s	typeref:typename:float
 timestamp_metadata	build_python/Lib/test/test_compileall.py	/^    def timestamp_metadata(self):$/;"	m	class:CompileallTestsBase
 timetuple	build_python/Lib/datetime.py	/^    def timetuple(self):$/;"	m	class:date
@@ -90040,12 +90149,14 @@ triggerSpawns	src/Game/gamecpp/g_trigger.cpp	/^spawn_t	triggerSpawns[] =$/;"	v	t
 trigger_activate_use	src/Game/gamecpp/g_trigger.cpp	/^void trigger_activate_use (edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
 trigger_brush_die	src/Game/gamecpp/g_misc.cpp	/^extern void trigger_brush_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,/;"	f	typeref:typename:void
 trigger_brush_use	src/Game/gamecpp/g_misc.cpp	/^void trigger_brush_use(edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
+trigger_checkpoint	hdr/common.h	/^	bool trigger_checkpoint[16] = {false};$/;"	m	class:DemoRecorder	typeref:typename:bool[16]
 trigger_countdown_remove	src/Game/gamecpp/g_trigger.cpp	/^void trigger_countdown_remove (edict_t *self)$/;"	f	typeref:typename:void
 trigger_countdown_think	src/Game/gamecpp/g_trigger.cpp	/^void trigger_countdown_think(edict_t *self)$/;"	f	typeref:typename:void
 trigger_countdown_touch	src/Game/gamecpp/g_trigger.cpp	/^void trigger_countdown_touch (edict_t *self, edict_t *other, cplane_t *plane, mtexinfo_t *surf)$/;"	f	typeref:typename:void
 trigger_countdown_use	src/Game/gamecpp/g_trigger.cpp	/^void trigger_countdown_use (edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
 trigger_counter_use	src/Game/gamecpp/g_trigger.cpp	/^void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
 trigger_crosslevel_trigger_use	src/Game/gamecpp/g_target.cpp	/^void trigger_crosslevel_trigger_use (edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
+trigger_edicts	hdr/engine.h	/^	link_t	trigger_edicts;$/;"	m	struct:areanode_s	typeref:typename:link_t
 trigger_elevator_init	src/Game/gamecpp/g_func.cpp	/^void trigger_elevator_init (edict_t *self)$/;"	f	typeref:typename:void
 trigger_elevator_use	src/Game/gamecpp/g_func.cpp	/^void trigger_elevator_use (edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
 trigger_enable	src/Game/gamecpp/g_trigger.cpp	/^void trigger_enable (edict_t *self, edict_t *other, edict_t *activator)$/;"	f	typeref:typename:void
@@ -90543,6 +90654,7 @@ unregister_callback	build_python/Lib/idlelib/window.py	/^    def unregister_call
 unregister_callback	build_python/Lib/idlelib/window.py	/^unregister_callback = registry.unregister_callback$/;"	v
 unregister_maybe_terminate	build_python/Lib/idlelib/filelist.py	/^    def unregister_maybe_terminate(self, edit):$/;"	m	class:FileList
 unregister_unpack_format	build_python/Lib/shutil.py	/^def unregister_unpack_format(name):$/;"	f
+unrelSZ	hdr/common.h	/^	std::unique_ptr<sizebuf_t> unrelSZ;$/;"	m	struct:slot_packetdata_s	typeref:typename:std::unique_ptr<sizebuf_t>
 unreliableData	src/features/netchan_extend.cpp	/^char unreliableData[16][TOTAL_PSIZE];\/\/1390 * 1024$/;"	v	typeref:typename:char[16][]
 unreliablePointer	src/features/netchan_extend.cpp	/^unsigned int unreliablePointer[16];$/;"	v	typeref:typename:unsigned int[16]
 unsafe	build_python/Lib/uuid.py	/^    unsafe = -1$/;"	v	class:SafeUUID
@@ -91250,6 +91362,8 @@ view_text	build_python/Lib/idlelib/textview.py	/^def view_text(parent, title, co
 view_types	build_python/Lib/multiprocessing/managers.py	/^view_types = [type(getattr({}, name)()) for name in ('items','keys','values')]$/;"	v
 viewangles	src/Game/gamecpp/q_shared.h	/^	vec3_t		viewangles;			\/\/ clamped$/;"	m	struct:__anon0c272cae0508	typeref:typename:vec3_t
 viewangles	src/Game/qcommon/pmove.h	/^	vec3_t		viewangles;					\/\/ for fixed views$/;"	m	struct:__anonc7762d4b0108	typeref:typename:vec3_t
+viewer_freecam	hdr/common.h	/^  bool viewer_freecam[16]; \/\/ experimental, future use$/;"	m	class:DemoPlayer	typeref:typename:bool[16]
+viewer_watch_slot	hdr/common.h	/^  int viewer_watch_slot[16]; \/\/ -1 = first available$/;"	m	class:DemoPlayer	typeref:typename:int[16]
 viewheight	src/Game/gamecpp/g_local.h	/^	int			viewheight;		\/\/ height above origin where eyesight is determined$/;"	m	struct:edict_s	typeref:typename:int
 viewheight	src/Game/gamecpp/q_shared.h	/^	float		viewheight;$/;"	m	struct:__anon0c272cae0508	typeref:typename:float
 viewoffset	src/Game/qcommon/pmove.h	/^	vec3_t		viewoffset;					\/\/ add to pmovestate->origin$/;"	m	struct:__anonc7762d4b0108	typeref:typename:vec3_t
@@ -91444,6 +91558,7 @@ was_saved	build_python/Lib/idlelib/undo.py	/^    was_saved = -1$/;"	v	class:Undo
 waste_pain	src/Game/gamecpp/g_generic.cpp	/^void waste_pain (edict_t *ent, edict_t *other, float kick, int damage, vec3_t wherehit)$/;"	f	typeref:typename:void
 waste_pain2	src/Game/gamecpp/g_generic.cpp	/^void waste_pain2 (edict_t *ent, edict_t *other, float kick, int damage, vec3_t wherehit)$/;"	f	typeref:typename:void
 watchState	src/Game/gamecpp/ai.h	/^	int				watchState;$/;"	m	class:ai_c	typeref:typename:int
+watch_slot	hdr/common.h	/^	int watch_slot = -1;$/;"	m	class:DemoPlayer	typeref:typename:int
 waterlevel	src/Game/gamecpp/g_local.h	/^	int			waterlevel;$/;"	m	struct:edict_s	typeref:typename:int
 waterlevel	src/Game/gamecpp/q_shared.h	/^	int			waterlevel;$/;"	m	struct:__anon0c272cae0508	typeref:typename:int
 watertype	src/Game/gamecpp/g_local.h	/^	int			watertype;$/;"	m	struct:edict_s	typeref:typename:int

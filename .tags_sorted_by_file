@@ -77174,6 +77174,18 @@ open_resource	build_python/Lib/zipimport.py	/^    def open_resource(self, resour
 path_sep	build_python/Lib/zipimport.py	/^path_sep = _bootstrap_external.path_sep$/;"	v
 resource_path	build_python/Lib/zipimport.py	/^    def resource_path(self, resource):$/;"	m	class:_ZipImportResourceReader
 zipimporter	build_python/Lib/zipimport.py	/^class zipimporter:$/;"	c
+Behavioral details (current implementation)	docs/ServerSideDemos.md	/^### Behavioral details (current implementation)$/;"	S	section:Server‑Side Demos (POC)
+Design map	docs/ServerSideDemos.md	/^### Design map$/;"	S	section:Server‑Side Demos (POC)
+Engine interception points (Quake II)	docs/ServerSideDemos.md	/^### Engine interception points (Quake II)$/;"	S	section:Server‑Side Demos (POC)
+How it works	docs/ServerSideDemos.md	/^### How it works$/;"	S	section:Server‑Side Demos (POC)
+Playback controls	docs/ServerSideDemos.md	/^### Playback controls$/;"	S	section:Server‑Side Demos (POC)
+Quick start	docs/ServerSideDemos.md	/^### Quick start$/;"	S	section:Server‑Side Demos (POC)
+Roadmap / Ideas	docs/ServerSideDemos.md	/^### Roadmap \/ Ideas$/;"	S	section:Server‑Side Demos (POC)
+Robustness and Dota 2‑style Live Shared Replay	docs/ServerSideDemos.md	/^### Robustness and Dota 2‑style Live Shared Replay$/;"	S	section:Server‑Side Demos (POC)
+SSDM file format (version 1)	docs/ServerSideDemos.md	/^### SSDM file format (version 1)$/;"	S	section:Server‑Side Demos (POC)
+Server‑Side Demos (POC)	docs/ServerSideDemos.md	/^## Server‑Side Demos (POC)$/;"	s
+Tips and limitations	docs/ServerSideDemos.md	/^### Tips and limitations$/;"	S	section:Server‑Side Demos (POC)
+Troubleshooting, difficulties, limitations	docs/ServerSideDemos.md	/^### Troubleshooting, difficulties, limitations$/;"	S	section:Server‑Side Demos (POC)
 VectorLength	example_py_scripts/commands.py	/^def VectorLength(v):$/;"	f
 VectorLengthFlat	example_py_scripts/commands.py	/^def VectorLengthFlat(v):$/;"	f
 cmd_clear_text	example_py_scripts/commands.py	/^def cmd_clear_text(who):$/;"	f
@@ -77221,6 +77233,13 @@ damage_knockback	extra/weapon_dmg_pseudocode.cpp	/^	int damage_knockback; 	\/\/ 
 DS_FAILURE	hdr/common.h	/^	DS_FAILURE,$/;"	e	enum:enum_dl_status
 DS_SUCCESS	hdr/common.h	/^	DS_SUCCESS$/;"	e	enum:enum_dl_status
 DS_UNCERTAIN	hdr/common.h	/^	DS_UNCERTAIN,$/;"	e	enum:enum_dl_status
+DemoCheckpoint	hdr/common.h	/^class DemoCheckpoint {$/;"	c
+DemoData	hdr/common.h	/^class DemoData {$/;"	c
+DemoFramesMap	hdr/common.h	/^typedef std::unordered_map<int,SlotPacketDataMap> DemoFramesMap;$/;"	t	typeref:typename:std::unordered_map<int,SlotPacketDataMap>
+DemoPlayer	hdr/common.h	/^class DemoPlayer {$/;"	c
+DemoRecorder	hdr/common.h	/^class DemoRecorder {$/;"	c
+DemoSystem	hdr/common.h	/^class DemoSystem {$/;"	c
+DemosPerLevelMap	hdr/common.h	/^typedef std::unordered_map<int,std::unique_ptr<DemoData>> DemosPerLevelMap;$/;"	t	typeref:typename:std::unordered_map<int,std::unique_ptr<DemoData>>
 EntDict	hdr/common.h	/^} EntDict;$/;"	t	typeref:struct:__anon476fffb10108
 FileData	hdr/common.h	/^struct FileData {$/;"	s
 LayoutMode	hdr/common.h	/^	enum LayoutMode {$/;"	g
@@ -77228,16 +77247,43 @@ MemoryItem	hdr/common.h	/^	MemoryItem(std::string name,std::string type,unsigned
 MemoryItem	hdr/common.h	/^class MemoryItem {$/;"	c
 NOP	hdr/common.h	/^#define NOP /;"	d
 STAT_LAYOUTS	hdr/common.h	/^#define STAT_LAYOUTS /;"	d
+SlotPacketDataMap	hdr/common.h	/^typedef std::unordered_map<int,std::unique_ptr<slot_packetdata_t>> SlotPacketDataMap;$/;"	t	typeref:typename:std::unordered_map<int,std::unique_ptr<slot_packetdata_t>>
 __anon476fffb10108	hdr/common.h	/^typedef struct {$/;"	s
+activation_chunks	hdr/common.h	/^	std::vector<chunk_t> activation_chunks[16];$/;"	m	class:DemoData	typeref:typename:std::vector<chunk_t>[16]
+active	hdr/common.h	/^	bool active = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
+active	hdr/common.h	/^	bool active = false;$/;"	m	class:DemoRecorder	typeref:typename:bool
+bookmarks	hdr/common.h	/^    std::unordered_map<std::string,int> bookmarks;$/;"	m	class:DemoPlayer	typeref:typename:std::unordered_map<std::string,int>
 c_ent	hdr/common.h	/^	edict_t * c_ent;$/;"	m	struct:__anon476fffb10108	typeref:typename:edict_t *
+checkpoints	hdr/common.h	/^	std::unordered_map<int, std::unique_ptr<DemoCheckpoint>> checkpoints;$/;"	m	class:DemoData	typeref:typename:std::unordered_map<int,std::unique_ptr<DemoCheckpoint>>
+chunk_s	hdr/common.h	/^typedef struct chunk_s {$/;"	s
+chunk_t	hdr/common.h	/^} chunk_t;$/;"	t	typeref:struct:chunk_s
+configstrings_baselines	hdr/common.h	/^	std::vector<chunk_t> configstrings_baselines;$/;"	m	class:DemoCheckpoint	typeref:typename:std::vector<chunk_t>
 count	hdr/common.h	/^    size_t count;$/;"	m	struct:list	typeref:typename:size_t
 crc	hdr/common.h	/^	int crc;$/;"	m	struct:FileData	typeref:typename:int
+current_frame	hdr/common.h	/^	int current_frame = 0;$/;"	m	class:DemoPlayer	typeref:typename:int
+data	hdr/common.h	/^	char * data;$/;"	m	struct:chunk_s	typeref:typename:char *
 data	hdr/common.h	/^    void *data;$/;"	m	struct:list_node	typeref:typename:void *
+deathmatch	hdr/common.h	/^	int deathmatch;$/;"	m	class:DemoData	typeref:typename:int
+demo_frames_map	hdr/common.h	/^	DemoFramesMap demo_frames_map;$/;"	m	class:DemoData	typeref:typename:DemoFramesMap
+demo_player	hdr/common.h	/^	std::unique_ptr<DemoPlayer> demo_player;$/;"	m	class:DemoSystem	typeref:typename:std::unique_ptr<DemoPlayer>
+demo_recorder	hdr/common.h	/^	std::unique_ptr<DemoRecorder> demo_recorder;$/;"	m	class:DemoSystem	typeref:typename:std::unique_ptr<DemoRecorder>
+demo_rel	hdr/common.h	/^	sizebuf_t demo_rel;$/;"	m	class:DemoPlayer	typeref:typename:sizebuf_t
+demo_rel_buf	hdr/common.h	/^	char    demo_rel_buf[1400-16];$/;"	m	class:DemoPlayer	typeref:typename:char[]
+demos	hdr/common.h	/^	DemosPerLevelMap demos;$/;"	m	class:DemoSystem	typeref:typename:DemosPerLevelMap
 dict	hdr/common.h	/^	PyDictObject dict;$/;"	m	struct:__anon476fffb10108	typeref:typename:PyDictObject
+disk_file	hdr/common.h	/^	std::ofstream disk_file;$/;"	m	class:DemoRecorder	typeref:typename:std::ofstream
 entityProperties	hdr/common.h	/^	static std::unordered_map<std::string, MemoryItem*> entityProperties;$/;"	m	class:MemoryItem	typeref:typename:std::unordered_map<std::string,MemoryItem * >
 enum_dl_status	hdr/common.h	/^enum enum_dl_status {$/;"	g
 filename	hdr/common.h	/^	std::string filename;$/;"	m	struct:FileData	typeref:typename:std::string
+final_frame	hdr/common.h	/^	int final_frame = 0;$/;"	m	class:DemoPlayer	typeref:typename:int
+first_frame	hdr/common.h	/^	int first_frame = 0;$/;"	m	class:DemoPlayer	typeref:typename:int
+frame_step	hdr/common.h	/^    int frame_step = 1;$/;"	m	class:DemoPlayer	typeref:typename:int
+game_dir	hdr/common.h	/^	std::string game_dir;$/;"	m	class:DemoData	typeref:typename:std::string
 gclientProperties	hdr/common.h	/^	static std::unordered_map<std::string, MemoryItem*> gclientProperties;$/;"	m	class:MemoryItem	typeref:typename:std::unordered_map<std::string,MemoryItem * >
+ghoulChunkIndex	hdr/common.h	/^	int ghoulChunkIndex[16];$/;"	m	class:DemoPlayer	typeref:typename:int[16]
+ghoulLoaded	hdr/common.h	/^	bool ghoulLoaded[16];$/;"	m	class:DemoPlayer	typeref:typename:bool[16]
+ghoul_chunks	hdr/common.h	/^	std::vector<chunk_t> ghoul_chunks[16];$/;"	m	class:DemoData	typeref:typename:std::vector<chunk_t>[16]
+ghoul_rel_sealed	hdr/common.h	/^	bool ghoul_rel_sealed[16] = {false};$/;"	m	class:DemoRecorder	typeref:typename:bool[16]
 head	hdr/common.h	/^    list_node_t *head;$/;"	m	struct:list	typeref:typename:list_node_t *
 headshot	hdr/common.h	/^		bool headshot;$/;"	m	struct:killfeed_s	typeref:typename:bool
 hud	hdr/common.h	/^		hud,$/;"	e	enum:LayoutMode
@@ -77245,23 +77291,42 @@ info	hdr/common.h	/^	std::string info;$/;"	m	class:MemoryItem	typeref:typename:s
 killer	hdr/common.h	/^		edict_t * killer;$/;"	m	struct:killfeed_s	typeref:typename:edict_t *
 killfeed_s	hdr/common.h	/^	typedef struct killfeed_s$/;"	s
 killfeed_t	hdr/common.h	/^	} killfeed_t;$/;"	t	typeref:struct:killfeed_s
+len	hdr/common.h	/^	int len;$/;"	m	struct:chunk_s	typeref:typename:int
+level_name	hdr/common.h	/^	std::string level_name;$/;"	m	class:DemoData	typeref:typename:std::string
 list	hdr/common.h	/^typedef struct list {$/;"	s
 list_node	hdr/common.h	/^typedef struct list_node {$/;"	s
 list_node_t	hdr/common.h	/^} list_node_t;$/;"	t	typeref:struct:list_node
 list_t	hdr/common.h	/^} list_t;$/;"	t	typeref:struct:list
+loop	hdr/common.h	/^    bool loop = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 means_of_death	hdr/common.h	/^		int means_of_death;$/;"	m	struct:killfeed_s	typeref:typename:int
 name	hdr/common.h	/^	std::string name;$/;"	m	class:MemoryItem	typeref:typename:std::string
+netchan_close_rel	hdr/common.h	/^	bool netchan_close_rel = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 next	hdr/common.h	/^    struct list_node *next;$/;"	m	struct:list_node	typeref:struct:list_node *
 offset	hdr/common.h	/^	unsigned int offset;$/;"	m	class:MemoryItem	typeref:typename:unsigned int
+packet_override	hdr/common.h	/^	bool packet_override = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 page	hdr/common.h	/^		page$/;"	e	enum:LayoutMode
+paused	hdr/common.h	/^    bool paused = false;$/;"	m	class:DemoPlayer	typeref:typename:bool
 prev	hdr/common.h	/^    struct list_node *prev;$/;"	m	struct:list_node	typeref:struct:list_node *
 rcon_cmd_type	hdr/common.h	/^typedef void (*rcon_cmd_type)(void);$/;"	t	typeref:typename:void (*)(void)
+recording_name	hdr/common.h	/^	char recording_name[MAX_TOKEN_CHARS];$/;"	m	class:DemoRecorder	typeref:typename:char[]
+recording_status	hdr/common.h	/^	bool recording_status;$/;"	m	class:DemoSystem	typeref:typename:bool
+relSZ	hdr/common.h	/^	std::unique_ptr<sizebuf_t> relSZ;$/;"	m	struct:slot_packetdata_s	typeref:typename:std::unique_ptr<sizebuf_t>
+selected_demo_spawncount	hdr/common.h	/^	int selected_demo_spawncount = -1; \/\/ numeric id chosen for playback$/;"	m	class:DemoSystem	typeref:typename:int
+serverstate_trigger_play	hdr/common.h	/^	bool serverstate_trigger_play; \/\/ thickdemo trigger$/;"	m	class:DemoSystem	typeref:typename:bool
+slot_packetdata_s	hdr/common.h	/^typedef struct slot_packetdata_s {$/;"	s
+slot_packetdata_t	hdr/common.h	/^} slot_packetdata_t;$/;"	t	typeref:struct:slot_packetdata_s
 stget	hdr/common.h	/^#define stget(/;"	d
 stset	hdr/common.h	/^#define stset(/;"	d
 tail	hdr/common.h	/^    list_node_t *tail;$/;"	m	struct:list	typeref:typename:list_node_t *
 time_of_death	hdr/common.h	/^		float time_of_death;$/;"	m	struct:killfeed_s	typeref:typename:float
+timestamp	hdr/common.h	/^	int timestamp;$/;"	m	class:DemoCheckpoint	typeref:typename:int
+trigger_checkpoint	hdr/common.h	/^	bool trigger_checkpoint[16] = {false};$/;"	m	class:DemoRecorder	typeref:typename:bool[16]
 type	hdr/common.h	/^	std::string type;$/;"	m	class:MemoryItem	typeref:typename:std::string
+unrelSZ	hdr/common.h	/^	std::unique_ptr<sizebuf_t> unrelSZ;$/;"	m	struct:slot_packetdata_s	typeref:typename:std::unique_ptr<sizebuf_t>
 victim	hdr/common.h	/^		edict_t * victim;$/;"	m	struct:killfeed_s	typeref:typename:edict_t *
+viewer_freecam	hdr/common.h	/^  bool viewer_freecam[16]; \/\/ experimental, future use$/;"	m	class:DemoPlayer	typeref:typename:bool[16]
+viewer_watch_slot	hdr/common.h	/^  int viewer_watch_slot[16]; \/\/ -1 = first available$/;"	m	class:DemoPlayer	typeref:typename:int[16]
+watch_slot	hdr/common.h	/^	int watch_slot = -1;$/;"	m	class:DemoPlayer	typeref:typename:int
 SOFREE_MINECRAFT	hdr/deathmatch.h	/^#define SOFREE_MINECRAFT /;"	d
 SOFREE_SCOREBOARD	hdr/deathmatch.h	/^#define SOFREE_SCOREBOARD /;"	d
 always_gamerules_c	hdr/deathmatch.h	/^class always_gamerules_c:public gamerules_c$/;"	c
@@ -77292,6 +77357,8 @@ COND_WAIT_ALL	hdr/engine.h	/^	COND_WAIT_ALL, $/;"	e	enum:ScriptConditionT
 COND_WAIT_ANY	hdr/engine.h	/^	COND_WAIT_ANY,$/;"	e	enum:ScriptConditionT
 COND_WAIT_TIME	hdr/engine.h	/^	COND_WAIT_TIME,$/;"	e	enum:ScriptConditionT
 CSCRIPT_SCRIPTCONDITION	hdr/engine.h	/^#define CSCRIPT_SCRIPTCONDITION /;"	d
+EDICT_ABSMAXS	hdr/engine.h	/^#define EDICT_ABSMAXS /;"	d
+EDICT_ABSMINS	hdr/engine.h	/^#define EDICT_ABSMINS /;"	d
 EDICT_BASE	hdr/engine.h	/^#define EDICT_BASE /;"	d
 EDICT_CLASSNAME	hdr/engine.h	/^#define EDICT_CLASSNAME /;"	d
 EDICT_CLIPMASK	hdr/engine.h	/^#define EDICT_CLIPMASK /;"	d
@@ -77309,6 +77376,7 @@ EDICT_MATERIAL	hdr/engine.h	/^#define EDICT_MATERIAL /;"	d
 EDICT_MAXS	hdr/engine.h	/^#define EDICT_MAXS /;"	d
 EDICT_MINS	hdr/engine.h	/^#define EDICT_MINS /;"	d
 EDICT_MODEL	hdr/engine.h	/^#define EDICT_MODEL /;"	d
+EDICT_MOVETYPE	hdr/engine.h	/^#define EDICT_MOVETYPE /;"	d
 EDICT_NEXTTHINK	hdr/engine.h	/^#define EDICT_NEXTTHINK /;"	d
 EDICT_OWNER	hdr/engine.h	/^#define EDICT_OWNER /;"	d
 EDICT_PAIN	hdr/engine.h	/^#define EDICT_PAIN /;"	d
@@ -77317,6 +77385,7 @@ EDICT_PS_GUN	hdr/engine.h	/^#define EDICT_PS_GUN /;"	d
 EDICT_SCRIPT	hdr/engine.h	/^#define EDICT_SCRIPT /;"	d
 EDICT_SOLID	hdr/engine.h	/^#define EDICT_SOLID /;"	d
 EDICT_SURFACETYPE	hdr/engine.h	/^#define EDICT_SURFACETYPE /;"	d
+EDICT_SVFLAGS	hdr/engine.h	/^#define EDICT_SVFLAGS /;"	d
 EDICT_S_ANGLES	hdr/engine.h	/^#define EDICT_S_ANGLES /;"	d
 EDICT_S_ORIGIN	hdr/engine.h	/^#define EDICT_S_ORIGIN /;"	d
 EDICT_S_SKINNUM	hdr/engine.h	/^#define EDICT_S_SKINNUM /;"	d
@@ -77362,6 +77431,10 @@ SV_CONFIGSTRINGS	hdr/engine.h	/^#define SV_CONFIGSTRINGS /;"	d
 ScriptConditionT	hdr/engine.h	/^enum ScriptConditionT$/;"	g
 __anonc4b1643e0103	hdr/engine.h	/^typedef enum {$/;"	g
 __anonc4b1643e0203	hdr/engine.h	/^{$/;"	g
+areanode_s	hdr/engine.h	/^typedef struct areanode_s$/;"	s
+areanode_t	hdr/engine.h	/^} areanode_t;$/;"	t	typeref:struct:areanode_s
+axis	hdr/engine.h	/^	int		axis;		\/\/ -1 = leaf node$/;"	m	struct:areanode_s	typeref:typename:int
+children	hdr/engine.h	/^	struct areanode_s	*children[2];$/;"	m	struct:areanode_s	typeref:struct:areanode_s * [2]
 client_state_t	hdr/engine.h	/^} client_state_t;$/;"	t	typeref:enum:__anonc4b1643e0203
 client_t	hdr/engine.h	/^typedef void client_t;$/;"	t	typeref:typename:void
 cmd_function_s	hdr/engine.h	/^typedef struct cmd_function_s$/;"	s
@@ -77370,16 +77443,19 @@ cs_connected	hdr/engine.h	/^	cs_connected,	\/\/ has been assigned to a client_t,
 cs_free	hdr/engine.h	/^	cs_free,		\/\/ can be reused for a new connection$/;"	e	enum:__anonc4b1643e0203
 cs_spawned	hdr/engine.h	/^	cs_spawned		\/\/ client is fully in game$/;"	e	enum:__anonc4b1643e0203
 cs_zombie	hdr/engine.h	/^	cs_zombie,		\/\/ client has been disconnected, but don't reuse$/;"	e	enum:__anonc4b1643e0203
+dist	hdr/engine.h	/^	float	dist;$/;"	m	struct:areanode_s	typeref:typename:float
 function	hdr/engine.h	/^	xcommand_t				function;$/;"	m	struct:cmd_function_s	typeref:typename:xcommand_t
 name	hdr/engine.h	/^	char					*name;$/;"	m	struct:cmd_function_s	typeref:typename:char *
 next	hdr/engine.h	/^	struct cmd_function_s	*next;$/;"	m	struct:cmd_function_s	typeref:struct:cmd_function_s *
 server_state_t	hdr/engine.h	/^} server_state_t;$/;"	t	typeref:enum:__anonc4b1643e0103
+solid_edicts	hdr/engine.h	/^	link_t	solid_edicts;$/;"	m	struct:areanode_s	typeref:typename:link_t
 ss_dead	hdr/engine.h	/^	ss_dead,			\/\/ no map loaded$/;"	e	enum:__anonc4b1643e0103
 ss_demo	hdr/engine.h	/^	ss_demo$/;"	e	enum:__anonc4b1643e0103
 ss_game	hdr/engine.h	/^	ss_game,			\/\/ actively running$/;"	e	enum:__anonc4b1643e0103
 ss_loading	hdr/engine.h	/^	ss_loading,			\/\/ spawning level edicts$/;"	e	enum:__anonc4b1643e0103
 stget	hdr/engine.h	/^#define stget(/;"	d
 stset	hdr/engine.h	/^#define stset(/;"	d
+trigger_edicts	hdr/engine.h	/^	link_t	trigger_edicts;$/;"	m	struct:areanode_s	typeref:typename:link_t
 xcommand_t	hdr/engine.h	/^typedef void (*xcommand_t) (void);$/;"	t	typeref:typename:void (*)(void)
 %	makefile	/^%:$/;"	t
 all	makefile	/^all:$/;"	t
@@ -91629,6 +91705,28 @@ buttons	src/commands.cpp	/^	byte	buttons; \/\/ [+1]$/;"	m	struct:usercmd_S	typer
 cmd_nix_checksum	src/commands.cpp	/^void cmd_nix_checksum(void)$/;"	f	typeref:typename:void
 cmd_nix_client_map	src/commands.cpp	/^void cmd_nix_client_map(void)$/;"	f	typeref:typename:void
 cmd_nix_client_state	src/commands.cpp	/^void cmd_nix_client_state(void)$/;"	f	typeref:typename:void
+cmd_nix_demo_bmdel	src/commands.cpp	/^static void cmd_nix_demo_bmdel(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmgoto	src/commands.cpp	/^static void cmd_nix_demo_bmgoto(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmlist	src/commands.cpp	/^static void cmd_nix_demo_bmlist(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmren	src/commands.cpp	/^static void cmd_nix_demo_bmren(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_bmset	src/commands.cpp	/^static void cmd_nix_demo_bmset(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_freecam	src/commands.cpp	/^static void cmd_nix_demo_freecam(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_goto	src/commands.cpp	/^static void cmd_nix_demo_goto(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_loop	src/commands.cpp	/^static void cmd_nix_demo_loop(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_nextcp	src/commands.cpp	/^static void cmd_nix_demo_nextcp(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pause	src/commands.cpp	/^static void cmd_nix_demo_pause(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pov	src/commands.cpp	/^static void cmd_nix_demo_pov(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pov_next	src/commands.cpp	/^static void cmd_nix_demo_pov_next(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_pov_prev	src/commands.cpp	/^static void cmd_nix_demo_pov_prev(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_prevcp	src/commands.cpp	/^static void cmd_nix_demo_prevcp(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_rate	src/commands.cpp	/^static void cmd_nix_demo_rate(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_resume	src/commands.cpp	/^static void cmd_nix_demo_resume(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_seekms	src/commands.cpp	/^static void cmd_nix_demo_seekms(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demo_seekpct	src/commands.cpp	/^static void cmd_nix_demo_seekpct(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_demomap	src/commands.cpp	/^void cmd_nix_demomap(void)$/;"	f	typeref:typename:void
+cmd_nix_match_history	src/commands.cpp	/^static void cmd_nix_match_history(void)$/;"	f	typeref:typename:void	file:
+cmd_nix_record	src/commands.cpp	/^void cmd_nix_record(void)$/;"	f	typeref:typename:void
+cmd_nix_stoprecord	src/commands.cpp	/^void cmd_nix_stoprecord(void)$/;"	f	typeref:typename:void
 cmd_nix_test	src/commands.cpp	/^void cmd_nix_test(void)$/;"	f	typeref:typename:void
 fake_cb	src/commands.cpp	/^void fake_cb(void) {$/;"	f	typeref:typename:void
 fireEvent	src/commands.cpp	/^	float	fireEvent;$/;"	m	struct:usercmd_S	typeref:typename:float	file:
@@ -91691,6 +91789,7 @@ my_PM_StepSlideMove	src/core/exe_shared.cpp	/^void my_PM_StepSlideMove(int num)$
 my_Qcommon_Frame	src/core/exe_shared.cpp	/^void my_Qcommon_Frame(int msec)$/;"	f	typeref:typename:void
 my_Qcommon_Init	src/core/exe_shared.cpp	/^void my_Qcommon_Init(int one , char ** two) {$/;"	f	typeref:typename:void
 my_Qcommon_Shutdown	src/core/exe_shared.cpp	/^void my_Qcommon_Shutdown(void)$/;"	f	typeref:typename:void
+my_SV_AreaEdicts_r	src/core/exe_shared.cpp	/^void my_SV_AreaEdicts_r (areanode_t *node)$/;"	f	typeref:typename:void
 my_Sys_GetProcAddress	src/core/exe_shared.cpp	/^void * my_Sys_GetProcAddress(void* handle, char* name)$/;"	f	typeref:typename:void *
 my_my_COM_BlockSequenceCRCByte	src/core/exe_shared.cpp	/^unsigned char my_my_COM_BlockSequenceCRCByte(std::vector<unsigned char> base, unsigned int seque/;"	f	typeref:typename:unsigned char
 my_test	src/core/exe_shared.cpp	/^void my_test(void)$/;"	f	typeref:typename:void
@@ -91705,6 +91804,7 @@ base_addr	src/core/game.cpp	/^void *base_addr = NULL;$/;"	v	typeref:typename:voi
 entstring_to_map	src/core/game.cpp	/^void entstring_to_map(char * entstring,std::unordered_map<std::string, std::vector<std::unordere/;"	f	typeref:typename:void
 game_exports	src/core/game.cpp	/^game_export_t * game_exports = NULL;$/;"	v	typeref:typename:game_export_t *
 map_to_entstring	src/core/game.cpp	/^void map_to_entstring(std::unordered_map<std::string, std::vector<std::unordered_map<std::string/;"	f	typeref:typename:void
+my_CRadiusContent_Compact	src/core/game.cpp	/^void __attribute__((stdcall)) my_CRadiusContent_Compact(int foundNum, void* CRadiusContent)$/;"	f	typeref:typename:void
 my_ClientBegin	src/core/game.cpp	/^void my_ClientBegin(edict_t * ent)$/;"	f	typeref:typename:void
 my_ClientCommand	src/core/game.cpp	/^void my_ClientCommand (edict_t *ent)$/;"	f	typeref:typename:void
 my_ClientDisconnect	src/core/game.cpp	/^void my_ClientDisconnect(edict_t * ent)$/;"	f	typeref:typename:void
@@ -91713,6 +91813,7 @@ my_Cmd_Say_f	src/core/game.cpp	/^void my_Cmd_Say_f(edict_t *ent, qboolean team, 
 my_G_RunFrame	src/core/game.cpp	/^float my_G_RunFrame (int serverframe)$/;"	f	typeref:typename:float
 my_G_SetStats	src/core/game.cpp	/^void my_G_SetStats(edict_t * ent)$/;"	f	typeref:typename:void
 my_GetSequenceForGoreZoneDeath	src/core/game.cpp	/^mmove_t	* my_GetSequenceForGoreZoneDeath(void * self,edict_t &monster, edict_t *inflictor, edict/;"	f	typeref:typename:mmove_t *
+my_Move_Begin	src/core/game.cpp	/^void my_Move_Begin (edict_t *ent)$/;"	f	typeref:typename:void
 my_PB_AddArmor	src/core/game.cpp	/^int my_PB_AddArmor(edict_t *ent, int amount)$/;"	f	typeref:typename:int
 my_Player_player_die	src/core/game.cpp	/^void my_Player_player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec/;"	f	typeref:typename:void
 my_PutClientInServer	src/core/game.cpp	/^void my_PutClientInServer (edict_t *ent)$/;"	f	typeref:typename:void
@@ -91722,6 +91823,7 @@ my_Sys_GetGameAPI	src/core/game.cpp	/^game_export_t * my_Sys_GetGameAPI (void *p
 my_T_Damage	src/core/game.cpp	/^void my_T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point,/;"	f	typeref:typename:void
 my_die_Cmd_Score_f	src/core/game.cpp	/^static void my_die_Cmd_Score_f (edict_t *ent)$/;"	f	typeref:typename:void	file:
 my_itemArmorTouch	src/core/game.cpp	/^void my_itemArmorTouch(edict_t *self, edict_t *other, cplane_t *plane, mtexinfo_t *surf)$/;"	f	typeref:typename:void
+my_plat_CalcAcceleratedMove	src/core/game.cpp	/^void my_plat_CalcAcceleratedMove(moveinfo_t *moveinfo)$/;"	f	typeref:typename:void
 stats_CC	src/core/game.cpp	/^int stats_CC[32];$/;"	v	typeref:typename:int[32]
 stats_DEATHS	src/core/game.cpp	/^int stats_DEATHS[32]; \/\/does not include kill$/;"	v	typeref:typename:int[32]
 stats_FLAGS_CAPTURED	src/core/game.cpp	/^int stats_FLAGS_CAPTURED[32];$/;"	v	typeref:typename:int[32]
@@ -91806,7 +91908,7 @@ timelimit	src/cvars.cpp	/^cvar_t * timelimit = NULL;$/;"	v	typeref:typename:cvar
 my_Sys_GetClipboardData	src/features/clipboard.cpp	/^char *my_Sys_GetClipboardData(void) {$/;"	f	typeref:typename:char *
 my_Sys_GetClipboardData	src/features/clipboard.cpp	/^char *my_Sys_GetClipboardData(void)$/;"	f	typeref:typename:char *
 show_utf8_prop	src/features/clipboard.cpp	/^ show_utf8_prop(Display *dpy, Window w, Atom p)$/;"	f	typeref:typename:char *
-DemoCheckpoint	src/features/demos.cpp	/^DemoCheckPoint::DemoCheckpoint(int timestamp) :$/;"	f	class:DemoCheckPoint
+DemoCheckpoint	src/features/demos.cpp	/^DemoCheckpoint::DemoCheckpoint(int timestamp) :$/;"	f	class:DemoCheckpoint
 DemoData	src/features/demos.cpp	/^DemoData::DemoData(std::string level_name,int deathmatch, std::string game_dir) :$/;"	f	class:DemoData
 DemoPlayer	src/features/demos.cpp	/^DemoPlayer::DemoPlayer()$/;"	f	class:DemoPlayer
 DemoRecorder	src/features/demos.cpp	/^DemoRecorder::DemoRecorder()$/;"	f	class:DemoRecorder
@@ -91814,11 +91916,20 @@ DemoSystem	src/features/demos.cpp	/^DemoSystem::DemoSystem()$/;"	f	class:DemoSys
 Initialise	src/features/demos.cpp	/^void DemoSystem::Initialise() {$/;"	f	class:DemoSystem	typeref:typename:void
 LoadDemo	src/features/demos.cpp	/^bool DemoSystem::LoadDemo() {$/;"	f	class:DemoSystem	typeref:typename:bool
 PrepareLevel	src/features/demos.cpp	/^void DemoSystem::PrepareLevel() {$/;"	f	class:DemoSystem	typeref:typename:void
+__anonaa5798530102	src/features/demos.cpp	/^    auto write_u32 = [](std::ofstream &f, uint32_t v){ f.write((const char*)&v, sizeof(v)); };$/;"	f	function:DemoRecorder::writeToDisk	file:
+__anonaa5798530202	src/features/demos.cpp	/^    auto write_str = [&](std::ofstream &f, const std::string &s){ uint32_t n=(uint32_t)s.size();/;"	f	function:DemoRecorder::writeToDisk	file:
+__anonaa5798530302	src/features/demos.cpp	/^    auto strip_ext = [](const std::string &name){ size_t p=name.find_last_of('.'); if(p==std::st/;"	f	function:DemoRecorder::writeToDisk	file:
+__anonaa5798530402	src/features/demos.cpp	/^    auto read_u32 = [](std::ifstream &fin, uint32_t &v){ fin.read((char*)&v,sizeof(v)); return (/;"	f	function:DemoSystem::LoadDemo	file:
+__anonaa5798530502	src/features/demos.cpp	/^    auto read_str = [&](std::ifstream &fin, std::string &out){ uint32_t n=0; if(!read_u32(fin,n)/;"	f	function:DemoSystem::LoadDemo	file:
 begin	src/features/demos.cpp	/^void DemoPlayer::begin(void) {$/;"	f	class:DemoPlayer	typeref:typename:void
 create_checkpoint	src/features/demos.cpp	/^void DemoRecorder::create_checkpoint(int slot)$/;"	f	class:DemoRecorder	typeref:typename:void
 demo_system	src/features/demos.cpp	/^DemoSystem demo_system;$/;"	v	typeref:typename:DemoSystem
+demo_viewer_auto_interval_ms	src/features/demos.cpp	/^int demo_viewer_auto_interval_ms[32] = { 0 };$/;"	v	typeref:typename:int[32]
+demo_viewer_freecam	src/features/demos.cpp	/^bool demo_viewer_freecam[32] = { false };$/;"	v	typeref:typename:bool[32]
+demo_viewer_last_cycle_ms	src/features/demos.cpp	/^int demo_viewer_last_cycle_ms[32] = { 0 };$/;"	v	typeref:typename:int[32]
+demo_viewer_watch_slot	src/features/demos.cpp	/^int demo_viewer_watch_slot[32] = { -1 };$/;"	v	typeref:typename:int[32]
 endRecording	src/features/demos.cpp	/^void DemoRecorder::endRecording(void) {$/;"	f	class:DemoRecorder	typeref:typename:void
-generate_svc_serverdata	src/features/demos.cpp	/^void DemoCheckpoint::generate_svc_serverdata(std::vector<chunk_t>& resultVector) {$/;"	f	class:DemoCheckpoint	typeref:typename:void
+generate_svc_serverdata	src/features/demos.cpp	/^void DemoCheckpoint::generate_svc_serverdata(int slot, std::vector<chunk_t>& resultVector) {$/;"	f	class:DemoCheckpoint	typeref:typename:void
 onClientFullyConnected	src/features/demos.cpp	/^void DemoRecorder::onClientFullyConnected(void)$/;"	f	class:DemoRecorder	typeref:typename:void
 playback	src/features/demos.cpp	/^void DemoPlayer::playback(netchan_t *chan, int length, byte *data)$/;"	f	class:DemoPlayer	typeref:typename:void
 saveNetworkData	src/features/demos.cpp	/^void DemoRecorder::saveNetworkData(void * netchan, int relLen, unsigned char * relData, int unre/;"	f	class:DemoRecorder	typeref:typename:void
@@ -92008,6 +92119,7 @@ orig_MSG_WriteDeltaUsercmd	src/fn_sigs.cpp	/^void (*orig_MSG_WriteDeltaUsercmd) 
 orig_MSG_WriteLong	src/fn_sigs.cpp	/^void (*orig_MSG_WriteLong) (sizebuf_t *sb, int c) = 0x0811F674;$/;"	v	typeref:typename:void (*)(sizebuf_t * sb,int c)
 orig_MSG_WriteShort	src/fn_sigs.cpp	/^void (*orig_MSG_WriteShort) (sizebuf_t *sb, int c) = 0x0811F5FC;$/;"	v	typeref:typename:void (*)(sizebuf_t * sb,int c)
 orig_MSG_WriteString	src/fn_sigs.cpp	/^void (*orig_MSG_WriteString) (sizebuf_t *sb, char *s) = 0x0811F760;$/;"	v	typeref:typename:void (*)(sizebuf_t * sb,char * s)
+orig_Move_Begin	src/fn_sigs.cpp	/^void (*orig_Move_Begin) (edict_t *ent);/;"	v	typeref:typename:void (*)(edict_t * ent)
 orig_NET_SendPacket	src/fn_sigs.cpp	/^void (*orig_NET_SendPacket) (netsrc_t sock, int length, void *data, netadr_t to) = 0x0820C940;$/;"	v	typeref:typename:void (*)(netsrc_t sock,int length,void * data,netadr_t to)
 orig_NET_StringToAdr	src/fn_sigs.cpp	/^qboolean (*orig_NET_StringToAdr) (char *s, netadr_t *a) = 0x0820D710;$/;"	v	typeref:typename:qboolean (*)(char * s,netadr_t * a)
 orig_Netchan_OutOfBandPrint	src/fn_sigs.cpp	/^void (*orig_Netchan_OutOfBandPrint) (int net_socket, netadr_t adr, char *format, ...) = 0x0812AE/;"	v	typeref:typename:void (*)(int net_socket,netadr_t adr,char * format,...)
@@ -92028,6 +92140,7 @@ orig_SP_GetStringText	src/fn_sigs.cpp	/^const char	*(*orig_SP_GetStringText)(uns
 orig_SP_Print	src/fn_sigs.cpp	/^void (*orig_SP_Print)(edict_t *ent, unsigned short ID, ...) = 0x081328D0;$/;"	v	typeref:typename:void (*)(edict_t * ent,unsigned short ID,...)
 orig_SP_Register	src/fn_sigs.cpp	/^void (*orig_SP_Register)(const char *Package) = 0x081348A8;$/;"	v	typeref:typename:void (*)(const char * Package)
 orig_SP_SPrint	src/fn_sigs.cpp	/^int (*orig_SP_SPrint)(char *buffer, int buffer_size, unsigned short ID, ...) = 0x081331D4;$/;"	v	typeref:typename:int (*)(char * buffer,int buffer_size,unsigned short ID,...)
+orig_SV_AreaEdicts_r	src/fn_sigs.cpp	/^void (*orig_SV_AreaEdicts_r) (areanode_t *node) = 0x80B2E4C;$/;"	v	typeref:typename:void (*)(areanode_t * node)
 orig_SV_ClientThink	src/fn_sigs.cpp	/^void (*orig_SV_ClientThink) (void *cl, usercmd_t *cmd) = 0x080B1470;$/;"	v	typeref:typename:void (*)(void * cl,usercmd_t * cmd)
 orig_SV_EffectIndex	src/fn_sigs.cpp	/^int (*orig_SV_EffectIndex)( char * name) = 0x080A94BC;$/;"	v	typeref:typename:int (*)(char * name)
 orig_SV_ExecuteClientMessage	src/fn_sigs.cpp	/^void (*orig_SV_ExecuteClientMessage) (client_t *cl) = 0x080B157C;$/;"	v	typeref:typename:void (*)(client_t * cl)
@@ -92065,6 +92178,7 @@ orig_fireSpas	src/fn_sigs.cpp	/^void (*orig_fireSpas)(weaponFireInfo_t &wf) = NU
 orig_glEnable	src/fn_sigs.cpp	/^void (*orig_glEnable)(unsigned int cap) = NULL;$/;"	v	typeref:typename:void (*)(unsigned int cap)
 orig_itemArmorTouch	src/fn_sigs.cpp	/^void (*orig_itemArmorTouch)(edict_t *self, edict_t *other, cplane_t *plane, mtexinfo_t *surf) = /;"	v	typeref:typename:void (*)(edict_t * self,edict_t * other,cplane_t * plane,mtexinfo_t * surf)
 orig_menu_AddServer	src/fn_sigs.cpp	/^void (*orig_menu_AddServer)(netadr_t addr,char *data) = 0x080E08B0;$/;"	v	typeref:typename:void (*)(netadr_t addr,char * data)
+orig_plat_CalcAcceleratedMove	src/fn_sigs.cpp	/^void (*orig_plat_CalcAcceleratedMove)(moveinfo_t *moveinfo);$/;"	v	typeref:typename:void (*)(moveinfo_t * moveinfo)
 orig_setDMMode	src/fn_sigs.cpp	/^void (* orig_setDMMode)(void * self,int newtype) = NULL;$/;"	v	typeref:typename:void (*)(void * self,int newtype)
 orig_use_drivers_txt_load	src/fn_sigs.cpp	/^int (*orig_use_drivers_txt_load)(void * unknown) = NULL;$/;"	v	typeref:typename:int (*)(void * unknown)
 orig_va	src/fn_sigs.cpp	/^char	* (*orig_va)(char *format, ...) = 0x081ED5DC;$/;"	v	typeref:typename:char * (*)(char * format,...)
@@ -92307,7 +92421,7 @@ BINARY	src/makefile	/^BINARY:=test.so$/;"	m
 BUILD_NUMBER_FILE	src/makefile	/^BUILD_NUMBER_FILE=buildnum$/;"	m
 BUILD_NUMBER_LDFLAGS	src/makefile	/^BUILD_NUMBER_LDFLAGS  = -Wl,--defsym=__BUILD_YEAR=$$((`date +'%Y'`))$/;"	m
 CC	src/makefile	/^CC=g++$/;"	m
-CFLAGS	src/makefile	/^CFLAGS:= -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ..\/h/;"	m
+CFLAGS	src/makefile	/^CFLAGS:= -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../;"	m
 LDFLAGS	src/makefile	/^LDFLAGS:= -m32 -shared -L \/minizip\/build$/;"	m
 LINKUS	src/makefile	/^LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lstdc++fs -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -l/;"	m
 OBJS	src/makefile	/^OBJS:= \\$/;"	m
@@ -92482,6 +92596,7 @@ SockadrToNetadr	src/util.cpp	/^void SockadrToNetadr (struct sockaddr_in *s, neta
 VectorLength	src/util.cpp	/^vec_t VectorLength(vec3_t v)$/;"	f	typeref:typename:vec_t
 VectorNormalize	src/util.cpp	/^vec_t VectorNormalize (vec3_t v)$/;"	f	typeref:typename:vec_t
 VectorSeparation	src/util.cpp	/^static vec_t VectorSeparation(vec3_t v0, vec3_t v1)$/;"	f	typeref:typename:vec_t	file:
+WriteE9Jmp	src/util.cpp	/^void WriteE9Jmp(void * where, void * dest)$/;"	f	typeref:typename:void
 arraySize	src/util.cpp	/^int arraySize = 0;$/;"	v	typeref:typename:int
 array_to_variadic	src/util.cpp	/^void array_to_variadic(F f,edict_t * ent, short id, const std::array<T, N>& arr) {$/;"	f	typeref:typename:void
 array_to_variadic_impl	src/util.cpp	/^void array_to_variadic_impl(F f,edict_t * ent, short id, const std::array<T, N>& arr, std::index/;"	f	typeref:typename:void
