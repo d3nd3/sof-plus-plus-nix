@@ -16,6 +16,7 @@ $(info $(shell mkdir -p ../obj))
 # DEFAULT VARIABLE VALUES
 # CAN ENABLE FEATURES HERE
 USE_PYTHON:=1
+USE_DEMOSYSTEM:=1
 
 OBJS:= \
 ../obj/clipboard.o \
@@ -39,19 +40,28 @@ OBJS:= \
 ../obj/dm_sofree.o \
 ../obj/dm_standard.o \
 ../obj/dm_ctf.o \
-../obj/dm_realistic.o \
-../obj/demos.o \
+../obj/dm_realistic.o
 
+ifeq ($(USE_DEMOSYSTEM),1)
+OBJS += ../obj/demos.o
+CFLAGS_DEMO := -D DEMOSYSTEM
+endif
 
-CFLAGS:= -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/
+CFLAGS:= -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/ $(CFLAGS_DEMO)
 LDFLAGS:= -m32 -shared -L /minizip/build
 LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lstdc++fs -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm
 
+PYTHON_CFLAGS := $(shell pkg-config --cflags python3 2>/dev/null)
 ifeq ($(USE_PYTHON),1)
-	OBJS += ../obj/python.o ../obj/entity.o ../obj/ppnix.o ../obj/player.o ../obj/decorators.o ../obj/memory.o ../obj/pages.o ../obj/killfeed.o
-	CFLAGS += $(shell pkg-config --cflags python3) -DUSE_PYTHON
-	LDFLAGS += -L ../build_python
-	LINKUS += -Wl,-Bstatic -l:libpython3.8.a -Wl,-Bdynamic
+  ifeq ($(PYTHON_CFLAGS),)
+    ifneq (clean,$(MAKECMDGOALS))
+      $(error USE_PYTHON=1 but pkg-config python3 not found. Install python3-dev or build without Python: make USE_PYTHON=0)
+    endif
+  endif
+  OBJS += ../obj/python.o ../obj/entity.o ../obj/ppnix.o ../obj/player.o ../obj/decorators.o ../obj/memory.o ../obj/pages.o ../obj/killfeed.o
+  CFLAGS += $(PYTHON_CFLAGS) -DUSE_PYTHON
+  LDFLAGS += -L ../build_python
+  LINKUS += -Wl,-Bstatic -l:libpython3.8.a -Wl,-Bdynamic
 endif
 
 

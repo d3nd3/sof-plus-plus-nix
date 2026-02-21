@@ -447,7 +447,7 @@ void my_Netchan_Transmit_Save (netchan_t *chan, int length, byte *data)
 {
 	//SOFPPNIX_DEBUG("my_netchan_save");
 
-	#if 1
+	#ifdef DEMOSYSTEM
 	if ( demo_system.recording_status ) {
 
 		//netchan_t->reliable_length
@@ -477,7 +477,7 @@ client state is still cs_zombie after disconnect.
 */
 void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 {
-	#if 1
+	#ifdef DEMOSYSTEM
 	int serverstate = stget(0x082AF680,0);
 	//sv.state = serverstate; inside SV_SpawnServer.
 	if ( !demo_system.demo_player->active ) {
@@ -489,8 +489,6 @@ void my_Netchan_Transmit_Playback (netchan_t *chan, int length, byte *data)
 	if ( !demo_system.demo_player->packet_override ) return;
 
 	demo_system.demo_player->playback(chan,length,data);
-
-	//SOFPPNIX_DEBUG("EndNetchan");
 	#else
 	return my_Netchan_Transmit(chan,length,data);
 	#endif
@@ -537,6 +535,7 @@ void my_Netchan_Patch(netchan_t *chan)
 		stset(chan,0x54,0);
 	}
 	#else
+	#ifdef DEMOSYSTEM
 	if ( demo_system.demo_player->netchan_close_rel && !chan->reliable_length && demo_system.demo_player->demo_rel.cursize ) {
 		memcpy (chan->reliable_buf, demo_system.demo_player->demo_rel_buf, demo_system.demo_player->demo_rel.cursize);
 		chan->reliable_length = demo_system.demo_player->demo_rel.cursize;
@@ -549,6 +548,7 @@ void my_Netchan_Patch(netchan_t *chan)
 		chan->reliable_sequence ^= 1;
 		chan->message.cursize = 0;
 	}
+	#endif
 	#endif
 	
 	#endif

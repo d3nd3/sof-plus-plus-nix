@@ -150,7 +150,7 @@ void DemoCheckpoint::generate_svc_serverdata(int slot, std::vector<chunk_t>& res
 
 	}
 
-	#if 1
+	#ifdef DEMOSYSTEM
 	// baselines
 	entity_state_t	nullstate;
 	entity_state_t	*base;
@@ -440,7 +440,11 @@ void DemoRecorder::writeToDisk(void)
     int first = 0, last = 0;
     if (!demo_data->demo_frames_map.empty()) {
         first = demo_data->demo_frames_map.begin()->first;
-        last  = demo_data->demo_frames_map.rbegin()->first;
+        last = first;
+        for (const auto &kv : demo_data->demo_frames_map) {
+            if (kv.first < first) first = kv.first;
+            if (kv.first > last) last = kv.first;
+        }
     }
     write_u32(f, (uint32_t)first);
     write_u32(f, (uint32_t)last);
@@ -568,7 +572,8 @@ void DemoPlayer::begin(void) {
     }
     first_frame = demo_system.demos[spawncount]->demo_frames_map.begin()->first;
     current_frame = first_frame;
-    final_frame = demo_system.demos[spawncount]->demo_frames_map.rbegin()->first;
+    final_frame = first_frame;
+    for (const auto &kv : demo_system.demos[spawncount]->demo_frames_map) if (kv.first > final_frame) final_frame = kv.first;
 	SOFPPNIX_DEBUG("Starting demo on frame : %i / %i",first_frame, final_frame);
     paused = false;
     frame_step = 1;
@@ -612,7 +617,7 @@ void DemoPlayer::playback(netchan_t *chan, int length, byte *data)
         auto &demoData = demo_system.demos[spawncount];
         int cpFrame = current_frame;
         if (!demoData->checkpoints.empty()) {
-            int best = demo_player->first_frame; // fallback
+            int best = first_frame;
             for (const auto &kv : demoData->checkpoints) {
                 int fr = kv.first; if (fr <= current_frame && fr >= best) best = fr;
             }
@@ -788,7 +793,7 @@ create entry into demos with svs.spawncount as key.
 Called by sv_spawnserver.
 */
 void DemoSystem::PrepareLevel() {
-	SOFPPNIX_DEBUG("Summoning recorder and player controls...")
+	SOFPPNIX_DEBUG("Summoning recorder and player controls...");
 
 	// Reset the unique_ptr's to get a clean object.
 	demo_recorder.reset(new DemoRecorder());

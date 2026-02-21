@@ -1,6 +1,6 @@
 #include "common.h"
 
-
+#ifdef DEMOSYSTEM
 static void cmd_nix_match_history(void);
 static void cmd_nix_demo_pause(void);
 static void cmd_nix_demo_resume(void);
@@ -16,8 +16,11 @@ static void cmd_nix_demo_bmgoto(void);
 static void cmd_nix_demo_bmlist(void);
 static void cmd_nix_demo_bmdel(void);
 static void cmd_nix_demo_bmren(void);
+static void cmd_nix_demo_pov(void);
+static void cmd_nix_demo_freecam(void);
 static void cmd_nix_demo_pov_next(void);
 static void cmd_nix_demo_pov_prev(void);
+#endif
 
 void CreateCommands(void)
 {
@@ -25,7 +28,7 @@ void CreateCommands(void)
 	my_Cmd_AddCommand("++nix_client_state",&cmd_nix_client_state);
 	my_Cmd_AddCommand("++nix_client_map",&cmd_nix_client_map);
 
-    #if 1
+    #ifdef DEMOSYSTEM
     my_Cmd_AddCommand("++nix_demomap",&cmd_nix_demomap);
     my_Cmd_AddCommand("++nix_record",&cmd_nix_record);
     my_Cmd_AddCommand("++nix_stoprecord",&cmd_nix_stoprecord);
@@ -48,7 +51,7 @@ void CreateCommands(void)
     my_Cmd_AddCommand("++nix_demo_pov_next",(void*)cmd_nix_demo_pov_next);
     my_Cmd_AddCommand("++nix_demo_pov_prev",(void*)cmd_nix_demo_pov_prev);
     my_Cmd_AddCommand("++nix_demo_freecam",(void*)cmd_nix_demo_freecam);
-    #endif
+    #endif /* DEMOSYSTEM */
 
 	// command to output checksum
 	my_Cmd_AddCommand("++nix_checksum",&cmd_nix_checksum);
@@ -57,6 +60,7 @@ void CreateCommands(void)
 	
 }
 
+#ifdef DEMOSYSTEM
 static void cmd_nix_demo_pov(void)
 {
     if (orig_Cmd_Argc() != 2) {
@@ -754,7 +758,6 @@ void cmd_nix_test(void)
 }
 
 
-#if 1
 void cmd_nix_demomap(void)
 {
 
@@ -808,4 +811,4 @@ void cmd_nix_stoprecord(void)
 #endif
 	demo_system.demo_recorder->endRecording();
 }
-#endif
+#endif /* DEMOSYSTEM */

@@ -724,6 +724,7 @@ extern int demo_viewer_auto_interval_ms[32];
 extern int demo_viewer_last_cycle_ms[32];
 #endif
 
+#ifdef DEMOSYSTEM
 // Enabled declarations for demos feature (POC)
 typedef struct slot_packetdata_s {
 	std::unique_ptr<sizebuf_t> relSZ;
@@ -826,6 +827,11 @@ public:
 	bool LoadDemo();
 };
 extern DemoSystem demo_system;
+extern int demo_viewer_watch_slot[32];
+extern bool demo_viewer_freecam[32];
+extern int demo_viewer_auto_interval_ms[32];
+extern int demo_viewer_last_cycle_ms[32];
+#endif
 
 /*
 ---------------------------------------------------------------------------

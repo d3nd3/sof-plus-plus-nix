@@ -2,9 +2,11 @@
 a mod that behaves similar to sofplus on windows, applies to linux binary only
 
 ## Preparing Build
-sudo apt install libcurl4-openssl-dev:i386 libssl-dev:i386 libbsd-dev:i386 libx11-dev:i386 libcrypt1:i386 libminizip-dev:i368
+sudo apt install g++-multilib libcurl4-openssl-dev:i386 libssl-dev:i386 libbsd-dev:i386 libx11-dev:i386 libcrypt1:i386 libminizip-dev:i386 libsdl1.2-dev:i386
 
 sudo ln -s /usr/lib/i386-linux-gnu/libcrypt.so.1 /usr/lib/i386-linux-gnu/libcrypt.so
+
+To build without Python support: `make USE_PYTHON=0`. To disable the demo system: `make USE_DEMOSYSTEM=0` (combine as needed, e.g. `make USE_PYTHON=0 USE_DEMOSYSTEM=0`).
 
 ## Recommended to use the docker when using USE_PYTHON:=1
 It is recommended to use the docker script `dock-build.sh` and `dock-run.sh` to properly install the python library, uses a compiler within a docker!  

@@ -1057,7 +1057,7 @@ void my_ClientCommand (edict_t *ent)
 		// Spectator should not output this command as text.
 		return;
 	}
-    // Viewer-local demo commands (when demo playback is active)
+#ifdef DEMOSYSTEM
     if (demo_system.demo_player && demo_system.demo_player->active) {
         const char* c = cmd;
         int slot = slot_from_ent(ent);
@@ -1112,6 +1112,7 @@ void my_ClientCommand (edict_t *ent)
             return;
         }
     }
+#endif
     orig_ClientCommand(ent);
 }
 

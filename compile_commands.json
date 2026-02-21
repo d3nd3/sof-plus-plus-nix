@@ -1,0 +1,157 @@
+[
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/clipboard.cpp -o ../obj/clipboard.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/clipboard.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c commands.cpp -o ../obj/commands.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/commands.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c cvars.cpp -o ../obj/cvars.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/cvars.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c core/exe_shared.cpp -o ../obj/exe_shared.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/core/exe_shared.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c core/exe_server.cpp -o ../obj/exe_server.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/core/exe_server.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c core/exe_client.cpp -o ../obj/exe_client.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/core/exe_client.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c fn_sigs.cpp -o ../obj/fn_sigs.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/fn_sigs.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c core/game.cpp -o ../obj/game.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/core/game.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c main.cpp -o ../obj/main.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/main.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/serverlist.cpp -o ../obj/serverlist.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/serverlist.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/httpdl.cpp -o ../obj/httpdl.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/httpdl.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/detect.cpp -o ../obj/detect.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/detect.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c core/video.cpp -o ../obj/video.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/core/video.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/weapon_balance.cpp -o ../obj/weapon_balance.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/weapon_balance.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c util.cpp -o ../obj/util.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/util.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c strip.cpp -o ../obj/strip.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/strip.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c game_modes/dm_always.cpp -o ../obj/dm_always.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/game_modes/dm_always.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c game_modes/deathmatch.cpp -o ../obj/deathmatch.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/game_modes/deathmatch.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c game_modes/dm_sofree.cpp -o ../obj/dm_sofree.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/game_modes/dm_sofree.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c game_modes/dm_standard.cpp -o ../obj/dm_standard.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/game_modes/dm_standard.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c game_modes/dm_ctf.cpp -o ../obj/dm_ctf.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/game_modes/dm_ctf.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c game_modes/dm_realistic.cpp -o ../obj/dm_realistic.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/game_modes/dm_realistic.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/demos.cpp -o ../obj/demos.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/demos.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/python.cpp -o ../obj/python.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/python.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c python_api/entity.cpp -o ../obj/entity.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/python_api/entity.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c python_api/ppnix.cpp -o ../obj/ppnix.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/python_api/ppnix.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c python_api/player.cpp -o ../obj/player.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/python_api/player.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c python_api/decorators.cpp -o ../obj/decorators.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/python_api/decorators.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c python_api/memory.cpp -o ../obj/memory.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/python_api/memory.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/pages.cpp -o ../obj/pages.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/pages.cpp"
+    },
+    {
+        "command": "g++ -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/  -DUSE_PYTHON -c features/killfeed.cpp -o ../obj/killfeed.o",
+        "directory": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src",
+        "file": "/home/dinda/git-projects/d3nd3/public/sof/sof-plus-plus-nix/src/features/killfeed.cpp"
+    }
+]

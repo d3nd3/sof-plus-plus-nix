@@ -309,8 +309,9 @@ void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstat
 	void * svs = 0x082A2540;
 	spawncount = stget(svs,0x108);
 
-    // Engage demo system lifecycle per level
+#ifdef DEMOSYSTEM
     demo_system.PrepareLevel();
+#endif
 }
 
 /*
@@ -318,18 +319,15 @@ void my_SV_SpawnServer(char *server, char *spawnpoint, server_state_t serverstat
 */
 void my_SV_New_f(void)
 {
-	//TODO: Support multiple clients. This becomes array.
 	SOFPPNIX_DEBUG("SV_New_f");
-
+#ifdef DEMOSYSTEM
 	if ( demo_system.demo_player && demo_system.demo_player->active ) {
-		// Let the engine run the normal connect handshake first
 		orig_SV_New_f();
-		// Then switch to demo override for subsequent packets
 		demo_system.demo_player->packet_override = true;
 		return;
 	}
+#endif
 	orig_SV_New_f();
-	
 }
 
 
