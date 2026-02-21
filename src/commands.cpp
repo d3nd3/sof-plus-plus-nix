@@ -498,6 +498,7 @@ static void cmd_nix_demo_bmren(void)
     demo_system.demo_player->bookmarks[newn] = frame;
     SOFPPNIX_PRINT("renamed bookmark '%s' -> '%s'", oldn.c_str(), newn.c_str());
 }
+#endif /* DEMOSYSTEM */
 
 std::vector<std::string> split(const std::string& str, const std::string& delimiter) {
 	std::vector<std::string> substrings;
@@ -757,7 +758,7 @@ void cmd_nix_test(void)
 	SOFPPNIX_DEBUG("Test done");
 }
 
-
+#ifdef DEMOSYSTEM
 void cmd_nix_demomap(void)
 {
 
