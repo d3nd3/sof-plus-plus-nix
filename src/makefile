@@ -48,7 +48,7 @@ OBJS += ../obj/demos.o
 CFLAGS_DEMO := -D DEMOSYSTEM
 endif
 
-CFLAGS:= -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/ $(CFLAGS_DEMO)
+CFLAGS:= -O2 -fomit-frame-pointer -std=c++17 -m32 -fpic -fpermissive -w -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/ $(CFLAGS_DEMO)
 
 # Statically link libstdc++ and libgcc to avoid GLIBCXX symbol errors on target servers
 LDFLAGS:= -m32 -shared -static-libstdc++ -static-libgcc -L /minizip/build
