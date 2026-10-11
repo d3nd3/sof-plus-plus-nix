@@ -16,6 +16,7 @@ $(info $(shell mkdir -p ../obj))
 # DEFAULT VARIABLE VALUES
 # CAN ENABLE FEATURES HERE
 USE_PYTHON:=1
+PYTHON_VERSION?=3.8
 USE_DEMOSYSTEM:=1
 
 OBJS:= \
@@ -48,20 +49,29 @@ CFLAGS_DEMO := -D DEMOSYSTEM
 endif
 
 CFLAGS:= -g -std=c++17 -m32 -fpic -fpermissive -w -D DEBUG -D _GNU_SOURCE -D_inline=inline -I ../hdr -I /lib/ $(CFLAGS_DEMO)
-LDFLAGS:= -m32 -shared -L /minizip/build
-LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lstdc++fs -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl  -lutil -lm
 
-PYTHON_CFLAGS := $(shell pkg-config --cflags python3 2>/dev/null)
+# Statically link libstdc++ and libgcc to avoid GLIBCXX symbol errors on target servers
+LDFLAGS:= -m32 -shared -static-libstdc++ -static-libgcc -L /minizip/build
+LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lstdc++fs -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl -lutil -lm
+
+# Force 32-bit pkg-config path query for Python
+PYTHON_CFLAGS := $(shell PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig pkg-config --cflags python$(PYTHON_VERSION) 2>/dev/null)
+ifeq ($(PYTHON_CFLAGS),)
+  PYTHON_CFLAGS := $(shell PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig pkg-config --cflags python3 2>/dev/null | sed 's/x86_64-linux-gnu/i386-linux-gnu/g')
+endif
+
 ifeq ($(USE_PYTHON),1)
   ifeq ($(PYTHON_CFLAGS),)
     ifneq (clean,$(MAKECMDGOALS))
-      $(error USE_PYTHON=1 but pkg-config python3 not found. Install python3-dev or build without Python: make USE_PYTHON=0)
+      $(error USE_PYTHON=1 but 32-bit Python headers not found. Install libpython3-dev:i386 or build with USE_PYTHON=0)
     endif
   endif
   OBJS += ../obj/python.o ../obj/entity.o ../obj/ppnix.o ../obj/player.o ../obj/decorators.o ../obj/memory.o ../obj/pages.o ../obj/killfeed.o
   CFLAGS += $(PYTHON_CFLAGS) -DUSE_PYTHON
-  LDFLAGS += -L ../build_python
-  LINKUS += -Wl,-Bstatic -l:libpython3.8.a -Wl,-Bdynamic
+  LDFLAGS += -L../build_python
+  
+  # Dynamically static link libpython3.9.a or libpython3.8.a based on PYTHON_VERSION flag
+  LINKUS += -Wl,-Bstatic -lpython$(PYTHON_VERSION) -Wl,-Bdynamic
 endif
 
 
@@ -72,7 +82,6 @@ BUILD_NUMBER_LDFLAGS += -Wl,--defsym=__BUILD_MONTH=$$((10\#`date +'%m'` + 16))
 BUILD_NUMBER_LDFLAGS += -Wl,--defsym=__BUILD_DAY=$$((10\#`date +'%d'` + 64))
 
 BUILD_NUMBER_LDFLAGS += -Wl,--defsym=__BUILD_NUMBER=$$(cat $(BUILD_NUMBER_FILE))
-
 
 
 # run recipe if ../out/binary does not exist or ../out/binaryDate >= installDirBinaryDate
@@ -90,7 +99,6 @@ $(INSTALL_DIR)$(BINARY): ../out/$(BINARY)
 #PYTHON DEPENDENDANT PARTS
 ifeq ($(USE_PYTHON),1)
 
-# python_api
 ../obj/player.o : ./python_api/player.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 ../obj/entity.o : ./python_api/entity.cpp

@@ -305,7 +305,8 @@ void createSharedDetours(void)
 	//detour doesnt work !! related to esp first line?
 	//orig_Netchan_Transmit = createDetour(0x0812AFCC, &my_Netchan_Transmit,6);
 
-	orig_SV_AreaEdicts_r = createDetour(orig_SV_AreaEdicts_r, &my_SV_AreaEdicts_r, 5);
+	//testing a bug related to c4 0 0 0 and grenade drop etc.
+	//orig_SV_AreaEdicts_r = createDetour(orig_SV_AreaEdicts_r, &my_SV_AreaEdicts_r, 5);
 }
 
 void createClientDetours(void)

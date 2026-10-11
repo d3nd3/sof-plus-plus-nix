@@ -13,8 +13,7 @@ RUN git clone https://github.com/Kitware/CMake
 
 WORKDIR CMake
 
-RUN ./bootstrap && make && make install
-
+RUN ./bootstrap -- -DCMAKE_USE_OPENSSL=OFF && make && make install
 
 # ===============================================================
 # Compile minizip

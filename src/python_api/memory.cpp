@@ -90,7 +90,7 @@ public:
 
 				*(vec_t*)((char*)baseAddress + offset) = x;
 				*(vec_t*)((char*)baseAddress + offset + sizeof(vec_t)) = y;
-				*(vec_t*)((char*)baseAddress + offset + 1*sizeof(vec_t)) = z;
+				*(vec_t*)((char*)baseAddress + offset + 2*sizeof(vec_t)) = z;
 			}
 		}
 	}
