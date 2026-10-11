@@ -176,5 +176,5 @@ endif
 
 .PHONY: clean
 clean:
-	rm ../obj/* >/dev/null 2>&1 || true
-	rm ../out/* >/dev/null 2>&1 || true
+	rm -f ../obj/* >/dev/null 2>&1 || true
+	rm -f ../out/* >/dev/null 2>&1 || true
