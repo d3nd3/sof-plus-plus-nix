@@ -139,7 +139,7 @@ void memoryProtect(void * addr)
 {
 	size_t page_size = getpagesize();
 	void * aligned_addr = (void *)((unsigned long)addr & ~(page_size - 1));
-	if (mprotect(aligned_addr, page_size, PROT_READ ) == -1) {
+	if (mprotect(aligned_addr, page_size, PROT_READ | PROT_EXEC) == -1) {
 		error_exit("m-protect");
 	}
 }
@@ -174,7 +174,12 @@ void * createDetour(void * orig, void * mine, int size) {
 	/*
 		THUNK SAVED. { SAVED OPCODES;JMP->ORIG+SIZE(SAVED_OPCODES) }
 	*/
-	void * thunk = malloc(size + 5);
+	size_t page_size = getpagesize();
+	void * thunk = mmap(NULL, page_size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	if (thunk == MAP_FAILED) {
+		error_exit("detour mmap");
+	}
 	// save the front of func
 	memcpy(thunk, orig, size);
 	// jump back
@@ -194,6 +199,9 @@ void * createDetour(void * orig, void * mine, int size) {
 	memcpy(orig+1,&rel_jmp,4);
 
 	memoryProtect(orig);
+	if (mprotect(thunk, page_size, PROT_READ | PROT_EXEC) == -1) {
+		error_exit("detour mprotect");
+	}
 	// dealloc this on uninit.
 	return thunk;
 }
