@@ -509,23 +509,23 @@ void my_ShutdownGame(void)
 
 
 	/*
-		free all detour mallocs
+		release all detour trampolines
 	*/
 	
-	free(orig_SpawnEntities);
-	free(orig_ShutdownGame);
-	free(orig_ClientBegin);
-	free(orig_ClientDisconnect);
-	free(orig_ClientUserinfoChanged);
-	free(orig_G_RunFrame);
-	free(orig_Cmd_Say_f);
-	free(orig_PutClientInServer);
-	free(orig_PB_AddArmor);
-	free(orig_GetSequenceForGoreZoneDeath);
-	free(orig_G_SetStats);
-	free(orig_ClientCommand);
-	free(orig_T_Damage);
-	free(orig_fireSpas);
+	destroyDetour(orig_SpawnEntities);
+	destroyDetour(orig_ShutdownGame);
+	destroyDetour(orig_ClientBegin);
+	destroyDetour(orig_ClientDisconnect);
+	destroyDetour(orig_ClientUserinfoChanged);
+	destroyDetour(orig_G_RunFrame);
+	destroyDetour(orig_Cmd_Say_f);
+	destroyDetour(orig_PutClientInServer);
+	destroyDetour(orig_PB_AddArmor);
+	destroyDetour(orig_GetSequenceForGoreZoneDeath);
+	destroyDetour(orig_G_SetStats);
+	destroyDetour(orig_ClientCommand);
+	destroyDetour(orig_T_Damage);
+	destroyDetour(orig_fireSpas);
 
 
 	freeDeathmatchHooks();

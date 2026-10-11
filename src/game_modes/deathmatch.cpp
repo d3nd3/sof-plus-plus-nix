@@ -94,7 +94,7 @@ void applyDeathmatchHooks(unsigned int base_addr)
 
 void freeDeathmatchHooks(void)
 {
-	free(orig_setDMMode);
+	destroyDetour(orig_setDMMode);
 }
 
 /*

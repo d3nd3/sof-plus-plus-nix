@@ -198,6 +198,7 @@ extern void memoryProtect(void * addr);
 extern void callE8Patch(void * addr,void * to);
 extern void WriteE9Jmp(void * where, void * dest);
 extern void * createDetour(void * orig, void * mine, int size);
+extern void destroyDetour(void * thunk);
 extern void memoryAdjust(void * addr, int size, unsigned char val);
 
 // net

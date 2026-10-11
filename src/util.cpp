@@ -206,6 +206,12 @@ void * createDetour(void * orig, void * mine, int size) {
 	return thunk;
 }
 
+void destroyDetour(void *thunk)
+{
+	if (thunk && thunk != MAP_FAILED)
+		munmap(thunk, getpagesize());
+}
+
 // qcommon from game source exports it.
 bool        NET_CompareAdr (netadr_t a, netadr_t b)
 {
