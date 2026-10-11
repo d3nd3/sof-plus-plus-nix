@@ -3,10 +3,31 @@
 #include <dlfcn.h>
 #include <link.h>
 
+extern void setupMemory(void);
+
 CURL * curl_handle = NULL;
 unsigned char chktbl2[3000];
 int sofreebuild_len;
 char sofreebuildstring[128];
+static bool gamespy_bound = false;
+
+static void ensureGamespy(void)
+{
+	if (gamespy_bound || !gs_select_sock || !gamespyport ||
+	    gamespyport->value <= 0) return;
+
+	struct sockaddr_in addr = {};
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(gamespyport->value);
+	addr.sin_addr.s_addr = INADDR_ANY;
+	if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+		error_exit("Unable to bind to gamespy port");
+
+	gamespy_bound = true;
+	memset(&sof1master_ip, 0, sizeof(sof1master_ip));
+	char master[] = "sof1master.megalag.org:27900";
+	orig_NET_StringToAdr(master, &sof1master_ip);
+}
 
 void my_Qcommon_Frame(int msec)
 {
@@ -57,6 +78,7 @@ qboolean my_Cbuf_AddLateCommands(void)
 {
 
 	qboolean ret = orig_Cbuf_AddLateCommands();
+	setupMemory();
 	// if ( ret ) return ret;
 
 	// Linux chktbl is slightly different than windows. Has some 0x80 instead of 0x00
@@ -95,7 +117,6 @@ qboolean my_Cbuf_AddLateCommands(void)
 	curl_global_init(CURL_GLOBAL_NOTHING);
 
 	SOFPPNIX_PRINT("Curl Version : %s",curl_version());
-
 	
 	
 	// Init has been done!
@@ -106,7 +127,6 @@ qboolean my_Cbuf_AddLateCommands(void)
 	// my_Cmd_AddCommand("pingservers",&my_CL_PingServers);
 
     CreateCommands();
-
 
 	/*
 		Used by client and server.
@@ -119,12 +139,12 @@ qboolean my_Cbuf_AddLateCommands(void)
 	int flags = fcntl(gs_select_sock, F_GETFL, 0);
 	fcntl(gs_select_sock, F_SETFL, flags | O_NONBLOCK);
 
-
+	if (!dedicated) createServerCvars();
 	if ( dedicated->value == 1.0f ) {
 		// Has to be below the gs_select_sock line above.
 		serverInit();
 	}
-
+	ensureGamespy();
 	return ret;
 }
 /*
@@ -135,38 +155,12 @@ qboolean my_Cbuf_AddLateCommands(void)
 */
 void my_Qcommon_Init(int one , char ** two) {
 	// orig_Cvar_Get crashing Z_malloc before Qcommon_Init.
-	
 	orig_Qcommon_Init(one,two);
 
 	// This cvar is set by dedicated_start dedicated.cfg
 	// ------------------------ GAMESPY BROADCASTING -----------------------
-	if ( sv_public && sv_public->value ) {
-		SOFPPNIX_PRINT("Server is public.");
-		
-		// Bind to port
-		struct sockaddr_in addr;
-		memset(&addr, 0, sizeof(addr));
-		addr.sin_family = AF_INET;
-		addr.sin_port = htons(gamespyport->value);
-		addr.sin_addr.s_addr = INADDR_ANY;
-
-		if (bind(gs_select_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-			error_exit("Unable to bind to gamespy port");
-		}
-
-		// gamespyport hostport map change -> 27900
-		// master checks using src port 28904 '\\info\\' ~every 5 minutes
-		// master checks using src port 28902 '\\status\\' ~every 30 seconds
-		// client query server list -> 28900
-
-		// memset 0 the master
-		memset(&sof1master_ip, 0, sizeof(sof1master_ip));
-		orig_NET_StringToAdr("sof1master.megalag.org:27900", &sof1master_ip);
-
-		// orig_NET_StringToAdr("5.135.46.179:27900",&sof1master_ip);
-		// orig_NET_StringToAdr("localhost:27900", &sof1master_ip);
-		// orig_NET_StringToAdr("172.22.130.228:27900", &sof1master_ip);
-	}
+	if (sv_public && sv_public->value) SOFPPNIX_PRINT("Server is public.");
+	ensureGamespy();
 }
 
 void my_Qcommon_Shutdown(void)

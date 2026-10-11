@@ -61,7 +61,7 @@ void serverInit(void)
 		pythonFirstInit();
 	#endif
 
-	createServerCvars();
+	if (!sv_public) createServerCvars();
 	
 	//cvar controlled features like publicRcon, slideFix etc.
 	init_server_features();

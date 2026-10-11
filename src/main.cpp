@@ -56,6 +56,8 @@ INDEX 4\n\
 }\n";
 
 void setupMemory(void);
+static bool memory_ready = false;
+bool cbuf_ready = false;
 
 int chdir(const char *path)
 {
@@ -86,7 +88,13 @@ void __attribute__ ((constructor)) begin() {
 	// Prevent SDL from having ugly message? (seg deploy parachute)
 	signal(SIGSEGV, segfault_handler);
 
-	// setupMemory();
+	// Leave the WON objects available, but skip their obsolete external
+	// login/heartbeat network operations under Box86.
+	callE8Patch(0x081FDF2A, &GamespyHeartbeat);
+	callE8Patch(0x080ABF6C, &GamespyHeartbeat);
+	orig_Cbuf_AddLateCommands = createDetour(
+		orig_Cbuf_AddLateCommands, &my_Cbuf_AddLateCommands, 5);
+	cbuf_ready = true;
 }
 
 
@@ -288,7 +296,9 @@ void createSharedDetours(void)
 	orig_Qcommon_Init = createDetour(orig_Qcommon_Init,&my_Qcommon_Init,5);
 
 	// This is used as the reliable startup function.
-	orig_Cbuf_AddLateCommands = createDetour(orig_Cbuf_AddLateCommands,&my_Cbuf_AddLateCommands,5);
+	if (!cbuf_ready)
+		orig_Cbuf_AddLateCommands = createDetour(
+			orig_Cbuf_AddLateCommands, &my_Cbuf_AddLateCommands, 5);
 
 	// Cleanup
 	orig_Qcommon_Shutdown = createDetour(orig_Qcommon_Shutdown , &my_Qcommon_Shutdown, 5);
@@ -416,13 +426,12 @@ void createServerDetours(void)
 }
 
 void setupMemory() {
-	printf("sof++nix_DEBUG: First Init patches + detours\n");
+	if (memory_ready) return;
+	memory_ready = true;
 
 	goldPlatinumSoFClient();
 
 	goldPlatinumSoFServer();
-
-	wondisable();
 
 	fixMasterServerList();
 
