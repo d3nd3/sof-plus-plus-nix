@@ -88,8 +88,8 @@ void __attribute__ ((constructor)) begin() {
 	// Prevent SDL from having ugly message? (seg deploy parachute)
 	signal(SIGSEGV, segfault_handler);
 
-	// Leave the WON objects available, but skip their obsolete external
-	// login/heartbeat network operations under Box86.
+	// Leave the WON objects available, but route the legacy heartbeat hook
+	// through the GameSpy-compatible implementation under Box86.
 	callE8Patch(0x081FDF2A, &GamespyHeartbeat);
 	callE8Patch(0x080ABF6C, &GamespyHeartbeat);
 	orig_Cbuf_AddLateCommands = createDetour(

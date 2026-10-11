@@ -30,6 +30,9 @@ netadr_t my_netadr = {
 
 int gs_select_sock = 0;
 netadr_t sof1master_ip;
+netadr_t sof1svmaster_ip;
+netadr_t qtracker_master_ip;
+netadr_t sofvault_master_ip;
 // a gs_item struct that contains a netadr_t and a boolean hinting if status received
 typedef struct gs_item_s {
 	netadr_t addr;
@@ -41,6 +44,46 @@ std::chrono::steady_clock::time_point lastSentTime;
 
 // a std vector of gs_items
 std::vector<gs_item_t> gs_items;
+
+static netadr_t *const heartbeat_addresses[] = {
+	&sof1master_ip, &sof1svmaster_ip, &qtracker_master_ip, &sofvault_master_ip
+};
+static std::chrono::steady_clock::time_point next_gamespy_heartbeat;
+
+static void sendGamespyMasterPacket(char *data)
+{
+	for (netadr_t *master : heartbeat_addresses) {
+		struct sockaddr_in address;
+		NetadrToSockadr(master, &address);
+		if (sendto(gs_select_sock, data, strlen(data), 0,
+		           (struct sockaddr *)&address, sizeof(address)) < 0)
+			error_exit("Failed to send Gamespy packet: %s\n", std::strerror(errno));
+	}
+}
+
+static void sendCtrlGamespyPacket(char *data)
+{
+	struct sockaddr_in address;
+	NetadrToSockadr(&sof1svmaster_ip, &address);
+	if (sendto(gs_select_sock, data, strlen(data), 0,
+	           (struct sockaddr *)&address, sizeof(address)) < 0)
+		error_exit("Failed to send CTRL packet: %s\n", std::strerror(errno));
+}
+
+static void sendCtrlHostPacket(char *data)
+{
+	orig_NET_SendPacket(NS_SERVER, strlen(data), data, sof1svmaster_ip);
+}
+
+static void sendGamespyHeartbeat(bool statechanged)
+{
+	char data[128];
+	snprintf(data, sizeof(data), "\\heartbeat\\%s\\gamename\\sofretail%s",
+	         gamespyport->string, statechanged ? "\\statechanged\\" : "");
+	sendGamespyMasterPacket(data);
+	next_gamespy_heartbeat =
+		std::chrono::steady_clock::now() + std::chrono::seconds(150);
+}
 
 
 /*
@@ -681,92 +724,31 @@ void nonBlockingServerResponses(void)
 	// SOFPPNIX_DEBUG("Outside\n");
 }
 
-/*
-This is called inside SV_Frame. So only server calls it. Periodic heartbeat
-I don't think its used in windows(sofplus).
-But hook is in place, to silence the WON heartbeat code.(crashes). could nop.
-*/
 void GamespyHeartbeat(void)
 {
-	/*
-		NOT USED.
-	*/ 
-	return;
-	if ( !sv_public || (sv_public && !sv_public->value) ) return;
-	SOFPPNIX_DEBUG("Sending heartbeat to gamespy");
-	// \\heartbeat\\%d\\gamename\\%s
-	
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0) {
-		SOFPPNIX_PRINT("Error: Failed to create socket.\n");
-		return 1;
-	}
-
-	// int timeout = 2000; // user timeout in milliseconds [ms]
-	// setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (char*) &timeout, sizeof(timeout));
-
-	// Set the maximum segment size for outgoing TCP packets
-	// int maxseg = 1400;
-	// if (setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, sizeof(maxseg)) < 0) {
-	//     error_exit("Failed to set maximum segment size.\n");
-	// }
-
-	struct addrinfo hints;
-	struct addrinfo *res;
-	std::memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-	int status = getaddrinfo("sof1master.megalag.org", NULL, &hints, &res);
-	if (status != 0) {
-		error_exit("Failed to resolve hostname.\n");
-	}
-	struct sockaddr_in server_addr;
-	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
-	server_addr.sin_port = htons(28900);
-	freeaddrinfo(res);
-
-	if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-		error_exit("Failed to connect to server.\n");
-	}
-
-
-	static int heartbeat = 0;
-
-	char message[128];
-	snprintf(message,"\\heartbeat\\%d\\gamename\\%s",heartbeat,"sofretail");
-	if (send(sockfd, message, strlen(message), 0) < 0) {
-		error_exit("Failed to send message.\n");
-	}
-	heartbeat++;
+	if ( !sv_public || !gamespyport || gamespyport->value <= 0 ) return;
+	if ( std::chrono::steady_clock::now() < next_gamespy_heartbeat ) return;
+	sendGamespyHeartbeat(false);
 }
 
 /*
 	Called by Game SpawnEntities, when level changes, hostport and gamespyport and sent to the master
-	Operates on gamespyport UDP
+	Operates on both server UDP sockets.
 */
 void GamespyHeartbeatCtrlNotify(void)
 {
-	if ( !sv_public || (sv_public && !sv_public->value) ) return;
+	if ( !sv_public || !sv_public->value || !gamespyport || !hostport ||
+	     gamespyport->value <= 0 || hostport->value <= 0 ) return;
 
 	// SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
 	
 	//fill in the gamespyport and hostport
 	char formedData[256];
 	snprintf(formedData, 256, "\\gamespyport\\%s\\hostport\\%s\\", gamespyport->string, hostport->string);
-
-	// netadr_t to sockaddr_in
-	struct sockaddr_in gs_server_info;
-	NetadrToSockadr(&sof1master_ip,&gs_server_info);
-
-	// sendto gs_server_info on gs_select_sock, Ensure send using gamespy socket
-	if (sendto(gs_select_sock, formedData, strlen(formedData), 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-		error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
-	}
+	sendCtrlGamespyPacket(formedData);
 
 	// now the hostport variant Ensure send using hostport socket
 	snprintf(formedData, 256, "\\hostport\\%s\\gamespyport\\%s\\", hostport->string,gamespyport->string);
-	// netsrc_t sock, int length, void *data, netadr_t to
-	orig_NET_SendPacket(NS_SERVER, strlen(formedData), formedData, sof1master_ip);
-	
+	sendCtrlHostPacket(formedData);
+	sendGamespyHeartbeat(true);
 }

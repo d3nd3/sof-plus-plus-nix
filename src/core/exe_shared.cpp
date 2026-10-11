@@ -25,8 +25,17 @@ static void ensureGamespy(void)
 
 	gamespy_bound = true;
 	memset(&sof1master_ip, 0, sizeof(sof1master_ip));
-	char master[] = "sof1master.megalag.org:27900";
-	orig_NET_StringToAdr(master, &sof1master_ip);
+	memset(&sof1svmaster_ip, 0, sizeof(sof1svmaster_ip));
+	memset(&qtracker_master_ip, 0, sizeof(qtracker_master_ip));
+	memset(&sofvault_master_ip, 0, sizeof(sofvault_master_ip));
+	char client_master[] = "sof1master.megalag.org:27900";
+	char server_master[] = "sof1svmaster.megalag.org:27900";
+	char qtracker_master[] = "gsm.qtracker.com:27900";
+	char sofvault_master[] = "sof1master.sofvault.org:27900";
+	orig_NET_StringToAdr(client_master, &sof1master_ip);
+	orig_NET_StringToAdr(server_master, &sof1svmaster_ip);
+	orig_NET_StringToAdr(qtracker_master, &qtracker_master_ip);
+	orig_NET_StringToAdr(sofvault_master, &sofvault_master_ip);
 }
 
 void my_Qcommon_Frame(int msec)

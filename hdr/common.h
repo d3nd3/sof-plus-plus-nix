@@ -275,6 +275,9 @@ extern void SP_PRINT_MULTI(edict_t * ent, short id, std::string& format, std::ve
 */
 extern int gs_select_sock;
 extern netadr_t sof1master_ip;
+extern netadr_t sof1svmaster_ip;
+extern netadr_t qtracker_master_ip;
+extern netadr_t sofvault_master_ip;
 // client gs
 extern void GetServerList(void);
 
