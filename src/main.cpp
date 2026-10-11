@@ -194,6 +194,27 @@ void wondisable(void)
 		memoryAdjust(0x080C8B6A,5,NOP);
 }
 
+static void bypassWONFree(void)
+{
+}
+
+static int bypassWONRequest(void)
+{
+	return 1;
+}
+
+static void bypassWONAuthorization(void)
+{
+	// Box86 cannot safely execute the obsolete authoritative WON requests.
+	callE8Patch(0x080A9CBF, &bypassWONFree);
+	callE8Patch(0x080A9CD9, &bypassWONRequest);
+	callE8Patch(0x080A9D8D, &bypassWONFree);
+	callE8Patch(0x080A9DA7, &bypassWONRequest);
+	callE8Patch(0x080AA315, &bypassWONFree);
+	callE8Patch(0x080AA71D, &bypassWONFree);
+	callE8Patch(0x080AA746, &bypassWONFree);
+}
+
 void fixMasterServerList(void)
 {
 	//---------------MASTER SERVER LIST---------------
@@ -432,6 +453,8 @@ void setupMemory() {
 	goldPlatinumSoFClient();
 
 	goldPlatinumSoFServer();
+
+	bypassWONAuthorization();
 
 	fixMasterServerList();
 
