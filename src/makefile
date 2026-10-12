@@ -52,7 +52,7 @@ CFLAGS:= -O2 -fomit-frame-pointer -std=c++17 -m32 -fpic -fpermissive -w -D _GNU_
 
 # Statically link libstdc++ and libgcc to avoid GLIBCXX symbol errors on target servers
 LDFLAGS:= -m32 -shared -static-libstdc++ -static-libgcc -L /minizip/build
-LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lstdc++fs -lminizip -Wl,-Bdynamic -lcrypt -lpthread -ldl -lutil -lm
+LINKUS:= -lcurl -lX11 -Wl,-Bstatic -lstdc++fs -lminizip -Wl,-Bdynamic -lz -lcrypt -lpthread -ldl -lutil -lm
 
 # Force 32-bit pkg-config path query for Python
 PYTHON_CFLAGS := $(shell PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig pkg-config --cflags python$(PYTHON_VERSION) 2>/dev/null)
