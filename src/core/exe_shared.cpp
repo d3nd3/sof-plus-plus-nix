@@ -24,10 +24,9 @@ static void ensureGamespy(void)
 		error_exit("Unable to bind to gamespy port");
 
 	gamespy_bound = true;
-	// Custom-style master, resolved once and hard-coded on purpose.
+	// The custom master is resolved when a map is announced, after all cvars
+	// have been loaded.
 	memset(&sof1svmaster_ip, 0, sizeof(sof1svmaster_ip));
-	char server_master[] = "sof1svmaster.megalag.org:27900";
-	orig_NET_StringToAdr(server_master, &sof1svmaster_ip);
 }
 
 void my_Qcommon_Frame(int msec)

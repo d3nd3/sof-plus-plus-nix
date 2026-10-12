@@ -5,6 +5,8 @@ cvar_t * sv_public = NULL;
 cvar_t * gamespyport = NULL;
 cvar_t * hostport = NULL;
 cvar_t * sv_masters = NULL;
+cvar_t * _sp_sv_master_gamespy = NULL;
+cvar_t * _sp_sv_master_sofplus = NULL;
 cvar_t * cl_masters = NULL;
 cvar_t * cl_master = NULL;
 cvar_t * hostname = NULL;
@@ -199,10 +201,16 @@ void createServerCvars(void)
 		gamespyport = orig_Cvar_Get(		"gamespyport", 			"0", 	CVAR_NOSET, 									NULL);
 		hostport = orig_Cvar_Get(			"hostport", 			"0", 	CVAR_NOSET, 									NULL);
 
-		// Space separated list of gamespy-style master servers to heartbeat.
-		// Bare hostnames default to port 27900. The custom sof1svmaster
-		// master is hard-coded separately and is not part of this list.
-		sv_masters = orig_Cvar_Get(			"sv_masters", 			"sof1master.megalag.org:27900 gsm.qtracker.com:27900 sof1master.sofvault.org:27900", 	CVAR_ARCHIVE, 	NULL);
+		// Stock SoFplus cvars: legacy GameSpy heartbeat and custom CTRL master.
+		_sp_sv_master_gamespy = orig_Cvar_Get(
+			"_sp_sv_master_gamespy", "master.gamespy.com", CVAR_ARCHIVE, NULL);
+		_sp_sv_master_sofplus = orig_Cvar_Get(
+			"_sp_sv_master_sofplus", "sof1svmaster.megalag.org",
+			CVAR_ARCHIVE, NULL);
+		// Optional space-separated heartbeat fan-out override. Bare hostnames
+		// default to port 27900; empty means use _sp_sv_master_gamespy.
+		sv_masters = orig_Cvar_Get(
+			"sv_masters", "", CVAR_ARCHIVE, NULL);
 
 		dmflags = orig_Cvar_Get(			"dmflags", 				"0", 	CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 	NULL);
 		maxclients = orig_Cvar_Get(			"maxclients", 			"16", 	CVAR_SERVERINFO | CVAR_LATCH , 					NULL);

@@ -46,6 +46,28 @@ std::chrono::steady_clock::time_point lastSentTime;
 std::vector<gs_item_t> gs_items;
 
 static std::chrono::steady_clock::time_point next_gamespy_heartbeat;
+static unsigned int gamespy_query_id = 1;
+
+static int socketPort(int fd, int fallback)
+{
+	struct sockaddr_in address = {};
+	socklen_t length = sizeof(address);
+	return fd >= 0 && getsockname(fd, (struct sockaddr *)&address, &length) == 0
+		? ntohs(address.sin_port) : fallback;
+}
+
+static int gamespyBoundPort(void)
+{
+	return socketPort(gs_select_sock,
+		gamespyport ? c_string_to_int(gamespyport->string) : 0);
+}
+
+static int serverBoundPort(void)
+{
+	// The engine stores the dedicated IP socket at ip_sockets[1].
+	int fd = *(const int *)0x085568ac;
+	return socketPort(fd, hostport ? c_string_to_int(hostport->string) : 0);
+}
 
 // These globals are fixed in the non-PIE SoF executable.
 static sizebuf_t *const engine_net_message = (sizebuf_t *)0x084237F0;
@@ -66,9 +88,12 @@ static bool resolveMasterServer(const std::string &target, netadr_t *out)
 
 static void sendGamespyMasterPacket(char *data)
 {
-	if (!sv_masters || !sv_masters->string)
+	std::string masters = sv_masters && sv_masters->string ? sv_masters->string : "";
+	if (masters.empty() && _sp_sv_master_gamespy && _sp_sv_master_gamespy->string)
+		masters = _sp_sv_master_gamespy->string;
+	if (masters.empty())
 		return;
-	std::istringstream input(sv_masters->string);
+	std::istringstream input(masters);
 	std::string target;
 	while (input >> target) {
 		netadr_t master;
@@ -101,8 +126,8 @@ static void sendCtrlHostPacket(char *data)
 static void sendGamespyHeartbeat(bool statechanged)
 {
 	char data[128];
-	snprintf(data, sizeof(data), "\\heartbeat\\%s\\gamename\\sofretail%s",
-	         gamespyport->string, statechanged ? "\\statechanged\\" : "");
+	snprintf(data, sizeof(data), "\\heartbeat\\%d\\gamename\\sofretail%s",
+	         gamespyBoundPort(), statechanged ? "\\statechanged\\" : "");
 	sendGamespyMasterPacket(data);
 	next_gamespy_heartbeat =
 		std::chrono::steady_clock::now() + std::chrono::seconds(150);
@@ -117,8 +142,7 @@ static bool readGamespySecureChallenge(const unsigned char *data, size_t length,
 		if (length <= start || memcmp(data, prefix, start) != 0)
 			continue;
 		size_t end = start;
-		while (end < length && data[end] >= 0x20 && data[end] <= 0x7e &&
-		       data[end] != '\\')
+		while (end < length && data[end] != 0 && data[end] != '\\')
 			++end;
 		challenge.assign((const char *)data + start, end - start);
 		return !challenge.empty();
@@ -497,9 +521,6 @@ void GetServerList(void)
 		if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
 			error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
 		}
-		if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-			error_exit("Failed to send response. ErrMsg = %s\n",std::strerror(errno));
-		}
 		it++;
 	}
 	// Handle all responses on the gamespy port.
@@ -636,8 +657,6 @@ void my_menu_AddServer(netadr_t addr,char *data)
 */
 void nonBlockingServerResponses(void)
 {
-	static int i_queryid = 2;
-
 	unsigned char buffer[1400];
 	struct sockaddr_in in_addr;
 	socklen_t addrlen = sizeof(in_addr);
@@ -670,9 +689,19 @@ void nonBlockingServerResponses(void)
 			bool secureQuery = sv_public && sv_public->value &&
 				readGamespySecureChallenge(buffer, recv_len, secureChallenge);
 
-			// OBJECTIVE: pass any '\\status\\' queries if we are server /w public 1
-			if ( sv_public && sv_public->value &&
-			     (secureQuery || !strncmp((char*)buffer, "\\status\\", 8)) ) {
+			// Stock SoF answers a secure challenge separately, then answers
+			// the following status query with an ordinary status packet.
+			if (sv_public && sv_public->value && secureQuery) {
+				std::vector<uint8_t> key = ValidateKey("iVn3a3", secureChallenge);
+				std::string response = "\\validate\\" +
+					std::string(key.begin(), key.end()) +
+					"\\final\\\\queryid\\" +
+					std::to_string(++gamespy_query_id) + ".1";
+				if (sendto(gs_select_sock, response.data(), response.size(), 0,
+				           (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0)
+					error_exit("sendto() failed responding to secure query");
+			} else if (sv_public && sv_public->value && recv_len >= 8 &&
+			           !strncmp((char *)buffer, "\\status\\", 8)) {
 				// received every 30 seconds... (if info completed)
 				// SOFPPNIX_DEBUG("Got a \\status\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 				// TODO: send back a response
@@ -682,7 +711,7 @@ void nonBlockingServerResponses(void)
 				const char* gamever = "1.07f";
 				int location = 1;
 				const char* in_hostname = hostname->string;
-				int in_hostport = c_string_to_int(hostport->string);
+				int in_hostport = serverBoundPort();
 				const char* in_mapname = mapname->string;
 				const char* gametype = "Unknown";
 				switch ( std::lround(deathmatch->value) ) {
@@ -701,16 +730,16 @@ void nonBlockingServerResponses(void)
 				int in_timelimit = c_string_to_int(timelimit->string);
 				int in_fraglimit = c_string_to_int(fraglimit->string);
 				int in_dmflags = c_string_to_int(dmflags->string);
-				const char* movescale = g_movescale->value == 1.0f ? "100%" : (std::to_string((int)(g_movescale->value * 100)) + "%").c_str();
+				std::string movescale = g_movescale->value == 1.0f
+					? "100%" : std::to_string((int)(g_movescale->value * 100)) + "%";
 
 				const char* in_cheats = cheats->value == 1.0f ? "enabled" : "disabled";
 				int in_ctf_loops = std::lround(ctf_loops->value);
 				int suicide_penalty = std::lround(sv_suicidepenalty->value);
 
 
-				i_queryid++;
 				char queryid[64];
-				snprintf(queryid,sizeof(queryid),"%d.1",i_queryid);
+				snprintf(queryid, sizeof(queryid), "%d.1", ++gamespy_query_id);
 				// static const char * queryid = "3.1";
 
 				std::string player_data;
@@ -751,6 +780,8 @@ void nonBlockingServerResponses(void)
 				// std::cout << "Player data: " << player_data << std::endl;
 				
 				// Generate the response string using snprintf
+				std::string player_suffix =
+					player_data.empty() ? "" : player_data + "\\";
 				char response[1024];
 				snprintf(response, sizeof(response), "\\gamename\\%s\\"
 												"gamever\\%s\\"
@@ -770,29 +801,24 @@ void nonBlockingServerResponses(void)
 												"cheats\\%s\\"
 												"ctf_loops\\%d\\"
 												"suicide_penalty\\%d\\"
-												"%s\\"
+												"%s"
 												"final\\\\queryid\\%s",
 					gamename, gamever, location, in_hostname, in_hostport, in_mapname, gametype,
 					numplayers, maxplayers, gamemode, violence, in_timelimit, in_fraglimit,
-					in_dmflags, movescale, in_cheats, in_ctf_loops, suicide_penalty,player_data.c_str(), queryid);
+					in_dmflags, movescale.c_str(), in_cheats, in_ctf_loops,
+					suicide_penalty, player_suffix.c_str(), queryid);
 				
 				// player_0\John Mullinsqqu\frags_0\0\ping_0\38\skin_0\dekker\team_0\The Order
 				// std::cout << response << std::endl;
 
 				std::string responseString(response);
-				if (secureQuery) {
-					std::vector<uint8_t> key = ValidateKey("iVn3a3", secureChallenge);
-					size_t final = responseString.find("\\final\\");
-					if (final != std::string::npos)
-						responseString.insert(final, "\\validate\\" +
-							std::string(key.begin(), key.end()));
-				}
-				if ( sendto(gs_select_sock, responseString.c_str(), responseString.size(),
+				if ( sendto(gs_select_sock, responseString.data(), responseString.size(),
 				            0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
 					error_exit("sendto() failed responding to \\info\\ query try public 0 if continued error");
 				}
 				
-			} else if ( sv_public && sv_public->value && !strncmp((char*)buffer, "\\info\\", 6) ) {
+			} else if ( sv_public && sv_public->value && recv_len >= 6 &&
+			            !strncmp((char*)buffer, "\\info\\", 6) ) {
 				// received every 5 minutes... (if on the radar)
 				// SOFPPNIX_DEBUG("Got a \\info\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 				// prepare data to send back as response
@@ -800,7 +826,7 @@ void nonBlockingServerResponses(void)
 				// \hostname\Example\hostport\8080\mapname\dm/suddm2\gametype\DM\numplayers\0\maxplayers\16\gamemode\openplaying\violence\0\final\\queryid\6.1
 
 				const char* in_hostname = hostname->string;
-				int in_hostport = c_string_to_int(hostport->string);
+				int in_hostport = serverBoundPort();
 				const char* in_mapname = mapname->string;
 				const char* gametype = "Unknown";
 				
@@ -819,10 +845,9 @@ void nonBlockingServerResponses(void)
 				const char* gamemode = "openplaying";
 				int violence = c_string_to_int(sv_violence->string);
 
-				i_queryid++;
 				// const char* queryid = "3.1";
 				char queryid[64];
-				snprintf(queryid,sizeof(queryid),"%d.1",i_queryid);
+				snprintf(queryid, sizeof(queryid), "%d.1", ++gamespy_query_id);
 				// Generate the response string using snprintf
 				char response[1024];
 				snprintf(response, sizeof(response), "\\hostname\\%s\\"
@@ -976,10 +1001,6 @@ void nonBlockingServerResponses(void)
 				std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
 				error_exit("Failed to send response.\n");
 			}
-			if (sendto(gs_select_sock, "\\status\\", 8, 0,(struct sockaddr*)&gs_server_info,sizeof(gs_server_info)) < 0) {
-				std::cerr << "Error: Failed to send response: " << std::strerror(errno) << std::endl;
-				error_exit("Failed to send response.\n");
-			}
 
 			item->lastSentTime = now;
 		}
@@ -991,7 +1012,8 @@ void nonBlockingServerResponses(void)
 
 void GamespyHeartbeat(void)
 {
-	if ( !sv_public || !gamespyport || gamespyport->value <= 0 ) return;
+	if ( !sv_public || !sv_public->value || !gamespyport ||
+	     gamespyBoundPort() <= 0 ) return;
 	if ( std::chrono::steady_clock::now() < next_gamespy_heartbeat ) return;
 	sendGamespyHeartbeat(false);
 }
@@ -1002,18 +1024,30 @@ void GamespyHeartbeat(void)
 */
 void GamespyHeartbeatCtrlNotify(void)
 {
-	if ( !sv_public || !sv_public->value || !gamespyport || !hostport ||
-	     gamespyport->value <= 0 || hostport->value <= 0 ) return;
+	int game_port = gamespyBoundPort();
+	int host_port = serverBoundPort();
+	if ( !sv_public || !sv_public->value || game_port <= 0 || host_port <= 0 ||
+	     !_sp_sv_master_sofplus || !_sp_sv_master_sofplus->string ||
+	     !*_sp_sv_master_sofplus->string ) return;
 
 	// SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
-	
+	std::string master = _sp_sv_master_sofplus->string;
+	if (master.find(':') == std::string::npos)
+		master += ":" GAMESPY_MASTER_PORT;
+	if (!orig_NET_StringToAdr(&master[0], &sof1svmaster_ip) ||
+	    !(sof1svmaster_ip.ip[0] || sof1svmaster_ip.ip[1] ||
+	      sof1svmaster_ip.ip[2] || sof1svmaster_ip.ip[3]))
+		return;
+
 	//fill in the gamespyport and hostport
 	char formedData[256];
-	snprintf(formedData, 256, "\\gamespyport\\%s\\hostport\\%s\\", gamespyport->string, hostport->string);
+	snprintf(formedData, sizeof(formedData),
+	         "\\hostport\\%d\\gamespyport\\%d\\", host_port, game_port);
 	sendCtrlGamespyPacket(formedData);
 
 	// now the hostport variant Ensure send using hostport socket
-	snprintf(formedData, 256, "\\hostport\\%s\\gamespyport\\%s\\", hostport->string,gamespyport->string);
+	snprintf(formedData, sizeof(formedData),
+	         "\\gamespyport\\%d\\hostport\\%d\\", game_port, host_port);
 	sendCtrlHostPacket(formedData);
 	sendGamespyHeartbeat(true);
 }

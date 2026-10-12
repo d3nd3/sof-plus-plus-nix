@@ -41,14 +41,12 @@ vector<uint8_t> ValidateKey(string handoff, string in_key) {
 		table[a] = d;
 		key[i] ^= table[(b + d) & 255];
 	}
-	in_keylen /= 3;
 	int i = 0;
 	vector<uint8_t> out_key;
-	while (in_keylen > 0) {
-		in_keylen -= 1;
+	while (i < in_keylen) {
 		b = key[i];
 		i += 1;
-		d = key[i];
+		d = i < in_keylen ? key[i] : 0;
 		i += 1;
 		uint8_t c = AddChar(b >> 2);
 		if ( c )
@@ -56,7 +54,7 @@ vector<uint8_t> ValidateKey(string handoff, string in_key) {
 		c = AddChar(((b & 3) << 4) | (d >> 4));
 		if ( c ) 
 			out_key.push_back(c);
-		b = key[i];
+		b = i < in_keylen ? key[i] : 0;
 		i += 1;
 		c = AddChar(((d & 15) << 2) | (b >> 6));
 		if ( c )

@@ -427,6 +427,8 @@ extern cvar_t * sv_public;
 extern cvar_t * gamespyport;
 extern cvar_t * hostport;
 extern cvar_t * sv_masters;
+extern cvar_t * _sp_sv_master_gamespy;
+extern cvar_t * _sp_sv_master_sofplus;
 extern cvar_t * cl_masters;
 extern cvar_t * cl_master;
 extern cvar_t * hostname;
