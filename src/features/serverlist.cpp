@@ -162,7 +162,7 @@ void GetServerList(void)
 	std::vector<uint8_t> key = ValidateKey(std::string("iVn3a3"),realkey);
 	std::string hashed_key( key.begin(), key.end() );
 
-	std::string response = "\\gamename\\sofretail\\gamever\\1.07f\\location\\0\\validate\\" + std::string("ABCDEFGH") + "\\final\\\\queryid\\1.1\\";
+	std::string response = "\\gamename\\sofretail\\gamever\\1.07f\\location\\0\\validate\\" + hashed_key + "\\final\\\\queryid\\1.1\\";
 	char * c = response.c_str();
 	// ssize_t send(int sockfd, const void *buf, size_t len, int flags);
 	if (send(sockfd, c, response.size(), 0) < 0) {
@@ -211,6 +211,7 @@ void GetServerList(void)
 		addr.ip[1] = data[i + 1];
 		addr.ip[2] = data[i + 2];
 		addr.ip[3] = data[i + 3];
+		// netadr_t.port is stored in network order; NetadrToSockadr copies it.
 		addr.port = (data[i + 5] << 8) | data[i + 4];
 
 		unacked_server.addr = addr;
