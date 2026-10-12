@@ -50,6 +50,10 @@ static netadr_t *const heartbeat_addresses[] = {
 };
 static std::chrono::steady_clock::time_point next_gamespy_heartbeat;
 
+// These globals are fixed in the non-PIE SoF executable.
+static sizebuf_t *const engine_net_message = (sizebuf_t *)0x084237F0;
+static netadr_t *const engine_net_from = (netadr_t *)0x084237DC;
+
 static void sendGamespyMasterPacket(char *data)
 {
 	for (netadr_t *master : heartbeat_addresses) {
@@ -83,6 +87,100 @@ static void sendGamespyHeartbeat(bool statechanged)
 	sendGamespyMasterPacket(data);
 	next_gamespy_heartbeat =
 		std::chrono::steady_clock::now() + std::chrono::seconds(150);
+}
+
+static int statusSpInt(cvar_t *cvar, int fallback = 0)
+{
+	return cvar ? (int)cvar->value : fallback;
+}
+
+static const char *statusSpString(cvar_t *cvar)
+{
+	return cvar && cvar->string ? cvar->string : "";
+}
+
+static bool readStatusSpQuery(std::string &query, bool &includePlayers)
+{
+	if (!engine_net_message || !engine_net_message->data ||
+	    engine_net_message->cursize <= 4)
+		return false;
+
+	const char *text = (char *)engine_net_message->data + 4;
+	size_t length = 0;
+	while (length < (size_t)engine_net_message->cursize - 4 && text[length])
+		++length;
+
+	std::istringstream input(std::string(text, length));
+	std::string command, variant;
+	if (!(input >> command >> variant) ||
+	    command != "status" || variant != "sp")
+		return false;
+
+	std::vector<std::string> args;
+	std::string arg;
+	while (input >> arg)
+		args.push_back(arg);
+
+	query = args.size() && args[0].size() == 4 ? args[0] : "";
+	includePlayers = args.size() < 3 || (std::atoi(args[2].c_str()) & 1);
+	return true;
+}
+
+static std::string makeStatusSpResponse(const std::string &query,
+                                         bool includePlayers)
+{
+	std::ostringstream output;
+	auto field = [&output](const auto &value) { output << '\\' << value; };
+	const int players = maxclients ? countPlayersInGame() : 0;
+	const int clients = statusSpInt(maxclients);
+
+	field(query); field(1); field("sp"); field(20140531); field((long)time(NULL));
+	field(7488); field(4513); field(players); field(0); field(0); field(0);
+	field(0); field(150); field(0); output << '\n';
+
+	field(query); field(2); field(statusSpInt(cheats)); field(1); field(800);
+	field(statusSpInt(ctf_loops, 10)); field(statusSpInt(deathmatch));
+	field(statusSpInt(dmflags)); field(statusSpInt(fraglimit));
+	output << std::fixed << std::setprecision(6)
+	       << '\\' << (g_movescale ? g_movescale->value : 1.0f);
+	field(statusSpString(hostname)); field(statusSpString(mapname));
+	field(clients); field(clients); field(statusSpInt(sv_suicidepenalty, 2));
+	field(statusSpInt(sv_violence, 63));
+	output << '\\' << (timelimit ? timelimit->value : 0.0f) << '\n';
+
+	int record = 2;
+	if (includePlayers) {
+		for (int slot = 0; slot < clients; ++slot) {
+			void *client = getClientX(slot);
+			if (*(int *)client != cs_spawned)
+				continue;
+
+			field(query); field(++record); field(slot); field(""); field("");
+			field(0); field(0); field(0); field(0); field(12); field(0);
+			field(163); field(70); field(""); field(""); field("John Mullinsqqu");
+			field(36); field(0); field(0); field(0); field(""); field(0);
+			field(0); field(0); field(0); field("");
+			output << '\n';
+		}
+	}
+	field(query); field(++record); output << "\n\n";
+	return output.str();
+}
+
+void my_SV_ConnectionlessPacket(void)
+{
+	std::string query;
+	bool includePlayers = false;
+	if (!sv_public || !sv_public->value ||
+	    !readStatusSpQuery(query, includePlayers)) {
+		orig_SV_ConnectionlessPacket();
+		return;
+	}
+
+	std::string response = makeStatusSpResponse(query, includePlayers);
+	char format[] = "print\n%s";
+	orig_Netchan_OutOfBandPrint(NS_SERVER, *engine_net_from, format,
+	                             response.c_str());
 }
 
 

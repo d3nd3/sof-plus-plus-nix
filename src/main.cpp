@@ -154,6 +154,9 @@ void goldPlatinumSoFServer(void)
 		//---------------info %s 33!---------------
 		// Receive info packets from protocol 33
 		memoryAdjust(0x080A99D7,1,0x21);
+
+		// SoFplus status sp is a separate OOB response used by server browsers.
+		callE8Patch(0x080AB558, &my_SV_ConnectionlessPacket);
 }
 
 void wondisable(void)

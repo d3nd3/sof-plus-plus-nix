@@ -38,6 +38,9 @@ extern void ( *orig_PF_Configstring)(int index, char * string);
 extern void (*orig_SV_RunGameFrame) (void);
 extern void my_SV_RunGameFrame(void);
 
+extern void (*orig_SV_ConnectionlessPacket) (void);
+extern void my_SV_ConnectionlessPacket(void);
+
 extern void (*orig_Cmd_Say_f) (edict_t *ent, qboolean team, qboolean arg0);
 extern void my_Cmd_Say_f(edict_t *ent, qboolean team, qboolean arg0);
 
