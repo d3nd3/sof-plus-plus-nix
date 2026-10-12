@@ -2,6 +2,8 @@
 
 #include "decodekey.h"
 
+#include <cmath>
+
 
 
 netadr_t my_netadr = {
@@ -104,6 +106,24 @@ static void sendGamespyHeartbeat(bool statechanged)
 	sendGamespyMasterPacket(data);
 	next_gamespy_heartbeat =
 		std::chrono::steady_clock::now() + std::chrono::seconds(150);
+}
+
+static bool readGamespySecureChallenge(const unsigned char *data, size_t length,
+                                       std::string &challenge)
+{
+	const char *prefixes[] = {"\\status\\secure\\", "\\secure\\"};
+	for (const char *prefix : prefixes) {
+		size_t start = strlen(prefix);
+		if (length <= start || memcmp(data, prefix, start) != 0)
+			continue;
+		size_t end = start;
+		while (end < length && data[end] >= 0x20 && data[end] <= 0x7e &&
+		       data[end] != '\\')
+			++end;
+		challenge.assign((const char *)data + start, end - start);
+		return !challenge.empty();
+	}
+	return false;
 }
 
 static int statusSpInt(cvar_t *cvar, int fallback = 0)
@@ -646,9 +666,13 @@ void nonBlockingServerResponses(void)
 		// Data is available, so receive it and process it
 		int recv_len = recvfrom(gs_select_sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&in_addr, &addrlen);
 		if (recv_len > 0) {
+			std::string secureChallenge;
+			bool secureQuery = sv_public && sv_public->value &&
+				readGamespySecureChallenge(buffer, recv_len, secureChallenge);
 
 			// OBJECTIVE: pass any '\\status\\' queries if we are server /w public 1
-			if ( sv_public && sv_public->value && !strncmp((char*)buffer, "\\status\\", 8) ) {
+			if ( sv_public && sv_public->value &&
+			     (secureQuery || !strncmp((char*)buffer, "\\status\\", 8)) ) {
 				// received every 30 seconds... (if info completed)
 				// SOFPPNIX_DEBUG("Got a \\status\\ query from %s:%d\n", inet_ntoa(in_addr.sin_addr), ntohs(in_addr.sin_port));
 				// TODO: send back a response
@@ -755,7 +779,16 @@ void nonBlockingServerResponses(void)
 				// player_0\John Mullinsqqu\frags_0\0\ping_0\38\skin_0\dekker\team_0\The Order
 				// std::cout << response << std::endl;
 
-				if ( sendto(gs_select_sock, response, strlen(response), 0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
+				std::string responseString(response);
+				if (secureQuery) {
+					std::vector<uint8_t> key = ValidateKey("iVn3a3", secureChallenge);
+					size_t final = responseString.find("\\final\\");
+					if (final != std::string::npos)
+						responseString.insert(final, "\\validate\\" +
+							std::string(key.begin(), key.end()));
+				}
+				if ( sendto(gs_select_sock, responseString.c_str(), responseString.size(),
+				            0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
 					error_exit("sendto() failed responding to \\info\\ query try public 0 if continued error");
 				}
 				
@@ -807,7 +840,8 @@ void nonBlockingServerResponses(void)
 				// std::cout << response << std::endl;
 
 				// Send the response back to the in_addr that sent the query
-				if ( sendto(gs_select_sock, response, strlen(response), 0, (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
+				if ( sendto(gs_select_sock, response, strlen(response), 0,
+				            (struct sockaddr *)&in_addr, sizeof(in_addr)) < 0 ) {
 					error_exit("sendto() failed responding to \\info\\ query try public 0 if continued error");
 				}
 			} else {
