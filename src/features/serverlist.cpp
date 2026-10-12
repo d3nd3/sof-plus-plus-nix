@@ -75,6 +75,8 @@ static netadr_t *const engine_net_from = (netadr_t *)0x084237DC;
 
 #define GAMESPY_MASTER_PORT "27900"
 
+static std::vector<std::string> splitMasterList(const std::string &list);
+
 static bool resolveMasterServer(const std::string &target, netadr_t *out)
 {
 	std::string address = target;
@@ -93,9 +95,7 @@ static void sendGamespyMasterPacket(char *data)
 		masters = _sp_sv_master_gamespy->string;
 	if (masters.empty())
 		return;
-	std::istringstream input(masters);
-	std::string target;
-	while (input >> target) {
+	for (const std::string &target : splitMasterList(masters)) {
 		netadr_t master;
 		if (!resolveMasterServer(target, &master)) {
 			SOFPPNIX_PRINT("Unable to resolve master server %s\n", target.c_str());
