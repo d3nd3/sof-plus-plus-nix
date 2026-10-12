@@ -274,10 +274,8 @@ extern void SP_PRINT_MULTI(edict_t * ent, short id, std::string& format, std::ve
  ---------------------------------------------------------------------
 */
 extern int gs_select_sock;
-extern netadr_t sof1master_ip;
 extern netadr_t sof1svmaster_ip;
-extern netadr_t qtracker_master_ip;
-extern netadr_t sofvault_master_ip;
+#define DEFAULT_CL_MASTERS "sof1master.megalag.org,master.333networks.com,sof1master.sofvault.org,gsm.qtracker.com,master2.qtracker.com"
 // client gs
 extern void GetServerList(void);
 
@@ -428,6 +426,9 @@ extern cvar_t * maxclients;
 extern cvar_t * sv_public;
 extern cvar_t * gamespyport;
 extern cvar_t * hostport;
+extern cvar_t * sv_masters;
+extern cvar_t * cl_masters;
+extern cvar_t * cl_master;
 extern cvar_t * hostname;
 extern cvar_t * deathmatch;
 extern cvar_t * mapname;

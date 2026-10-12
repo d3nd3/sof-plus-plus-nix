@@ -29,10 +29,8 @@ netadr_t my_netadr = {
 
 
 int gs_select_sock = 0;
-netadr_t sof1master_ip;
+// Custom-style master server. Hard-coded, intentionally not part of sv_masters.
 netadr_t sof1svmaster_ip;
-netadr_t qtracker_master_ip;
-netadr_t sofvault_master_ip;
 // a gs_item struct that contains a netadr_t and a boolean hinting if status received
 typedef struct gs_item_s {
 	netadr_t addr;
@@ -45,20 +43,39 @@ std::chrono::steady_clock::time_point lastSentTime;
 // a std vector of gs_items
 std::vector<gs_item_t> gs_items;
 
-static netadr_t *const heartbeat_addresses[] = {
-	&sof1master_ip, &sof1svmaster_ip, &qtracker_master_ip, &sofvault_master_ip
-};
 static std::chrono::steady_clock::time_point next_gamespy_heartbeat;
 
 // These globals are fixed in the non-PIE SoF executable.
 static sizebuf_t *const engine_net_message = (sizebuf_t *)0x084237F0;
 static netadr_t *const engine_net_from = (netadr_t *)0x084237DC;
 
+#define GAMESPY_MASTER_PORT "27900"
+
+static bool resolveMasterServer(const std::string &target, netadr_t *out)
+{
+	std::string address = target;
+	if (address.find(':') == std::string::npos)
+		address += ":" GAMESPY_MASTER_PORT;
+	std::memset(out, 0, sizeof(*out));
+	if (!orig_NET_StringToAdr(&address[0], out))
+		return false;
+	return out->ip[0] || out->ip[1] || out->ip[2] || out->ip[3];
+}
+
 static void sendGamespyMasterPacket(char *data)
 {
-	for (netadr_t *master : heartbeat_addresses) {
+	if (!sv_masters || !sv_masters->string)
+		return;
+	std::istringstream input(sv_masters->string);
+	std::string target;
+	while (input >> target) {
+		netadr_t master;
+		if (!resolveMasterServer(target, &master)) {
+			SOFPPNIX_PRINT("Unable to resolve master server %s\n", target.c_str());
+			continue;
+		}
 		struct sockaddr_in address;
-		NetadrToSockadr(master, &address);
+		NetadrToSockadr(&master, &address);
 		if (sendto(gs_select_sock, data, strlen(data), 0,
 		           (struct sockaddr *)&address, sizeof(address)) < 0)
 			error_exit("Failed to send Gamespy packet: %s\n", std::strerror(errno));
@@ -184,6 +201,190 @@ void my_SV_ConnectionlessPacket(void)
 }
 
 
+#define CLIENT_MASTER_PORT 28900
+#define CLIENT_MASTER_TIMEOUT_SEC 5
+
+// Split on spaces and commas so "a b,c" style lists both work.
+static std::vector<std::string> splitMasterList(const std::string &list)
+{
+	std::vector<std::string> entries;
+	std::string current;
+	for (char c : list) {
+		if (c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == ',') {
+			if (!current.empty()) {
+				entries.push_back(current);
+				current.clear();
+			}
+		} else {
+			current += c;
+		}
+	}
+	if (!current.empty())
+		entries.push_back(current);
+	return entries;
+}
+
+static bool parseMasterEntry(const std::string &entry, std::string &host, int &port)
+{
+	host.clear();
+	port = CLIENT_MASTER_PORT;
+	std::string::size_type colon = entry.find(':');
+	if (colon == std::string::npos) {
+		host = entry;
+	} else {
+		host = entry.substr(0, colon);
+		try {
+			port = std::stoi(entry.substr(colon + 1));
+		} catch (...) {
+			return false;
+		}
+	}
+	return !host.empty() && port > 0 && port < 65536;
+}
+
+// Candidates to try in order. A manually set cl_master goes first,
+// then every cl_masters entry, so a timeout falls through to the next.
+static std::vector<std::string> clientMasterCandidates(void)
+{
+	std::string list = DEFAULT_CL_MASTERS;
+	if (cl_masters && cl_masters->string && *cl_masters->string)
+		list = cl_masters->string;
+	std::vector<std::string> entries = splitMasterList(list);
+	std::vector<std::string> candidates;
+	if (cl_master && cl_master->string && *cl_master->string)
+		candidates.push_back(cl_master->string);
+	for (const std::string &entry : entries) {
+		if (candidates.empty() || entry != candidates[0])
+			candidates.push_back(entry);
+	}
+	return candidates;
+}
+
+// Connect with a timeout so a dead master does not hang the client.
+static int connectMasterTimeout(const char *host, int port)
+{
+	struct addrinfo hints;
+	struct addrinfo *res = NULL;
+	std::memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	if (getaddrinfo(host, NULL, &hints, &res) != 0)
+		return -1;
+	struct sockaddr_in server_addr;
+	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
+	server_addr.sin_port = htons(port);
+	freeaddrinfo(res);
+
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd < 0)
+		return -1;
+
+	int flags = fcntl(sockfd, F_GETFL, 0);
+	fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+	int rc = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+	if (rc < 0 && errno != EINPROGRESS) {
+		close(sockfd);
+		return -1;
+	}
+	if (rc < 0) {
+		fd_set writefds;
+		FD_ZERO(&writefds);
+		FD_SET(sockfd, &writefds);
+		struct timeval timeout = { CLIENT_MASTER_TIMEOUT_SEC, 0 };
+		rc = select(sockfd + 1, NULL, &writefds, NULL, &timeout);
+		if (rc <= 0) {
+			close(sockfd);
+			return -1;
+		}
+		int err = 0;
+		socklen_t len = sizeof(err);
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0) {
+			close(sockfd);
+			return -1;
+		}
+	}
+	fcntl(sockfd, F_SETFL, flags);
+	struct timeval timeout = { CLIENT_MASTER_TIMEOUT_SEC, 0 };
+	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+	setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+	return sockfd;
+}
+
+// Full TCP exchange with one master. False on any failure, never exits.
+static bool fetchServerListFromMaster(const std::string &host, int port, std::vector<unsigned char> &out)
+{
+	out.clear();
+	int sockfd = connectMasterTimeout(host.c_str(), port);
+	if (sockfd < 0) {
+		SOFPPNIX_PRINT("Error: Failed to connect to master server %s:%d.\n", host.c_str(), port);
+		return false;
+	}
+
+	const char* message = "IDQD";
+	if (send(sockfd, message, std::strlen(message), 0) < 0) {
+		SOFPPNIX_PRINT("Error: Failed to send challenge to master server %s.\n", host.c_str());
+		close(sockfd);
+		return false;
+	}
+
+	unsigned char challenge[1400];
+	int challenge_len = recv(sockfd, challenge, sizeof(challenge), 0);
+	if (challenge_len <= 0) {
+		SOFPPNIX_PRINT("Error: No challenge from master server %s.\n", host.c_str());
+		close(sockfd);
+		return false;
+	}
+
+	std::string received_message((char*)challenge, challenge_len);
+
+	// Split the message string by the backslash character '\'
+	std::vector<std::string> parts;
+	std::istringstream iss(received_message);
+	std::string part;
+	while (std::getline(iss, part, '\\')) {
+		parts.push_back(part);
+	}
+	if (parts.empty()) {
+		SOFPPNIX_PRINT("Error: Bad challenge from master server %s.\n", host.c_str());
+		close(sockfd);
+		return false;
+	}
+	std::string realkey = parts[parts.size() - 1];
+
+	std::vector<uint8_t> key = ValidateKey(std::string("iVn3a3"), realkey);
+	std::string hashed_key(key.begin(), key.end());
+
+	std::string response = "\\gamename\\sofretail\\gamever\\1.07f\\location\\0\\validate\\" + hashed_key + "\\final\\\\queryid\\1.1\\";
+	if (send(sockfd, response.c_str(), response.size(), 0) < 0) {
+		SOFPPNIX_PRINT("Error: Failed to validate with master server %s.\n", host.c_str());
+		close(sockfd);
+		return false;
+	}
+
+	response = "\\list\\cmp\\gamename\\sofretail\\final\\";
+	if (send(sockfd, response.c_str(), response.size(), 0) < 0) {
+		SOFPPNIX_PRINT("Error: Failed to request list from master server %s.\n", host.c_str());
+		close(sockfd);
+		return false;
+	}
+
+	unsigned char chunk[1400];
+	while (true) {
+		int r = recv(sockfd, chunk, sizeof(chunk), 0);
+		if (r < 0) {
+			SOFPPNIX_PRINT("Error: Failed to receive list from master server %s.\n", host.c_str());
+			close(sockfd);
+			return false;
+		}
+		if (r == 0)
+			break;
+		out.insert(out.end(), chunk, chunk + r);
+	}
+	close(sockfd);
+	return true;
+}
+
 /*
 The port should already be binded somewhere else.
 */
@@ -195,111 +396,42 @@ void GetServerList(void)
 		\\list\cmp\gamename\sofretail\final\
 -------------------------------------------------------------------
 	*/
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0) {
-		SOFPPNIX_PRINT("Error: Failed to create socket.\n");
-		return 1;
-	}
-
-	// int timeout = 2000; // user timeout in milliseconds [ms]
-	// setsockopt(sockfd, SOL_TCP, TCP_USER_TIMEOUT, (char*) &timeout, sizeof(timeout));
-
-	// Set the maximum segment size for outgoing TCP packets
-	// int maxseg = 1400;
-	// if (setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &maxseg, sizeof(maxseg)) < 0) {
-	//     error_exit("Failed to set maximum segment size.\n");
-	// }
-
-	struct addrinfo hints;
-	struct addrinfo *res;
-	std::memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-	int status = getaddrinfo("sof1master.megalag.org", NULL, &hints, &res);
-	if (status != 0) {
-		error_exit("Failed to resolve hostname.\n");
-	}
-	struct sockaddr_in server_addr;
-	std::memcpy(&server_addr, res->ai_addr, res->ai_addrlen);
-	server_addr.sin_port = htons(28900);
-	freeaddrinfo(res);
-
-	if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-		error_exit("Failed to connect to server.\n");
-	}
-
-
-	const char* message = "IDQD";
-	if (send(sockfd, message, std::strlen(message), 0) < 0) {
-		error_exit("Failed to send message.\n");
-	}
-
-	unsigned char buffer[1400];
-	std::memset(buffer, 0, sizeof(buffer));
-	int bytes_returned = recv(sockfd, buffer, sizeof(buffer), 0);
-	if (bytes_returned < 0) {
-		error_exit("Failed to receive message.\n");
-	}
-
-	std::string received_message((char*)buffer,bytes_returned);
-
-	// Split the message string by the backslash character '\'
-	std::vector<std::string> parts;
-	std::istringstream iss(received_message);
-	std::string part;
-	while (std::getline(iss, part, '\\')) {
-		parts.push_back(part);
-	}
-
-	std::string realkey = parts[parts.size() - 1];
-
-	// This is disabled I think. But do it anyway.
-	// Hash the key using the provided hash function
-	// char * ckey = gsseckey(NULL,key.c_str(),"iVn3a3",2);
-	std::vector<uint8_t> key = ValidateKey(std::string("iVn3a3"),realkey);
-	std::string hashed_key( key.begin(), key.end() );
-
-	std::string response = "\\gamename\\sofretail\\gamever\\1.07f\\location\\0\\validate\\" + hashed_key + "\\final\\\\queryid\\1.1\\";
-	char * c = response.c_str();
-	// ssize_t send(int sockfd, const void *buf, size_t len, int flags);
-	if (send(sockfd, c, response.size(), 0) < 0) {
-		error_exit("Failed to send response.\n");
-	}
-
-	response = "\\list\\cmp\\gamename\\sofretail\\final\\";
-	c = response.c_str();
-	if (send(sockfd, c, response.size(), 0) < 0) {
-		error_exit("Failed to send response.\n");
-	}
-	std::memset(buffer, 0, sizeof(buffer));
-	
-	int r = 0;
-	bytes_returned = 0;
-	while ( true ) {
-		// ssize_t recv(int sockfd, void *buf, size_t len, int flags);
-		r = recv(sockfd, buffer + bytes_returned, sizeof(buffer) - bytes_returned, 0);
-		if ( r < 0) {
-			error_exit("Failed to receive message.\n");
-		} else {
-			if ( r == 0 )
-				break;
+	std::vector<unsigned char> raw;
+	std::string used_master;
+	for (const std::string &candidate : clientMasterCandidates()) {
+		std::string host;
+		int port;
+		if (!parseMasterEntry(candidate, host, port))
+			continue;
+		if (!fetchServerListFromMaster(host, port, raw)) {
+			SOFPPNIX_PRINT("Master server %s timed out, trying next.\n", candidate.c_str());
+			continue;
 		}
-		bytes_returned += r;
+		if (raw.size() <= 7 || (raw.size() - 7) % 6 != 0) {
+			SOFPPNIX_PRINT("Master server %s returned a bad server list, trying next.\n", candidate.c_str());
+			continue;
+		}
+		used_master = candidate;
+		break;
 	}
-	close(sockfd);
+	if (used_master.empty()) {
+		SOFPPNIX_PRINT("Error: No master server reachable.\n");
+		return;
+	}
+	if (cl_master && (!cl_master->string || used_master != cl_master->string)) {
+		std::string active = used_master;
+		setCvarString(cl_master, &active[0]);
+	}
 	// there is a \final\ at the end. So ignore last 7 bytes
-	// hexdump(buffer,buffer+bytes_returned);
+	// hexdump(raw.data(),raw.data()+raw.size());
 
 	// Ignore the first 7 bytes
-	unsigned char* data = buffer;
-	if (bytes_returned <= 7 || (bytes_returned-7) % 6 != 0 ) {
-		error_exit("Failure getting Server List , bytes returned not correct\n");
-	}
+	unsigned char* data = raw.data();
+	size_t bytes_returned = raw.size();
 	auto now = std::chrono::steady_clock::now();
 	// Parse the buffer and create gamespy structs that contain netadr_t
 	// They are global and will be dealt with each frame
-	for (int i = 0; i < bytes_returned - 7; i += 6) {
+	for (size_t i = 0; i < bytes_returned - 7; i += 6) {
 
 		gs_item_t unacked_server;
 

@@ -4,6 +4,9 @@ cvar_t * maxclients = NULL;
 cvar_t * sv_public = NULL;
 cvar_t * gamespyport = NULL;
 cvar_t * hostport = NULL;
+cvar_t * sv_masters = NULL;
+cvar_t * cl_masters = NULL;
+cvar_t * cl_master = NULL;
 cvar_t * hostname = NULL;
 cvar_t * deathmatch = NULL;
 cvar_t * dedicated = NULL;
@@ -196,6 +199,11 @@ void createServerCvars(void)
 		gamespyport = orig_Cvar_Get(		"gamespyport", 			"0", 	CVAR_NOSET, 									NULL);
 		hostport = orig_Cvar_Get(			"hostport", 			"0", 	CVAR_NOSET, 									NULL);
 
+		// Space separated list of gamespy-style master servers to heartbeat.
+		// Bare hostnames default to port 27900. The custom sof1svmaster
+		// master is hard-coded separately and is not part of this list.
+		sv_masters = orig_Cvar_Get(			"sv_masters", 			"sof1master.megalag.org:27900 gsm.qtracker.com:27900 sof1master.sofvault.org:27900", 	CVAR_ARCHIVE, 	NULL);
+
 		dmflags = orig_Cvar_Get(			"dmflags", 				"0", 	CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 	NULL);
 		maxclients = orig_Cvar_Get(			"maxclients", 			"16", 	CVAR_SERVERINFO | CVAR_LATCH , 					NULL);
 		hostname = orig_Cvar_Get(			"hostname", 			"", 	CVAR_SERVERINFO | CVAR_ARCHIVE, 				NULL);
@@ -256,6 +264,11 @@ void createServerCvars(void)
 void createClientCvars(void)
 {
 	//									name					value	flags										modifiedCallback
+	// Space separated list of client master servers to fetch the server list from.
+	// Commas are also accepted as separators. Bare hostnames default to port 28900.
+	cl_masters = orig_Cvar_Get(			"cl_masters", 			DEFAULT_CL_MASTERS, 	CVAR_ARCHIVE, 	NULL);
+	// Currently active client master. Advanced to the next cl_masters entry on timeout.
+	cl_master = orig_Cvar_Get(			"cl_master", 			"", 	CVAR_ARCHIVE, 	NULL);
 }
 void createSharedCvars(void)
 {
