@@ -57,17 +57,28 @@ static int socketPort(int fd, int fallback)
 		? ntohs(address.sin_port) : fallback;
 }
 
+static int configuredHostPort(void)
+{
+	return hostport ? c_string_to_int(hostport->string) : 0;
+}
+
+static int configuredGamespyPort(void)
+{
+	return gamespyport ? c_string_to_int(gamespyport->string) : 0;
+}
+
 static int gamespyBoundPort(void)
 {
-	return socketPort(gs_select_sock,
-		gamespyport ? c_string_to_int(gamespyport->string) : 0);
+	int port = socketPort(gs_select_sock, configuredGamespyPort());
+	return port > 0 ? port : configuredGamespyPort();
 }
 
 static int serverBoundPort(void)
 {
 	// The engine stores the dedicated IP socket at ip_sockets[1].
 	int fd = *(const int *)0x085568ac;
-	return socketPort(fd, hostport ? c_string_to_int(hostport->string) : 0);
+	int port = socketPort(fd, configuredHostPort());
+	return port > 0 ? port : configuredHostPort();
 }
 
 // These globals are fixed in the non-PIE SoF executable.
@@ -1169,8 +1180,10 @@ void nonBlockingServerResponses(void)
 
 void GamespyHeartbeat(void)
 {
-	if ( !sv_public || !sv_public->value || !gamespyport ||
-	     gamespyBoundPort() <= 0 || !gamespy_map_ready ) return;
+	if ( !sv_public || !sv_public->value || gamespyBoundPort() <= 0 )
+		return;
+	if ( !gamespy_map_ready )
+		gamespy_map_ready = true;
 	if ( std::chrono::steady_clock::now() < next_gamespy_heartbeat ) return;
 	sendGamespyHeartbeat();
 }
@@ -1183,13 +1196,15 @@ void GamespyHeartbeatCtrlNotify(void)
 {
 	int game_port = gamespyBoundPort();
 	int host_port = serverBoundPort();
-	if ( !sv_public || !sv_public->value || game_port <= 0 || host_port <= 0 )
+	if ( !sv_public || !sv_public->value || game_port <= 0 )
 		return;
 	gamespy_map_ready = true;
-	if ( !_sp_sv_master_sofplus || !_sp_sv_master_sofplus->string ||
-	     !*_sp_sv_master_sofplus->string ) return;
+	sendGamespyHeartbeat();
 
-	// SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
+	if ( host_port <= 0 || !_sp_sv_master_sofplus ||
+	     !_sp_sv_master_sofplus->string || !*_sp_sv_master_sofplus->string )
+		return;
+
 	std::string master = _sp_sv_master_sofplus->string;
 	if (master.find(':') == std::string::npos)
 		master += ":" GAMESPY_MASTER_PORT;
@@ -1198,15 +1213,11 @@ void GamespyHeartbeatCtrlNotify(void)
 	      sof1svmaster_ip.ip[2] || sof1svmaster_ip.ip[3]))
 		return;
 
-	//fill in the gamespyport and hostport
 	char formedData[256];
 	snprintf(formedData, sizeof(formedData),
 	         "\\hostport\\%d\\gamespyport\\%d\\", host_port, game_port);
 	sendCtrlGamespyPacket(formedData);
-
-	// now the hostport variant Ensure send using hostport socket
 	snprintf(formedData, sizeof(formedData),
 	         "\\gamespyport\\%d\\hostport\\%d\\", game_port, host_port);
 	sendCtrlHostPacket(formedData);
-	sendGamespyHeartbeat();
 }
