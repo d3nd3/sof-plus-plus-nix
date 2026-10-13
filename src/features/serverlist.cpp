@@ -47,6 +47,7 @@ std::vector<gs_item_t> gs_items;
 
 static std::chrono::steady_clock::time_point next_gamespy_heartbeat;
 static unsigned int gamespy_query_id = 1;
+static bool gamespy_map_ready = false;
 
 static int socketPort(int fd, int fallback)
 {
@@ -1169,7 +1170,7 @@ void nonBlockingServerResponses(void)
 void GamespyHeartbeat(void)
 {
 	if ( !sv_public || !sv_public->value || !gamespyport ||
-	     gamespyBoundPort() <= 0 ) return;
+	     gamespyBoundPort() <= 0 || !gamespy_map_ready ) return;
 	if ( std::chrono::steady_clock::now() < next_gamespy_heartbeat ) return;
 	sendGamespyHeartbeat();
 }
@@ -1182,8 +1183,10 @@ void GamespyHeartbeatCtrlNotify(void)
 {
 	int game_port = gamespyBoundPort();
 	int host_port = serverBoundPort();
-	if ( !sv_public || !sv_public->value || game_port <= 0 || host_port <= 0 ||
-	     !_sp_sv_master_sofplus || !_sp_sv_master_sofplus->string ||
+	if ( !sv_public || !sv_public->value || game_port <= 0 || host_port <= 0 )
+		return;
+	gamespy_map_ready = true;
+	if ( !_sp_sv_master_sofplus || !_sp_sv_master_sofplus->string ||
 	     !*_sp_sv_master_sofplus->string ) return;
 
 	// SOFPPNIX_DEBUG("Sending out GamespyHeartbeat\n");
