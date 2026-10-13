@@ -123,11 +123,11 @@ static void sendCtrlHostPacket(char *data)
 	orig_NET_SendPacket(NS_SERVER, strlen(data), data, sof1svmaster_ip);
 }
 
-static void sendGamespyHeartbeat(bool statechanged)
+static void sendGamespyHeartbeat(void)
 {
 	char data[128];
 	snprintf(data, sizeof(data), "\\heartbeat\\%d\\gamename\\sofretail%s",
-	         gamespyBoundPort(), statechanged ? "\\statechanged\\" : "");
+	         gamespyBoundPort(), "\\statechanged\\");
 	sendGamespyMasterPacket(data);
 	next_gamespy_heartbeat =
 		std::chrono::steady_clock::now() + std::chrono::seconds(150);
@@ -242,6 +242,160 @@ void my_SV_ConnectionlessPacket(void)
 	char format[] = "print\n%s";
 	orig_Netchan_OutOfBandPrint(NS_SERVER, *engine_net_from, format,
 	                             response.c_str());
+}
+
+static bool gamespyStartsWith(const unsigned char *data, size_t length,
+                              const char *prefix)
+{
+	size_t prefixLength = strlen(prefix);
+	return length >= prefixLength && !memcmp(data, prefix, prefixLength);
+}
+
+static const char *gamespyGameType(void)
+{
+	switch (std::lround(deathmatch ? deathmatch->value : 0)) {
+	case 1: return "DM";
+	case 2: return "Assassin";
+	case 3: return "Arsenal";
+	case 4: return "CTF";
+	case 5: return "Realistic";
+	case 6: return "Control";
+	case 7: return "CTB";
+	default: return "Unknown";
+	}
+}
+
+static std::string gamespyInfoFields(void)
+{
+	std::ostringstream out;
+	out << "\\hostname\\" << statusSpString(hostname)
+	    << "\\hostport\\" << serverBoundPort()
+	    << "\\mapname\\" << statusSpString(mapname)
+	    << "\\gametype\\" << gamespyGameType()
+	    << "\\numplayers\\" << countPlayersInGame()
+	    << "\\maxplayers\\" << statusSpInt(maxclients)
+	    << "\\gamemode\\openplaying"
+	    << "\\violence\\" << statusSpInt(sv_violence, 0);
+	return out.str();
+}
+
+static std::string gamespyRulesFields(void)
+{
+	std::ostringstream out;
+	out << "\\timelimit\\" << statusSpInt(timelimit)
+	    << "\\fraglimit\\" << statusSpInt(fraglimit)
+	    << "\\dmflags\\" << statusSpInt(dmflags)
+	    << "\\movescale\\";
+	if (g_movescale && g_movescale->value == 1.0f)
+		out << "100%";
+	else
+		out << (int)((g_movescale ? g_movescale->value : 1.0f) * 100) << '%';
+	out << "\\cheats\\" << (statusSpInt(cheats) ? "enabled" : "disabled")
+	    << "\\ctf_loops\\" << statusSpInt(ctf_loops, 10)
+	    << "\\suicide_penalty\\" << statusSpInt(sv_suicidepenalty, 2);
+	return out.str();
+}
+
+static std::string gamespyBasicFields(void)
+{
+	return "\\gamename\\sofretail\\gamever\\1.07f\\location\\1";
+}
+
+static std::string gamespyPlayerFields(void)
+{
+	std::ostringstream out;
+	for (int i = 0; i < countPlayersInGame(); ++i) {
+		out << "\\player_" << i << "\\John Mullinsqqu"
+		    << "\\frags_" << i << "\\0"
+		    << "\\ping_" << i << "\\38"
+		    << "\\skin_" << i << "\\dekker"
+		    << "\\team_" << i << "\\The Order";
+	}
+	return out.str();
+}
+
+static std::string gamespyFinish(const std::string &fields, unsigned int query)
+{
+	return fields + "\\final\\\\queryid\\" +
+		std::to_string(query) + ".1";
+}
+
+static std::string gamespyStatusResponse(bool secure,
+                                         const std::string &challenge,
+                                         unsigned int query)
+{
+	std::string fields = gamespyBasicFields() +
+		gamespyInfoFields() + gamespyRulesFields() + gamespyPlayerFields();
+	if (secure) {
+		std::vector<uint8_t> key = ValidateKey("iVn3a3", challenge);
+		return fields + "\\validate\\" +
+			std::string(key.begin(), key.end()) +
+			"\\final\\\\queryid\\" + std::to_string(query) + ".1";
+	}
+	return gamespyFinish(fields, query);
+}
+
+static bool handleGamespyQuery(const unsigned char *data, int length,
+                               const struct sockaddr_in &from)
+{
+	if (!sv_public || !sv_public->value)
+		return false;
+
+	std::string challenge;
+	const bool secure = readGamespySecureChallenge(data, length, challenge);
+	const bool status = gamespyStartsWith(data, length, "\\status\\");
+	const unsigned int query = ++gamespy_query_id;
+	auto send = [&from](const std::string &response) {
+		if (sendto(gs_select_sock, response.data(), response.size(), 0,
+		           (const struct sockaddr *)&from, sizeof(from)) < 0)
+			error_exit("sendto() failed responding to Gamespy query");
+	};
+
+	if (secure && !status) {
+		std::vector<uint8_t> key = ValidateKey("iVn3a3", challenge);
+		send("\\validate\\" + std::string(key.begin(), key.end()) +
+		     "\\final\\\\queryid\\" + std::to_string(query) + ".1");
+		return true;
+	}
+	if (status) {
+		send(gamespyStatusResponse(secure, challenge, query));
+		return true;
+	}
+	if (gamespyStartsWith(data, length, "\\info\\\\rules\\")) {
+		send(gamespyFinish(gamespyInfoFields() + gamespyRulesFields(), query));
+		return true;
+	}
+	if (gamespyStartsWith(data, length, "\\info\\")) {
+		send(gamespyFinish(gamespyInfoFields(), query));
+		return true;
+	}
+	if (gamespyStartsWith(data, length, "\\basic\\")) {
+		send(gamespyFinish(gamespyBasicFields(), query));
+		return true;
+	}
+	if (gamespyStartsWith(data, length, "\\rules\\")) {
+		send(gamespyFinish(gamespyRulesFields(), query));
+		return true;
+	}
+	if (gamespyStartsWith(data, length, "\\players\\")) {
+		send(gamespyFinish(gamespyPlayerFields(), query));
+		return true;
+	}
+	if (gamespyStartsWith(data, length, "\\echo\\")) {
+		std::string response((const char *)data, length);
+		response += "\\final\\\\queryid\\" + std::to_string(query) + ".1";
+		send(response);
+		return true;
+	}
+	if (gamespyStartsWith(data, length, "\\packets\\")) {
+		const std::string id = std::to_string(query);
+		send(gamespyBasicFields() + "\\queryid\\" + id + ".1");
+		send(gamespyInfoFields() + "\\queryid\\" + id + ".2");
+		send(gamespyRulesFields() + "\\queryid\\" + id + ".3");
+		send("\\final\\\\queryid\\" + id + ".4");
+		return true;
+	}
+	return false;
 }
 
 
@@ -685,6 +839,7 @@ void nonBlockingServerResponses(void)
 		// Data is available, so receive it and process it
 		int recv_len = recvfrom(gs_select_sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&in_addr, &addrlen);
 		if (recv_len > 0) {
+			if (!handleGamespyQuery(buffer, recv_len, in_addr)) {
 			std::string secureChallenge;
 			bool secureQuery = sv_public && sv_public->value &&
 				readGamespySecureChallenge(buffer, recv_len, secureChallenge);
@@ -965,7 +1120,8 @@ void nonBlockingServerResponses(void)
 					}
 					i++;
 				}// for gs_items
-			}// not a status request 
+			}// not a status request
+			}
 		} // data recv
 			
 			
@@ -1015,7 +1171,7 @@ void GamespyHeartbeat(void)
 	if ( !sv_public || !sv_public->value || !gamespyport ||
 	     gamespyBoundPort() <= 0 ) return;
 	if ( std::chrono::steady_clock::now() < next_gamespy_heartbeat ) return;
-	sendGamespyHeartbeat(false);
+	sendGamespyHeartbeat();
 }
 
 /*
@@ -1049,5 +1205,5 @@ void GamespyHeartbeatCtrlNotify(void)
 	snprintf(formedData, sizeof(formedData),
 	         "\\gamespyport\\%d\\hostport\\%d\\", game_port, host_port);
 	sendCtrlHostPacket(formedData);
-	sendGamespyHeartbeat(true);
+	sendGamespyHeartbeat();
 }
