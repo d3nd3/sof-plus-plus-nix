@@ -521,6 +521,97 @@ static int connectMasterTimeout(const char *host, int port)
 	return sockfd;
 }
 
+static bool recvMasterBytes(int sockfd, std::vector<unsigned char> &out, bool stopOnIdle)
+{
+	unsigned char chunk[4096];
+	for (;;) {
+		int r = recv(sockfd, chunk, sizeof(chunk), 0);
+		if (r > 0)
+			out.insert(out.end(), chunk, chunk + r);
+		else if (r == 0)
+			break;
+		else if (stopOnIdle && (errno == EAGAIN || errno == EWOULDBLOCK))
+			break;
+		else
+			return false;
+	}
+	return true;
+}
+
+static bool extractMasterChallengeKey(const std::string &message, std::string &key)
+{
+	const char *marker = "\\secure\\";
+	size_t pos = message.find(marker);
+	if (pos == std::string::npos) {
+		pos = message.find("secure\\");
+		if (pos == std::string::npos)
+			return false;
+		pos += strlen("secure\\");
+	} else {
+		pos += strlen(marker);
+	}
+	size_t end = pos;
+	while (end < message.size() && message[end] != '\\' && message[end] != '\0' &&
+	       message[end] != '\r' && message[end] != '\n')
+		++end;
+	key = message.substr(pos, end - pos);
+	return !key.empty();
+}
+
+static bool parseTextIpMasterList(const std::string &text, std::vector<unsigned char> &out)
+{
+	out.clear();
+	const std::string marker = "\\ip\\";
+	size_t pos = 0;
+	while ((pos = text.find(marker, pos)) != std::string::npos) {
+		pos += marker.size();
+		size_t end = text.find('\\', pos);
+		if (end == std::string::npos)
+			break;
+		std::string entry = text.substr(pos, end - pos);
+		pos = end;
+		size_t colon = entry.find(':');
+		if (colon == std::string::npos)
+			continue;
+		struct in_addr addr;
+		if (!inet_aton(entry.substr(0, colon).c_str(), &addr))
+			continue;
+		int port = std::atoi(entry.substr(colon + 1).c_str());
+		if (port <= 0 || port >= 65536)
+			continue;
+		uint32_t ip = ntohl(addr.s_addr);
+		out.push_back((ip >> 24) & 0xff);
+		out.push_back((ip >> 16) & 0xff);
+		out.push_back((ip >> 8) & 0xff);
+		out.push_back(ip & 0xff);
+		out.push_back((port >> 8) & 0xff);
+		out.push_back(port & 0xff);
+	}
+	return out.size() >= 6;
+}
+
+static bool normalizeMasterListPayload(const std::vector<unsigned char> &raw,
+                                       std::vector<unsigned char> &out)
+{
+	out.clear();
+	if (raw.empty())
+		return false;
+
+	std::string text((const char *)raw.data(), raw.size());
+	if (text.find("\\ip\\") != std::string::npos)
+		return parseTextIpMasterList(text, out);
+
+	size_t finalPos = text.find("\\final\\");
+	size_t bodyLen = finalPos == std::string::npos ? raw.size() : finalPos;
+	if (bodyLen <= 7)
+		return false;
+	const size_t recordBytes = bodyLen - 7;
+	if (recordBytes % 6 != 0)
+		return false;
+	out.assign(raw.begin() + 7, raw.begin() + 7 + recordBytes);
+	return !out.empty();
+}
+
 // Full TCP exchange with one master. False on any failure, never exits.
 static bool fetchServerListFromMaster(const std::string &host, int port, std::vector<unsigned char> &out)
 {
@@ -531,46 +622,47 @@ static bool fetchServerListFromMaster(const std::string &host, int port, std::ve
 		return false;
 	}
 
-	const char* message = "IDQD";
-	if (send(sockfd, message, std::strlen(message), 0) < 0) {
-		SOFPPNIX_PRINT("Error: Failed to send challenge to master server %s.\n", host.c_str());
-		close(sockfd);
-		return false;
+	std::vector<unsigned char> challengeBuf;
+	if (!recvMasterBytes(sockfd, challengeBuf, true) || challengeBuf.empty()) {
+		const char *message = "IDQD";
+		if (send(sockfd, message, strlen(message), 0) < 0 ||
+		    !recvMasterBytes(sockfd, challengeBuf, true) || challengeBuf.empty()) {
+			SOFPPNIX_PRINT("Error: No challenge from master server %s.\n", host.c_str());
+			close(sockfd);
+			return false;
+		}
 	}
 
-	unsigned char challenge[1400];
-	int challenge_len = recv(sockfd, challenge, sizeof(challenge), 0);
-	if (challenge_len <= 0) {
-		SOFPPNIX_PRINT("Error: No challenge from master server %s.\n", host.c_str());
-		close(sockfd);
-		return false;
+	std::string challenge((const char *)challengeBuf.data(), challengeBuf.size());
+	std::string realkey;
+	if (!extractMasterChallengeKey(challenge, realkey)) {
+		std::vector<std::string> parts;
+		std::istringstream iss(challenge);
+		std::string part;
+		while (std::getline(iss, part, '\\'))
+			parts.push_back(part);
+		if (!parts.empty())
+			realkey = parts.back();
 	}
-
-	std::string received_message((char*)challenge, challenge_len);
-
-	// Split the message string by the backslash character '\'
-	std::vector<std::string> parts;
-	std::istringstream iss(received_message);
-	std::string part;
-	while (std::getline(iss, part, '\\')) {
-		parts.push_back(part);
-	}
-	if (parts.empty()) {
+	if (realkey.empty()) {
 		SOFPPNIX_PRINT("Error: Bad challenge from master server %s.\n", host.c_str());
 		close(sockfd);
 		return false;
 	}
-	std::string realkey = parts[parts.size() - 1];
 
 	std::vector<uint8_t> key = ValidateKey(std::string("iVn3a3"), realkey);
 	std::string hashed_key(key.begin(), key.end());
-
-	std::string response = "\\gamename\\sofretail\\gamever\\1.07f\\location\\0\\validate\\" + hashed_key + "\\final\\\\queryid\\1.1\\";
+	// Stock SoF clients use gamever 1.6 on the master TCP session (see ~/sofgsprotocol).
+	std::string response = "\\gamename\\sofretail\\gamever\\1.6\\location\\0\\validate\\" +
+		hashed_key + "\\final\\\\queryid\\1.1\\";
 	if (send(sockfd, response.c_str(), response.size(), 0) < 0) {
 		SOFPPNIX_PRINT("Error: Failed to validate with master server %s.\n", host.c_str());
 		close(sockfd);
 		return false;
 	}
+
+	std::vector<unsigned char> listRaw;
+	recvMasterBytes(sockfd, listRaw, true);
 
 	response = "\\list\\cmp\\gamename\\sofretail\\final\\";
 	if (send(sockfd, response.c_str(), response.size(), 0) < 0) {
@@ -579,19 +671,17 @@ static bool fetchServerListFromMaster(const std::string &host, int port, std::ve
 		return false;
 	}
 
-	unsigned char chunk[1400];
-	while (true) {
-		int r = recv(sockfd, chunk, sizeof(chunk), 0);
-		if (r < 0) {
-			SOFPPNIX_PRINT("Error: Failed to receive list from master server %s.\n", host.c_str());
-			close(sockfd);
-			return false;
-		}
-		if (r == 0)
-			break;
-		out.insert(out.end(), chunk, chunk + r);
-	}
+	std::vector<unsigned char> more;
+	recvMasterBytes(sockfd, more, false);
+	listRaw.insert(listRaw.end(), more.begin(), more.end());
 	close(sockfd);
+	if (listRaw.empty())
+		return false;
+
+	std::vector<unsigned char> normalized;
+	if (!normalizeMasterListPayload(listRaw, normalized))
+		return false;
+	out.swap(normalized);
 	return true;
 }
 
@@ -617,7 +707,7 @@ void GetServerList(void)
 			SOFPPNIX_PRINT("Master server %s timed out, trying next.\n", candidate.c_str());
 			continue;
 		}
-		if (raw.size() <= 7 || (raw.size() - 7) % 6 != 0) {
+		if (raw.size() < 6 || raw.size() % 6 != 0) {
 			SOFPPNIX_PRINT("Master server %s returned a bad server list, trying next.\n", candidate.c_str());
 			continue;
 		}
@@ -632,16 +722,10 @@ void GetServerList(void)
 		std::string active = used_master;
 		setCvarString(cl_master, &active[0]);
 	}
-	// there is a \final\ at the end. So ignore last 7 bytes
-	// hexdump(raw.data(),raw.data()+raw.size());
-
-	// Ignore the first 7 bytes
 	unsigned char* data = raw.data();
 	size_t bytes_returned = raw.size();
 	auto now = std::chrono::steady_clock::now();
-	// Parse the buffer and create gamespy structs that contain netadr_t
-	// They are global and will be dealt with each frame
-	for (size_t i = 0; i < bytes_returned - 7; i += 6) {
+	for (size_t i = 0; i < bytes_returned; i += 6) {
 
 		gs_item_t unacked_server;
 
@@ -651,7 +735,7 @@ void GetServerList(void)
 		addr.ip[1] = data[i + 1];
 		addr.ip[2] = data[i + 2];
 		addr.ip[3] = data[i + 3];
-		// netadr_t.port is stored in network order; NetadrToSockadr copies it.
+		// cmp list ports are big-endian; netadr.port matches htons() in host uint16 form.
 		addr.port = (data[i + 5] << 8) | data[i + 4];
 
 		unacked_server.addr = addr;
