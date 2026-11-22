@@ -1,6 +1,8 @@
 # sof-plus-plus-nix
 a mod that behaves similar to sofplus on windows, applies to linux binary only
 
+Prefer pictures? Start with **[HUMANS.md](HUMANS.md)**.
+
 ## Preparing Build
 sudo apt install g++-multilib libcurl4-openssl-dev:i386 libssl-dev:i386 libbsd-dev:i386 libx11-dev:i386 libcrypt1:i386 libminizip-dev:i386 libsdl1.2-dev:i386
 

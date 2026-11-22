@@ -1,0 +1,169 @@
+# sof-plus-plus-nix — system overview (source of truth).
+# Render:  scripts/render-diagram.sh  (svg: light+dark, png: dark, for gpm desktop)
+# Colours come from the d2 theme, not hardcoded fills, so both light and dark render legibly.
+# Rule: if a hook site, feature, data store, or build input changes,
+# update this file in the same commit and re-render the SVG.
+
+title: |md
+  **sof-plus-plus-nix** — SoFplus-style mod for the 32-bit Linux Soldier of Fortune binary, delivered as one LD_PRELOAD `.so`
+| {near: top-center}
+
+direction: right
+grid-columns: 3
+grid-rows: 2
+
+entry: Entry points {
+  engine: SoF i386 binary starts · `test.so` injected via `LD_PRELOAD` / `BOX86_LD_PRELOAD` {
+    shape: hexagon
+  }
+  ctor: ELF constructor `begin()` · runs before engine `main` {
+    shape: hexagon
+  }
+  console: `++nix_*` / `sp_*` commands · cvars · public rcon
+  addons: `~/.loki/sof/python/*.py` addons · decorator callbacks {
+    shape: hexagon
+  }
+  net: clients connect · server-browser pings · UDP
+  map: map spawn / level change · demos and page strings reset {
+    shape: hexagon
+  }
+  rcon: public rcon · remote console over UDP
+}
+
+core: Core · one preload, many patched call sites {
+  patch: `util.cpp` `memoryAdjust` · mprotect then write the fixed `0x08…` address
+  detour: `util.cpp` `createDetour` · jump thunk + trampoline, returns the original
+  shared: `core/exe_shared.cpp` · `Qcommon_Init` / `Frame` / `Cbuf_AddLateCommands`
+  client: `core/exe_client.cpp` · `CL_*` / `VID_LoadRefresh` · FOV, video library
+  server: `core/exe_server.cpp` · `SV_Map_f` / `RunGameFrame` / `SpawnServer` / Ghoul pack
+  gameapi: `core/game.cpp` · `Sys_GetGameAPI` + `SV_ClientThink` wrappers
+  protocol: `main.cpp` gold-platinum · 1.07f protocol 33, WON disable, master-list swap
+
+  httpdl: `features/httpdl.cpp` · libcurl fetch on precache, unzip into `base/`
+  serverlist: `features/serverlist.cpp` · own GameSpy heartbeat + non-blocking browser replies
+  video: `features/video.cpp` · widescreen mode list · `gl_driver` refresh hook
+  clipboard: `features/clipboard.cpp` · `Sys_GetClipboardData` via X11, WSL fallback
+  pages: `features/pages.cpp` · server-drawn scoreboard / chat pages
+  killfeed: `features/killfeed.cpp` · death list expiry, per-client draw
+  balance: `features/weapon_balance.cpp` · per-weapon damage / fire patches
+  detect: `features/detect.cpp` · usercmd + aim validation used by game modes
+
+  dm: `game_modes/dm_always.cpp` · deathmatch rule set with every feature on
+  dmvar: `dm_standard` / `dm_sofree` / `dm_ctf` / `dm_realistic` · smaller rule deltas
+  strings: `strip.cpp` · string-package registry, 97 reserved menu string IDs
+
+  pyinit: `features/python.cpp` · `Py_Initialize` with `PYTHONHOME=.`, imports addons
+  pymod: `python_api/ppnix.cpp` · `ppnix` module — print, time, cvars, chat, file registration
+  pywrap: `python_api/player.cpp` + `entity.cpp` · live player / edict objects for scripts
+  pyev: `python_api/decorators.cpp` · `@event.*` registers callbacks fired from C hooks
+  pymem: `python_api/memory.cpp` · scripted read/write of patched engine memory
+  demos: `features/demos.cpp` · `.ssdm` server-side demo record / playback
+
+  gap: "**not built:** `netchan_extend.cpp` (absent from makefile) · `src/Game/` is vendored reference only" {
+    shape: document
+  }
+}
+
+state: State {
+  direction: down
+  addons: `~/.loki/sof/python/*.py` — addon scripts {
+    shape: cylinder
+  }
+  menus: `~/.loki/sof/c/*.m32` — client menu scripts, served over HTTP {
+    shape: cylinder
+  }
+  artifact: `~/.loki/sof-runtime/test.so` — installed preload, loaded at launch {
+    shape: cylinder
+  }
+  demos: `demos/*.ssdm` — recorded server demos {
+    shape: cylinder
+  }
+  pyhome: `build_python/lib/python3.8` — vendored stdlib, becomes `PYTHONHOME` {
+    shape: cylinder
+  }
+  build: `out/test.so` + `obj/` + `buildnum` — build outputs {
+    shape: cylinder
+  }
+  runtime: in-process state {
+    sites: patched address list + original bytes
+    cbs: Python callback table per `@event`
+    sockets: GameSpy + HTTP sockets and curl handle
+    track: downloaded-zip registry
+  }
+}
+
+ext: External {
+  sof: `sof` i386 binary — fixed load layout the patches assume
+  game: `base/gamex86.so` — stock game DLL, wrapped and detoured
+  curl: HTTP mirrors — map / pak downloads
+  masters: GameSpy + SoFree master servers — UDP heartbeat and query
+  x11: X11 + SDL 1.2 — clipboard, video modes, GL driver
+  docker: i386/ubuntu:20.04 build image — cmake, minizip-ng, CPython 3.8
+  box86: Box86 / QEMU — emulation used by the server bundle
+}
+
+entry.engine -> core.shared: "constructor first"
+entry.ctor -> core.patch: "first patch pass"
+entry.console -> core.shared: "`Cbuf` commands"
+entry.addons -> core.pyinit: "imported"
+entry.net -> core.serverlist: "query · heartbeat"
+
+core.patch -> core.detour: "same primitive"
+core.shared -> core.client: "client init"
+core.shared -> core.server: "server init"
+core.client -> core.video
+core.client -> core.clipboard
+core.server -> core.gameapi: "`GetGameAPI`"
+core.server -> core.httpdl: "map precache"
+core.server -> core.demos: "SV / Ghoul hooks"
+core.gameapi -> core.pages
+core.gameapi -> core.killfeed
+core.gameapi -> core.balance
+core.gameapi -> core.dm
+core.dm -> core.dmvar
+core.detect -> core.dm
+core.strings -> core.pages: "page strings"
+core.pyinit -> core.pymod
+core.pymod -> core.pywrap
+core.pymod -> core.pymem
+core.pymod -> core.pyev: "`@event` helpers"
+core.gameapi -> core.pyev: "fires `@event.*`"
+core.protocol -> core.patch: "uses"
+
+core.patch -> ext.sof: "writes `0x08…` bytes"
+core.protocol -> ext.sof: "protocol 33 · WON off"
+core.pymem -> ext.sof: "read / write"
+core.gameapi -> ext.game: "wraps vtable"
+core.httpdl -> ext.curl
+core.serverlist -> ext.masters
+core.video -> ext.x11
+core.clipboard -> ext.x11
+ext.box86 -> ext.sof: "runs the binary"
+
+core.pyinit -> state.pyhome: "`PYTHONHOME`"
+core.pyinit -> state.addons: "imports"
+core.demos -> state.demos: "write / play"
+core.httpdl -> state.menus: "serves `.m32`"
+state.build -> state.artifact: "`install.sh`"
+ext.docker -> state.build: "`make` in i386"
+
+classes: {
+  store: {style.stroke: "#1c7ed6"; style.stroke-width: 2}
+  ext: {style.stroke: "#7048e8"; style.stroke-dash: 3}
+  hot: {style.stroke: "#e8590c"; style.stroke-width: 3}
+}
+
+state.addons.class: store
+state.menus.class: store
+state.artifact.class: store
+state.demos.class: store
+state.pyhome.class: store
+state.build.class: store
+ext.sof.class: ext
+ext.game.class: ext
+ext.curl.class: ext
+ext.masters.class: ext
+ext.x11.class: ext
+ext.docker.class: ext
+ext.box86.class: ext
+core.gap.class: hot
