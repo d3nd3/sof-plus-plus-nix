@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install necessary build dependencies
 ARG TZ=Europe/London
-ENV TZ $TZ
+ENV TZ=$TZ
 RUN apt-get -y update && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
     build-essential \
     wget \
